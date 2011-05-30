@@ -30,6 +30,7 @@ ifeq ($(PLATFORM), Darwin)
 endif
 
 TARGETS := demo-font demo-texture demo-label demo-cube
+#TARGETS := $($(wildcard demo-*.c):.c=)
 HEADERS:= $(wildcard *.h)
 SOURCES:= $(filter-out $(wildcard demo-*.c), $(wildcard *.c))
 OBJECTS:= $(SOURCES:.c=.o)

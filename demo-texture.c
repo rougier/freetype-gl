@@ -84,7 +84,7 @@ int main( int argc, char **argv )
     int bold   = 0;
     int italic = 0;
     char * font_description = "Bitstream Vera Sans";
-    size_t font_minsize = 10;
+    size_t font_minsize = 8;
     size_t font_maxsize = 28;
     size_t font_count = font_maxsize - font_minsize;
     float gamma = 1.5;
