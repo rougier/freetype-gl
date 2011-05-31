@@ -29,9 +29,9 @@
 #include <math.h>
 #include <wchar.h>
 #include <getopt.h>
-#include "font.h"
 #include "vec234.h"
 #include "vector.h"
+#include "font-manager.h"
 #include "vertex-buffer.h"
 #include "texture-font.h"
 #include "texture-glyph.h"
@@ -83,15 +83,13 @@ int main( int argc, char **argv )
 {
     int bold   = 0;
     int italic = 0;
-    char * font_description = "Bitstream Vera Sans";
-    size_t font_minsize = 8;
-    size_t font_maxsize = 28;
-    size_t font_count = font_maxsize - font_minsize;
-    float gamma = 1.5;
-    wchar_t *font_cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
-                          L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-                          L"`abcdefghijklmnopqrstuvwxyz{|}~";
-    char * font_filename = "./Vera.ttf";
+    char * family = "Bitstream Vera Sans";
+    float minsize = 8, maxsize = 28;
+    size_t count = maxsize - minsize;
+    wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
+                     L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
+                     L"`abcdefghijklmnopqrstuvwxyz{|}~";
+    char * filename = "./Vera.ttf";
     TextureAtlas *atlas;
     TextureFont *font;
     size_t i, missed = 0;
@@ -105,20 +103,20 @@ int main( int argc, char **argv )
     glutKeyboardFunc( keyboard );
 
     atlas = texture_atlas_new( 512, 512 );
-    for( i=0; i < font_count; ++i)
+    for( i=0; i < count; ++i)
     {
-        font_filename = font_find( font_description, bold, italic );
-        font = texture_font_new( atlas, font_filename, font_minsize+i, gamma );
-        missed += texture_font_cache_glyphs( font, font_cache );
+        filename = font_manager_match_description( 0, family, minsize+i, bold, italic );
+        font = texture_font_new( atlas, filename, minsize+i );
+        missed += texture_font_cache_glyphs( font, cache );
         texture_font_delete(font);
     }
     glBindTexture( GL_TEXTURE_2D, atlas->texid );
-    printf( "Matched font               : %s\n", font_filename );
-    printf( "Number of fonts            : %ld\n", font_count );
-    printf( "Number of glyphs per font  : %ld\n", wcslen(font_cache) );
+    printf( "Matched font               : %s\n", filename );
+    printf( "Number of fonts            : %ld\n", count );
+    printf( "Number of glyphs per font  : %ld\n", wcslen(cache) );
     printf( "Number of missed glyphs    : %ld\n", missed );
     printf( "Total number of glyphs     : %ld/%ld\n",
-            wcslen(font_cache)*font_count - missed, wcslen(font_cache)*font_count );
+            wcslen(cache)*count - missed, wcslen(cache)*count );
     printf( "Texture size               : %ldx%ld\n", atlas->width, atlas->height );
     printf( "Texture occupancy          : %.2f%%\n", 
             100.0*atlas->used/(float)(atlas->width*atlas->height) );

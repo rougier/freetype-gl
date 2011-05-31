@@ -39,6 +39,26 @@ window_get_active( void )
 }
 
 
+void
+window_clear( Window *self )
+{
+    glut_window_clear( );
+}
+
+
+void
+window_run( Window *self )
+{
+    glut_window_run( );
+}
+
+
+void
+window_draw( Window *self )
+{
+    glut_window_draw( );
+}
+
 
 Window *
 glut_window_new( int width, int height, char *title, float fps )

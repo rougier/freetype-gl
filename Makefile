@@ -29,7 +29,7 @@ ifeq ($(PLATFORM), Darwin)
 	               `freetype-config --libs` `pkg-config --libs fontconfig`
 endif
 
-TARGETS := demo-font demo-texture demo-label demo-cube
+TARGETS := demo-font demo-texture demo-label demo-cube demo-encoding
 #TARGETS := $($(wildcard demo-*.c):.c=)
 HEADERS:= $(wildcard *.h)
 SOURCES:= $(filter-out $(wildcard demo-*.c), $(wildcard *.c))
@@ -37,6 +37,9 @@ OBJECTS:= $(SOURCES:.c=.o)
 
 
 all: ${TARGETS}
+
+demo-encoding: ${OBJECTS} ${HEADERS} demo-encoding.o
+	$(CC) ${OBJECTS} demo-encoding.o $(LIBS) -o $@
 
 demo-font: ${OBJECTS} ${HEADERS} demo-font.o
 	$(CC) ${OBJECTS} demo-font.o $(LIBS) -o $@

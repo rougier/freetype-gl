@@ -31,7 +31,6 @@ struct __vector__ {
     void * (* item_new    )( void   );
     void   (* item_delete )( void * );
     void * (* item_copy   )( void * );
-    int    (* item_cmp    )( void *, void * );
 };
 typedef struct __vector__ vector;
 

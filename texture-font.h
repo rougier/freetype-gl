@@ -22,6 +22,9 @@
 #ifndef __TEXTURE_FONT_H__
 #define __TEXTURE_FONT_H__
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include "vec234.h"
 #include "vector.h"
 #include "texture-atlas.h"
@@ -32,19 +35,28 @@ typedef struct
     vector *       glyphs;
     TextureAtlas * atlas;
     char *         filename;
-    size_t         size;
+    int            bold;
+    int            italic;
+    float          size;
     float          gamma;
 } TextureFont;
 
 
 
 TextureFont *  texture_font_new( TextureAtlas *atlas,
-                                 char *filename, size_t size, float gamma );
+                                 const char *filename,
+                                 const float size );
 void           texture_font_delete( TextureFont *self );
 TextureGlyph * texture_font_get_glyph( TextureFont *self,
                                        wchar_t charcode );
 size_t         texture_font_cache_glyphs( TextureFont *self,
                                           wchar_t * charcodes );
+
+int            texture_font_load_face( FT_Library * library,
+                                       const char * filename,
+                                       const float size,
+                                       FT_Face * face );
+
 
 #endif /* __TEXTURE_FONT_H__ */
 

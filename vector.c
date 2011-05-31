@@ -77,7 +77,7 @@ vector_front( vector *self )
 {
     assert( self );
     assert( self->size );
-    return vector_get( self, self->size-1 );
+    return vector_get( self, 0 );
 }
 
 void *
@@ -85,7 +85,7 @@ vector_back( vector *self )
 {
     assert( self );
     assert( self->size );
-    return vector_get( self, 0 );
+    return vector_get( self, self->size-1 );
 }
 
 int

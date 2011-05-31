@@ -62,11 +62,9 @@ vertex_buffer_new( char *format )
         self->attributes[i]->stride = stride;
     }
     self->vertices = vector_new( stride, 0, 0, 0 );
-    glGenBuffers( 1, &self->vertices_id );
-
+    self->vertices_id  = 0;
     self->indices = vector_new( sizeof(GLuint), 0, 0, 0 );
-    glGenBuffers( 1, &self->indices_id );
-
+    self->indices_id  = 0;
     return self;
 }
 
@@ -121,6 +119,14 @@ vertex_buffer_delete( VertexBuffer *self )
 void
 vertex_buffer_upload ( VertexBuffer *self )
 {
+    if( !self->vertices_id )
+    {
+        glGenBuffers( 1, &self->vertices_id );
+    }
+    if( !self->indices_id )
+    {
+        glGenBuffers( 1, &self->indices_id );
+    }
     glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
     glBufferData( GL_ARRAY_BUFFER, self->vertices->size*self->vertices->itemsize,
                                    self->vertices->items, GL_DYNAMIC_DRAW );

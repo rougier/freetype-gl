@@ -27,10 +27,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "font.h"
 #include "vec234.h"
 #include "vector.h"
 #include "vertex-buffer.h"
+#include "font-manager.h"
 #include "texture-font.h"
 #include "texture-glyph.h"
 #include "texture-atlas.h"
@@ -75,24 +75,19 @@ void keyboard( unsigned char key, int x, int y )
 
 int main( int argc, char **argv )
 {
+    size_t i, j = 0;
     int bold   = 0;
     int italic = 0;
-    char * font_description = "Bitstream Vera Sans";
-    size_t font_minsize = 8;
-    size_t font_maxsize = 28;
-    size_t font_count = font_maxsize - font_minsize;
-    float gamma = 1.5;
-    wchar_t *font_cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
-                          L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-                          L"`abcdefghijklmnopqrstuvwxyz{|}~";
-    char * font_filename = 0;
-    size_t i, j, missed = 0;
-    TextureAtlas *atlas;
-    TextureGlyph *glyph;
-    TextureFont **fonts = malloc( sizeof(TextureFont *)*font_count );
+    char * family = "Bitstream Vera Sans";
+    size_t minsize = 8;
+    size_t maxsize = 28;
+    size_t count = maxsize - minsize;
     wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
     vec2 pen ;
-
+    TextureFont *font;
+    TextureGlyph *glyph;
+    FontManager *manager = font_manager_new( );
+    buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 
 
     glutInit( &argc, argv );
     glutInitWindowSize( 800, 400 );
@@ -102,25 +97,26 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 
-    atlas = texture_atlas_new( 512, 512 );
     pen.x = 0; pen.y = 0;
-    for( i=0; i < font_count; ++i)
+    for( i=0; i < count; ++i)
     {
-        font_filename = font_find( font_description, bold, italic );
-        fonts[i] = texture_font_new( atlas, font_filename, font_minsize+i, gamma );
-        missed += texture_font_cache_glyphs( fonts[i], font_cache );
-        glyph = texture_font_get_glyph( fonts[i], text[0] );
+        font = font_manager_get_from_description( manager, family, minsize+i, bold, italic);
+        glyph = texture_font_get_glyph( font, text[0] );
+        if( !glyph )
+        {
+            continue;
+        }
         texture_glyph_add_to_vertex_buffer( glyph, buffer, &pen );
         for( j=1; j<wcslen(text); ++j )
         {
-            glyph = texture_font_get_glyph( fonts[i], text[j] );
+            glyph = texture_font_get_glyph( font, text[j] );
             pen.x += texture_glyph_get_kerning( glyph, text[j-1] );
             texture_glyph_add_to_vertex_buffer( glyph, buffer, &pen );
         }
-        pen.x = 0; pen.y -= (font_minsize+i+2);
+        pen.x = 0; pen.y -= (minsize+i+2);
     }
-    glBindTexture( GL_TEXTURE_2D, atlas->texid );
+
+    glBindTexture( GL_TEXTURE_2D, manager->atlas->texid );
     glutMainLoop( );
     return 0;
 }

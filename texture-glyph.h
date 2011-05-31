@@ -50,7 +50,9 @@ typedef struct {
 
 
 TextureGlyph * texture_glyph_new( void );
+TextureGlyph * texture_glyph_copy( TextureGlyph *other );
 void           texture_glyph_delete( TextureGlyph *self );
+
 void           texture_glyph_render( TextureGlyph *self,
                                      vec2 *pen );
 void           texture_glyph_add_to_vertex_buffer( TextureGlyph *self,

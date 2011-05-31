@@ -28,13 +28,13 @@
 #include "window.h"
 #include "vertex-buffer.h"
 
-
 VertexBuffer *cube;
-float theta = 0, phi=0, fps=50;
+float theta=0, phi=0, fps=50;
+
 
 void on_draw( Window *window )
 {
-    window->clear();
+    window_clear( window );
 
     theta += .5; phi += .5;
     glPushMatrix();
@@ -53,9 +53,9 @@ void on_draw( Window *window )
     glDisable( GL_LIGHTING );
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     glDepthMask( GL_FALSE );
-    glColor4f( 0, 0, 0, .5 );
 
     /* Use vertice (v) only */
+    glColor4f( 0, 0, 0, .5 );
     vertex_buffer_render( cube, GL_QUADS, "v" );
     glDepthMask( GL_TRUE );
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -71,61 +71,34 @@ void on_resize( Window *window, int width, int height )
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity( );
     glTranslatef( 0.0, 0.0, -5.0 );
-    glutPostRedisplay();
 }
-
-
-void on_init( Window *window )
-{
-    GLfloat ambient[]  = {0.1f, 0.1f, 0.1f, 1.0f};
-    GLfloat diffuse[]  = {1.0f, 1.0f, 1.0f, 1.0f};
-    GLfloat position[] = {0.0f, 1.0f, 2.0f, 1.0f};
-    GLfloat specular[] = {0.0f, 0.0f, 0.0f, 1.0f};
-    glPolygonOffset( 1, 1 );
-    glClearColor(1.0,1.0,1.0,1);
-    glEnable( GL_DEPTH_TEST ); 
-    glEnable( GL_COLOR_MATERIAL );
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_LIGHT0 );
-    glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
-    glLightfv( GL_LIGHT0, GL_AMBIENT, ambient );
-    glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
-    glLightfv( GL_LIGHT0, GL_POSITION, position );
-    glEnable( GL_LINE_SMOOTH );
-}
-
 
 int main( int argc, char **argv )
 {
     typedef struct { float x,y,z; } vec3;
     typedef struct { vec3 position, normal, color;} vertex;
-
-    /* vertex positions */
     vec3 v[] = { { 1, 1, 1},  {-1, 1, 1},  {-1,-1, 1}, { 1,-1, 1},
                  { 1,-1,-1},  { 1, 1,-1},  {-1, 1,-1}, {-1,-1,-1} };
-    /* vertex normals */
     vec3 n[] = { { 0, 0, 1},  { 1, 0, 0},  { 0, 1, 0} ,
                  {-1, 0, 1},  { 0,-1, 0},  { 0, 0,-1} };
-    /* vertex colors */
     vec3 c[] = { {1, 1, 1},  {1, 1, 0},  {1, 0, 1},  {0, 1, 1},
                  {1, 0, 0},  {0, 0, 1},  {0, 1, 0},  {0, 0, 0} };
     vertex vertices[24] =  {
-        {v[0],n[0],c[0]}, {v[1],n[0],c[1]}, {v[2],n[0],c[2]}, {v[3],n[0],c[3]},
-        {v[0],n[1],c[0]}, {v[3],n[1],c[3]}, {v[4],n[1],c[4]}, {v[5],n[1],c[5]},
-        {v[0],n[2],c[0]}, {v[5],n[2],c[5]}, {v[6],n[2],c[6]}, {v[1],n[2],c[1]},
-        {v[1],n[3],c[1]}, {v[6],n[3],c[6]}, {v[7],n[3],c[7]}, {v[2],n[3],c[2]},
-        {v[7],n[4],c[7]}, {v[4],n[4],c[4]}, {v[3],n[4],c[3]}, {v[2],n[4],c[2]},
-        {v[4],n[5],c[4]}, {v[7],n[5],c[7]}, {v[6],n[5],c[6]}, {v[5],n[5],c[5]} };
+      {v[0],n[0],c[0]}, {v[1],n[0],c[1]}, {v[2],n[0],c[2]}, {v[3],n[0],c[3]},
+      {v[0],n[1],c[0]}, {v[3],n[1],c[3]}, {v[4],n[1],c[4]}, {v[5],n[1],c[5]},
+      {v[0],n[2],c[0]}, {v[5],n[2],c[5]}, {v[6],n[2],c[6]}, {v[1],n[2],c[1]},
+      {v[1],n[3],c[1]}, {v[6],n[3],c[6]}, {v[7],n[3],c[7]}, {v[2],n[3],c[2]},
+      {v[7],n[4],c[7]}, {v[4],n[4],c[4]}, {v[3],n[4],c[3]}, {v[2],n[4],c[2]},
+      {v[4],n[5],c[4]}, {v[7],n[5],c[7]}, {v[6],n[5],c[6]}, {v[5],n[5],c[5]} };
     GLuint indices[24] = { 0, 1, 2, 3,    4, 5, 6, 7,   8, 9,10,11,
                            12,13,14,15,  16,17,18,19,  20,21,22,23 };
-
-    Window *window = window_new( 400, 400, "Window", 50.0 );
-    window->on_draw   = on_draw;
-    window->on_resize = on_resize;
-    window->on_init   = on_init;
     cube = vertex_buffer_new_from_data("v3f:n3f:c3f",
                                        24, vertices, 24, indices );
-    window->run();
+    Window *window = window_new( 400, 400, "Cube", 50.0 );
+
+    window->on_draw = on_draw;
+    window->on_resize = on_resize;
+    window_run( window );
+
     return 0;
 }
