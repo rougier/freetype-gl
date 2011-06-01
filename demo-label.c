@@ -54,7 +54,7 @@ void display( void )
     glEnable( GL_TEXTURE_2D );
     glColor4f(1,1,1,1);
     glPushMatrix();
-    glTranslatef(5, viewport[3]-50, 0);
+    glTranslatef(5, viewport[3]-32, 0);
     vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
     glPopMatrix();
     glutSwapBuffers( );
@@ -87,19 +87,18 @@ void add_text( wchar_t *      text,
     size_t i;
     TextureFont *font    = font_manager_get_from_markup( manager, markup );
     TextureGlyph *glyph  = texture_font_get_glyph( font, text[0] );
-    texture_glyph_add_to_vertex_buffer( glyph, buffer, pen );
+    texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen );
     for( i=1; i<wcslen(text); ++i )
     {
         TextureGlyph *glyph = texture_font_get_glyph( font, text[i] );
         pen->x += texture_glyph_get_kerning( glyph, text[i-1] );
-        texture_glyph_add_to_vertex_buffer( glyph, buffer, pen );
+        texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen );
     }
     glBindTexture( GL_TEXTURE_2D, manager->atlas->texid );
 }
 
 int main( int argc, char **argv )
 {
-    //setlocale(LC_ALL, "");
     glutInit( &argc, argv );
     glutInitWindowSize( 600, 400 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
@@ -110,36 +109,34 @@ int main( int argc, char **argv )
 
     Color red = {1,0,0,1};
     TextMarkup normal = { "Bitstream Vera Sans", 16, 0, 0, 0.0, 0.0,
-                          {0,0,0,1}, {1,1,1,1},
+                          {0,0,.25,1}, {1,1,1,1},
                           0, {0,0,0,1}, 0, {0,0,0,1},
                           0, {0,0,0,1}, 0, {0,0,0,1} };
-    TextMarkup title  = { "Zapfino", 32, 0, 0, 0.0, 0.0,
-                          {0,0,0,1}, {1,1,1,1},
+    TextMarkup title  = { "Bitstream Vera Sans", 32, 0, 0, 0.0, 0.0,
+                          {0,0,.5,1}, {1,1,1,1},
                           0, {0,0,0,1}, 0, {0,0,0,1},
                           0, {0,0,0,1}, 0, {0,0,0,1} };
     TextMarkup bold        = normal; bold.bold = 1;
     TextMarkup italic      = normal; italic.italic = 1;
     TextMarkup bold_italic = bold;   bold_italic.italic = 1;
-    TextMarkup bold_red    = bold; bold.foreground_color = red;
-
+    TextMarkup bold_red    = bold;   bold_red.foreground_color = red;
     vec2 pen = {0.0, 0.0} ;
     manager = font_manager_new();
     buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 
 
     add_text( L"Freetype OpenGL™", buffer, &title, &pen );
-    pen.y -= 56; pen.x = 0;
+    pen.y -= 36; pen.x = 0;
 
     add_text( L"Freetype text handling using a single vertex buffer !",
               buffer, &normal, &pen);
-    pen.y -= 16; pen.x = 0;
+    pen.y -= 18; pen.x = 0;
 
-    add_text( L"Font glyphs are stored within a ", buffer, &normal, &pen );
+    add_text( L" • Font glyphs are stored within a ", buffer, &normal, &pen );
     add_text( L"single texture", buffer, &bold_red, &pen );
     add_text( L" !", buffer, &normal, &pen );
-    pen.y -= 16; pen.x = 0;
-
-    add_text( L"Unicode characters handling : ²³€¥∑∫∞√©Ω¿«»", buffer, &normal, &pen );
-    pen.y -= 16; pen.x = 0;
+    pen.y -= 18; pen.x = 0;
+    add_text( L" • Unicode characters are available : ²³€¥∑∫∞√©Ω¿«»", buffer, &normal, &pen );
+    pen.y -= 18; pen.x = 0;
 
     glutMainLoop( );
     return 0;

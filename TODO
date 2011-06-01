@@ -1,0 +1,6 @@
+TODO
+====
+- To implement a generic hash table to speed up glyph and kerning access
+- To add a small markup parser
+- Document code
+- More demos

@@ -67,6 +67,7 @@ texture_glyph_delete( TextureGlyph *self )
 
 void
 texture_glyph_render( TextureGlyph *self,
+                      TextMarkup *markup,
                       vec2 *pen )
 {
     assert( self );
@@ -100,8 +101,10 @@ texture_glyph_render( TextureGlyph *self,
 void
 texture_glyph_add_to_vertex_buffer( TextureGlyph *self,
                                     VertexBuffer *buffer,
+                                    TextMarkup *markup,
                                     vec2 *pen )
 {
+    size_t i;
     int x0  = pen->x + self->offset.x;
     int y0  = pen->y + self->offset.y;
     int x1  = x0 + self->size.width;
@@ -118,9 +121,18 @@ texture_glyph_add_to_vertex_buffer( TextureGlyph *self,
                                       { x0,y1,0,  u0,v1,  0,0,0,1 },
                                       { x1,y1,0,  u1,v1,  0,0,0,1 },
                                       { x1,y0,0,  u1,v0,  0,0,0,1 } };
+    if( markup )
+    {
+        for( i=0; i<4; ++i )
+        {
+            vertices[i].r = markup->foreground_color.r;
+            vertices[i].g = markup->foreground_color.g;
+            vertices[i].b = markup->foreground_color.b;
+            vertices[i].a = markup->foreground_color.a;
+        }
+    }
     vertex_buffer_push_back_indices( buffer, indices, 6 );
     vertex_buffer_push_back_vertices( buffer, vertices, 4 );
-
 
     pen->x += self->advance.x;
     pen->y += self->advance.y;

@@ -54,7 +54,7 @@ texture_font_new( TextureAtlas *atlas,
     self->glyphs = vector_new( sizeof(TextureGlyph), 0, 0, 0 );
     self->filename = strdup( filename );
     self->size = size;
-    self->gamma = 1.5;
+    self->gamma = 1.25;
     self->atlas = atlas;
     return self;
 }
@@ -270,7 +270,7 @@ texture_font_load_face( FT_Library * library,
                         const float size,
                         FT_Face * face )
 {
-    size_t hres = 10;
+    size_t hres = 12;
     FT_Error error;
     FT_Matrix matrix = { (int)((1.0/hres) * 0x10000L),
                          (int)((0.0)      * 0x10000L),
@@ -308,6 +308,7 @@ texture_font_load_face( FT_Library * library,
 
     /* Set char size */
     error = FT_Set_Char_Size( *face, size*64, 0, 72*hres, 72 );
+    /* error = FT_Set_Char_Size( *face, size*64, 0, 72, 72 ); */
     if( error )
     {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",

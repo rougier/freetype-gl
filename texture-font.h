@@ -42,7 +42,6 @@ typedef struct
 } TextureFont;
 
 
-
 TextureFont *  texture_font_new( TextureAtlas *atlas,
                                  const char *filename,
                                  const float size );

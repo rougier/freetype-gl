@@ -42,6 +42,7 @@ typedef struct
     unsigned char *data;
 } TextureAtlas;
 
+
 TextureAtlas *  texture_atlas_new( size_t width, size_t height );
 void            texture_atlas_delete( TextureAtlas *self );
 void            texture_atlas_upload( TextureAtlas *self );
