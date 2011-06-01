@@ -51,7 +51,7 @@ texture_font_new( TextureAtlas *atlas,
     {
         return NULL;
     }
-    self->glyphs = vector_new( sizeof(TextureGlyph), 0, 0, 0 );
+    self->glyphs = vector_new( sizeof(TextureGlyph) );
     self->filename = strdup( filename );
     self->size = size;
     self->gamma = 1.25;
@@ -167,7 +167,7 @@ texture_font_cache_glyphs( TextureFont *self,
     for( i=0; i<wcslen(charcodes); ++i )
     {
         glyph_index = FT_Get_Char_Index( face, charcodes[i] );
-        error = FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER );
+        error = FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_TARGET_LIGHT );
         if( error )
         {
             fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
@@ -210,7 +210,6 @@ texture_font_cache_glyphs( TextureFont *self,
 
         /* Discard hinting to get advance */
         FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
-        //FT_Load_Char( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
         slot = face->glyph;
         glyph->advance.x    = slot->advance.x/64.0;
         glyph->advance.y    = slot->advance.y/64.0;
@@ -270,7 +269,7 @@ texture_font_load_face( FT_Library * library,
                         const float size,
                         FT_Face * face )
 {
-    size_t hres = 12;
+    size_t hres = 1;
     FT_Error error;
     FT_Matrix matrix = { (int)((1.0/hres) * 0x10000L),
                          (int)((0.0)      * 0x10000L),

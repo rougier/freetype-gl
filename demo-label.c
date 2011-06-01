@@ -1,25 +1,24 @@
-/* -*- coding: utf-8 -*- */
-/* =========================================================================
- * Freetype GL - A C OpenGL Freetype engine
- * Platform:    Any
- * API version: 1.0
- * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright (c) 2011 Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
- * 
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- * ========================================================================= */
+// ============================================================================
+// Freetype GL - A C OpenGL Freetype engine
+// Platform:    Any
+// API version: 1.0
+// WWW:         http://code.google.com/p/freetype-gl/
+// ----------------------------------------------------------------------------
+// Copyright (c) 2011 Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
+// 
+// This program is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the
+// Free Software Foundation, either version 3 of the License, or (at your
+// option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+// Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program. If not, see <http://www.gnu.org/licenses/>.
+// ============================================================================
 #if defined(__APPLE__)
     #include <Glut/glut.h>
 #else
@@ -107,19 +106,13 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    Color red = {1,0,0,1};
     TextMarkup normal = { "Bitstream Vera Sans", 16, 0, 0, 0.0, 0.0,
-                          {0,0,.25,1}, {1,1,1,1},
+                          {0,0,0,1}, {1,1,1,0},
                           0, {0,0,0,1}, 0, {0,0,0,1},
                           0, {0,0,0,1}, 0, {0,0,0,1} };
-    TextMarkup title  = { "Bitstream Vera Sans", 32, 0, 0, 0.0, 0.0,
-                          {0,0,.5,1}, {1,1,1,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1} };
-    TextMarkup bold        = normal; bold.bold = 1;
-    TextMarkup italic      = normal; italic.italic = 1;
-    TextMarkup bold_italic = bold;   bold_italic.italic = 1;
-    TextMarkup bold_red    = bold;   bold_red.foreground_color = red;
+    TextMarkup title  = normal; title.size = 32;
+    TextMarkup bold   = normal; bold.bold = 1;
+    TextMarkup italic = normal; italic.italic = 1;
     vec2 pen = {0.0, 0.0} ;
     manager = font_manager_new();
     buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 
@@ -132,7 +125,7 @@ int main( int argc, char **argv )
     pen.y -= 18; pen.x = 0;
 
     add_text( L" • Font glyphs are stored within a ", buffer, &normal, &pen );
-    add_text( L"single texture", buffer, &bold_red, &pen );
+    add_text( L"single texture", buffer, &bold, &pen );
     add_text( L" !", buffer, &normal, &pen );
     pen.y -= 18; pen.x = 0;
     add_text( L" • Unicode characters are available : ²³€¥∑∫∞√©Ω¿«»", buffer, &normal, &pen );

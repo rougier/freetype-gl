@@ -61,9 +61,9 @@ vertex_buffer_new( char *format )
     {
         self->attributes[i]->stride = stride;
     }
-    self->vertices = vector_new( stride, 0, 0, 0 );
+    self->vertices = vector_new( stride );
     self->vertices_id  = 0;
-    self->indices = vector_new( sizeof(GLuint), 0, 0, 0 );
+    self->indices = vector_new( sizeof(GLuint) );
     self->indices_id  = 0;
     return self;
 }
@@ -79,10 +79,10 @@ vertex_buffer_new_from_data( char *format,
 
     vector_resize( self->vertices, vcount );
     assert( self->vertices->size == vcount);
-    memcpy( self->vertices->items, vertices, vcount*self->vertices->itemsize );
+    memcpy( self->vertices->items, vertices, vcount*self->vertices->item_size );
     vector_resize( self->indices, icount );
     assert( self->indices->size == icount);
-    memcpy( self->indices->items, indices, icount*self->indices->itemsize );
+    memcpy( self->indices->items, indices, icount*self->indices->item_size );
     self->dirty = 1;
     return self;
 }
@@ -128,11 +128,11 @@ vertex_buffer_upload ( VertexBuffer *self )
         glGenBuffers( 1, &self->indices_id );
     }
     glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
-    glBufferData( GL_ARRAY_BUFFER, self->vertices->size*self->vertices->itemsize,
+    glBufferData( GL_ARRAY_BUFFER, self->vertices->size*self->vertices->item_size,
                                    self->vertices->items, GL_DYNAMIC_DRAW );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, self->indices->size*self->indices->itemsize,
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, self->indices->size*self->indices->item_size,
                                            self->indices->items, GL_DYNAMIC_DRAW );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 }
@@ -197,7 +197,7 @@ vertex_buffer_push_back_indices ( VertexBuffer *self,
                                   size_t count )
 {
     self->dirty = 1;
-    vector_add_data( self->indices, indices, count );
+    vector_push_back_data( self->indices, indices, count );
 }
 
 void
@@ -206,7 +206,7 @@ vertex_buffer_push_back_vertices ( VertexBuffer *self,
                                    size_t count )
 {
     self->dirty = 1;
-    vector_add_data( self->vertices, vertices, count );
+    vector_push_back_data( self->vertices, vertices, count );
 
 }
 

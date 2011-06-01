@@ -50,7 +50,7 @@ font_manager_new( void )
             return 0;
         }
         self->atlas = atlas;
-        self->fonts = vector_new( sizeof(TextureFont), 0, 0, 0 );
+        self->fonts = vector_new( sizeof(TextureFont) );
         self->cache = wcsdup( L" " );
 /*
         self->cache = wcsdup( L" !\"#$%&'()*+,-./0123456789:;<=>?"

@@ -21,10 +21,8 @@
  * ========================================================================= */
 #ifndef __TEXT_MARKUP_H__
 #define __TEXT_MARKUP_H__
-#include <ctype.h>
 
-typedef struct
-{
+typedef struct {
     float r,g,b,a;
 } Color;
 

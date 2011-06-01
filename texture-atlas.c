@@ -48,7 +48,7 @@ texture_atlas_new( size_t width, size_t height )
     {
         return NULL;
     }
-    self->nodes = vector_new( sizeof(Node), 0, 0, 0 );
+    self->nodes = vector_new( sizeof(Node) );
     self->used = 0;
     self->width = width;
     self->height = height;
