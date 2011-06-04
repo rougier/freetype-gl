@@ -36,9 +36,7 @@
 
 
  
-typedef struct __Window__ Window;
-
-struct __Window__
+struct Window
 {
     float fps;
     int width, height;
@@ -48,26 +46,29 @@ struct __Window__
     void (* run)              ( void );
     void (* clear )           ( void );
     void (* draw )            ( void );
-    int  (* on_init )         (struct __Window__ * );
-    int  (* on_exit )         (struct __Window__ * );
-    int  (* on_show )         (struct __Window__ * );
-    int  (* on_hide )         (struct __Window__ * );
-    int  (* on_close )        (struct __Window__ * );
-    int  (* on_move )         (struct __Window__ *, int, int );
-    void (* on_resize)        (struct __Window__ *, int, int );
-    int  (* on_expose )       (struct __Window__ * );
-    void (* on_draw )         (struct __Window__ * );
-    int  (* on_idle )         (struct __Window__ * );
-    int  (* on_key_press   )  (struct __Window__ *, int, int );
-    int  (* on_key_release )  (struct __Window__ *, int, int );
-    int  (* on_mouse_press )  (struct __Window__ *, int, int, int, int );
-    int  (* on_mouse_release) (struct __Window__ *, int, int, int, int );
-    int  (* on_mouse_enter )  (struct __Window__ *, int, int );
-    int  (* on_mouse_leave )  (struct __Window__ *, int, int );
-    int  (* on_mouse_motion)  (struct __Window__ *, int, int, int, int );
-    int  (* on_mouse_drag)    (struct __Window__ *, int, int, int, int, int, int );
-    int  (* on_mouse_scroll)  (struct __Window__ *, int, int, int, int );
+    int  (* on_init )         (struct Window * );
+    int  (* on_exit )         (struct Window * );
+    int  (* on_show )         (struct Window * );
+    int  (* on_hide )         (struct Window * );
+    int  (* on_close )        (struct Window * );
+    int  (* on_move )         (struct Window *, int, int );
+    void (* on_resize)        (struct Window *, int, int );
+    int  (* on_expose )       (struct Window * );
+    void (* on_draw )         (struct Window * );
+    int  (* on_idle )         (struct Window * );
+    int  (* on_key_press   )  (struct Window *, int, int );
+    int  (* on_key_release )  (struct Window *, int, int );
+    int  (* on_mouse_press )  (struct Window *, int, int, int, int );
+    int  (* on_mouse_release) (struct Window *, int, int, int, int );
+    int  (* on_mouse_enter )  (struct Window *, int, int );
+    int  (* on_mouse_leave )  (struct Window *, int, int );
+    int  (* on_mouse_motion)  (struct Window *, int, int, int, int );
+    int  (* on_mouse_drag)    (struct Window *, int, int, int, int, int, int );
+    int  (* on_mouse_scroll)  (struct Window *, int, int, int, int );
 };
+
+typedef struct Window Window;
+
 
 Window *window_new( int width, int height, char *title, float fps );
 Window *window_get_active( void );

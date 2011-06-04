@@ -36,7 +36,7 @@
 
 typedef struct
 {
-    vector *nodes;
+    Vector *nodes;
     size_t width, height, used;
     unsigned int texid;
     unsigned char *data;

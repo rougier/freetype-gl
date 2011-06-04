@@ -30,7 +30,7 @@
 
 typedef struct {
     TextureAtlas * atlas;
-    vector *       fonts;
+    Vector *       fonts;
     wchar_t *      cache;
 } FontManager;
 

@@ -1,0 +1,115 @@
+/*
+ * Source: http://www.loria.fr/~rougier/style.css
+ * CC license: http://creativecommons.org/licenses/by-nc-sa/2.0/
+ * Last changed: 31-05-2008
+ */
+@import url(doxygen.css);
+
+
+code {
+  font-family: Monaco;
+}
+
+.summary {
+    display: none;
+}
+
+.ingroups {
+    font-size: 0.65em;
+    line-height: 1.25em;
+}
+
+.headertitle {
+    font-size: 1.5em;
+    line-height: 1.25em;
+}
+
+.memitem {
+    margin-top: 1em;
+}
+
+body {
+  margin-left: 180px;
+  margin-right: 60px;
+  font-family: Verdana;
+  font-size: 11pt;
+}
+
+#content p {
+  margin-bottom: 1.5em;
+}
+
+#content li {
+  margin-bottom: 1.5em;
+}
+
+#content h2 {
+  font-size: 18pt;
+  font-weight: normal;
+  color: #ff6161;
+}
+
+#content .console {
+  font-family: monospace;
+  font-size: 10pt;
+  /*background-color: #ff9191;*/
+  border: 1px solid #ff6161;
+  padding: 5px;
+}
+
+.news-item {
+  clear: right;
+}
+
+.news-title {
+  font-weight: bold;
+}
+
+.news-attribution {
+  font-size: 10pt;
+  float: right;
+  margin-bottom: 1em;
+}
+
+.gallery td {
+  padding-bottom: 0.5em;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.gallery img {
+  border: 0px;
+}
+
+.gallery-buttons {
+  text-align: right;
+}
+
+.gallery-buttons a {
+  text-decoration: none;
+}
+
+.gallery-buttons a:visited {
+  color: black;
+}
+
+.gallery-buttons a {
+  color: black;
+}
+
+.discussion-entry {
+  clear: right;
+}
+
+.discussion-title {
+  font-weight: bold;
+}
+
+.discussion-attribution {
+  font-size: 10pt;
+  float: right;
+  margin-bottom: 1em;
+}
+
+
+
