@@ -39,19 +39,29 @@ OBJECTS:= $(SOURCES:.c=.o)
 all: ${TARGETS}
 
 demo-font: ${OBJECTS} ${HEADERS} demo-font.o
-	$(CC) ${OBJECTS} demo-font.o $(LIBS) -o $@
+	@echo -n "Building $@... "
+	@$(CC) ${OBJECTS} demo-font.o $(LIBS) -o $@
+	@echo "done."
 
 demo-texture: ${OBJECTS} ${HEADERS} demo-texture.o
-	$(CC) ${OBJECTS} demo-texture.o $(LIBS) -o $@
+	@echo -n "Building $@... "
+	@$(CC) ${OBJECTS} demo-texture.o $(LIBS) -o $@
+	@echo "done."
 
 demo-label: ${OBJECTS} ${HEADERS} demo-label.o
-	$(CC) ${OBJECTS} demo-label.o $(LIBS) -o $@
+	@echo -n "Building $@... "
+	@$(CC) ${OBJECTS} demo-label.o $(LIBS) -o $@
+	@echo "done."
 
 demo-cube: ${OBJECTS} ${HEADERS} demo-cube.o
-	$(CC) ${OBJECTS} demo-cube.o $(LIBS) -o $@
+	@echo -n "Building $@... "
+	@$(CC) ${OBJECTS} demo-cube.o $(LIBS) -o $@
+	@echo "done."
 
 %.o : %.c
-	$(CC) -c $(CFLAGS) $< -o $@ 
+	@echo -n "Building $@... "
+	@$(CC) -c $(CFLAGS) $< -o $@ 
+	@echo "done."
 
 clean:
 	@-rm -f $(TARGETS) *.o

@@ -28,8 +28,6 @@
 #include <stdio.h>
 #include <wchar.h>
 #include <locale.h>
-
-#include "vec234.h"
 #include "vector.h"
 #include "text-markup.h"
 #include "vertex-buffer.h"
@@ -81,7 +79,7 @@ void keyboard( unsigned char key, int x, int y )
 void add_text( wchar_t *      text,
                VertexBuffer * buffer,
                TextMarkup *   markup,
-               vec2 *         pen )
+               Pen *          pen )
 {
     size_t i;
     TextureFont *font    = font_manager_get_from_markup( manager, markup );
@@ -113,7 +111,7 @@ int main( int argc, char **argv )
     TextMarkup title  = normal; title.size = 32;
     TextMarkup bold   = normal; bold.bold = 1;
     TextMarkup italic = normal; italic.italic = 1;
-    vec2 pen = {0.0, 0.0} ;
+    Pen pen = {0.0, 0.0} ;
     manager = font_manager_new();
     buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 
 

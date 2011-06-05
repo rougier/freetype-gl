@@ -1,40 +1,33 @@
-// ============================================================================
-// Freetype GL - A C OpenGL Freetype engine
-// Platform:    Any
-// API version: 1.0
-// WWW:         http://code.google.com/p/freetype-gl/
-// ----------------------------------------------------------------------------
-// Copyright (c) 2011 Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
-// 
-// This program is free software: you can redistribute it and/or modify it
-// under the terms of the GNU General Public License as published by the
-// Free Software Foundation, either version 3 of the License, or (at your
-// option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-// Public License for more details.
-//
-// You should have received a copy of the GNU General Public License along
-// with this program. If not, see <http://www.gnu.org/licenses/>.
-// ============================================================================
+/* =========================================================================
+ * Freetype GL - A C OpenGL Freetype engine
+ * Platform:    Any
+ * API version: 1.0
+ * WWW:         http://code.google.com/p/freetype-gl/
+ * -------------------------------------------------------------------------
+ * Copyright (c) 2011 Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
+ * 
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * =========================================================================
+
+   ========================================================================= */
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
 
-/**
- *  @defgroup Vector Vector
- *
- *  The vector structure and associated functions loosely mimics the c++ vector
- *  class.
- *
- *  @{
- */
 
 /**
  *  Generic vector structure.
- *
  */
 typedef struct
  {
@@ -50,11 +43,6 @@ typedef struct
      /** Size (in bytes) of a single item. */
      size_t item_size;
 } Vector;
-
-
-/**
- * @name General
- */
 
 /**
  *  Creates a vector.
@@ -72,14 +60,6 @@ typedef struct
  */
   void
   vector_delete( Vector *self );
-
-/** @} **/
-
-
-
-/**
- * @name Item access
- */
 
 /**
  *  Returns a pointer to the item located at specified index.
@@ -122,14 +102,6 @@ typedef struct
   vector_contains( const Vector *self,
                    const void *item,
                    int (*cmp)(const void *, const void *) );
-
-/** @} **/
-
-
-
-/**
- * @name Capacity
- */
 
 /**
  *  Checks whether the vector is empty.
@@ -175,14 +147,6 @@ typedef struct
  */
   void
   vector_shrink( Vector *self );
-
-/** @} **/
-
-
-
-/**
- * @name Modifiers
- */
 
 /**
  *  Removes all items.
@@ -305,9 +269,5 @@ typedef struct
   void
   vector_sort( Vector *self,
                int (*cmp)(const void *, const void *) );
-
-/** @} **/
-
-/** @} **/
 
 #endif /* __VECTOR_H__ */

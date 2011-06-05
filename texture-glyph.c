@@ -38,16 +38,16 @@ texture_glyph_new( void )
     {
         return NULL;
     }
-    self->size.width  = 0;
-    self->size.height = 0;
-    self->offset.x    = 0;
-    self->offset.y    = 0;
-    self->advance.x   = 0.0;
-    self->advance.y   = 0.0;
-    self->texcoords.s = 0.0;
-    self->texcoords.t = 0.0;
-    self->texcoords.p = 0.0;
-    self->texcoords.q = 0.0;
+    self->width     = 0;
+    self->height    = 0;
+    self->offset_x  = 0;
+    self->offset_y  = 0;
+    self->advance_x = 0.0;
+    self->advance_y = 0.0;
+    self->u0        = 0.0;
+    self->v0        = 0.0;
+    self->u1        = 0.0;
+    self->v1        = 0.0;
     return self;
 }
 
@@ -68,19 +68,19 @@ texture_glyph_delete( TextureGlyph *self )
 void
 texture_glyph_render( TextureGlyph *self,
                       TextMarkup *markup,
-                      vec2 *pen )
+                      Pen *pen )
 {
     assert( self );
 
-    int x  = pen->x + self->offset.x;
-    int y  = pen->y + self->offset.y;
-    int w  = self->size.width;
-    int h  = self->size.height;
+    int x  = pen->x + self->offset_x;
+    int y  = pen->y + self->offset_y;
+    int w  = self->width;
+    int h  = self->height;
 
-    float u0 = self->texcoords.u0;
-    float v0 = self->texcoords.v0;
-    float u1 = self->texcoords.u1;
-    float v1 = self->texcoords.v1;
+    float u0 = self->u0;
+    float v0 = self->v0;
+    float u1 = self->u1;
+    float v1 = self->v1;
 
     glBegin( GL_TRIANGLES );
     {
@@ -94,25 +94,25 @@ texture_glyph_render( TextureGlyph *self,
     }
     glEnd();
 
-    pen->x += self->advance.x;
-    pen->y += self->advance.y;
+    pen->x += self->advance_x;
+    pen->y += self->advance_y;
 }
 
 void
-texture_glyph_add_to_vertex_buffer( TextureGlyph *self,
+texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
                                     VertexBuffer *buffer,
-                                    TextMarkup *markup,
-                                    vec2 *pen )
+                                    const TextMarkup *markup,
+                                    Pen *pen )
 {
     size_t i;
-    int x0  = pen->x + self->offset.x;
-    int y0  = pen->y + self->offset.y;
-    int x1  = x0 + self->size.width;
-    int y1  = y0 - self->size.height;
-    float u0 = self->texcoords.u0;
-    float v0 = self->texcoords.v0;
-    float u1 = self->texcoords.u1;
-    float v1 = self->texcoords.v1;
+    int x0  = pen->x + self->offset_x;
+    int y0  = pen->y + self->offset_y;
+    int x1  = x0 + self->width;
+    int y1  = y0 - self->height;
+    float u0 = self->u0;
+    float v0 = self->v0;
+    float u1 = self->u1;
+    float v1 = self->v1;
 
     GLuint index = buffer->vertices->size;
     GLuint indices[] = {index, index+1, index+2,
@@ -134,8 +134,8 @@ texture_glyph_add_to_vertex_buffer( TextureGlyph *self,
     vertex_buffer_push_back_indices( buffer, indices, 6 );
     vertex_buffer_push_back_vertices( buffer, vertices, 4 );
 
-    pen->x += self->advance.x;
-    pen->y += self->advance.y;
+    pen->x += self->advance_x;
+    pen->y += self->advance_y;
 }
 
 float 

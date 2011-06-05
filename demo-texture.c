@@ -26,15 +26,9 @@
 #endif
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <wchar.h>
-#include <getopt.h>
-#include "vec234.h"
-#include "vector.h"
 #include "font-manager.h"
-#include "vertex-buffer.h"
 #include "texture-font.h"
-#include "texture-glyph.h"
 #include "texture-atlas.h"
 
 

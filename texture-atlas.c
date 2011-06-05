@@ -190,7 +190,7 @@ texture_atlas_merge( TextureAtlas *self )
 /* ========================================================================= */
 /*                                                                           */
 /* ========================================================================= */
-ivec2
+Region
 texture_atlas_get_region( TextureAtlas *self,
                           size_t width, size_t height )
 {
@@ -201,13 +201,12 @@ texture_atlas_get_region( TextureAtlas *self,
 */
 	int y, best_height, best_width, best_index;
     Node *node, *prev;
-    ivec2 pos;
+    Region region = {0,0,width,height};
     size_t i;
 
     best_height = INT_MAX;
     best_index  = -1;
     best_width = INT_MAX;
-    pos.x = pos.y = 0;
 	for( i=0; i<self->nodes->size; ++i )
 	{
         y = texture_atlas_fit( self, i, width, height );
@@ -220,22 +219,24 @@ texture_atlas_get_region( TextureAtlas *self,
 				best_height = y + height;
 				best_index = i;
 				best_width = node->width;
-				pos.x = node->x;
-				pos.y = y;
+				region.x = node->x;
+				region.y = y;
 			}
         }
     }
    
 	if( best_index == -1 )
     {
-        pos.x = -1;
-        pos.y = -1;
-        return pos;
+        region.x = -1;
+        region.y = -1;
+        region.width = 0;
+        region.height = 0;
+        return region;
     }
 
     node = (Node *) malloc( sizeof(Node) );
-    node->x     = pos.x;
-    node->y     = pos.y + height;
+    node->x     = region.x;
+    node->y     = region.y + height;
     node->width = width;
     vector_insert( self->nodes, best_index, node );
     free( node );
@@ -267,5 +268,5 @@ texture_atlas_get_region( TextureAtlas *self,
     }
     texture_atlas_merge( self );
     self->used += width * height;
-    return pos;
+    return region;
 }

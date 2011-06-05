@@ -1,24 +1,24 @@
-// ============================================================================
-// Freetype GL - An ansi C OpenGL Freetype engine
-// Platform:    Any
-// API version: 1.0
-// WWW:         http://www.loria.fr/~rougier/freetype-gl
-// ----------------------------------------------------------------------------
-// Copyright (c) 2011 Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
-//
-// This program is free software: you can redistribute it and/or modify it
-// under the terms of the GNU General Public License as published by the
-// Free Software Foundation, either version 3 of the License, or (at your
-// option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
-// Public License for more details.
-//
-// You should have received a copy of the GNU General Public License along
-// with this program. If not, see <http://www.gnu.org/licenses/>.
-// ============================================================================
+/* =========================================================================
+ * Freetype GL - An ansi C OpenGL Freetype engine
+ * Platform:    Any
+ * API version: 1.0
+ * WWW:         http://www.loria.fr/~rougier/freetype-gl
+ * -------------------------------------------------------------------------
+ * Copyright (c) 2011 Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * ========================================================================= */
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <stdint.h>
@@ -40,6 +40,7 @@ const struct {
 
 
 
+/* ------------------------------------------------------------------------- */
 TextureFont *
 texture_font_new( TextureAtlas *atlas,
                   const char *filename,
@@ -60,6 +61,7 @@ texture_font_new( TextureAtlas *atlas,
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 texture_font_delete( TextureFont *self )
 {
@@ -73,6 +75,8 @@ texture_font_delete( TextureFont *self )
 }
 
 
+
+/* ------------------------------------------------------------------------- */
 void
 texture_font_generate_kerning( TextureFont *self )
 {
@@ -140,6 +144,7 @@ texture_font_generate_kerning( TextureFont *self )
 
 
 
+/* ------------------------------------------------------------------------- */
 size_t
 texture_font_cache_glyphs( TextureFont *self,
                            wchar_t * charcodes )
@@ -151,7 +156,7 @@ texture_font_cache_glyphs( TextureFont *self,
     FT_GlyphSlot  slot;
     FT_UInt       glyph_index;
     TextureGlyph *glyph;
-    ivec2         pos;
+    Region        region;
     unsigned char c;
     size_t        missed = 0;
     width  = self->atlas->width;
@@ -184,34 +189,34 @@ texture_font_cache_glyphs( TextureFont *self,
                 *(unsigned char *)(slot->bitmap.buffer + y*slot->bitmap.pitch + x ) = c;
             }
         }
-        pos = texture_atlas_get_region( self->atlas,
-                                        slot->bitmap.width, slot->bitmap.rows );
-        if ( pos.x < 0 )
+        region = texture_atlas_get_region( self->atlas,
+                                           slot->bitmap.width, slot->bitmap.rows );
+        if ( region.x < 0 )
         {
             missed++;
             continue;
         }
-        texture_atlas_set_region( self->atlas, pos.x, pos.y,
+        texture_atlas_set_region( self->atlas, region.x, region.y,
                                   slot->bitmap.width, slot->bitmap.rows,
                                   slot->bitmap.buffer, slot->bitmap.pitch );
 
         glyph = texture_glyph_new( );
-        glyph->charcode     = charcodes[i];
-        glyph->kerning      = 0;
-        glyph->size.width   = slot->bitmap.width;
-        glyph->size.height  = slot->bitmap.rows;
-        glyph->offset.x     = slot->bitmap_left;
-        glyph->offset.y     = slot->bitmap_top;
-        glyph->texcoords.u0 = pos.x/(float)width;
-        glyph->texcoords.v0 = pos.y/(float)height;
-        glyph->texcoords.u1 = (pos.x + glyph->size.width)/(float)width;
-        glyph->texcoords.v1 = (pos.y + glyph->size.height)/(float)height;
+        glyph->charcode = charcodes[i];
+        glyph->kerning  = 0;
+        glyph->width    = slot->bitmap.width;
+        glyph->height   = slot->bitmap.rows;
+        glyph->offset_x = slot->bitmap_left;
+        glyph->offset_y = slot->bitmap_top;
+        glyph->u0       = region.x/(float)width;
+        glyph->v0       = region.y/(float)height;
+        glyph->u1       = (region.x + glyph->width)/(float)width;
+        glyph->v1       = (region.y + glyph->height)/(float)height;
 
         /* Discard hinting to get advance */
         FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
         slot = face->glyph;
-        glyph->advance.x    = slot->advance.x/64.0;
-        glyph->advance.y    = slot->advance.y/64.0;
+        glyph->advance_x    = slot->advance.x/64.0;
+        glyph->advance_y    = slot->advance.y/64.0;
 
         vector_push_back( self->glyphs, glyph );
         texture_glyph_delete( glyph );
@@ -224,6 +229,7 @@ texture_font_cache_glyphs( TextureFont *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 TextureGlyph *
 texture_font_get_glyph( TextureFont *self,
                         wchar_t charcode )
@@ -255,13 +261,14 @@ texture_font_get_glyph( TextureFont *self,
 
     if( texture_font_cache_glyphs( self, buffer ) == 0 )
     {
-        glyph = vector_back( self->glyphs );
         return (TextureGlyph *) vector_back( self->glyphs );
     }
     return NULL;
 }
 
 
+
+/* ------------------------------------------------------------------------- */
 int
 texture_font_load_face( FT_Library * library,
                         const char * filename,

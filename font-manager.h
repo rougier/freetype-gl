@@ -28,6 +28,9 @@
 #include "texture-atlas.h"
 
 
+/**
+ *
+ */
 typedef struct {
     TextureAtlas * atlas;
     Vector *       fonts;
@@ -35,27 +38,73 @@ typedef struct {
 } FontManager;
 
 
-FontManager *   font_manager_new( void );
-FontManager *   font_manager_copy( FontManager *other );
-void            font_manager_delete( FontManager *self );
-TextureFont *   font_manager_get_from_filename( FontManager *self,
-                                                const char * filename,
-                                                const float size );
-TextureFont *   font_manager_get_from_description( FontManager *self,
-                                                   const char * family,
-                                                   const float size,
-                                                   const int bold,
-                                                   const int italic );
-TextureFont *   font_manager_get_from_markup( FontManager *self,
-                                              const TextMarkup *markup );
-char *          font_manager_match_description( FontManager *self,
-                                                const char * family,
-                                                const float size,
-                                                const int bold,
-                                                const int italic );
-const wchar_t * font_manager_get_cache( FontManager *self );
-void            font_manager_set_cache( FontManager *self,
-                                        const wchar_t * cache );
+
+/**
+ *
+ */
+  FontManager *
+  font_manager_new( void );
+
+
+/**
+ *
+ */
+  void
+  font_manager_delete( FontManager *self );
+
+
+/**
+ *
+ */
+  TextureFont *
+  font_manager_get_from_filename( FontManager * self,
+                                  const char * filename,
+                                  const float size );
+
+
+/**
+ *
+ */
+  TextureFont *
+  font_manager_get_from_description( FontManager * self,
+                                     const char * family,
+                                     const float size,
+                                     const int bold,
+                                     const int italic );
+
+
+/**
+ *
+ */
+  TextureFont *
+  font_manager_get_from_markup( FontManager *self,
+                                const TextMarkup *markup );
+
+
+/**
+ *
+ */
+  char *
+  font_manager_match_description( FontManager * self,
+                                  const char * family,
+                                  const float size,
+                                  const int bold,
+                                  const int italic );
+
+
+/**
+ *
+ */
+  const wchar_t *
+  font_manager_get_cache( FontManager * self );
+
+
+/**
+ *
+ */
+  void
+  font_manager_set_cache( FontManager * self,
+                          const wchar_t * cache );
 
 #endif /* __FONT_MANAGER_H__ */
 

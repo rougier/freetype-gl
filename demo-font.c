@@ -27,13 +27,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "vec234.h"
 #include "vector.h"
 #include "vertex-buffer.h"
 #include "font-manager.h"
 #include "text-markup.h"
 #include "texture-font.h"
-#include "texture-glyph.h"
+//#include "texture-glyph.h"
 #include "texture-atlas.h"
 
 
@@ -84,7 +83,7 @@ int main( int argc, char **argv )
     size_t maxsize = 28;
     size_t count = maxsize - minsize;
     wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
-    vec2 pen ;
+    Pen pen ;
     TextureFont *font;
     TextureGlyph *glyph;
     TextMarkup markup = { "Bitstream Vera Sans", 16, 0, 0, 0.0, 0.0,

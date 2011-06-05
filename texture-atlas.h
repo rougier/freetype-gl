@@ -32,7 +32,11 @@
 #ifndef __TEXTURE_ATLAS_H__
 #define __TEXTURE_ATLAS_H__
 #include "vector.h"
-#include "vec234.h"
+
+typedef struct
+{
+    int x, y, width, height;
+} Region;
 
 typedef struct
 {
@@ -43,14 +47,47 @@ typedef struct
 } TextureAtlas;
 
 
-TextureAtlas *  texture_atlas_new( size_t width, size_t height );
-void            texture_atlas_delete( TextureAtlas *self );
-void            texture_atlas_upload( TextureAtlas *self );
-ivec2           texture_atlas_get_region( TextureAtlas *self,
-                                          size_t width, size_t height );
-void            texture_atlas_set_region( TextureAtlas *self,
-                                          size_t x, size_t y,
-                                          size_t width, size_t height,
-                                          unsigned char *data, size_t stride );
+/**
+ *
+ */
+  TextureAtlas *
+  texture_atlas_new( size_t width,
+                     size_t height );
+
+
+/**
+ *
+ */
+  void
+  texture_atlas_delete( TextureAtlas *self );
+
+
+/**
+ *
+ */
+  void
+  texture_atlas_upload( TextureAtlas *self );
+
+
+/**
+ *
+ */
+  Region
+  texture_atlas_get_region( TextureAtlas *self,
+                            size_t width,
+                            size_t height );
+
+
+/**
+ *
+ */
+  void
+  texture_atlas_set_region( TextureAtlas *self,
+                            size_t x,
+                            size_t y,
+                            size_t width,
+                            size_t height,
+                            unsigned char *data,
+                            size_t stride );
 
 #endif /* __TEXTURE_ATLAS_H__ */

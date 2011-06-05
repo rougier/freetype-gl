@@ -27,21 +27,40 @@
 #include "text-markup.h"
 #include "vertex-buffer.h"
 
+/**
+ *
+ */
 typedef struct {
     wchar_t   charcode;
     float     kerning;       
 } KerningPair;
 
+
+/**
+ *
+ */
+typedef struct {
+    float x,y;
+} Pen;
+
+
+/**
+ *
+ */
 typedef struct {
     wchar_t       charcode;
-    ivec2         size;
-    ivec2         offset;
-    vec2          advance;
-    vec4          texcoords;
+    int           width, height;
+    int           offset_x, offset_y;
+    int           advance_x, advance_y;
+    float         u0, v0, u1, v1;
     KerningPair * kerning;
     size_t        kerning_count;
 } TextureGlyph;
 
+
+/**
+ *
+ */
 typedef struct {
     int x, y, z;
     float u, v;
@@ -49,17 +68,44 @@ typedef struct {
 } TextureGlyphVertex;
 
 
-TextureGlyph * texture_glyph_new( void );
-TextureGlyph * texture_glyph_copy( TextureGlyph *other );
-void           texture_glyph_delete( TextureGlyph *self );
-void           texture_glyph_render( TextureGlyph * self,
-                                     TextMarkup * markup,
-                                     vec2 * pen );
-void           texture_glyph_add_to_vertex_buffer( TextureGlyph * self,
-                                                   VertexBuffer * buffer,
-                                                   TextMarkup * markup,
-                                                   vec2 * pen );
-float          texture_glyph_get_kerning( TextureGlyph *self,
-                                          wchar_t charcode );
+/**
+ *
+ */
+  TextureGlyph *
+  texture_glyph_new( void );
+
+
+/**
+ *
+ */
+  void
+  texture_glyph_delete( TextureGlyph * self );
+
+
+/**
+ *
+ */
+  void
+  texture_glyph_render( TextureGlyph * self,
+                        TextMarkup * markup,
+                        Pen * pen );
+
+
+/**
+ *
+ */
+  void
+  texture_glyph_add_to_vertex_buffer( const TextureGlyph * self,
+                                      VertexBuffer * buffer,
+                                      const TextMarkup * markup,
+                                      Pen * pen );
+
+
+/**
+ *
+ */
+  float
+  texture_glyph_get_kerning( TextureGlyph * self,
+                             wchar_t charcode );
 
 #endif /* __TEXTURE_GLYPH_H__ */
