@@ -180,6 +180,15 @@ typedef struct
 
 
 /**
+ * Clear all vertices and indices
+ *
+ * @param  self  a vertex buffer
+ */
+  void
+  vertex_buffer_clear( VertexBuffer *self );
+
+
+/**
  * Appends a single index at the end of the buffer.
  *
  * @param  self  a vertex buffer
