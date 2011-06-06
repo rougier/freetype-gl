@@ -65,6 +65,7 @@ vertex_buffer_new( char *format )
     self->vertices_id  = 0;
     self->indices = vector_new( sizeof(GLuint) );
     self->indices_id  = 0;
+    self->dirty = 1;
     return self;
 }
 
@@ -116,6 +117,7 @@ vertex_buffer_delete( VertexBuffer *self )
     free( self );
 }
 
+
 void
 vertex_buffer_upload ( VertexBuffer *self )
 {
@@ -137,12 +139,31 @@ vertex_buffer_upload ( VertexBuffer *self )
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 }
 
+
+void
+vertex_buffer_clear( VertexBuffer *self )
+{
+    assert( self );
+
+    vector_clear( self->indices );
+    vector_clear( self->vertices );
+    self->dirty = 1;
+}
+
 void
 vertex_buffer_render ( VertexBuffer *self,
                        GLenum mode,
                        char *what )
 { 
     int i,j;
+
+    assert( self );
+
+    if( !self->vertices->size )
+    {
+        return;
+    }
+
 
     if( self->dirty )
     {
