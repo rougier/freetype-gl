@@ -25,18 +25,78 @@
     #include <GL/glut.h>
 #endif
 #include <stdlib.h>
-#include "window.h"
+#include "vector.h"
+#include "text-markup.h"
+#include "font-manager.h"
+#include "texture-font.h"
+#include "texture-glyph.h"
 #include "vertex-buffer.h"
 
-VertexBuffer *cube;
-float theta=0, phi=0, fps=50;
+
+VertexBuffer *cube, *text_buffer;
+FontManager *manager;
 
 
-void on_draw( Window *window )
+void init( void )
 {
-    window_clear( window );
+    GLfloat ambient[]  = {0.1f, 0.1f, 0.1f, 1.0f};
+    GLfloat diffuse[]  = {1.0f, 1.0f, 1.0f, 1.0f};
+    GLfloat position[] = {0.0f, 1.0f, 2.0f, 1.0f};
+    GLfloat specular[] = {0.0f, 0.0f, 0.0f, 1.0f};
+    glPolygonOffset( 1, 1 );
+    glClearColor( 1.0, 1.0, 1.0, 1.0 );
+    glEnable( GL_DEPTH_TEST ); 
+    glEnable( GL_COLOR_MATERIAL );
+    glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glEnable( GL_LIGHT0 );
+    glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
+    glLightfv( GL_LIGHT0, GL_AMBIENT, ambient );
+    glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
+    glLightfv( GL_LIGHT0, GL_POSITION, position );
+    glEnable( GL_LINE_SMOOTH );
+}
+
+void display( void )
+{
+    static float theta=0, phi=0;
+    int viewport[4];
+    glGetIntegerv( GL_VIEWPORT, viewport );
+    GLuint width  = viewport[2];
+    GLuint height = viewport[3];
+    static int frame=0, time, timebase=0;
 
     theta += .5; phi += .5;
+	frame++;
+	time = glutGet( GLUT_ELAPSED_TIME );
+
+    if (time - timebase > 1000)
+    {
+        wchar_t fps[64]; 
+        size_t i;
+        Pen pen = {5.0, 5.0};
+        TextMarkup markup = { "Arial", 64, 0, 0, 0.0, 0.0,
+                              {.5,.5,.5,.5}, {1,1,1,0},
+                              0, {0,0,0,1}, 0, {0,0,0,1},
+                              0, {0,0,0,1}, 0, {0,0,0,1} };
+        TextureFont *font= font_manager_get_from_markup( manager, &markup );
+        TextureGlyph *glyph;
+        swprintf( fps, 64, L"%.2f", frame*1000.0/(time-timebase) );
+        timebase = time;
+        frame = 0;
+
+        vertex_buffer_clear( text_buffer );
+        glyph = texture_font_get_glyph( font, fps[0] );
+        texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &markup, &pen );
+        for( i=1; i<wcslen(fps); ++i )
+        {
+            glyph = texture_font_get_glyph( font, fps[i] );
+            pen.x += texture_glyph_get_kerning( glyph, fps[i-1] );
+            texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &markup, &pen );
+        }
+    }
+
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glPushMatrix();
     glRotatef( theta, 0,0,1 );
     glRotatef( phi,   0,1,0 );
@@ -60,9 +120,28 @@ void on_draw( Window *window )
     glDepthMask( GL_TRUE );
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     glPopMatrix();
+
+    /* Display FPS */
+    glEnable( GL_TEXTURE_2D );
+    glBindTexture( GL_TEXTURE_2D, manager->atlas->texid );
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, width, 0, height, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    vertex_buffer_render( text_buffer, GL_TRIANGLES, "vtc" );
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glDisable( GL_TEXTURE_2D );
+
+    glutSwapBuffers( );
 }
 
-void on_resize( Window *window, int width, int height )
+void reshape( int width, int height )
 {
     glViewport(0, 0, width, height);
     glMatrixMode( GL_PROJECTION );
@@ -73,8 +152,29 @@ void on_resize( Window *window, int width, int height )
     glTranslatef( 0.0, 0.0, -5.0 );
 }
 
+void keyboard( unsigned char key, int x, int y )
+{
+    if ( key == 27 )
+    {
+        exit( EXIT_SUCCESS );
+    }
+}
+
+void timer( int dt )
+{
+    glutPostRedisplay();
+    glutTimerFunc( dt, timer, dt );
+}
+
+void idle( void )
+{
+    glutPostRedisplay();
+}
+
+
 int main( int argc, char **argv )
 {
+    int fps = 50;
     typedef struct { float x,y,z; } vec3;
     typedef struct { vec3 position, normal, color;} vertex;
     vec3 v[] = { { 1, 1, 1},  {-1, 1, 1},  {-1,-1, 1}, { 1,-1, 1},
@@ -92,13 +192,21 @@ int main( int argc, char **argv )
       {v[4],n[5],c[4]}, {v[7],n[5],c[7]}, {v[6],n[5],c[6]}, {v[5],n[5],c[5]} };
     GLuint indices[24] = { 0, 1, 2, 3,    4, 5, 6, 7,   8, 9,10,11,
                            12,13,14,15,  16,17,18,19,  20,21,22,23 };
-    cube = vertex_buffer_new_from_data("v3f:n3f:c3f",
-                                       24, vertices, 24, indices );
-    Window *window = window_new( 400, 400, "Cube", 50.0 );
+    cube = vertex_buffer_new_from_data( "v3f:n3f:c3f",
+                                        24, vertices, 24, indices );
+    manager = font_manager_new();
+    text_buffer = vertex_buffer_new( "v3i:t2f:c4f" ); 
 
-    window->on_draw = on_draw;
-    window->on_resize = on_resize;
-    window_run( window );
-
-    return 0;
+    glutInit( &argc, argv );
+    glutInitWindowSize( 400, 400 );
+    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
+    glutCreateWindow( "Vertex buffer cube" );
+    glutReshapeFunc( reshape );
+    glutDisplayFunc( display );
+    glutKeyboardFunc( keyboard );
+    glutTimerFunc( 1000/fps, timer, 1000/fps );
+    //glutIdleFunc( idle );
+    init( );
+    glutMainLoop( );
+    return EXIT_SUCCESS;
 }
