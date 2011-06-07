@@ -30,6 +30,8 @@ texture-glyph: Simple structure that described a texture glyph (position within
 text-markup:   Simple structure that describes text properties (font family,
                font size, colors, underline, etc.)
 
+font-manager:  Structure in charge of caching fonts.
+
 vertex-buffer: Generic vertex buffer structure inspired by pyglet (python).
 
                More information at:

@@ -51,13 +51,6 @@ texture_glyph_new( void )
     return self;
 }
 
-TextureGlyph *
-texture_glyph_copy( TextureGlyph *other )
-{
-    TextureGlyph *self = (TextureGlyph *) malloc( sizeof(TextureGlyph) );
-    return self;
-}
-
 void
 texture_glyph_delete( TextureGlyph *self )
 {

@@ -175,7 +175,6 @@ vertex_buffer_render ( VertexBuffer *self,
     
     glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
     glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
     for (i=0; i<strlen(what); ++i)
     {
         char ctarget = what[i];
@@ -194,7 +193,16 @@ vertex_buffer_render ( VertexBuffer *self,
             }
         }
     }
-    glDrawElements( mode, self->indices->size, GL_UNSIGNED_INT, 0 );
+    if( self->indices->size )
+    {
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
+        glDrawElements( mode, self->indices->size, GL_UNSIGNED_INT, 0 );
+    }
+    else
+    {
+        glDrawArrays( mode, 0, self->vertices->size );
+    }
+
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
     glPopClientAttrib( );

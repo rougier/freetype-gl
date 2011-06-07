@@ -61,12 +61,6 @@ font_manager_new( void )
     return self;
 }
 
-FontManager *
-font_manager_copy( FontManager *other )
-{
-    return other;
-}
-
 void
 font_manager_delete( FontManager *self )
 {
