@@ -1,40 +1,36 @@
-// ============================================================================
-// Freetype GL - A C OpenGL Freetype engine
-// Platform:    Any
-// API version: 1.0
-// WWW:         http://code.google.com/p/freetype-gl/
-// ----------------------------------------------------------------------------
-// Copyright (c) 2011 Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
-// 
-// This program is free software: you can redistribute it and/or modify it
-// under the terms of the GNU General Public License as published by the
-// Free Software Foundation, either version 3 of the License, or (at your
-// option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-// Public License for more details.
-//
-// You should have received a copy of the GNU General Public License along
-// with this program. If not, see <http://www.gnu.org/licenses/>.
-// ============================================================================
+/* =========================================================================
+ * Freetype GL - A C OpenGL Freetype engine
+ * Platform:    Any
+ * API version: 1.0
+ * WWW:         http://code.google.com/p/freetype-gl/
+ * -------------------------------------------------------------------------
+ * Copyright (c) 2011 Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
+ * 
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * ========================================================================= */
 #if defined(__APPLE__)
     #include <Glut/glut.h>
 #else
     #include <GL/glut.h>
 #endif
-#include <stdlib.h>
-#include <stdio.h>
 #include <wchar.h>
-#include <locale.h>
 #include "vector.h"
 #include "text-markup.h"
-#include "vertex-buffer.h"
 #include "font-manager.h"
 #include "texture-font.h"
 #include "texture-glyph.h"
-#include "texture-atlas.h"
+#include "vertex-buffer.h"
 
 
 VertexBuffer *buffer;
@@ -71,7 +67,7 @@ void keyboard( unsigned char key, int x, int y )
 {
     if ( key == 27 )
     {
-        exit( 1 );
+        exit( EXIT_SUCCESS );
     }
 }
 
@@ -97,20 +93,67 @@ void add_text( wchar_t *      text,
 int main( int argc, char **argv )
 {
     glutInit( &argc, argv );
-    glutInitWindowSize( 600, 400 );
+    glutInitWindowSize( 700, 400 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
     glutCreateWindow( "Freetype OpenGL" );
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    TextMarkup normal = { "Bitstream Vera Sans", 16, 0, 0, 0.0, 0.0,
+/*
+    TextMarkup markup = { "Liberation Mono", 15, 0, 0, 0.0, 0.0,
+                          {0,0,0,1}, {1,1,1,0},
+                          0, {0,0,0,1}, 0, {0,0,0,1},
+                          0, {0,0,0,1}, 0, {0,0,0,1} };
+
+    Pen pen = {0.0, 16} ;
+    manager = font_manager_new();
+    buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 
+
+	FILE *fp = fopen( "demo-label.c", "r" );
+    char   line[1024];
+    wchar_t wline[1024];
+	if (fp == NULL)
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    while( fgets( line, sizeof(line), fp ) != NULL )
+    {
+      int len = strlen(line)-1;
+      if( line[len] == '\n' )
+      {
+          line[len] = '\0';
+      }
+      if( len > 0)
+      {
+          swprintf( wline, strlen(line)+1, L"%s", line );
+          add_text( wline, buffer, &markup, &pen );
+      }
+      pen.y -= 18;
+      pen.x = 0;
+    }
+    fclose(fp);
+*/
+
+    TextMarkup normal = { "Liberation Sans", 18, 0, 0, 0.0, 0.0,
                           {0,0,0,1}, {1,1,1,0},
                           0, {0,0,0,1}, 0, {0,0,0,1},
                           0, {0,0,0,1}, 0, {0,0,0,1} };
     TextMarkup title  = normal; title.size = 32;
     TextMarkup bold   = normal; bold.bold = 1;
     TextMarkup italic = normal; italic.italic = 1;
+    TextMarkup subscript   = normal; subscript.rise   =-2; subscript.size = 12;
+    TextMarkup superscript = normal; superscript.rise = 2; superscript.size = 12;
+    Color color_red  = {1,0,0,1};
+    Color color_green= {0,1,0,1};
+    Color color_blue = {0,0,1,1};
+    TextMarkup red   = normal; red.foreground_color   = color_red;
+    TextMarkup green = normal; green.foreground_color = color_green;
+    TextMarkup blue  = normal; blue.foreground_color  = color_blue;
+    TextMarkup zapfino = normal; zapfino.family = "Zapfino";
+
+
     Pen pen = {0.0, 0.0} ;
     manager = font_manager_new();
     buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 
@@ -118,16 +161,27 @@ int main( int argc, char **argv )
     add_text( L"Freetype OpenGL™", buffer, &title, &pen );
     pen.y -= 36; pen.x = 0;
 
-    add_text( L"Freetype text handling using a single vertex buffer !",
+    add_text( L"Freetype text handling using a single"
+              L"vertex buffer and a single texture featuring:",
               buffer, &normal, &pen);
-    pen.y -= 18; pen.x = 0;
+    pen.y -= 24; pen.x = 0;
 
-    add_text( L" • Font glyphs are stored within a ", buffer, &normal, &pen );
-    add_text( L"single texture", buffer, &bold, &pen );
-    add_text( L" !", buffer, &normal, &pen );
-    pen.y -= 18; pen.x = 0;
-    add_text( L" • Unicode characters are available : ²³€¥∑∫∞√©Ω¿«»", buffer, &normal, &pen );
-    pen.y -= 18; pen.x = 0;
+    add_text( L" • Unicode characters: ²³€¥∑∫∞√©Ω¿«»", buffer, &normal, &pen );
+    pen.y -= 24; pen.x = 0;
+
+    add_text( L" • ", buffer, &normal, &pen );
+    add_text( L"superscript ", buffer, &superscript, &pen );
+    add_text( L" and ", buffer, &normal, &pen );
+    add_text( L"subscript ", buffer, &subscript, &pen );
+    pen.y -= 24; pen.x = 0;
+
+    add_text( L" • Any ", buffer, &green, &pen );
+    add_text( L"color ", buffer, &blue, &pen );
+    add_text( L"you like", buffer, &red, &pen );
+    pen.y -= 40; pen.x = 0;
+
+    add_text( L" • ", buffer, &normal, &pen );
+    add_text( L"Any (installed) font", buffer, &zapfino, &pen );
 
     glutMainLoop( );
     return 0;
