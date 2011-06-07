@@ -120,6 +120,10 @@ int main( int argc, char **argv )
                           {0,0,0,1}, {1,1,1,0},
                           0, {0,0,0,1}, 0, {0,0,0,1},
                           0, {0,0,0,1}, 0, {0,0,0,1} };
+    TextMarkup title  = { "Bitstream Vera Serif", 32, 0, 0, 0.0, 0.0,
+                          {.2,.2,.2,1}, {1,1,1,0},
+                          0, {0,0,0,1}, 0, {0,0,0,1},
+                          0, {0,0,0,1}, 0, {0,0,0,1} };
 
     manager = font_manager_new();
     text_buffer  = vertex_buffer_new( "v3i:t2f:c4f" ); 
@@ -138,6 +142,10 @@ int main( int argc, char **argv )
     origin.y = height/2 - glyph->offset_y + glyph->height/2;
     texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &big, &origin );
 
+    // title
+    pen.x = 50;
+    pen.y = 560;
+    add_text( L"Glyph metrics", text_buffer, &title, &pen );
 
     // Baseline
     p1.x = 0.1*width; p1.y = origin.y;
