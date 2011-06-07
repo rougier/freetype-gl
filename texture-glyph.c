@@ -98,6 +98,7 @@ texture_glyph_render( TextureGlyph *self,
     pen->y += self->advance_y;
 }
 
+
 void
 texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
                                     VertexBuffer *buffer,
@@ -106,7 +107,7 @@ texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
 {
     size_t i;
     int x0  = pen->x + self->offset_x;
-    int y0  = pen->y + self->offset_y;
+    int y0  = pen->y + self->offset_y + markup->rise;
     int x1  = x0 + self->width;
     int y1  = y0 - self->height;
     float u0 = self->u0;
