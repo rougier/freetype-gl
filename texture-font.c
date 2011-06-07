@@ -54,7 +54,7 @@ texture_font_new( TextureAtlas *atlas,
     self->glyphs = vector_new( sizeof(TextureGlyph) );
     self->filename = strdup( filename );
     self->size = size;
-    self->gamma = 1.25;
+    self->gamma = 1.5;
     self->atlas = atlas;
     return self;
 }
@@ -171,7 +171,8 @@ texture_font_cache_glyphs( TextureFont *self,
     for( i=0; i<wcslen(charcodes); ++i )
     {
         glyph_index = FT_Get_Char_Index( face, charcodes[i] );
-        error = FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_TARGET_LIGHT );
+        error = FT_Load_Glyph( face, glyph_index,
+                               FT_LOAD_RENDER | FT_LOAD_TARGET_LIGHT );
         if( error )
         {
             fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
@@ -180,13 +181,17 @@ texture_font_cache_glyphs( TextureFont *self,
             return wcslen(charcodes)-i;
         }
         slot = face->glyph;
+
+        /* Gamma correction (sort of) */
         for( x=0; x<slot->bitmap.width; ++x )
         {
             for( y=0; y<slot->bitmap.rows; ++y )
             {
-                c = *(unsigned char *)(slot->bitmap.buffer + y*slot->bitmap.pitch + x );
+                c = *(unsigned char *)(slot->bitmap.buffer
+                                       + y*slot->bitmap.pitch + x );
                 c = (unsigned char) ( pow(c/255.0, self->gamma) * 255);
-                *(unsigned char *)(slot->bitmap.buffer + y*slot->bitmap.pitch + x ) = c;
+                *(unsigned char *)(slot->bitmap.buffer
+                                   + y*slot->bitmap.pitch + x ) = c;
             }
         }
         region = texture_atlas_get_region( self->atlas,
