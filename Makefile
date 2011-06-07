@@ -29,34 +29,21 @@ ifeq ($(PLATFORM), Darwin)
 	               `freetype-config --libs` `pkg-config --libs fontconfig`
 endif
 
-TARGETS := demo-font demo-texture demo-label demo-cube
-#TARGETS := $($(wildcard demo-*.c):.c=)
+DEMOS  := $(patsubst %.c,%,$(wildcard demo-*.c))
 HEADERS:= $(wildcard *.h)
 SOURCES:= $(filter-out $(wildcard demo-*.c), $(wildcard *.c))
 OBJECTS:= $(SOURCES:.c=.o)
 
+.PHONY: all $(DEMOS)
+all: $(DEMOS)
 
-all: ${TARGETS}
-
-demo-font: ${OBJECTS} ${HEADERS} demo-font.o
-	@echo -n "Building $@... "
-	@$(CC) ${OBJECTS} demo-font.o $(LIBS) -o $@
+define DEMO_template
+$(1): $(1).o $(OBJECTS) $(HEADERS)
+	@echo -n "Building $$@... "
+	@$(CC) $(OBJECTS) $(1).o $(LIBS) -o $$@
 	@echo "done."
-
-demo-texture: ${OBJECTS} ${HEADERS} demo-texture.o
-	@echo -n "Building $@... "
-	@$(CC) ${OBJECTS} demo-texture.o $(LIBS) -o $@
-	@echo "done."
-
-demo-label: ${OBJECTS} ${HEADERS} demo-label.o
-	@echo -n "Building $@... "
-	@$(CC) ${OBJECTS} demo-label.o $(LIBS) -o $@
-	@echo "done."
-
-demo-cube: ${OBJECTS} ${HEADERS} demo-cube.o
-	@echo -n "Building $@... "
-	@$(CC) ${OBJECTS} demo-cube.o $(LIBS) -o $@
-	@echo "done."
+endef
+$(foreach demo,$(DEMOS),$(eval $(call DEMO_template,$(demo))))
 
 %.o : %.c
 	@echo -n "Building $@... "
@@ -64,7 +51,7 @@ demo-cube: ${OBJECTS} ${HEADERS} demo-cube.o
 	@echo "done."
 
 clean:
-	@-rm -f $(TARGETS) *.o
+	@-rm -f $(DEMOS) *.o
 
 distclean: clean
 	@-rm -f *~
