@@ -73,7 +73,7 @@ texture_glyph_render( TextureGlyph *self,
     assert( self );
 
     int x  = pen->x + self->offset_x;
-    int y  = pen->y + self->offset_y;
+    int y  = pen->y + self->offset_y + markup->rise;
     int w  = self->width;
     int h  = self->height;
 
@@ -94,7 +94,7 @@ texture_glyph_render( TextureGlyph *self,
     }
     glEnd();
 
-    pen->x += self->advance_x;
+    pen->x += self->advance_x + markup->spacing;
     pen->y += self->advance_y;
 }
 
@@ -135,7 +135,7 @@ texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
     vertex_buffer_push_back_indices( buffer, indices, 6 );
     vertex_buffer_push_back_vertices( buffer, vertices, 4 );
 
-    pen->x += self->advance_x;
+    pen->x += self->advance_x + markup->spacing;
     pen->y += self->advance_y;
 }
 
