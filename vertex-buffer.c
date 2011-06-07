@@ -130,12 +130,14 @@ vertex_buffer_upload ( VertexBuffer *self )
         glGenBuffers( 1, &self->indices_id );
     }
     glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
-    glBufferData( GL_ARRAY_BUFFER, self->vertices->size*self->vertices->item_size,
-                                   self->vertices->items, GL_DYNAMIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER,
+                  self->vertices->size*self->vertices->item_size,
+                  self->vertices->items, GL_DYNAMIC_DRAW );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, self->indices->size*self->indices->item_size,
-                                           self->indices->items, GL_DYNAMIC_DRAW );
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER,
+                  self->indices->size*self->indices->item_size,
+                  self->indices->items, GL_DYNAMIC_DRAW );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 }
 
