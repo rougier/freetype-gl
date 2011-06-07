@@ -143,6 +143,8 @@ int main( int argc, char **argv )
     TextMarkup title  = normal; title.size = 32;
     TextMarkup bold   = normal; bold.bold = 1;
     TextMarkup italic = normal; italic.italic = 1;
+    TextMarkup condensed = normal; condensed.spacing = -2.0;
+    TextMarkup expanded = normal; expanded.spacing   = +2.0;
     TextMarkup subscript   = normal; subscript.rise   =-2; subscript.size = 12;
     TextMarkup superscript = normal; superscript.rise = 2; superscript.size = 12;
     Color color_red  = {1,0,0,1};
@@ -182,6 +184,13 @@ int main( int argc, char **argv )
 
     add_text( L" • ", buffer, &normal, &pen );
     add_text( L"Any (installed) font", buffer, &zapfino, &pen );
+    pen.y -= 42; pen.x = 0;
+
+    add_text( L" • ", buffer, &normal, &pen );
+    add_text( L"condensed", buffer, &condensed, &pen );
+    add_text( L" or ", buffer, &normal, &pen );
+    add_text( L"expanded", buffer, &expanded, &pen );
+    pen.y -= 24; pen.x = 0;
 
     glutMainLoop( );
     return 0;
