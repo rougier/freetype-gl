@@ -148,21 +148,27 @@ int main( int argc, char **argv )
     add_text( L"Glyph metrics", text_buffer, &title, &pen );
 
     // Baseline
-    p1.x = 0.1*width; p1.y = origin.y;
+    p1.x = 0.1*width;
+    p1.y = origin.y;
     vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = 0.9*width; p2.y = p1.y;
+    p2.x = 0.9*width;
+    p2.y = p1.y;
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
 
     // Top line
-    p1.x = 0.1*width; p1.y = origin.y + glyph->offset_y;
+    p1.x = 0.1*width;
+    p1.y = origin.y + glyph->offset_y;
     vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = 0.9*width; p2.y = p1.y;
+    p2.x = 0.9*width;
+    p2.y = p1.y;
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
 
     // Bottom line
-    p1.x = 0.1*width; p1.y = origin.y + glyph->offset_y - glyph->height;
+    p1.x = 0.1*width;
+    p1.y = origin.y + glyph->offset_y - glyph->height;
     vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = 0.9*width; p2.y = p1.y;
+    p2.x = 0.9*width;
+    p2.y = p1.y;
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
 
     // Origin
@@ -197,17 +203,17 @@ int main( int argc, char **argv )
     // Right line
     p1.x = width/2 + glyph->width/2;
     p1.y = .3*height;
+    vertex_buffer_push_back_vertex( line_buffer, &p1 );
     p2.x = p1.x;
     p2.y = .9*height;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
 
     // Right line
     p1.x = width/2  - glyph->offset_x - glyph->width/2 + glyph->advance_x;
     p1.y = .1*height;
+    vertex_buffer_push_back_vertex( line_buffer, &p1 );
     p2.x = p1.x;
     p2.y = .7*height;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
     
     // Change line color
@@ -216,9 +222,9 @@ int main( int argc, char **argv )
     // width
     p1.x = width/2 - glyph->width/2;
     p1.y = .8*height;
-    p2.x = width/2 + glyph->width/2;
-    p2.y = .8*height;
     vertex_buffer_push_back_vertex( line_buffer, &p1 );
+    p2.x = width/2 + glyph->width/2;
+    p2.y = p1.y;
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = width/2 - 20;
     pen.y = .8*height + 3;
@@ -227,26 +233,26 @@ int main( int argc, char **argv )
     // advance_x
     p1.x = width/2 - glyph->width/2 - glyph->offset_x;
     p1.y = .2*height;
-    p2.x = width/2 - glyph->width/2 - glyph->offset_x + glyph->advance_x;
-    p2.y = .2*height;
     vertex_buffer_push_back_vertex( line_buffer, &p1 );
+    p2.x = width/2 - glyph->width/2 - glyph->offset_x + glyph->advance_x;
+    p2.y = p1.y;
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = width/2 - 48;
     pen.y = .2*height - 18;
     add_text( L"advance_x", text_buffer, &blue, &pen );
 
-    // offset_x
+    // Offset_x
     p1.x = width/2 - glyph->width/2 -glyph->offset_x;
     p1.y = .85*height;
-    p2.x = width/2 - glyph->width/2;
-    p2.y = .85*height;
     vertex_buffer_push_back_vertex( line_buffer, &p1 );
+    p2.x = width/2 - glyph->width/2;
+    p2.y = p1.y;
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = width/2 - glyph->width/2 + 5;
     pen.y = .85*height-8;
     add_text( L"offset_x", text_buffer, &blue, &pen );
 
-    // height
+    // Height
     p1.x = 0.3*width/2;
     p1.y = origin.y + glyph->offset_y - glyph->height;
     p2.x = 0.3*width/2;
@@ -258,12 +264,12 @@ int main( int argc, char **argv )
     add_text( L"height", text_buffer, &blue, &pen );
 
 
-    // height
+    // Offset y
     p1.x = 0.8*width;
     p1.y = origin.y + glyph->offset_y;
-    p2.x = 0.8*width;
-    p2.y = origin.y;
     vertex_buffer_push_back_vertex( line_buffer, &p1 );
+    p2.x = p1.x;
+    p2.y = origin.y;
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = 0.8*width+3;
     pen.y = origin.y + glyph->offset_y/2 -6;

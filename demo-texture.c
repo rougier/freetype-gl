@@ -83,7 +83,7 @@ int main( int argc, char **argv )
     wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
                      L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
                      L"`abcdefghijklmnopqrstuvwxyz{|}~";
-    char * filename = "./Vera.ttf";
+    char * filename;
     TextureAtlas *atlas;
     TextureFont *font;
     size_t i, missed = 0;

@@ -37,6 +37,7 @@ typedef struct
     char *         filename;
     int            bold;
     int            italic;
+    int            border;
     float          size;
     float          gamma;
 } TextureFont;

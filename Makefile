@@ -22,10 +22,10 @@
 PLATFORM		= $(shell uname)
 CC				= gcc
 CFLAGS			= -Wall `freetype-config --cflags` `pkg-config --cflags fontconfig`
-LIBS			= -lGL -lglut -lGLU \
+LIBS			= -lGL -lglut -lGLU -lglew \
 	              `freetype-config --libs` `pkg-config --libs fontconfig`
 ifeq ($(PLATFORM), Darwin)
-	LIBS		= -framework OpenGL -framework GLUT \
+	LIBS		= -framework OpenGL -framework GLUT -lglew\
 	               `freetype-config --libs` `pkg-config --libs fontconfig`
 endif
 

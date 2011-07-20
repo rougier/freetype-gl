@@ -54,7 +54,8 @@ texture_font_new( TextureAtlas *atlas,
     self->glyphs = vector_new( sizeof(TextureGlyph) );
     self->filename = strdup( filename );
     self->size = size;
-    self->gamma = 1.5;
+    self->border = 1;
+    self->gamma = 1.;
     self->atlas = atlas;
     return self;
 }
@@ -149,7 +150,7 @@ size_t
 texture_font_cache_glyphs( TextureFont *self,
                            wchar_t * charcodes )
 {
-    size_t i, x, y, width, height;
+    size_t i, x, y, width, height, w, h;
     FT_Library    library;
     FT_Error      error;
     FT_Face       face;
@@ -172,7 +173,8 @@ texture_font_cache_glyphs( TextureFont *self,
     {
         glyph_index = FT_Get_Char_Index( face, charcodes[i] );
         error = FT_Load_Glyph( face, glyph_index,
-                               FT_LOAD_RENDER | FT_LOAD_TARGET_LIGHT );
+//                             FT_LOAD_RENDER | FT_LOAD_TARGET_LIGHT );
+                               FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT );
         if( error )
         {
             fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
@@ -194,14 +196,18 @@ texture_font_cache_glyphs( TextureFont *self,
                                    + y*slot->bitmap.pitch + x ) = c;
             }
         }
-        region = texture_atlas_get_region( self->atlas,
-                                           slot->bitmap.width, slot->bitmap.rows );
+
+        w = slot->bitmap.width + 2*self->border;
+        h = slot->bitmap.rows + 2*self->border;
+        region = texture_atlas_get_region( self->atlas, w, h );
         if ( region.x < 0 )
         {
             missed++;
             continue;
         }
-        texture_atlas_set_region( self->atlas, region.x, region.y,
+        x = region.x + self->border;
+        y = region.y + self->border;
+        texture_atlas_set_region( self->atlas, x, y,
                                   slot->bitmap.width, slot->bitmap.rows,
                                   slot->bitmap.buffer, slot->bitmap.pitch );
 
@@ -212,10 +218,10 @@ texture_font_cache_glyphs( TextureFont *self,
         glyph->height   = slot->bitmap.rows;
         glyph->offset_x = slot->bitmap_left;
         glyph->offset_y = slot->bitmap_top;
-        glyph->u0       = region.x/(float)width;
-        glyph->v0       = region.y/(float)height;
-        glyph->u1       = (region.x + glyph->width)/(float)width;
-        glyph->v1       = (region.y + glyph->height)/(float)height;
+        glyph->u0       = x/(float)width;
+        glyph->v0       = y/(float)height;
+        glyph->u1       = (x + glyph->width)/(float)width;
+        glyph->v1       = (y + glyph->height)/(float)height;
 
         /* Discard hinting to get advance */
         FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
@@ -280,7 +286,7 @@ texture_font_load_face( FT_Library * library,
                         const float size,
                         FT_Face * face )
 {
-    size_t hres = 1;
+    size_t hres = 10;
     FT_Error error;
     FT_Matrix matrix = { (int)((1.0/hres) * 0x10000L),
                          (int)((0.0)      * 0x10000L),
