@@ -45,12 +45,11 @@ typedef struct { float x, y, zoom; } Viewport;
 TextureAtlas *atlas = 0;
 Viewport viewport = {0,0,1};
 GLuint program = 0;
-GLuint texid = 0;
 
 
-// ----------------------------------------------------------- build_shader ---
+// ------------------------------------------------------------ read_shader ---
 char *
-load_shader( const char *filename )
+read_shader( const char *filename )
 {
     FILE * file;
     char * buffer;
@@ -67,6 +66,7 @@ load_shader( const char *filename )
 	fseek(file, 0, SEEK_SET );
     buffer = (char *) malloc( (size+1) * sizeof( char *) );
 	fread( buffer, sizeof(char), size, file );
+    buffer[size] = 0;
     fclose( file );
     return buffer;
 }
@@ -128,9 +128,7 @@ display( void )
     glClearColor(1,1,1,1);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-
     glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, texid);
     glBindTexture(GL_TEXTURE_2D, atlas->texid);
     glEnable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );
@@ -140,15 +138,13 @@ display( void )
     GLuint handle;
     handle = glGetUniformLocation( program, "texture" );
     glUniform1i( handle, 0);
-    handle = glGetUniformLocation( program, "AlphaTest" );
-    glUniform1f( handle, 2.0);
-    handle = glGetUniformLocation( program, "GlyphColor" );
-    glUniform3f( handle, 1.0, 0.0, 0.0);
 
     int x = viewport.x;
     int y = viewport.y;
     width *= viewport.zoom;
     height *= viewport.zoom;
+
+    glColor4f( 0.0, 0.0, 0.0, 1.0 );
     glPushMatrix();
     glBegin(GL_QUADS);
     glTexCoord2f( 0, 1 ); glVertex2i( x, y );
@@ -376,7 +372,6 @@ main( int argc, char **argv )
     {
         filename = font_manager_match_description( 0, family, minsize+i, bold, italic );
         font = texture_font_new( atlas, filename, minsize+i );
-        font->border = 5;
         missed += texture_font_cache_glyphs( font, cache );
         texture_font_delete(font);
     }
@@ -391,14 +386,12 @@ main( int argc, char **argv )
     printf( "Texture occupancy          : %.2f%%\n\n", 
             100.0*atlas->used/(float)(atlas->width*atlas->height) );
 
-
     printf( "Generating distance map...\n" );
     unsigned char *map = make_distance_map(atlas->data, atlas->width, atlas->height);
     printf( "done !\n");
     memcpy(atlas->data, map, atlas->width*atlas->height*sizeof(unsigned char));
     free(map);
     texture_atlas_upload(atlas);
-
 
     // glew initialization and OpenGL version checking
 	glewInit( );
@@ -409,8 +402,8 @@ main( int argc, char **argv )
 	}
 
     // Create the GLSL program
-    char * vertex_shader_source   = load_shader("./distance-field.vert");
-    char * fragment_shader_source = load_shader("./distance-field.frag");
+    char * vertex_shader_source   = read_shader("./distance-field.vert");
+    char * fragment_shader_source = read_shader("./distance-field.frag");
     program = build_program( vertex_shader_source, fragment_shader_source );
     glUseProgram( program );
 

@@ -1,20 +1,16 @@
 uniform sampler2D texture;
-uniform float AlphaTest;
-uniform vec3 GlyphColor;
-const float SmoothCenter = 0.5;
+const float outline_center = 0.10;
+const float smooth_center  = 0.50;
+
 void main(void)
 {
-    // Look up distance from the distance field:
-    vec4 color = texture2D(texture,gl_TexCoord[0].st);
-    float alpha = color.a;
-
-    // Kill the fragment if it fails the alpha test.
-    if (alpha > AlphaTest)
-        discard;
-    vec3 rgb = color.xyz + GlyphColor;
-    // float width = 0.05;
-    float width = fwidth(alpha);
-    alpha = smoothstep(SmoothCenter - width, SmoothCenter + width, alpha);
+    vec4 color  = texture2D( texture, gl_TexCoord[0].st );
+    float dist  = color.a;
+    vec3 rgb    = color.xyz;
+    float width = fwidth(dist);
+    float alpha = smoothstep(smooth_center - width,
+                             smooth_center + width,
+                             dist);
     gl_FragColor = vec4(rgb, alpha);
 }
 
