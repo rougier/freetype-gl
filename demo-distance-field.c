@@ -125,7 +125,7 @@ display( void )
     glGetIntegerv( GL_VIEWPORT, v );
     GLuint width  = v[2];
     GLuint height = v[3];
-    glClearColor(1,1,1,1);
+    glClearColor(0.5,0.5,0.5,1.00);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glActiveTexture(GL_TEXTURE0);
@@ -144,7 +144,7 @@ display( void )
     width *= viewport.zoom;
     height *= viewport.zoom;
 
-    glColor4f( 0.0, 0.0, 0.0, 1.0 );
+    glColor4f( 1.0, 1.0, 1.0, 1.0 );
     glPushMatrix();
     glBegin(GL_QUADS);
     glTexCoord2f( 0, 1 ); glVertex2i( x, y );
@@ -347,7 +347,7 @@ int
 main( int argc, char **argv )
 {
     glutInit( &argc, argv );
-    glutInitWindowSize( 512, 512 );
+    glutInitWindowSize( 800, 800 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
     glutCreateWindow( "Freetype OpenGL width shaders" );
     glutReshapeFunc( reshape );
@@ -359,7 +359,7 @@ main( int argc, char **argv )
     int bold   = 0;
     int italic = 0;
     char * family = "Bitstream Vera Sans";
-    float minsize = 64, maxsize = 65;
+    float minsize = 72, maxsize = 73;
     size_t count = maxsize - minsize;
     wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
                      L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"

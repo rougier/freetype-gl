@@ -21,12 +21,12 @@
 # ============================================================================
 PLATFORM		= $(shell uname)
 CC				= gcc
-CFLAGS			= -Wall `freetype-config --cflags` `pkg-config --cflags fontconfig`
+CFLAGS			= -Wall `freetype-config --cflags` -I/usr/X11/include
 LIBS			= -lGL -lglut -lGLU -lglew \
-	              `freetype-config --libs` `pkg-config --libs fontconfig`
+	              `freetype-config --libs` -lfontconfig
 ifeq ($(PLATFORM), Darwin)
-	LIBS		= -framework OpenGL -framework GLUT -lglew\
-	               `freetype-config --libs` `pkg-config --libs fontconfig`
+	LIBS		= -framework OpenGL -framework GLUT -lglew \
+	               `freetype-config --libs` -L /usr/X11/lib -lfontconfig
 endif
 
 DEMOS  := $(patsubst %.c,%,$(wildcard demo-*.c))
@@ -39,16 +39,15 @@ all: $(DEMOS)
 
 define DEMO_template
 $(1): $(1).o $(OBJECTS) $(HEADERS)
-	@echo -n "Building $$@... "
+	@echo "Building $$@... "
 	@$(CC) $(OBJECTS) $(1).o $(LIBS) -o $$@
-	@echo "done."
 endef
 $(foreach demo,$(DEMOS),$(eval $(call DEMO_template,$(demo))))
 
 %.o : %.c
-	@echo -n "Building $@... "
+	@echo "Building $@... "
 	@$(CC) -c $(CFLAGS) $< -o $@ 
-	@echo "done."
+
 
 clean:
 	@-rm -f $(DEMOS) *.o
