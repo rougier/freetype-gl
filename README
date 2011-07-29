@@ -23,7 +23,6 @@ vector:        This structure loosely mimics the std::vector class from c++. It
 texture-font:  The texture-font structure is in charge of creating bitmap
                glyphs and to upload them to the texture atlas.
 
-
 texture-glyph: Simple structure that described a texture glyph (position within
                texture, advance, kerning, ...)
 
@@ -33,7 +32,8 @@ text-markup:   Simple structure that describes text properties (font family,
 font-manager:  Structure in charge of caching fonts.
 
 vertex-buffer: Generic vertex buffer structure inspired by pyglet (python).
+               (more information at http://www.pyglet.org)
 
-               More information at:
-               http://www.pyglet.org
+edtaa3func:    Distance field computation by Stefan Gustavson
+               (more information at http://contourtextures.wikidot.com/)
 
