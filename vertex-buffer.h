@@ -81,13 +81,13 @@ typedef struct
     /** Vector of vertices. */
     Vector * vertices;
 
-    /** GL idendity of the vertices buffer. */
+    /** GL identity of the vertices buffer. */
     GLuint vertices_id;
 
     /** Vector of indices. */
     Vector * indices;
 
-    /** GL idendity of the indices buffer. */
+    /** GL identity of the indices buffer. */
     GLuint indices_id;
 
     /** Whether the vertex buffer needs to be uploaded to GPU memory. */
