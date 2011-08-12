@@ -30,6 +30,7 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
+#pragma once
 #ifndef __TEXT_MARKUP_H__
 #define __TEXT_MARKUP_H__
 
@@ -55,6 +56,7 @@ typedef struct
     Color         overline_color;
     int           strikethrough;
     Color         strikethrough_color;
+    struct TextureFont_  * font;
 } TextMarkup;
 
 

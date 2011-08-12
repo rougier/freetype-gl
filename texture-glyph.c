@@ -40,7 +40,7 @@
 #include "texture-glyph.h"
 
 
-
+/* ------------------------------------------------------------------------- */
 TextureGlyph *
 texture_glyph_new( void )
 {
@@ -62,6 +62,9 @@ texture_glyph_new( void )
     return self;
 }
 
+
+
+/* ------------------------------------------------------------------------- */
 void
 texture_glyph_delete( TextureGlyph *self )
 {
@@ -69,6 +72,9 @@ texture_glyph_delete( TextureGlyph *self )
     free( self );
 }
 
+
+
+/* ------------------------------------------------------------------------- */
 void
 texture_glyph_render( TextureGlyph *self,
                       TextMarkup *markup,
@@ -103,6 +109,8 @@ texture_glyph_render( TextureGlyph *self,
 }
 
 
+
+/* ------------------------------------------------------------------------- */
 void
 texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
                                     VertexBuffer *buffer,
@@ -143,6 +151,9 @@ texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
     pen->y += self->advance_y;
 }
 
+
+
+/* ------------------------------------------------------------------------- */
 float 
 texture_glyph_get_kerning( TextureGlyph *self,
                            wchar_t charcode )

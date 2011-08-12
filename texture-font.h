@@ -30,8 +30,10 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
+#pragma once
 #ifndef __TEXTURE_FONT_H__
 #define __TEXTURE_FONT_H__
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "vector.h"
@@ -41,7 +43,7 @@
 /**
  *
  */
-typedef struct
+struct TextureFont_
 {
     Vector *       glyphs;
     TextureAtlas * atlas;
@@ -51,7 +53,8 @@ typedef struct
     int            border;
     float          size;
     float          gamma;
-} TextureFont;
+};
+typedef struct TextureFont_ TextureFont;
 
 
 

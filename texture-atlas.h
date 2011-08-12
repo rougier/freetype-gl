@@ -40,6 +40,7 @@
    http://clb.demon.fi/files/RectangleBinPack/
 
    ========================================================================= */
+#pragma once
 #ifndef __TEXTURE_ATLAS_H__
 #define __TEXTURE_ATLAS_H__
 #include "vector.h"

@@ -36,6 +36,9 @@
 #include <stdio.h>
 #include "vector.h"
 
+
+
+/* ------------------------------------------------------------------------- */
 Vector *
 vector_new( size_t item_size )
 {
@@ -55,6 +58,7 @@ vector_new( size_t item_size )
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_delete( Vector *self )
 {
@@ -65,6 +69,7 @@ vector_delete( Vector *self )
 
 
 
+/* ------------------------------------------------------------------------- */
 const void *
 vector_get( const Vector *self,
             size_t index )
@@ -77,6 +82,7 @@ vector_get( const Vector *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 const void *
 vector_front( const Vector *self )
 {
@@ -87,6 +93,7 @@ vector_front( const Vector *self )
 
 
 
+/* ------------------------------------------------------------------------- */
 const void *
 vector_back( const Vector *self )
 {
@@ -97,6 +104,7 @@ vector_back( const Vector *self )
 
 
 
+/* ------------------------------------------------------------------------- */
 int
 vector_contains( const Vector *self,
                  const void *item,
@@ -116,6 +124,7 @@ vector_contains( const Vector *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 int
 vector_empty( const Vector *self )
 {
@@ -125,6 +134,7 @@ vector_empty( const Vector *self )
 
 
 
+/* ------------------------------------------------------------------------- */
 size_t
 vector_size( const Vector *self )
 {
@@ -134,6 +144,7 @@ vector_size( const Vector *self )
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_reserve( Vector *self,
                 const size_t size )
@@ -148,6 +159,7 @@ vector_reserve( Vector *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 size_t
 vector_capacity( const Vector *self )
 {
@@ -157,6 +169,7 @@ vector_capacity( const Vector *self )
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_shrink( Vector *self )
 {
@@ -170,6 +183,7 @@ vector_shrink( Vector *self )
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_clear( Vector *self )
 {
@@ -178,6 +192,8 @@ vector_clear( Vector *self )
 }
 
 
+
+/* ------------------------------------------------------------------------- */
 void
 vector_set( Vector *self,
             const size_t index,
@@ -192,6 +208,7 @@ vector_set( Vector *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_insert( Vector *self,
                const size_t index,
@@ -216,6 +233,7 @@ vector_insert( Vector *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_erase_range( Vector *self,
                     const size_t first,
@@ -233,6 +251,7 @@ vector_erase_range( Vector *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_erase( Vector *self,
               const size_t index )
@@ -245,6 +264,7 @@ vector_erase( Vector *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_push_back( Vector *self,
                   const void *item )
@@ -254,6 +274,7 @@ vector_push_back( Vector *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_pop_back( Vector *self )
 {
@@ -264,6 +285,7 @@ vector_pop_back( Vector *self )
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_resize( Vector *self,
                const size_t size )
@@ -282,6 +304,7 @@ vector_resize( Vector *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_push_back_data( Vector *self,
                        const void * data,
@@ -302,6 +325,7 @@ vector_push_back_data( Vector *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_insert_data( Vector *self,
                     const size_t index,
@@ -327,6 +351,7 @@ vector_insert_data( Vector *self,
 
 
 
+/* ------------------------------------------------------------------------- */
 void
 vector_sort( Vector *self,
              int (*cmp)(const void *, const void *) )

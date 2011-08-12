@@ -30,6 +30,7 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
+#pragma once
 #ifndef __FONT_MANAGER_H__
 #define __FONT_MANAGER_H__
 

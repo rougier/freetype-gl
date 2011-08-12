@@ -39,7 +39,7 @@
 #endif
 #include "vector.h"
 
-#define MAX_VERTEX_ATTRIBUTE 8
+#define MAX_VERTEX_ATTRIBUTE 64
 
 
 
@@ -48,24 +48,57 @@
  */
 typedef struct 
 {
-    /** a client-side capability. */
+    /**
+     *  a client-side capability.
+     */
     GLenum target;
 
-    /** Number of component. */
+    /**
+     *  a translated client-side capability.
+     */
+    GLchar ctarget;
+
+    /**
+     * index of the generic vertex attribute to be modified.
+     */
+    GLuint index;
+
+    /**
+     * Number of components per generic vertex attribute. Must be 1, 2, 3, or
+     * 4. The initial value is 4.
+     */
     GLint size;
 
-    /** Data type. */
+    /** 
+     *  Data type of each component in the array. Symbolic constants GL_BYTE,
+     *  GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_INT, GL_UNSIGNED_INT,
+     *  GL_FLOAT, or GL_DOUBLE are accepted. The initial value is GL_FLOAT.
+     */
     GLenum type;
 
-    /** Byte offset between consecutive attributes. */
+    /**
+     *  Whether fixed-point data values should be normalized (GL_TRUE) or
+     *  converted directly as fixed-point values (GL_FALSE) when they are
+     *  accessed.
+     */
+    GLboolean normalized;
+
+    /**
+     *  Byte offset between consecutive generic vertex attributes. If stride is
+     *  0, the generic vertex attributes are understood to be tightly packed in
+     *  the array. The initial value is 0.
+     */
     GLsizei stride;
 
-    /** Pointer to the first component of the first attribute element in the
-     *  array. */
+    /**
+     *  Pointer to the first component of the first attribute element in the
+     *  array.
+     */
     GLvoid * pointer;
 
     /** Pointer to the function that enable this attribute. */
     void ( * enable )(void *);
+
 } VertexAttribute;
 
 
@@ -134,6 +167,16 @@ typedef struct
  */
   void
   vertex_buffer_delete( VertexBuffer * self );
+
+
+
+/**
+ * Print information about a vertex buffer
+ *
+ * @param  self  a vertex buffer
+ */
+  void
+  vertex_buffer_print( VertexBuffer * self );
 
 
 /**
@@ -281,18 +324,24 @@ typedef struct
 /**
  * Create an attribute from the given parameters.
  *
- * @param  target  a client-side capability
- * @param  size    number of component
- * @param  type    data type
- * @param  stride  byte offset between consecutive attributes.
- * @param  pointer pointer to the first component of the first attribute
- *                 element in the array.
- * @return         a new initialized vertex attribute.
+ * @param target     client-side capability
+ * @param index      index of the generic vertex attribute to be modified.
+ * @param size       number of component
+ * @param type       data type
+ * @param normalized Whether fixed-point data values should be normalized
+                     (GL_TRUE) or converted directly as fixed-point values
+                     (GL_FALSE) when they are  accessed.
+ * @param stride     byte offset between consecutive attributes.
+ * @param pointer    pointer to the first component of the first attribute
+ *                   element in the array.
+ * @return           a new initialized vertex attribute.
  */
 VertexAttribute *
 vertex_attribute_new( GLenum target,
+                      GLuint index,
                       GLint size,
                       GLenum type,
+                      GLboolean normalized,
                       GLsizei stride,
                       GLvoid *pointer );
 
@@ -369,6 +418,14 @@ vertex_attribute_new( GLenum target,
  */
   void
   vertex_attribute_secondary_color_enable( VertexAttribute *attr );
+
+/**
+ * Enable a generic vertex attribute.
+ *
+ * @param attr  a vertex attribute
+ */
+  void
+  vertex_attribute_generic_attribute_enable( VertexAttribute *attr );
 
 
 /**

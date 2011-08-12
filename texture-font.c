@@ -38,6 +38,7 @@
 #include <assert.h>
 #include <math.h>
 #include "texture-font.h"
+#include "texture-glyph.h"
 
 #undef __FTERRORS_H__
 #define FT_ERRORDEF( e, v, s )  { e, s },
@@ -66,7 +67,7 @@ texture_font_new( TextureAtlas *atlas,
     self->filename = strdup( filename );
     self->size = size;
     self->border = 1;
-    self->gamma = 1.;
+    self->gamma = 1.5;
     self->atlas = atlas;
     return self;
 }
@@ -297,7 +298,7 @@ texture_font_load_face( FT_Library * library,
                         const float size,
                         FT_Face * face )
 {
-    size_t hres = 10;
+    size_t hres = 64;
     FT_Error error;
     FT_Matrix matrix = { (int)((1.0/hres) * 0x10000L),
                          (int)((0.0)      * 0x10000L),

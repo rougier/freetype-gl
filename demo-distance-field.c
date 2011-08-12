@@ -303,54 +303,7 @@ make_distance_map( unsigned char *img,
     return out;
 }
 
-// --------------------------------------------------------------- TGA_read ---
-unsigned char *
-TGA_read( char *filename,
-          unsigned int * width,
-          unsigned int * height,
-          unsigned int * depth )
-{
-	FILE *file;
-	unsigned char type[4],  info[6];
-    file = fopen( filename, "rb" );
-    if( !file )
-    {
-        fprintf( stderr, "Unable to open file.\n" );
-		return 0;
-    }
-	fread( &type, sizeof (char), 3, file );
-	fseek( file, 12, SEEK_SET );
-	fread( &info, sizeof (char), 6, file );
 
-	/* Only image type (color) or 3 (greyscale) */
-	if( type[1] != 0 || (type[2] != 2 && type[2] != 3) )
-	{
-        fprintf( stderr, "Unhandled image type.\n" );
-		fclose( file );
-		return 0;
-	}
-
-	*width  = info[0] + info[1] * 256;
-	*height = info[2] + info[3] * 256;
-	*depth  = info[4] / 8;
-
-    if( *depth != 1 && *depth != 3 && *depth != 4 )
-    {
-        fprintf( stderr, "Unknown color depth (%d).\n", *depth*8 );
-		fclose(file);
-		return 0;
-	}
-
-	// Allocate memory for image data
-	unsigned long size =  (*height) * (*width) * (*depth);
-	unsigned char *data = (unsigned char *) malloc( size * sizeof(unsigned char) );
-
-	// Read in image data
-	fread( data, sizeof(unsigned char), size, file );
-	fclose( file );
-
-	return data;
-}
 
 
 // ------------------------------------------------------------------- main ---

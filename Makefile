@@ -41,12 +41,18 @@ ifeq ($(PLATFORM), Darwin)
 endif
 
 DEMOS  := $(patsubst %.c,%,$(wildcard demo-*.c))
+TESTS  := $(patsubst %.c,%,$(wildcard test-*.c))
 HEADERS:= $(wildcard *.h)
 SOURCES:= $(filter-out $(wildcard demo-*.c), $(wildcard *.c))
+SOURCES:= $(filter-out $(wildcard test-*.c), $(SOURCES))
 OBJECTS:= $(SOURCES:.c=.o)
 
-.PHONY: all $(DEMOS)
-all: $(DEMOS)
+.PHONY: all
+all: $(DEMOS) $(TESTS)
+
+demos: $(DEMOS)
+
+tests: $(TESTS)
 
 define DEMO_template
 $(1): $(1).o $(OBJECTS) $(HEADERS)
@@ -55,6 +61,13 @@ $(1): $(1).o $(OBJECTS) $(HEADERS)
 endef
 $(foreach demo,$(DEMOS),$(eval $(call DEMO_template,$(demo))))
 
+define TEST_template
+$(1): $(1).o $(OBJECTS) $(HEADERS)
+	@echo "Building $$@... "
+	@$(CC) $(OBJECTS) $(1).o $(LIBS) -o $$@
+endef
+$(foreach test,$(TESTS),$(eval $(call TEST_template,$(test))))
+
 %.o : %.c
 	@echo "Building $@... "
 	@$(CC) -c $(CFLAGS) $< -o $@ 
@@ -62,6 +75,7 @@ $(foreach demo,$(DEMOS),$(eval $(call DEMO_template,$(demo))))
 
 clean:
 	@-rm -f $(DEMOS) *.o
+	@-rm -f $(TESTS) *.o
 
 distclean: clean
 	@-rm -f *~
