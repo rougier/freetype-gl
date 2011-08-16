@@ -58,7 +58,7 @@ void display( void )
     glEnable( GL_TEXTURE_2D );
     glColor4f(1,1,1,1);
     glPushMatrix();
-    glTranslatef(5, viewport[3]-32, 0);
+    glTranslatef(5, viewport[3], 0);
     vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
     glPopMatrix();
     glutSwapBuffers( );
@@ -89,14 +89,15 @@ void add_text( wchar_t *      text,
                Pen *          pen )
 {
     size_t i;
-    TextureFont *font    = font_manager_get_from_markup( manager, markup );
-    TextureGlyph *glyph  = texture_font_get_glyph( font, text[0] );
-    texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen );
+    //TextureFont *font = font_manager_get_from_markup( manager, markup );
+    //markup->font = font;
+    TextureGlyph *glyph  = texture_font_get_glyph( markup->font, text[0] );
+    texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen, 0 );
     for( i=1; i<wcslen(text); ++i )
     {
-        TextureGlyph *glyph = texture_font_get_glyph( font, text[i] );
-        pen->x += texture_glyph_get_kerning( glyph, text[i-1] );
-        texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen );
+        TextureGlyph *glyph = texture_font_get_glyph( markup->font, text[i] );
+        int kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+        texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen, kerning );
     }
     glBindTexture( GL_TEXTURE_2D, manager->atlas->texid );
 }
@@ -111,59 +112,29 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-/*
-    TextMarkup markup = { "Liberation Mono", 15, 0, 0, 0.0, 0.0,
-                          {0,0,0,1}, {1,1,1,0},
-                          0, {0,0,0,1}, 0, {0,0,0,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1} };
 
-    Pen pen = {0.0, 16} ;
-    manager = font_manager_new();
-    buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 
-
-	FILE *fp = fopen( "demo-label.c", "r" );
-    char   line[1024];
-    wchar_t wline[1024];
-	if (fp == NULL)
-    {
-        exit( EXIT_FAILURE );
-    }
-
-    while( fgets( line, sizeof(line), fp ) != NULL )
-    {
-      int len = strlen(line)-1;
-      if( line[len] == '\n' )
-      {
-          line[len] = '\0';
-      }
-      if( len > 0)
-      {
-          swprintf( wline, strlen(line)+1, L"%s", line );
-          add_text( wline, buffer, &markup, &pen );
-      }
-      pen.y -= 18;
-      pen.x = 0;
-    }
-    fclose(fp);
-*/
-
-    Markup normal = { "Liberation Sans", 18, 0, 0, 0.0, 0.0,
-                          {0,0,0,1}, {1,1,1,0},
-                          0, {0,0,0,1}, 0, {0,0,0,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1} };
+    Color white = {1,1,1,1};
+    Color black = {0,0,0,1};
+    Color red  = {1,0,0,1};
+    Color green= {0,1,0,1};
+    Color blue = {0,0,1,1};
+    Markup normal = { "Liberation Sans", 20, 0, 0, 0.0, 0.0,
+                      {0,0,0,1}, {0,0,0,0},
+                      0, {0,0,0,1}, 0, {0,0,0,1},
+                      0, {0,0,0,1}, 0, {0,0,0,1}, 0 };
     Markup title  = normal; title.size = 32;
     Markup bold   = normal; bold.bold = 1;
     Markup italic = normal; italic.italic = 1;
+    Markup inverse = normal;
+    inverse.foreground_color = white;
+    inverse.background_color = black;
     Markup condensed = normal; condensed.spacing = -2.0;
     Markup expanded = normal; expanded.spacing   = +2.0;
     Markup subscript   = normal; subscript.rise   =-2; subscript.size = 12;
     Markup superscript = normal; superscript.rise = 2; superscript.size = 12;
-    Color color_red  = {1,0,0,1};
-    Color color_green= {0,1,0,1};
-    Color color_blue = {0,0,1,1};
-    Markup red   = normal; red.foreground_color   = color_red;
-    Markup green = normal; green.foreground_color = color_green;
-    Markup blue  = normal; blue.foreground_color  = color_blue;
+    Markup m_red   = normal; m_red.foreground_color   = red;
+    Markup m_green = normal; m_green.foreground_color = green;
+    Markup m_blue  = normal; m_blue.foreground_color  = blue;
     Markup zapfino = normal; zapfino.family = "Zapfino";
 
 
@@ -171,37 +142,61 @@ int main( int argc, char **argv )
     manager = font_manager_new();
     buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 
 
-    add_text( L"Freetype OpenGL™", buffer, &title, &pen );
-    pen.y -= 36; pen.x = 0;
+    title.font       = font_manager_get_from_markup( manager, &title );
+    normal.font      = font_manager_get_from_markup( manager, &normal );
+    superscript.font = font_manager_get_from_markup( manager, &superscript );
+    subscript.font   = font_manager_get_from_markup( manager, &subscript );
+    inverse.font     = font_manager_get_from_markup( manager, &inverse );
+    m_blue.font      = font_manager_get_from_markup( manager, &m_blue );
+    m_green.font     = font_manager_get_from_markup( manager, &m_green );
+    m_red.font       = font_manager_get_from_markup( manager, &m_red );
+    zapfino.font     = font_manager_get_from_markup( manager, &zapfino );
+    condensed.font   = font_manager_get_from_markup( manager, &condensed );
+    expanded.font    = font_manager_get_from_markup( manager, &expanded);
 
+    pen.y -= title.font->ascender; pen.x = 0;
+    add_text( L"Freetype OpenGL™", buffer, &title, &pen );
+    pen.y += title.font->descender;
+
+    pen.y -= normal.font->ascender; pen.x = 0;
     add_text( L"Freetype text handling using a single"
               L"vertex buffer and a single texture featuring:",
               buffer, &normal, &pen);
-    pen.y -= 24; pen.x = 0;
+    pen.y += normal.font->descender;
 
+    pen.y -= normal.font->ascender; pen.x = 0;
     add_text( L" • Unicode characters: ²³€¥∑∫∞√©Ω¿«»", buffer, &normal, &pen );
-    pen.y -= 24; pen.x = 0;
+    pen.y += normal.font->descender;
 
+    pen.y -= normal.font->ascender; pen.x = 0;
     add_text( L" • ", buffer, &normal, &pen );
     add_text( L"superscript ", buffer, &superscript, &pen );
     add_text( L" and ", buffer, &normal, &pen );
     add_text( L"subscript ", buffer, &subscript, &pen );
-    pen.y -= 24; pen.x = 0;
+    pen.y += normal.font->descender;
 
-    add_text( L" • Any ", buffer, &green, &pen );
-    add_text( L"color ", buffer, &blue, &pen );
-    add_text( L"you like", buffer, &red, &pen );
-    pen.y -= 40; pen.x = 0;
+    pen.y -= inverse.font->ascender; pen.x = 0;
+    add_text( L" • Inverse video mode ", buffer, &inverse, &pen );
+    pen.y += inverse.font->descender;
 
+    pen.y -= normal.font->ascender; pen.x = 0;
+    add_text( L" • Any ", buffer, &m_green, &pen );
+    add_text( L"color ", buffer, &m_blue, &pen );
+    add_text( L"you like", buffer, &m_red, &pen );
+    pen.y += normal.font->descender;
+
+    pen.y -= zapfino.font->ascender; pen.x = 0;
     add_text( L" • ", buffer, &normal, &pen );
     add_text( L"Any (installed) font", buffer, &zapfino, &pen );
-    pen.y -= 42; pen.x = 0;
+    pen.y += zapfino.font->descender;
 
+    pen.y -= normal.font->ascender; pen.x = 0;
     add_text( L" • ", buffer, &normal, &pen );
     add_text( L"condensed", buffer, &condensed, &pen );
     add_text( L" or ", buffer, &normal, &pen );
     add_text( L"expanded", buffer, &expanded, &pen );
-    pen.y -= 24; pen.x = 0;
+    pen.y += normal.font->descender; pen.x = 0;
+
 
     glutMainLoop( );
     return 0;

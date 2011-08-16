@@ -53,7 +53,9 @@ struct TextureFont_
     int            border;
     float          size;
     float          gamma;
+    Region         black;
     int            height;
+    int            linegap;
     int            ascender;
     int            descender;
 };

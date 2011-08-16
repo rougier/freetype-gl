@@ -47,6 +47,7 @@ typedef struct {
     TextureAtlas * atlas;
     Vector *       fonts;
     wchar_t *      cache;
+    Region         black;
 } FontManager;
 
 

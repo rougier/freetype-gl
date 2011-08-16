@@ -66,6 +66,7 @@ typedef struct {
     float         u0, v0, u1, v1;
     KerningPair * kerning;
     size_t        kerning_count;
+    struct TextureFont_   *font;
 } TextureGlyph;
 
 
@@ -109,7 +110,7 @@ typedef struct {
   texture_glyph_add_to_vertex_buffer( const TextureGlyph * self,
                                       VertexBuffer * buffer,
                                       const Markup * markup,
-                                      Pen * pen );
+                                      Pen * pen, int kerning );
 
 
 /**

@@ -97,12 +97,12 @@ void add_text( wchar_t *      text,
     size_t i;
     TextureFont *font    = font_manager_get_from_markup( manager, markup );
     TextureGlyph *glyph  = texture_font_get_glyph( font, text[0] );
-    texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen );
+    texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen, 0 );
     for( i=1; i<wcslen(text); ++i )
     {
         TextureGlyph *glyph = texture_font_get_glyph( font, text[i] );
-        pen->x += texture_glyph_get_kerning( glyph, text[i-1] );
-        texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen );
+        int kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+        texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen, kerning );
     }
     glBindTexture( GL_TEXTURE_2D, manager->atlas->texid );
 }
@@ -151,7 +151,7 @@ int main( int argc, char **argv )
     TextureGlyph *glyph  = texture_font_get_glyph( font, L'g' );
     origin.x = width/2  - glyph->offset_x - glyph->width/2;
     origin.y = height/2 - glyph->offset_y + glyph->height/2;
-    texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &big, &origin );
+    texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &big, &origin, 0 );
 
     // title
     pen.x = 50;

@@ -98,12 +98,12 @@ void display( void )
 
         vertex_buffer_clear( text_buffer );
         glyph = texture_font_get_glyph( font, fps[0] );
-        texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &markup, &pen );
+        texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &markup, &pen, 0 );
         for( i=1; i<wcslen(fps); ++i )
         {
             glyph = texture_font_get_glyph( font, fps[i] );
-            pen.x += texture_glyph_get_kerning( glyph, fps[i-1] );
-            texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &markup, &pen );
+            int kerning = texture_glyph_get_kerning( glyph, fps[i-1] );
+            texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &markup, &pen, kerning );
         }
     }
 

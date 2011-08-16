@@ -64,7 +64,7 @@ markup_new( void )
     self->strikethrough       = 0;
     self->strikethrough_color = black;
 
-    self->font                = 0;
+    self->font = 0;
 
     return self;
 }

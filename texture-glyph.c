@@ -37,6 +37,7 @@
 #endif
 #include <assert.h>
 #include <stdlib.h>
+#include "texture-font.h"
 #include "texture-glyph.h"
 
 
@@ -115,39 +116,85 @@ void
 texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
                                     VertexBuffer *buffer,
                                     const Markup *markup,
-                                    Pen *pen )
+                                    Pen *pen, int kerning )
 {
-    size_t i;
+    TextureFont *font = self->font;
+    float r = 0;
+    float g = 0;
+    float b = 0;
+    float a = 1;
+    int rise = 0;
+    int spacing = 0;
+
+    if( markup )
+    {
+        rise = markup->rise;
+        spacing = markup->spacing;
+    }
+    
+    pen->x += kerning;
+
+    // Background
+    if( markup && markup->background_color.a > 0 )
+    {
+        float u0 = font->atlas->black.x / (float) font->atlas->width;
+        float v0 = font->atlas->black.y / (float) font->atlas->height;
+        float u1 = u0 + font->atlas->black.width / (float) font->atlas->width;
+        float v1 = v0 + font->atlas->black.height / (float) font->atlas->height;
+        int x0  = pen->x - kerning;
+        int y0  = pen->y + font->descender;
+        int x1  = x0 + self->advance_x + markup->spacing + kerning;
+        int y1  = y0 + font->height - font->linegap;
+        r = markup->background_color.r;
+        g = markup->background_color.g;
+        b = markup->background_color.b;
+        a = markup->background_color.a;
+        GLuint index = buffer->vertices->size;
+        GLuint indices[] = {index, index+1, index+2,
+                            index, index+2, index+3};
+        TextureGlyphVertex vertices[] = { { x0,y0,0,  u0,v0,  r,g,b,a },
+                                          { x0,y1,0,  u0,v1,  r,g,b,a },
+                                          { x1,y1,0,  u1,v1,  r,g,b,a },
+                                          { x1,y0,0,  u1,v0,  r,g,b,a } };
+        vertex_buffer_push_back_indices( buffer, indices, 6 );
+        vertex_buffer_push_back_vertices( buffer, vertices, 4 );
+    }
+
+    // Underline
+
+    // Overline
+
+    // Outline
+
+    // Strikethrough
+
+    // Actual glyph
+    if( markup )
+    {
+        r = markup->foreground_color.r;
+        g = markup->foreground_color.g;
+        b = markup->foreground_color.b;
+        a = markup->foreground_color.a;
+    }
     int x0  = pen->x + self->offset_x;
-    int y0  = pen->y + self->offset_y + markup->rise;
+    int y0  = pen->y + self->offset_y + rise;
     int x1  = x0 + self->width;
     int y1  = y0 - self->height;
     float u0 = self->u0;
     float v0 = self->v0;
     float u1 = self->u1;
     float v1 = self->v1;
-
     GLuint index = buffer->vertices->size;
     GLuint indices[] = {index, index+1, index+2,
                         index, index+2, index+3};
-    TextureGlyphVertex vertices[] = { { x0,y0,0,  u0,v0,  0,0,0,1 },
-                                      { x0,y1,0,  u0,v1,  0,0,0,1 },
-                                      { x1,y1,0,  u1,v1,  0,0,0,1 },
-                                      { x1,y0,0,  u1,v0,  0,0,0,1 } };
-    if( markup )
-    {
-        for( i=0; i<4; ++i )
-        {
-            vertices[i].r = markup->foreground_color.r;
-            vertices[i].g = markup->foreground_color.g;
-            vertices[i].b = markup->foreground_color.b;
-            vertices[i].a = markup->foreground_color.a;
-        }
-    }
+    TextureGlyphVertex vertices[] = { { x0,y0,0,  u0,v0,  r,g,b,a },
+                                      { x0,y1,0,  u0,v1,  r,g,b,a },
+                                      { x1,y1,0,  u1,v1,  r,g,b,a },
+                                      { x1,y0,0,  u1,v0,  r,g,b,a } };
     vertex_buffer_push_back_indices( buffer, indices, 6 );
     vertex_buffer_push_back_vertices( buffer, vertices, 4 );
 
-    pen->x += self->advance_x + markup->spacing;
+    pen->x += self->advance_x + spacing;
     pen->y += self->advance_y;
 }
 

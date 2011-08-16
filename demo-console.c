@@ -111,7 +111,7 @@ console_new( void )
     self->handlers[__SIGNAL_HISTORY_NEXT__] = 0;
     self->handlers[__SIGNAL_HISTORY_PREV__] = 0;
     self->pen.x = self->pen.y = 0; 
-    Markup normal = { "Mono", 12, 0, 0, 0.0, 0.0,
+    Markup normal = { "Bitstream Vera Sans Mono", 13, 0, 0, 0.0, 0.0,
                       {0,0,0,1}, {1,1,1,0},
                       0, {0,0,0,1}, 0, {0,0,0,1},
                       0, {0,0,0,1}, 0, {0,0,0,1} };
@@ -237,7 +237,7 @@ console_render( Console *self )
                 console_add_glyph( console, text[index], text[index-1], &markup );
             }
         }
-        self->pen.y -= markup.font->height;
+        self->pen.y -= markup.font->height - markup.font->linegap;
         self->pen.x = 0;
         cursor_x = self->pen.x;
         cursor_y = self->pen.y;
@@ -281,7 +281,7 @@ console_render( Console *self )
     p.y += markup.font->descender;
     vertex_buffer_push_back_vertex( lines_buffer, &p );
 
-    p.y += markup.font->height;
+    p.y += markup.font->height - markup.font->linegap;
     vertex_buffer_push_back_vertex( lines_buffer, &p );
 
 

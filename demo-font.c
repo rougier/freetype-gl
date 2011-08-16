@@ -39,12 +39,10 @@
 #include <stdio.h>
 #include <wchar.h>
 #include "vector.h"
-#include "vertex-buffer.h"
 #include "font-manager.h"
-#include "markup.h"
 #include "texture-font.h"
 #include "texture-atlas.h"
-
+#include "vertex-buffer.h"
 
 VertexBuffer *buffer;
 
@@ -59,7 +57,7 @@ void display( void )
     glEnable( GL_TEXTURE_2D );
     glColor4f(1,1,1,1);
     glPushMatrix();
-    glTranslatef(5, viewport[3]-12, 0);
+    glTranslatef(5, viewport[3], 0);
     vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
     glPopMatrix();
     glutSwapBuffers( );
@@ -88,19 +86,14 @@ int main( int argc, char **argv )
     size_t i, j = 0;
     int bold   = 0;
     int italic = 0;
-    char * family = "Bitstream Vera Sans";
+    char * family = "Verdana";
     size_t minsize = 8;
-    size_t maxsize = 28;
+    size_t maxsize = 27;
     size_t count = maxsize - minsize;
     wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
     Pen pen ;
     TextureFont *font;
     TextureGlyph *glyph;
-    Markup markup = { "Bitstream Vera Sans", 16, 0, 0, 0.0, 0.0,
-                      {0,0,0,1}, {1,1,1,1},
-                      0, {0,0,0,1}, 0, {0,0,0,1},
-                      0, {0,0,0,1}, 0, {0,0,0,1} };
-
     FontManager *manager = font_manager_new( );
     buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 
 
@@ -113,6 +106,9 @@ int main( int argc, char **argv )
     glutKeyboardFunc( keyboard );
 
     pen.x = 0; pen.y = 0;
+    font = font_manager_get_from_description( manager, family, minsize, bold, italic);
+    pen.y -= font->ascender;
+
     for( i=0; i < count; ++i)
     {
         font = font_manager_get_from_description( manager, family, minsize+i, bold, italic);
@@ -121,14 +117,15 @@ int main( int argc, char **argv )
         {
             continue;
         }
-        texture_glyph_add_to_vertex_buffer( glyph, buffer, &markup, &pen );
+        texture_glyph_add_to_vertex_buffer( glyph, buffer, 0, &pen, 0 );
         for( j=1; j<wcslen(text); ++j )
         {
             glyph = texture_font_get_glyph( font, text[j] );
-            pen.x += texture_glyph_get_kerning( glyph, text[j-1] );
-            texture_glyph_add_to_vertex_buffer( glyph, buffer, &markup, &pen );
+            int kx = texture_glyph_get_kerning( glyph, text[j-1] );
+            texture_glyph_add_to_vertex_buffer( glyph, buffer, 0, &pen, kx );
         }
-        pen.x = 0; pen.y -= (minsize+i+2);
+        pen.y -= font->height - font->linegap;
+        pen.x = 0;
     }
 
     glBindTexture( GL_TEXTURE_2D, manager->atlas->texid );

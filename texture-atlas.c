@@ -66,6 +66,20 @@ texture_atlas_new( size_t width, size_t height )
     vector_push_back( self->nodes, &node );
     self->texid = 0;
     self->data = (unsigned char *) calloc( width*height, sizeof(unsigned char) );
+
+
+    // This is a special region that is used for background and underlined
+    // decorations of glyphs
+    int n = 4;
+    unsigned char buffer[n*n];
+    memset(buffer, 255, n*n);
+    Region r = texture_atlas_get_region( self, n, n );
+    texture_atlas_set_region( self, r.x, r.y, r.width, r.height, buffer, 1);
+    self->black.x     = r.x + 1;
+    self->black.y     = r.y + 1;
+    self->black.width = r.width - 2;
+    self->black.height= r.height - 2;
+
     return self;
 }
 

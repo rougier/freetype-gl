@@ -115,14 +115,10 @@ texture_font_generate_kerning( TextureFont *self )
     }
 
     FT_Size_Metrics metrics = face->size->metrics; 
-//    printf("%ld, %ld - %ld + %ld\n", 
-//           (metrics.height - metrics.ascender + metrics.descender) >> 6, 
-//           metrics.height    >> 6,
-//           metrics.ascender  >> 6,
-//           metrics.descender >> 6);
-    self->height    = metrics.height >> 6;
     self->ascender  = metrics.ascender  >> 6;
     self->descender = metrics.descender >> 6;
+    self->height    = metrics.height >> 6;
+    self->linegap   = self->height - self->ascender + self->descender;
 
     /* Reset linegap (we'll use kerning iterations to compute linegap) */
     // self->linegap = 0;
@@ -132,12 +128,6 @@ texture_font_generate_kerning( TextureFont *self )
     {
 
         glyph = (TextureGlyph *) vector_get( self->glyphs, i );
-        
-        // int ascent  = glyph->offset_y;
-        // int descent = glyph->offset_y - glyph->height;
-        // int linegap = ascent - descent;
-        // self->linegap = max( self->linegap, linegap );
-
 
         /* Remove any old kerning information */
         if( glyph->kerning )
@@ -221,7 +211,7 @@ texture_font_cache_glyphs( TextureFont *self,
         glyph_index = FT_Get_Char_Index( face, charcodes[i] );
         error = FT_Load_Glyph( face, glyph_index,
 //                             FT_LOAD_RENDER | FT_LOAD_TARGET_LIGHT );
-                               FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT );
+                              FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT );
         if( error )
         {
             fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
@@ -244,6 +234,7 @@ texture_font_cache_glyphs( TextureFont *self,
             }
         }
 
+
         w = slot->bitmap.width + 2*self->border;
         h = slot->bitmap.rows + 2*self->border;
         region = texture_atlas_get_region( self->atlas, w, h );
@@ -259,6 +250,7 @@ texture_font_cache_glyphs( TextureFont *self,
                                   slot->bitmap.buffer, slot->bitmap.pitch );
 
         glyph = texture_glyph_new( );
+        glyph->font = self;
         glyph->charcode = charcodes[i];
         glyph->kerning  = 0;
         glyph->width    = slot->bitmap.width;
@@ -333,7 +325,7 @@ texture_font_load_face( FT_Library * library,
                         const float size,
                         FT_Face * face )
 {
-    size_t hres = 32;
+    size_t hres = 16;
     FT_Error error;
     FT_Matrix matrix = { (int)((1.0/hres) * 0x10000L),
                          (int)((0.0)      * 0x10000L),

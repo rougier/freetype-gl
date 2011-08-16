@@ -50,12 +50,21 @@ typedef struct
     int x, y, width, height;
 } Region;
 
+typedef struct { float x,y,z,w; }  vec4;
+typedef struct { float x,y,z;   }  vec3;
+typedef struct { float x,y;     }  vec2;
+typedef struct { int x,y,z,w;   } ivec4;
+typedef struct { int x,y,z;     } ivec3;
+typedef struct { int x,y;       } ivec2;
+
+
 typedef struct
 {
     Vector *nodes;
     size_t width, height, used;
     unsigned int texid;
     unsigned char *data;
+    Region black;
 } TextureAtlas;
 
 

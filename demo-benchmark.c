@@ -50,7 +50,7 @@ wchar_t *text =
     L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 "
     L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 "
     L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 ";
-int line_count = 83;
+int line_count = 67;
 
 void init( void )
 {
@@ -72,26 +72,20 @@ void generate_buffer( void)
     TextureFont *font= font_manager_get_from_markup( manager, &markup );
     TextureGlyph *glyph;
     vertex_buffer_clear( buffer );
-    pen.y = 5.0;
+
+    pen.y = -font->descender;
     for( j=0; j<line_count; ++j )
     {
         pen.x = 10.0;
         glyph = texture_font_get_glyph( font, text[0] );
-        texture_glyph_add_to_vertex_buffer( glyph, buffer, &markup, &pen );
+        texture_glyph_add_to_vertex_buffer( glyph, buffer, &markup, &pen, 0 );
         for( i=1; i<wcslen(text); ++i )
         {
             glyph = texture_font_get_glyph( font, text[i] );
-            if( text[i] == L' ')
-            {
-                pen.x += glyph->advance_x;
-            }
-            else
-            {
-                pen.x += texture_glyph_get_kerning( glyph, text[i-1] );
-                texture_glyph_add_to_vertex_buffer( glyph, buffer, &markup, &pen );
-            }
+            int kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+            texture_glyph_add_to_vertex_buffer( glyph, buffer, &markup, &pen, kerning );
         }
-        pen.y += 12;
+        pen.y += font->height - font->linegap;
     }
 }
 

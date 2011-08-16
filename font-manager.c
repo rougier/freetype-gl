@@ -120,10 +120,11 @@ font_manager_get_from_description( FontManager *self,
                                    const int bold,
                                    const int italic )
 {
+    assert( self );
+
     TextureFont *font;
     char *filename = font_manager_match_description( self, family, size, bold, italic );
-
-    assert( self );
+    // fprintf(stderr, "Matched filename for %s: %s\n", family, filename);
     if( !filename )
     {
         return 0;
