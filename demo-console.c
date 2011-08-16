@@ -111,7 +111,7 @@ console_new( void )
     self->handlers[__SIGNAL_HISTORY_NEXT__] = 0;
     self->handlers[__SIGNAL_HISTORY_PREV__] = 0;
     self->pen.x = self->pen.y = 0; 
-    Markup normal = { "Arial", 12, 0, 0, 0.0, 0.0,
+    Markup normal = { "Mono", 12, 0, 0, 0.0, 0.0,
                       {0,0,0,1}, {1,1,1,0},
                       0, {0,0,0,1}, 0, {0,0,0,1},
                       0, {0,0,0,1}, 0, {0,0,0,1} };
@@ -212,9 +212,8 @@ console_render( Console *self )
     glGetIntegerv( GL_VIEWPORT, viewport );
 
     size_t i, index;
-
     self->pen.x = 0;
-    self->pen.y = viewport[3]-12;
+    self->pen.y = viewport[3];
     vertex_buffer_clear( console->buffer );
 
     int cursor_x = self->pen.x;
@@ -224,6 +223,9 @@ console_render( Console *self )
 
     // Console buffer
     markup = self->markup[MARKUP_FAINT];
+
+    self->pen.y -= markup.font->height;
+
     for( i=0; i<self->lines->size; ++i )
     {
         wchar_t *text = * (wchar_t **) vector_get( self->lines, i ) ;
@@ -235,7 +237,7 @@ console_render( Console *self )
                 console_add_glyph( console, text[index], text[index-1], &markup );
             }
         }
-        self->pen.y -= 12;
+        self->pen.y -= markup.font->height;
         self->pen.x = 0;
         cursor_x = self->pen.x;
         cursor_y = self->pen.y;
@@ -274,9 +276,12 @@ console_render( Console *self )
 
     // Cursor
     vertex_buffer_clear( lines_buffer );
+
     Point p = {cursor_x+1, cursor_y, markup.foreground_color};
+    p.y += markup.font->descender;
     vertex_buffer_push_back_vertex( lines_buffer, &p );
-    p.y += 12;
+
+    p.y += markup.font->height;
     vertex_buffer_push_back_vertex( lines_buffer, &p );
 
 

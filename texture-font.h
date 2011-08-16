@@ -53,6 +53,9 @@ struct TextureFont_
     int            border;
     float          size;
     float          gamma;
+    int            height;
+    int            ascender;
+    int            descender;
 };
 typedef struct TextureFont_ TextureFont;
 

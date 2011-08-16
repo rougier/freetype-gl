@@ -50,6 +50,8 @@ const struct {
 } FT_Errors[] =
 #include FT_ERRORS_H
 
+#define max(a,b) (a)>(b)?(a):(b)
+#define min(a,b) (a)<(b)?(a):(b)
 
 
 /* ------------------------------------------------------------------------- */
@@ -69,6 +71,11 @@ texture_font_new( TextureAtlas *atlas,
     self->border = 1;
     self->gamma = 1.5;
     self->atlas = atlas;
+
+    self->height = 0;
+    self->ascender = 0;
+    self->descender = 0;
+
     return self;
 }
 
@@ -101,12 +108,24 @@ texture_font_generate_kerning( TextureFont *self )
     FT_Vector    kerning;
 
 
-    // Load font 
+    /* Load font */
     if( !texture_font_load_face( &library, self->filename, self->size, &face ) )
     {
         return;
     }
 
+    FT_Size_Metrics metrics = face->size->metrics; 
+//    printf("%ld, %ld - %ld + %ld\n", 
+//           (metrics.height - metrics.ascender + metrics.descender) >> 6, 
+//           metrics.height    >> 6,
+//           metrics.ascender  >> 6,
+//           metrics.descender >> 6);
+    self->height    = metrics.height >> 6;
+    self->ascender  = metrics.ascender  >> 6;
+    self->descender = metrics.descender >> 6;
+
+    /* Reset linegap (we'll use kerning iterations to compute linegap) */
+    // self->linegap = 0;
 
     /* For each glyph couple combination, check if kerning is necessary */
     for( i=0; i<self->glyphs->size; ++i )
@@ -114,6 +133,12 @@ texture_font_generate_kerning( TextureFont *self )
 
         glyph = (TextureGlyph *) vector_get( self->glyphs, i );
         
+        // int ascent  = glyph->offset_y;
+        // int descent = glyph->offset_y - glyph->height;
+        // int linegap = ascent - descent;
+        // self->linegap = max( self->linegap, linegap );
+
+
         /* Remove any old kerning information */
         if( glyph->kerning )
         {
