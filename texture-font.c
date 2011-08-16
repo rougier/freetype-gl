@@ -100,14 +100,21 @@ texture_font_generate_kerning( TextureFont *self )
     TextureGlyph *glyph, *prev_glyph;
     FT_Vector    kerning;
 
+
+    // Load font 
     if( !texture_font_load_face( &library, self->filename, self->size, &face ) )
     {
         return;
     }
 
+
+    /* For each glyph couple combination, check if kerning is necessary */
     for( i=0; i<self->glyphs->size; ++i )
     {
+
         glyph = (TextureGlyph *) vector_get( self->glyphs, i );
+        
+        /* Remove any old kerning information */
         if( glyph->kerning )
         {
             free( glyph->kerning );
@@ -120,27 +127,30 @@ texture_font_generate_kerning( TextureFont *self )
         glyph_index = FT_Get_Char_Index( face, glyph->charcode );
         for( j=0; j<self->glyphs->size; ++j )
         {
-            prev_glyph = (TextureGlyph *) vector_get( self->glyphs, i );
+            prev_glyph = (TextureGlyph *) vector_get( self->glyphs, j );
             prev_index = FT_Get_Char_Index( face, prev_glyph->charcode );
             FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNSCALED, &kerning );
             if( kerning.x != 0.0 )
             {
+                // printf("Kerning for (%c, %c): %ld\n",
+                //       prev_glyph->charcode, glyph->charcode, kerning.x);
                 count++;
             }
         }
       
-        /* No kerning necessary */
+        /* No kerning at all */
         if( !count )
         {
             continue;
         }
+
         /* Store kerning pairs */
         glyph->kerning = (KerningPair *) malloc( count * sizeof(KerningPair) );
         glyph->kerning_count = count;
         k = 0;
         for( j=0; j<self->glyphs->size; ++j )
         {
-            prev_glyph = (TextureGlyph *) vector_get( self->glyphs, i );
+            prev_glyph = (TextureGlyph *) vector_get( self->glyphs, j );
             prev_index = FT_Get_Char_Index( face, prev_glyph->charcode );
             FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNSCALED, &kerning );
             if( kerning.x != 0.0 )
@@ -298,7 +308,7 @@ texture_font_load_face( FT_Library * library,
                         const float size,
                         FT_Face * face )
 {
-    size_t hres = 64;
+    size_t hres = 32;
     FT_Error error;
     FT_Matrix matrix = { (int)((1.0/hres) * 0x10000L),
                          (int)((0.0)      * 0x10000L),
