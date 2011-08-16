@@ -35,7 +35,7 @@
 #define __TEXTURE_GLYPH_H__
 
 #include <wchar.h>
-#include "text-markup.h"
+#include "markup.h"
 #include "vertex-buffer.h"
 
 /**
@@ -98,7 +98,7 @@ typedef struct {
  */
   void
   texture_glyph_render( TextureGlyph * self,
-                        TextMarkup * markup,
+                        Markup * markup,
                         Pen * pen );
 
 
@@ -108,7 +108,7 @@ typedef struct {
   void
   texture_glyph_add_to_vertex_buffer( const TextureGlyph * self,
                                       VertexBuffer * buffer,
-                                      const TextMarkup * markup,
+                                      const Markup * markup,
                                       Pen * pen );
 
 

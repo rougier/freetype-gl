@@ -37,7 +37,7 @@
 #endif
 #include <stdlib.h>
 #include "vector.h"
-#include "text-markup.h"
+#include "markup.h"
 #include "font-manager.h"
 #include "texture-font.h"
 #include "texture-glyph.h"
@@ -86,10 +86,10 @@ void display( void )
         wchar_t fps[64]; 
         size_t i;
         Pen pen = {5.0, 5.0};
-        TextMarkup markup = { "Arial", 64, 0, 0, 0.0, 0.0,
-                              {.5,.5,.5,.5}, {1,1,1,0},
-                              0, {0,0,0,1}, 0, {0,0,0,1},
-                              0, {0,0,0,1}, 0, {0,0,0,1} };
+        Markup markup = { "Arial", 64, 0, 0, 0.0, 0.0,
+                          {.5,.5,.5,.5}, {1,1,1,0},
+                          0, {0,0,0,1}, 0, {0,0,0,1},
+                          0, {0,0,0,1}, 0, {0,0,0,1} };
         TextureFont *font= font_manager_get_from_markup( manager, &markup );
         TextureGlyph *glyph;
         swprintf( fps, 64, L"%.2f", frame*1000.0/(time-timebase) );

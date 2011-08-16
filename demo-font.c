@@ -41,9 +41,8 @@
 #include "vector.h"
 #include "vertex-buffer.h"
 #include "font-manager.h"
-#include "text-markup.h"
+#include "markup.h"
 #include "texture-font.h"
-//#include "texture-glyph.h"
 #include "texture-atlas.h"
 
 
@@ -97,10 +96,10 @@ int main( int argc, char **argv )
     Pen pen ;
     TextureFont *font;
     TextureGlyph *glyph;
-    TextMarkup markup = { "Bitstream Vera Sans", 16, 0, 0, 0.0, 0.0,
-                          {0,0,0,1}, {1,1,1,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1} };
+    Markup markup = { "Bitstream Vera Sans", 16, 0, 0, 0.0, 0.0,
+                      {0,0,0,1}, {1,1,1,1},
+                      0, {0,0,0,1}, 0, {0,0,0,1},
+                      0, {0,0,0,1}, 0, {0,0,0,1} };
 
     FontManager *manager = font_manager_new( );
     buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 

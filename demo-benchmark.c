@@ -37,7 +37,7 @@
 #endif
 #include <stdlib.h>
 #include "vector.h"
-#include "text-markup.h"
+#include "markup.h"
 #include "font-manager.h"
 #include "texture-font.h"
 #include "texture-glyph.h"
@@ -65,10 +65,10 @@ void generate_buffer( void)
 {
     size_t i, j;
     Pen pen;
-    TextMarkup markup = { "Monotype", 12, 0, 0, 0.0, 0.0,
-                          {0,0,0,1}, {1,1,1,0},
-                          0, {0,0,0,1}, 0, {0,0,0,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1} };
+    Markup markup = { "Monotype", 12, 0, 0, 0.0, 0.0,
+                      {0,0,0,1}, {1,1,1,0},
+                      0, {0,0,0,1}, 0, {0,0,0,1},
+                      0, {0,0,0,1}, 0, {0,0,0,1} };
     TextureFont *font= font_manager_get_from_markup( manager, &markup );
     TextureGlyph *glyph;
     vertex_buffer_clear( buffer );

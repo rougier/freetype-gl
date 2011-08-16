@@ -135,7 +135,7 @@ font_manager_get_from_description( FontManager *self,
 
 TextureFont *
 font_manager_get_from_markup( FontManager *self,
-                              const TextMarkup *markup )
+                              const Markup *markup )
 {
     assert( self );
     assert( markup );

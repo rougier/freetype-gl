@@ -35,7 +35,7 @@
 #define __FONT_MANAGER_H__
 
 #include "vector.h"
-#include "text-markup.h"
+#include "markup.h"
 #include "texture-font.h"
 #include "texture-atlas.h"
 
@@ -90,7 +90,7 @@ typedef struct {
  */
   TextureFont *
   font_manager_get_from_markup( FontManager *self,
-                                const TextMarkup *markup );
+                                const Markup *markup );
 
 
 /**

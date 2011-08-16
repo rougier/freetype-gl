@@ -37,7 +37,7 @@
 #endif
 #include <wchar.h>
 #include "vector.h"
-#include "text-markup.h"
+#include "markup.h"
 #include "font-manager.h"
 #include "texture-font.h"
 #include "texture-glyph.h"
@@ -91,7 +91,7 @@ void keyboard( unsigned char key, int x, int y )
 
 void add_text( wchar_t *      text,
                VertexBuffer * buffer,
-               TextMarkup *   markup,
+               Markup *       markup,
                Pen *          pen )
 {
     size_t i;
@@ -122,20 +122,20 @@ int main( int argc, char **argv )
 
     typedef struct { float x,y; float r,g,b,a; } Point;
 
-    TextMarkup normal = { "Liberation Sans", 18, 0, 0, 0.0, 0.0,
-                          {0,0,0,1}, {1,1,1,0},
-                          0, {0,0,0,1}, 0, {0,0,0,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1} };
-    TextMarkup blue = normal; blue.foreground_color.b = 1;
-    TextMarkup big    = { "Bitstream Vera Serif", 400, 0, 0, 0.0, 0.0,
-                          {0,0,0,1}, {1,1,1,0},
-                          0, {0,0,0,1}, 0, {0,0,0,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1} };
-    TextMarkup title  = { "Bitstream Vera Serif", 32, 0, 0, 0.0, 0.0,
-                          {.2,.2,.2,1}, {1,1,1,0},
-                          0, {0,0,0,1}, 0, {0,0,0,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1} };
-
+    Markup normal = { "Liberation Sans", 18, 0, 0, 0.0, 0.0,
+                      {0,0,0,1}, {1,1,1,0},
+                      0, {0,0,0,1}, 0, {0,0,0,1},
+                      0, {0,0,0,1}, 0, {0,0,0,1} };
+    Markup blue = normal; blue.foreground_color.b = 1;
+    Markup big    = { "Bitstream Vera Serif", 400, 0, 0, 0.0, 0.0,
+                      {0,0,0,1}, {1,1,1,0},
+                      0, {0,0,0,1}, 0, {0,0,0,1},
+                      0, {0,0,0,1}, 0, {0,0,0,1} };
+    Markup title  = { "Bitstream Vera Serif", 32, 0, 0, 0.0, 0.0,
+                      {.2,.2,.2,1}, {1,1,1,0},
+                      0, {0,0,0,1}, 0, {0,0,0,1},
+                      0, {0,0,0,1}, 0, {0,0,0,1} };
+    
     manager = font_manager_new();
     text_buffer  = vertex_buffer_new( "v3i:t2f:c4f" ); 
     line_buffer  = vertex_buffer_new( "v2f:c4f" ); 

@@ -89,7 +89,7 @@ int main( int argc, char **argv )
     int bold   = 0;
     int italic = 0;
     char * family = "Bitstream Vera Sans";
-    float minsize = 8, maxsize = 28;
+    float minsize = 8, maxsize = 25;
     size_t count = maxsize - minsize;
     wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
                      L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"

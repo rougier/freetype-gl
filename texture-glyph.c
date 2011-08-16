@@ -77,7 +77,7 @@ texture_glyph_delete( TextureGlyph *self )
 /* ------------------------------------------------------------------------- */
 void
 texture_glyph_render( TextureGlyph *self,
-                      TextMarkup *markup,
+                      Markup *markup,
                       Pen *pen )
 {
     assert( self );
@@ -114,7 +114,7 @@ texture_glyph_render( TextureGlyph *self,
 void
 texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
                                     VertexBuffer *buffer,
-                                    const TextMarkup *markup,
+                                    const Markup *markup,
                                     Pen *pen )
 {
     size_t i;

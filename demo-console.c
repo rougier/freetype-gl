@@ -55,11 +55,15 @@ const int __SIGNAL_HISTORY_PREV__ = 3;
 
 
 const int MARKUP_NORMAL      = 0;
-const int MARKUP_BOLD        = 1;
-const int MARKUP_ITALIC      = 2;
-const int MARKUP_BOLD_ITALIC = 3;
-const int MARKUP_FAINT       = 4;
-#define MARKUP_COUNT 5
+const int MARKUP_DEFAULT     = 0;
+const int MARKUP_ERROR       = 1;
+const int MARKUP_WARNING     = 2;
+const int MARKUP_OUTPUT      = 3;
+const int MARKUP_BOLD        = 4;
+const int MARKUP_ITALIC      = 5;
+const int MARKUP_BOLD_ITALIC = 6;
+const int MARKUP_FAINT       = 7;
+#define   MARKUP_COUNT         8
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -67,36 +71,35 @@ typedef struct {
     float x,y;
     Color color;
 } Point;
-
-struct Terminal_ {
+struct Console_ {
     Vector *       lines;
     wchar_t *      prompt;
     wchar_t        killring[MAX_LINE_LENGTH+1];
     wchar_t        input[MAX_LINE_LENGTH+1];
     size_t         cursor;
-    TextMarkup     markup[MARKUP_COUNT];
+    Markup         markup[MARKUP_COUNT];
     VertexBuffer * buffer;
     Pen            pen; 
-    void (*handlers[4])( struct Terminal_ *, wchar_t * );
+    void (*handlers[4])( struct Console_ *, wchar_t * );
 };
-typedef struct Terminal_ Terminal;
+typedef struct Console_ Console;
 
 
 // ------------------------------------------------------- global variables ---
-static Terminal * terminal = 0;
+static Console * console = 0;
 static FontManager * manager = 0;
 static VertexBuffer *lines_buffer;
 
 
-
-// ----------------------------------------------------------------------------
-Terminal *
-terminal_new( void )
+// ------------------------------------------------------------ console_new ---
+Console *
+console_new( void )
 {
-    Terminal *self = (Terminal *) malloc( sizeof(Terminal) );
+    Console *self = (Console *) malloc( sizeof(Console) );
     if( !self )
+    {
         return self;
-
+    }
     self->lines = vector_new( sizeof(wchar_t *) );
     self->prompt = (wchar_t *) wcsdup( L">>> " );
     self->cursor = 0;
@@ -108,19 +111,33 @@ terminal_new( void )
     self->handlers[__SIGNAL_HISTORY_NEXT__] = 0;
     self->handlers[__SIGNAL_HISTORY_PREV__] = 0;
     self->pen.x = self->pen.y = 0; 
-    TextMarkup normal = { "Mono", 12, 0, 0, 0.0, 0.0,
-                          {0,0,0,1}, {1,1,1,0},
-                          0, {0,0,0,1}, 0, {0,0,0,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1} };
-    TextMarkup bold        = normal; bold.bold = 1;
-    TextMarkup italic      = normal; italic.italic = 1;
-    TextMarkup bold_italic = normal; bold.bold = 1; italic.italic = 1;
-    TextMarkup faint       = normal;
+    Markup normal = { "Arial", 12, 0, 0, 0.0, 0.0,
+                      {0,0,0,1}, {1,1,1,0},
+                      0, {0,0,0,1}, 0, {0,0,0,1},
+                      0, {0,0,0,1}, 0, {0,0,0,1} };
+    Markup bold        = normal; bold.bold = 1;
+    Markup italic      = normal; italic.italic = 1;
+    Markup bold_italic = normal; bold.bold = 1; italic.italic = 1;
+    Markup faint       = normal;
     faint.foreground_color.r = 0.35;
     faint.foreground_color.g = 0.35;
     faint.foreground_color.b = 0.35;
-
+    Markup error        = normal;
+    error.foreground_color.r = 1.00;
+    error.foreground_color.g = 0.00;
+    error.foreground_color.b = 0.00;
+    Markup warning       = normal;
+    warning.foreground_color.r = 1.00;
+    warning.foreground_color.g = 0.50;
+    warning.foreground_color.b = 0.50;
+    Markup output        = normal;
+    output.foreground_color.r = 0.00;
+    output.foreground_color.g = 0.00;
+    output.foreground_color.b = 1.00;
     self->markup[MARKUP_NORMAL]      = normal;
+    self->markup[MARKUP_ERROR]       = error;
+    self->markup[MARKUP_WARNING]     = warning;
+    self->markup[MARKUP_OUTPUT]      = output;
     self->markup[MARKUP_FAINT]       = faint;
     self->markup[MARKUP_BOLD]        = bold;
     self->markup[MARKUP_ITALIC]      = italic;
@@ -140,19 +157,19 @@ terminal_new( void )
 
 
 
-// -------------------------------------------------------- terminal_delete ---
+// -------------------------------------------------------- console_delete ---
 void
-terminal_delete( Terminal *self )
+console_delete( Console *self )
 { }
 
 
 
-// ----------------------------------------------------- terminal_add_glyph ---
+// ----------------------------------------------------- console_add_glyph ---
 void
-terminal_add_glyph( Terminal *self,
-                    wchar_t current,
-                    wchar_t previous,
-                    TextMarkup *markup )
+console_add_glyph( Console *self,
+                   wchar_t current,
+                   wchar_t previous,
+                   Markup *markup )
 {
     TextureGlyph *glyph  = texture_font_get_glyph( markup->font, current );
     if( previous != L'\0' )
@@ -187,9 +204,9 @@ terminal_add_glyph( Terminal *self,
 
 
 
-// -------------------------------------------------------- terminal_render ---
+// -------------------------------------------------------- console_render ---
 void
-terminal_render( Terminal *self )
+console_render( Console *self )
 {
     int viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
@@ -198,12 +215,12 @@ terminal_render( Terminal *self )
 
     self->pen.x = 0;
     self->pen.y = viewport[3]-12;
-    vertex_buffer_clear( terminal->buffer );
+    vertex_buffer_clear( console->buffer );
 
     int cursor_x = self->pen.x;
     int cursor_y = self->pen.y;
 
-    TextMarkup markup;
+    Markup markup;
 
     // Console buffer
     markup = self->markup[MARKUP_FAINT];
@@ -212,10 +229,10 @@ terminal_render( Terminal *self )
         wchar_t *text = * (wchar_t **) vector_get( self->lines, i ) ;
         if( wcslen(text) > 0 )
         {
-            terminal_add_glyph( terminal, text[0], L'\0', &markup );
+            console_add_glyph( console, text[0], L'\0', &markup );
             for( index=1; index < wcslen(text)-1; ++index )
             {
-                terminal_add_glyph( terminal, text[index], text[index-1], &markup );
+                console_add_glyph( console, text[index], text[index-1], &markup );
             }
         }
         self->pen.y -= 12;
@@ -228,10 +245,10 @@ terminal_render( Terminal *self )
     markup = self->markup[MARKUP_BOLD];
     if( wcslen( self->prompt ) > 0 )
     {
-        terminal_add_glyph( terminal, self->prompt[0], L'\0', &markup );
+        console_add_glyph( console, self->prompt[0], L'\0', &markup );
         for( index=1; index < wcslen(self->prompt); ++index )
         {
-            terminal_add_glyph( terminal, self->prompt[index], self->prompt[index-1], &markup );
+            console_add_glyph( console, self->prompt[index], self->prompt[index-1], &markup );
         }
     }
     cursor_x = (int) self->pen.x;
@@ -240,14 +257,14 @@ terminal_render( Terminal *self )
     markup = self->markup[MARKUP_NORMAL];
     if( wcslen(self->input) > 0 )
     {
-        terminal_add_glyph( terminal, self->input[0], L'\0', &markup );
+        console_add_glyph( console, self->input[0], L'\0', &markup );
         if( self->cursor > 0)
         {
             cursor_x = (int) self->pen.x;
         }
         for( index=1; index < wcslen(self->input); ++index )
         {
-            terminal_add_glyph( terminal, self->input[index], self->input[index-1], &markup );
+            console_add_glyph( console, self->input[index], self->input[index-1], &markup );
             if( index < self->cursor )
             {
                 cursor_x = (int) self->pen.x;
@@ -265,18 +282,18 @@ terminal_render( Terminal *self )
 
     glColor4f(1,1,1,1);
     glEnable( GL_TEXTURE_2D );
-    vertex_buffer_render( terminal->buffer, GL_TRIANGLES, "vtc" );
+    vertex_buffer_render( console->buffer, GL_TRIANGLES, "vtc" );
     glDisable( GL_TEXTURE_2D );
     vertex_buffer_render( lines_buffer, GL_LINES, "vc" );
 }
 
 
 
-// ------------------------------------------------------- terminal_connect ---
+// ------------------------------------------------------- console_connect ---
 void
-terminal_connect( Terminal *self,
+console_connect( Console *self,
                   const char *signal,
-                  void (*handler)(Terminal *, wchar_t *))
+                  void (*handler)(Console *, wchar_t *))
 {
     if( strcmp( signal,"activate" ) == 0 )
     {
@@ -298,13 +315,10 @@ terminal_connect( Terminal *self,
 
 
 
-// --------------------------------------------------------- terminal_print ---
+// --------------------------------------------------------- console_print ---
 void
-terminal_print( Terminal *self,
-                wchar_t *text )
+console_print( Console *self, wchar_t *text )
 {
-    // fwprintf( stderr, L"Printing %ls\n", text );
-
     // Make sure there is at least one line
     if( self->lines->size == 0 )
     {
@@ -339,7 +353,7 @@ terminal_print( Terminal *self,
         free( last_line );
         if( (end-start)  < (wcslen( text )-1) )
         {
-            terminal_print(self, end+1 );
+            console_print(self, end+1 );
         }
         return;
     }
@@ -356,9 +370,9 @@ terminal_print( Terminal *self,
 
 
 
-// ------------------------------------------------------- terminal_process ---
+// ------------------------------------------------------- console_process ---
 void
-terminal_process( Terminal *self,
+console_process( Console *self,
                   const char *action,
                   const unsigned char key )
 {
@@ -383,13 +397,13 @@ terminal_process( Terminal *self,
     {
         if( strcmp( action, "enter" ) == 0 )
         {
-            if( terminal->handlers[__SIGNAL_ACTIVATE__] )
+            if( console->handlers[__SIGNAL_ACTIVATE__] )
             {
-                (*terminal->handlers[__SIGNAL_ACTIVATE__])(terminal, terminal->input);
+                (*console->handlers[__SIGNAL_ACTIVATE__])(console, console->input);
             }
-            terminal_print( self, self->prompt );
-            terminal_print( self, self->input );
-            terminal_print( self, L"\n" );
+            console_print( self, self->prompt );
+            console_print( self, self->input );
+            console_print( self, L"\n" );
             self->input[0] = L'\0';
             self->cursor = 0;
         }
@@ -459,23 +473,23 @@ terminal_process( Terminal *self,
         }
         else if( strcmp( action, "history-prev" ) == 0 )
         {
-            if( terminal->handlers[__SIGNAL_HISTORY_PREV__] )
+            if( console->handlers[__SIGNAL_HISTORY_PREV__] )
             {
-                (*terminal->handlers[__SIGNAL_HISTORY_PREV__])(terminal, terminal->input);
+                (*console->handlers[__SIGNAL_HISTORY_PREV__])(console, console->input);
             }
         }
         else if( strcmp( action, "history-next" ) == 0 )
         {
-            if( terminal->handlers[__SIGNAL_HISTORY_NEXT__] )
+            if( console->handlers[__SIGNAL_HISTORY_NEXT__] )
             {
-                (*terminal->handlers[__SIGNAL_HISTORY_NEXT__])(terminal, terminal->input);
+                (*console->handlers[__SIGNAL_HISTORY_NEXT__])(console, console->input);
             }
         }
         else if( strcmp( action, "complete" ) == 0 )
         {
-            if( terminal->handlers[__SIGNAL_COMPLETE__] )
+            if( console->handlers[__SIGNAL_COMPLETE__] )
             {
-                (*terminal->handlers[__SIGNAL_COMPLETE__])(terminal, terminal->input);
+                (*console->handlers[__SIGNAL_COMPLETE__])(console, console->input);
             }
         }
     }
@@ -490,51 +504,51 @@ on_key_press ( unsigned char key, int x, int y )
     // fprintf( stderr, "key: %d\n", key);
     if (key == 1)
     {
-        terminal_process( terminal, "home", 0 );
+        console_process( console, "home", 0 );
     }
     else if (key == 4)
     { 
-        terminal_process( terminal, "delete", 0 );
+        console_process( console, "delete", 0 );
     }
     else if (key == 5)
     { 
-        terminal_process( terminal, "end", 0 );
+        console_process( console, "end", 0 );
     }
     else if (key == 8)
     { 
-        terminal_process( terminal, "backspace", 0 );
+        console_process( console, "backspace", 0 );
     }
     else if (key == 9)
     {
-        terminal_process( terminal, "complete", 0 );
+        console_process( console, "complete", 0 );
     }
     else if (key == 11)
     {
-        terminal_process( terminal, "kill", 0 );
+        console_process( console, "kill", 0 );
     }
     else if (key == 12)
     {
-        terminal_process( terminal, "clear", 0 );
+        console_process( console, "clear", 0 );
     }
     else if (key == 13)
     {
-        terminal_process( terminal, "enter", 0 );
+        console_process( console, "enter", 0 );
     }
     else if (key == 25)
     {
-        terminal_process( terminal, "yank", 0 );
+        console_process( console, "yank", 0 );
     }
     else if (key == 27)
     {
-        terminal_process( terminal, "escape", 0 );
+        console_process( console, "escape", 0 );
     }
     else if (key == 127)
     {
-        terminal_process( terminal, "backspace", 0 );
+        console_process( console, "backspace", 0 );
     }
     else if( key > 31)
     {
-        terminal_process( terminal, "type", key );
+        console_process( console, "type", key );
     }
     glutPostRedisplay();
 }
@@ -548,22 +562,22 @@ on_special_key_press( int key, int x, int y )
     switch (key)
     {
     case GLUT_KEY_UP:
-        terminal_process( terminal, "history-prev", 0 );
+        console_process( console, "history-prev", 0 );
         break;
     case GLUT_KEY_DOWN:
-        terminal_process( terminal, "history-next", 0 );
+        console_process( console, "history-next", 0 );
         break;
     case GLUT_KEY_LEFT:
-        terminal_process( terminal,  "left", 0 );
+        console_process( console,  "left", 0 );
         break;
     case GLUT_KEY_RIGHT:
-        terminal_process( terminal, "right", 0 );
+        console_process( console, "right", 0 );
         break;
     case GLUT_KEY_HOME:
-        terminal_process( terminal, "home", 0 );
+        console_process( console, "home", 0 );
         break;
     case GLUT_KEY_END:
-        terminal_process( terminal, "end", 0 );
+        console_process( console, "end", 0 );
         break;
     default:
         break;
@@ -576,7 +590,7 @@ on_special_key_press( int key, int x, int y )
 // ------------------------------------------------------------- on_display ---
 void on_display (void) {
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    terminal_render( terminal );
+    console_render( console );
     glutSwapBuffers();
 }
 
@@ -607,27 +621,26 @@ void on_init( void )
 
 
 // ----------------------------------------------------------------------------
-void terminal_activate (Terminal *self, wchar_t * input)
+void console_activate (Console *self, wchar_t * input)
 {
-    //terminal_print( self, L"Activate callback\n" );
+    //console_print( self, L"Activate callback\n" );
     fwprintf( stderr, L"Activate callback : %ls\n", input );
 }
-void terminal_complete (Terminal *self, wchar_t *input)
+void console_complete (Console *self, wchar_t *input)
 {
-    // terminal_print( self, L"Complete callback\n" );
+    // console_print( self, L"Complete callback\n" );
     fwprintf( stderr, L"Complete callback : %ls\n", input );
 }
-void terminal_history_prev (Terminal *self, wchar_t *input)
+void console_history_prev (Console *self, wchar_t *input)
 {
-    // terminal_print( self, L"History prev callback\n" );
+    // console_print( self, L"History prev callback\n" );
     fwprintf( stderr, L"History prev callback : %ls\n", input );
 }
-void terminal_history_next (Terminal *self, wchar_t *input)
+void console_history_next (Console *self, wchar_t *input)
 {
-    // terminal_print( self, L"History next callback\n" );
+    // console_print( self, L"History next callback\n" );
     fwprintf( stderr, L"History next callback : %ls\n", input );
 }
-
 
 
 int
@@ -635,23 +648,22 @@ main( int argc, char **argv )
 {
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "GL Terminal" );
+    glutCreateWindow( "GL Console" );
     glutReshapeFunc( on_reshape );
     glutDisplayFunc( on_display );
     glutKeyboardFunc( on_key_press );
     glutSpecialFunc( on_special_key_press );
     glutReshapeWindow( 600,400 );
 
-
     lines_buffer = vertex_buffer_new( "v2f:c4f" ); 
-    terminal = terminal_new();
-    terminal_print( terminal,
-                    L"OpenGL Freetype console\n"
-                    L"Copyright 2011 Nicolas P. Rougier. All rights reserved.\n \n" );
-    terminal_connect( terminal, "activate",     terminal_activate );
-    terminal_connect( terminal, "complete",     terminal_complete );
-    terminal_connect( terminal, "history-prev", terminal_history_prev );
-    terminal_connect( terminal, "history-next", terminal_history_next );
+    console = console_new();
+    console_print( console,
+                   L"OpenGL Freetype console\n"
+                   L"Copyright 2011 Nicolas P. Rougier. All rights reserved.\n \n" );
+    console_connect( console, "activate",     console_activate );
+    console_connect( console, "complete",     console_complete );
+    console_connect( console, "history-prev", console_history_prev );
+    console_connect( console, "history-next", console_history_next );
 
     on_init();
     glutMainLoop();

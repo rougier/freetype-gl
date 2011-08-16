@@ -37,7 +37,7 @@
 #endif
 #include <wchar.h>
 #include "vector.h"
-#include "text-markup.h"
+#include "markup.h"
 #include "font-manager.h"
 #include "texture-font.h"
 #include "texture-glyph.h"
@@ -85,7 +85,7 @@ void keyboard( unsigned char key, int x, int y )
 
 void add_text( wchar_t *      text,
                VertexBuffer * buffer,
-               TextMarkup *   markup,
+               Markup *       markup,
                Pen *          pen )
 {
     size_t i;
@@ -147,24 +147,24 @@ int main( int argc, char **argv )
     fclose(fp);
 */
 
-    TextMarkup normal = { "Liberation Sans", 18, 0, 0, 0.0, 0.0,
+    Markup normal = { "Liberation Sans", 18, 0, 0, 0.0, 0.0,
                           {0,0,0,1}, {1,1,1,0},
                           0, {0,0,0,1}, 0, {0,0,0,1},
                           0, {0,0,0,1}, 0, {0,0,0,1} };
-    TextMarkup title  = normal; title.size = 32;
-    TextMarkup bold   = normal; bold.bold = 1;
-    TextMarkup italic = normal; italic.italic = 1;
-    TextMarkup condensed = normal; condensed.spacing = -2.0;
-    TextMarkup expanded = normal; expanded.spacing   = +2.0;
-    TextMarkup subscript   = normal; subscript.rise   =-2; subscript.size = 12;
-    TextMarkup superscript = normal; superscript.rise = 2; superscript.size = 12;
+    Markup title  = normal; title.size = 32;
+    Markup bold   = normal; bold.bold = 1;
+    Markup italic = normal; italic.italic = 1;
+    Markup condensed = normal; condensed.spacing = -2.0;
+    Markup expanded = normal; expanded.spacing   = +2.0;
+    Markup subscript   = normal; subscript.rise   =-2; subscript.size = 12;
+    Markup superscript = normal; superscript.rise = 2; superscript.size = 12;
     Color color_red  = {1,0,0,1};
     Color color_green= {0,1,0,1};
     Color color_blue = {0,0,1,1};
-    TextMarkup red   = normal; red.foreground_color   = color_red;
-    TextMarkup green = normal; green.foreground_color = color_green;
-    TextMarkup blue  = normal; blue.foreground_color  = color_blue;
-    TextMarkup zapfino = normal; zapfino.family = "Zapfino";
+    Markup red   = normal; red.foreground_color   = color_red;
+    Markup green = normal; green.foreground_color = color_green;
+    Markup blue  = normal; blue.foreground_color  = color_blue;
+    Markup zapfino = normal; zapfino.family = "Zapfino";
 
 
     Pen pen = {0.0, 0.0} ;
