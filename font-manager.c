@@ -49,12 +49,12 @@ wcsdup( const wchar_t *string )
 
 
 FontManager *
-font_manager_new( void )
+font_manager_new( size_t width, size_t height, size_t depth )
 {
     static FontManager *self = 0;
     if( !self )
     {
-        TextureAtlas *atlas = texture_atlas_new( 512, 512 );
+        TextureAtlas *atlas = texture_atlas_new( width, height, depth );
         self = (FontManager *) malloc( sizeof(FontManager) );
         if( !self )
         {
@@ -140,9 +140,10 @@ font_manager_get_from_markup( FontManager *self,
 {
     assert( self );
     assert( markup );
-
-    return font_manager_get_from_description( self, markup->family, markup->size,
-                                                    markup->bold,   markup->italic );
+    TextureFont *font =
+        font_manager_get_from_description( self, markup->family, markup->size,
+                                           markup->bold,   markup->italic );
+    return font;
 }
 
 

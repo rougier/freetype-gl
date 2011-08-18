@@ -51,8 +51,10 @@ typedef struct { int x, y, width; } Node;
 
 /* ------------------------------------------------------------------------- */
 TextureAtlas *
-texture_atlas_new( size_t width, size_t height )
+texture_atlas_new( size_t width, size_t height, size_t depth )
 {
+    assert( (depth == 1) || (depth == 3) );
+
     TextureAtlas *self = (TextureAtlas *) malloc( sizeof(TextureAtlas) );
     if( !self )
     {
@@ -62,10 +64,12 @@ texture_atlas_new( size_t width, size_t height )
     self->used = 0;
     self->width = width;
     self->height = height;
+    self->depth = depth;
     Node node = {0,0,width};
     vector_push_back( self->nodes, &node );
     self->texid = 0;
-    self->data = (unsigned char *) calloc( width*height, sizeof(unsigned char) );
+    self->data = (unsigned char *)
+        calloc( width*height*depth, sizeof(unsigned char) );
 
 
     // This is a special region that is used for background and underlined
@@ -119,8 +123,16 @@ texture_atlas_upload( TextureAtlas *self )
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->width, self->height,
-                  0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
+    if( self->depth == 3 )
+    {
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, self->width, self->height,
+                      0, GL_RGB, GL_UNSIGNED_BYTE, self->data );
+    }
+    else
+    {
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->width, self->height,
+                      0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
+    }
 }
 
 
@@ -138,11 +150,12 @@ texture_atlas_set_region( TextureAtlas *self,
     assert( y < self->height);
     assert( (y + height) <= self->height);
     size_t i;
+    size_t depth = self->depth;
     size_t charsize = sizeof(char);
     for( i=0; i<height; ++i )
     {
-        memcpy( self->data+((y+i)*self->width+x) * charsize,
-                data+(i*stride) * charsize, width  * charsize );
+        memcpy( self->data+((y+i)*self->width + x ) * charsize * depth, 
+                data + (i*stride) * charsize, width * charsize * depth  );
     }
 }
 

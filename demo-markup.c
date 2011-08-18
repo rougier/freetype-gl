@@ -139,8 +139,8 @@ int main( int argc, char **argv )
 
 
     Pen pen = {0.0, 0.0} ;
-    manager = font_manager_new();
-    buffer= vertex_buffer_new( "v3i:t2f:c4f" ); 
+    manager = font_manager_new( 512, 512, 1 );
+    buffer= vertex_buffer_new( "v3f:t2f:c4f" ); 
 
     title.font       = font_manager_get_from_markup( manager, &title );
     normal.font      = font_manager_get_from_markup( manager, &normal );

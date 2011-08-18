@@ -162,8 +162,8 @@ void idle( void )
 
 int main( int argc, char **argv )
 {
-    manager = font_manager_new();
-    buffer = vertex_buffer_new( "v3i:t2f:c4f" ); 
+    manager = font_manager_new( 512, 512, 1 );
+    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
     glutInit( &argc, argv );
     glutInitWindowSize( 1000, 1000 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );

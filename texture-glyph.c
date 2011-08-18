@@ -119,9 +119,9 @@ texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
                                     Pen *pen, int kerning )
 {
     TextureFont *font = self->font;
-    float r = 0;
-    float g = 0;
-    float b = 0;
+    float r = 1;
+    float g = 1;
+    float b = 1;
     float a = 1;
     int rise = 0;
     int spacing = 0;
@@ -176,10 +176,10 @@ texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
         b = markup->foreground_color.b;
         a = markup->foreground_color.a;
     }
-    int x0  = pen->x + self->offset_x;
-    int y0  = pen->y + self->offset_y + rise;
-    int x1  = x0 + self->width;
-    int y1  = y0 - self->height;
+    int x0  = (int)( pen->x + self->offset_x );
+    int y0  = (int)( pen->y + self->offset_y + rise );
+    int x1  = (int)( x0 + self->width );
+    int y1  = (int)( y0 - self->height );
     float u0 = self->u0;
     float v0 = self->v0;
     float u1 = self->u1;

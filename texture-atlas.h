@@ -61,7 +61,7 @@ typedef struct { int x,y;       } ivec2;
 typedef struct
 {
     Vector *nodes;
-    size_t width, height, used;
+    size_t width, height, depth, used;
     unsigned int texid;
     unsigned char *data;
     Region black;
@@ -73,7 +73,8 @@ typedef struct
  */
   TextureAtlas *
   texture_atlas_new( size_t width,
-                     size_t height );
+                     size_t height,
+                     size_t depth );
 
 
 /**

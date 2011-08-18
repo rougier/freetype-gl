@@ -136,8 +136,8 @@ int main( int argc, char **argv )
                       0, {0,0,0,1}, 0, {0,0,0,1},
                       0, {0,0,0,1}, 0, {0,0,0,1} };
     
-    manager = font_manager_new();
-    text_buffer  = vertex_buffer_new( "v3i:t2f:c4f" ); 
+    manager = font_manager_new( 512, 512, 1 );
+    text_buffer  = vertex_buffer_new( "v3f:t2f:c4f" ); 
     line_buffer  = vertex_buffer_new( "v2f:c4f" ); 
     point_buffer = vertex_buffer_new( "v2f:c4f" ); 
 

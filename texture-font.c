@@ -32,6 +32,7 @@
  * ========================================================================= */
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_LCD_FILTER_H
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -71,7 +72,6 @@ texture_font_new( TextureAtlas *atlas,
     self->border = 1;
     self->gamma = 1.5;
     self->atlas = atlas;
-
     self->height = 0;
     self->ascender = 0;
     self->descender = 0;
@@ -147,8 +147,6 @@ texture_font_generate_kerning( TextureFont *self )
             FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNSCALED, &kerning );
             if( kerning.x != 0.0 )
             {
-                // printf("Kerning for (%c, %c): %ld\n",
-                //       prev_glyph->charcode, glyph->charcode, kerning.x);
                 count++;
             }
         }
@@ -187,7 +185,7 @@ size_t
 texture_font_cache_glyphs( TextureFont *self,
                            wchar_t * charcodes )
 {
-    size_t i, x, y, width, height, w, h;
+    size_t i, x, y, width, height, depth, w, h;
     FT_Library    library;
     FT_Error      error;
     FT_Face       face;
@@ -199,6 +197,7 @@ texture_font_cache_glyphs( TextureFont *self,
     size_t        missed = 0;
     width  = self->atlas->width;
     height = self->atlas->height;
+    depth  = self->atlas->depth;
 
     if( !texture_font_load_face( &library, self->filename, self->size, &face ) )
     {
@@ -209,9 +208,18 @@ texture_font_cache_glyphs( TextureFont *self,
     for( i=0; i<wcslen(charcodes); ++i )
     {
         glyph_index = FT_Get_Char_Index( face, charcodes[i] );
-        error = FT_Load_Glyph( face, glyph_index,
-//                             FT_LOAD_RENDER | FT_LOAD_TARGET_LIGHT );
-                              FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT );
+
+        // WARNING: We use texture-atlas depth to guess if user wants
+        //          LCD subpixel rendering
+        FT_Int32 flags = FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT;
+//                       FT_LOAD_RENDER | FT_LOAD_TARGET_LIGHT );
+        if( depth == 3 )
+        {
+            FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
+            flags |= FT_LOAD_TARGET_LCD;
+        }
+        error = FT_Load_Glyph( face, glyph_index, flags );
+
         if( error )
         {
             fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
@@ -235,7 +243,7 @@ texture_font_cache_glyphs( TextureFont *self,
         }
 
 
-        w = slot->bitmap.width + 2*self->border;
+        w = slot->bitmap.width/depth + 2*self->border;
         h = slot->bitmap.rows + 2*self->border;
         region = texture_atlas_get_region( self->atlas, w, h );
         if ( region.x < 0 )
@@ -243,18 +251,19 @@ texture_font_cache_glyphs( TextureFont *self,
             missed++;
             continue;
         }
+        w = w - 2;
+        h = h - 2;
         x = region.x + self->border;
         y = region.y + self->border;
-        texture_atlas_set_region( self->atlas, x, y,
-                                  slot->bitmap.width, slot->bitmap.rows,
+        texture_atlas_set_region( self->atlas, x, y, w, h,
                                   slot->bitmap.buffer, slot->bitmap.pitch );
 
         glyph = texture_glyph_new( );
         glyph->font = self;
         glyph->charcode = charcodes[i];
         glyph->kerning  = 0;
-        glyph->width    = slot->bitmap.width;
-        glyph->height   = slot->bitmap.rows;
+        glyph->width    = w;
+        glyph->height   = h;
         glyph->offset_x = slot->bitmap_left;
         glyph->offset_y = slot->bitmap_top;
         glyph->u0       = x/(float)width;
@@ -267,7 +276,6 @@ texture_font_cache_glyphs( TextureFont *self,
         slot = face->glyph;
         glyph->advance_x    = slot->advance.x/64.0;
         glyph->advance_y    = slot->advance.y/64.0;
-
         vector_push_back( self->glyphs, glyph );
         texture_glyph_delete( glyph );
     }

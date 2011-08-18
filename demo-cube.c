@@ -205,8 +205,8 @@ int main( int argc, char **argv )
                            12,13,14,15,  16,17,18,19,  20,21,22,23 };
     cube = vertex_buffer_new_from_data( "v3f:n3f:c3f",
                                         24, vertices, 24, indices );
-    manager = font_manager_new();
-    text_buffer = vertex_buffer_new( "v3i:t2f:c4f" ); 
+    manager = font_manager_new( 512, 512, 1 );
+    text_buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
 
     glutInit( &argc, argv );
     glutInitWindowSize( 400, 400 );

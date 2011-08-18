@@ -331,7 +331,7 @@ main( int argc, char **argv )
     TextureFont *font;
     char * filename;
     size_t i, missed = 0;
-    atlas = texture_atlas_new( 512, 512 );
+    atlas = texture_atlas_new( 512, 512, 1 );
     for( i=0; i < count; ++i)
     {
         filename = font_manager_match_description( 0, family, minsize+i, bold, italic );

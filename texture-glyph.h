@@ -62,7 +62,7 @@ typedef struct {
     wchar_t       charcode;
     int           width, height;
     int           offset_x, offset_y;
-    int           advance_x, advance_y;
+    float         advance_x, advance_y;
     float         u0, v0, u1, v1;
     KerningPair * kerning;
     size_t        kerning_count;
@@ -74,7 +74,7 @@ typedef struct {
  *
  */
 typedef struct {
-    int x, y, z;
+    float x, y, z;
     float u, v;
     float r, g, b, a;
 } TextureGlyphVertex;

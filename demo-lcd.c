@@ -52,10 +52,15 @@ void display( void )
     glGetIntegerv( GL_VIEWPORT, viewport );
     glClearColor(1,1,1,1);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    float alpha = 1;
+    glEnable( GL_COLOR_MATERIAL );
+    glBlendFunc( GL_CONSTANT_COLOR_EXT,
+                 GL_ONE_MINUS_SRC_COLOR );
     glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glColor3f( alpha, alpha, alpha );
+    glBlendColor( 1-alpha, 1-alpha, 1-alpha, 1 );
     glEnable( GL_TEXTURE_2D );
-    glColor4f(1,1,1,1);
     glPushMatrix();
     glTranslatef(5, viewport[3], 0);
     vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
@@ -91,10 +96,10 @@ int main( int argc, char **argv )
     Pen pen ;
     TextureFont *font;
     TextureGlyph *glyph;
-    FontManager *manager = font_manager_new( 512, 512, 1 );
+    FontManager *manager = font_manager_new( 512, 512, 3 );
     buffer= vertex_buffer_new( "v3f:t2f:c4f" ); 
     Markup markup = { "Verdana", minsize, 0, 0, 0.0, 0.0,
-                      {0,0,0,1}, {0,0,0,0},
+                      {1,1,1,1}, {0,0,0,0},
                       0, {0,0,0,1}, 0, {0,0,0,1},
                       0, {0,0,0,1}, 0, {0,0,0,1}, 0 };
 
@@ -113,7 +118,7 @@ int main( int argc, char **argv )
     for( i=0; i < count; ++i)
     {
         markup.size = minsize+i;
-        font = font_manager_get_from_markup( manager, &markup) ;
+        font = font_manager_get_from_markup( manager, &markup );
         glyph = texture_font_get_glyph( font, text[0] );
         if( !glyph )
         {

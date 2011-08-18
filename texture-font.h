@@ -54,6 +54,8 @@ struct TextureFont_
     float          size;
     float          gamma;
     Region         black;
+    int            antialias;
+    int            subpixel;
     int            height;
     int            linegap;
     int            ascender;

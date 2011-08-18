@@ -103,7 +103,7 @@ console_new( void )
     self->lines = vector_new( sizeof(wchar_t *) );
     self->prompt = (wchar_t *) wcsdup( L">>> " );
     self->cursor = 0;
-    self->buffer = vertex_buffer_new( "v3i:t2f:c4f" );
+    self->buffer = vertex_buffer_new( "v3f:t2f:c4f" );
     self->input[0] = L'\0';
     self->killring[0] = L'\0';
     self->handlers[__SIGNAL_ACTIVATE__]     = 0;
@@ -145,7 +145,7 @@ console_new( void )
 
     if( !manager )
     {
-        manager = font_manager_new( );
+        manager = font_manager_new( 512, 512, 1 );
     }
     size_t i;
     for( i=0; i < MARKUP_COUNT; ++i )

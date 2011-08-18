@@ -56,7 +56,7 @@ typedef struct {
  *
  */
   FontManager *
-  font_manager_new( void );
+  font_manager_new( size_t width, size_t height, size_t depth );
 
 
 /**
