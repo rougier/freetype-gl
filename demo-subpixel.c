@@ -284,6 +284,9 @@ int main( int argc, char **argv )
     program = build_program( vertex_shader_source, fragment_shader_source );
     texture_location = glGetUniformLocation(program, "texture");
     pixel_location   = glGetUniformLocation(program, "pixel");
+
+    glEnable(GL_FRAMEBUFFER_SRGB);
+
     glutMainLoop( );
     return 0;
 }

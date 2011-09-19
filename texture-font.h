@@ -50,16 +50,16 @@ struct TextureFont_
     char *         filename;
     int            bold;
     int            italic;
-    int            border;
     float          size;
     float          gamma;
     Region         black;
     int            antialias;
     int            subpixel;
-    int            height;
-    int            linegap;
-    int            ascender;
-    int            descender;
+    int            hinting;
+    float          height;
+    float          linegap;
+    float          ascender;
+    float          descender;
 };
 typedef struct TextureFont_ TextureFont;
 

@@ -40,15 +40,17 @@ ifeq ($(PLATFORM), Darwin)
 	               `freetype-config --libs` -L /usr/X11/lib -lfontconfig
 endif
 
-DEMOS  := $(patsubst %.c,%,$(wildcard demo-*.c))
-TESTS  := $(patsubst %.c,%,$(wildcard test-*.c))
-HEADERS:= $(wildcard *.h)
-SOURCES:= $(filter-out $(wildcard demo-*.c), $(wildcard *.c))
-SOURCES:= $(filter-out $(wildcard test-*.c), $(SOURCES))
-OBJECTS:= $(SOURCES:.c=.o)
+DEMOS     := $(patsubst %.c,%,$(wildcard demo-*.c))
+DEMOS_ATB := $(patsubst %.c,%,$(wildcard demo-atb-*.c))
+DEMOS     := $(filter-out $(DEMOS_ATB), $(DEMOS))
+TESTS     := $(patsubst %.c,%,$(wildcard test-*.c))
+HEADERS   := $(wildcard *.h)
+SOURCES   := $(filter-out $(wildcard demo-*.c), $(wildcard *.c))
+SOURCES   := $(filter-out $(wildcard test-*.c), $(SOURCES))
+OBJECTS   := $(SOURCES:.c=.o)
 
-.PHONY: all
-all: $(DEMOS) $(TESTS)
+.PHONY: all clean distclean
+all: $(DEMOS) demo-atb-agg $(TESTS)
 
 demos: $(DEMOS)
 
@@ -72,9 +74,13 @@ $(foreach test,$(TESTS),$(eval $(call TEST_template,$(test))))
 	@echo "Building $@... "
 	@$(CC) -c $(CFLAGS) $< -o $@ 
 
+demo-atb-agg: demo-atb-agg.o $(OBJECTS) $(HEADERS) \
+	          Arial.ttf Tahoma.ttf Verdana.ttf Times.ttf Georgia.ttf
+	@echo "Building $@... "
+	@$(CC) $(OBJECTS) $@.o $(LIBS) -lAntTweakBar -o $@
 
 clean:
-	@-rm -f $(DEMOS) *.o
+	@-rm -f $(DEMOS) $(DEMOS_ATB) *.o
 	@-rm -f $(TESTS) *.o
 
 distclean: clean

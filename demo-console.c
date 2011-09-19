@@ -671,6 +671,7 @@ main( int argc, char **argv )
     console_connect( console, "history-next", console_history_next );
 
     on_init();
+    glEnable(GL_FRAMEBUFFER_SRGB);
     glutMainLoop();
     return 0;
 }

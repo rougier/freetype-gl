@@ -45,10 +45,19 @@
 #define __TEXTURE_ATLAS_H__
 #include "vector.h"
 
+/**
+ * A Region describes
+ *
+ *
+ */
 typedef struct
 {
-    int x, y, width, height;
+    int x;
+    int y;
+    int width;
+    int height;
 } Region;
+
 
 typedef struct { float x,y,z,w; }  vec4;
 typedef struct { float x,y,z;   }  vec3;
@@ -60,11 +69,29 @@ typedef struct { int x,y;       } ivec2;
 
 typedef struct
 {
+    /** Current allocated nodes */
     Vector *nodes;
-    size_t width, height, depth, used;
+
+    /** Width (in pixels) of the underlying texture */
+    size_t width;
+
+    /** Height (in pixels) of the underlying texture */
+    size_t height;
+
+    /** Texture format (1, 3 or 4) */
+    size_t depth;
+
+    /** Allocated surface  */
+    size_t used;
+
+    /** Texture identity (OpenGL) */
     unsigned int texid;
+
     unsigned char *data;
+
+    /** A special region */
     Region black;
+
 } TextureAtlas;
 
 
@@ -111,5 +138,11 @@ typedef struct
                             size_t height,
                             unsigned char *data,
                             size_t stride );
+
+/**
+ *
+ */
+  void
+  texture_atlas_clear( TextureAtlas *self );
 
 #endif /* __TEXTURE_ATLAS_H__ */

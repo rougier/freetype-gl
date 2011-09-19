@@ -295,3 +295,30 @@ texture_atlas_get_region( TextureAtlas *self,
     self->used += width * height;
     return region;
 }
+
+
+/* ------------------------------------------------------------------------- */
+void
+texture_atlas_clear( TextureAtlas *self )
+{
+
+    vector_clear( self->nodes );
+    self->used = 0;
+    Node node = {0,0,self->width};
+    vector_push_back( self->nodes, &node );
+
+    memset( self->data, 0, self->width*self->height*self->depth );
+
+
+    // This is a special region that is used for background and underlined
+    // decorations of glyphs
+    int n = 4;
+    unsigned char buffer[n*n];
+    memset(buffer, 255, n*n);
+    Region r = texture_atlas_get_region( self, n, n );
+    texture_atlas_set_region( self, r.x, r.y, r.width, r.height, buffer, 1);
+    self->black.x     = r.x + 1;
+    self->black.y     = r.y + 1;
+    self->black.width = r.width - 2;
+    self->black.height= r.height - 2;
+}

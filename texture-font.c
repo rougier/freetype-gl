@@ -32,6 +32,7 @@
  * ========================================================================= */
 #include <ft2build.h>
 #include FT_FREETYPE_H
+// #include FT_ADVANCES_H
 #include FT_LCD_FILTER_H
 #include <stdint.h>
 #include <stdlib.h>
@@ -69,12 +70,26 @@ texture_font_new( TextureAtlas *atlas,
     self->glyphs = vector_new( sizeof(TextureGlyph) );
     self->filename = strdup( filename );
     self->size = size;
-    self->border = 1;
-    self->gamma = 1.5;
+    self->gamma = 1.;
     self->atlas = atlas;
     self->height = 0;
     self->ascender = 0;
     self->descender = 0;
+    self->hinting = 1;
+
+    /* Get font metrics at high resolution */
+    FT_Library library;
+    FT_Face face;
+    if( !texture_font_load_face( &library, self->filename, self->size*100, &face ) )
+    {
+        return self;
+    }
+
+    FT_Size_Metrics metrics = face->size->metrics; 
+    self->ascender  = (metrics.ascender >> 6) / 100.0;
+    self->descender = (metrics.descender >> 6) / 100.0;
+    self->height    = (metrics.height >> 6) / 100.0;
+    self->linegap   = self->height - self->ascender + self->descender;
 
     return self;
 }
@@ -113,15 +128,6 @@ texture_font_generate_kerning( TextureFont *self )
     {
         return;
     }
-
-    FT_Size_Metrics metrics = face->size->metrics; 
-    self->ascender  = metrics.ascender  >> 6;
-    self->descender = metrics.descender >> 6;
-    self->height    = metrics.height >> 6;
-    self->linegap   = self->height - self->ascender + self->descender;
-
-    /* Reset linegap (we'll use kerning iterations to compute linegap) */
-    // self->linegap = 0;
 
     /* For each glyph couple combination, check if kerning is necessary */
     for( i=0; i<self->glyphs->size; ++i )
@@ -211,8 +217,17 @@ texture_font_cache_glyphs( TextureFont *self,
 
         // WARNING: We use texture-atlas depth to guess if user wants
         //          LCD subpixel rendering
-        FT_Int32 flags = FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT;
-//                       FT_LOAD_RENDER | FT_LOAD_TARGET_LIGHT );
+        FT_Int32 flags = FT_LOAD_RENDER;
+
+        if( !self->hinting )
+        {
+            flags |= FT_LOAD_NO_HINTING | FT_LOAD_NO_AUTOHINT;
+        }
+        else
+        {
+            flags |= FT_LOAD_FORCE_AUTOHINT;
+        }
+
         if( depth == 3 )
         {
             FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
@@ -242,19 +257,20 @@ texture_font_cache_glyphs( TextureFont *self,
             }
         }
 
-
-        w = slot->bitmap.width/depth + 2*self->border;
-        h = slot->bitmap.rows + 2*self->border;
+        // We want each glyph to be separated by at least one black pixel
+        // (for example for shader used in demo-subpixel.c)
+        w = slot->bitmap.width/depth + 1;
+        h = slot->bitmap.rows + 1;
         region = texture_atlas_get_region( self->atlas, w, h );
         if ( region.x < 0 )
         {
             missed++;
             continue;
         }
-        w = w - 2;
-        h = h - 2;
-        x = region.x + self->border;
-        y = region.y + self->border;
+        w = w - 1;
+        h = h - 1;
+        x = region.x;
+        y = region.y;
         texture_atlas_set_region( self->atlas, x, y, w, h,
                                   slot->bitmap.buffer, slot->bitmap.pitch );
 
@@ -276,6 +292,7 @@ texture_font_cache_glyphs( TextureFont *self,
         slot = face->glyph;
         glyph->advance_x    = slot->advance.x/64.0;
         glyph->advance_y    = slot->advance.y/64.0;
+
         vector_push_back( self->glyphs, glyph );
         texture_glyph_delete( glyph );
     }
@@ -333,7 +350,7 @@ texture_font_load_face( FT_Library * library,
                         const float size,
                         FT_Face * face )
 {
-    size_t hres = 16;
+    size_t hres = 64;
     FT_Error error;
     FT_Matrix matrix = { (int)((1.0/hres) * 0x10000L),
                          (int)((0.0)      * 0x10000L),
@@ -370,7 +387,8 @@ texture_font_load_face( FT_Library * library,
     }
 
     /* Set char size */
-    error = FT_Set_Char_Size( *face, size*64, 0, 72*hres, 72 );
+    error = FT_Set_Char_Size( *face, (int)(size*64), 0, 72*hres, 72 );
+
     /* error = FT_Set_Char_Size( *face, size*64, 0, 72, 72 ); */
     if( error )
     {
