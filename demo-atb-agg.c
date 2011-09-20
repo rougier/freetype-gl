@@ -71,20 +71,25 @@ GLuint program = 0;
 GLuint texture_location;
 GLuint pixel_location;
 GLuint gamma_location;
+GLuint primary_location;
+GLuint secondary_location;
+GLuint tertiary_location;
 
-
-Family p_family     = GEORGIA;
-float p_size        = 16.0;
-int p_invert        = 0;
-int p_kerning       = 1;
-int p_hinting       = 1;
-int p_grayscale     = 0;
-float p_gamma       = 1.0;
-float p_interval    = 0.0;
-float p_weight      = 0.33;
-float p_width       = 1.0;
-float p_faux_weight = 0.0;
-float p_faux_italic = 0.0;
+Family p_family;
+float p_size;
+int p_invert;
+int p_kerning;
+int p_hinting;
+int p_lcd_filtering;
+float p_gamma;
+float p_interval;
+float p_weight;
+float p_width;
+float p_faux_weight;
+float p_faux_italic;
+float p_primary;
+float p_secondary;
+float p_tertiary;
 
 static wchar_t text[] = 
     L"A single pixel on a color LCD is made of three colored elements \n"
@@ -266,8 +271,8 @@ build_buffer( void )
                                L" !\"#$%&'()*+,-./0123456789:;<=>?"
                                L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
                                L"`abcdefghijklmnopqrstuvwxyz{|}~" );
-    pen.x = 0;
-    pen.y = 600 - font->height;
+    pen.x = 10;
+    pen.y = 600 - font->height - 10;
 
     glyph = texture_font_get_glyph( font, text[0] );
     add_glyph( glyph, buffer, &markup, &pen, 0 );
@@ -275,7 +280,7 @@ build_buffer( void )
     {
         if( text[i] == '\n' )
         {
-            pen.x  = 0;
+            pen.x  = 10;
             pen.y -= font->height; // + 0.01*(size - (int)size)*font->height;
         }
         else
@@ -309,7 +314,7 @@ void display(void)
 
     glEnable( GL_TEXTURE_2D );
     glBindTexture( GL_TEXTURE_2D, atlas->texid );
-    if( p_grayscale )
+    if( !p_lcd_filtering )
     {
         glEnable( GL_COLOR_MATERIAL );
         glEnable( GL_BLEND );
@@ -340,7 +345,7 @@ void display(void)
         }
     }
 
-    if( p_grayscale )
+    if( !p_lcd_filtering )
     {
         vertex_buffer_render( buffer, GL_TRIANGLES, "vt" );
     }
@@ -349,6 +354,11 @@ void display(void)
         glUseProgram( program );
         glUniform1i( texture_location, 0 );
         glUniform1f( gamma_location, p_gamma );
+
+        float norm = 1.0/(p_primary+2*p_secondary+2*p_tertiary);
+        glUniform1f( primary_location,   p_primary*norm );
+        glUniform1f( secondary_location, p_secondary*norm );
+        glUniform1f( tertiary_location,  p_tertiary*norm );
         glUniform2f( pixel_location,
                      1.0/atlas->width,
                      1.0/atlas->height );
@@ -380,13 +390,27 @@ void reset( void )
     p_invert    = 0;
     p_kerning   = 1;
     p_hinting   = 1;
-    p_grayscale = 0;
+    p_lcd_filtering = 1;
     p_gamma     = 1.0;
     p_interval  = 0.0;
     p_weight    = 0.33;
     p_width     = 1.0;
     p_faux_weight = 0.0;
     p_faux_italic = 0.0;
+    p_primary   = 1.0;
+    p_secondary = 0.0;
+    p_tertiary  = 0.0;
+    //p_primary   = 3.0/9.0;
+    //p_secondary = 2.0/9.0;
+    //p_tertiary  = 1.0/9.0;
+    if( !p_lcd_filtering )
+    {
+        atlas = atlas_gray;
+    }
+    else
+    {
+        atlas = atlas_rgb;
+    }
     build_buffer();
 }
 
@@ -440,23 +464,23 @@ void TW_CALL get_hinting( void *value, void *data )
     *(int *)value = p_hinting;
 }
 
-// ------------------------------------------------------ get/set grayscale ---
-void TW_CALL set_grayscale( const void *value, void *data )
+// -------------------------------------------------- get/set lcd_filtering ---
+void TW_CALL set_lcd_filtering( const void *value, void *data )
 {
-    p_grayscale = *(const int *) value;
-    if( p_grayscale )
-    {
-        atlas = atlas_gray;
-    }
-    else
+    p_lcd_filtering = *(const int *) value;
+    if( p_lcd_filtering )
     {
         atlas = atlas_rgb;
     }
+    else
+    {
+        atlas = atlas_gray;
+    }
     build_buffer();
 }
-void TW_CALL get_grayscale( void *value, void *data )
+void TW_CALL get_lcd_filtering( void *value, void *data )
 {
-    *(int *)value = p_grayscale;
+    *(int *)value = p_lcd_filtering;
 }
 
 // --------------------------------------------------------- get/set weight ---
@@ -569,9 +593,18 @@ int main(int argc, char *argv[])
 
     // Create a new tweak bar
     bar = TwNewBar("TweakBar");
-    TwDefine(" GLOBAL help='This example shows how to tune all font parameters.' ");
-    TwDefine(" TweakBar size='220 270' position='570 320' color='127 127 127' alpha=127"
-             " label='Parameters' resizable=False fontresizable=False iconifiable=False");
+    TwDefine("GLOBAL "
+             "help = 'This example shows how to tune all font parameters.' ");
+    TwDefine("TweakBar                      "
+             "size          = '280 400'     "
+             "position      = '500 20'      "
+             "color         = '127 127 127' "
+             "alpha         = 200           "
+             "label         = 'Parameters'  "
+             "resizable     = True          "
+             "fontresizable = True          "
+             "iconifiable   = True          ");
+
     {
         TwEnumVal familyEV[NUM_FONTS] = { {GEORGIA, "Georgia"},
                                           {TIMES,   "Times"},
@@ -580,59 +613,125 @@ int main(int argc, char *argv[])
                                           {ARIAL,   "Arial"} };
         TwType family_type = TwDefineEnum("Family", familyEV, NUM_FONTS);
         TwAddVarCB(bar, "Family", family_type, set_family, get_family, NULL, 
-                   "label='Font family' help='Font family.' ");
+                   "label = 'Family'      "
+                   "group = 'Font'        "
+                   "help  = ' '           ");
     }
     TwAddVarCB(bar, "Size", TW_TYPE_FLOAT, set_size, get_size, NULL, 
-               "label='Size' min=6.0 max=24.0 step=0.05 help='Font size.' ");
-    TwAddSeparator(bar, "", "");
-    TwAddVarCB(bar, "Invert", TW_TYPE_BOOL32, set_invert, get_invert, NULL, 
-               "label='Invert' help='Invert colors.' ");
+               "label = 'Size' "
+               "group = 'Font' "
+               "min   = 6.0    "
+               "max   = 24.0   "
+               "step  = 0.05   "
+               "help  = ' '    ");
+    TwAddVarCB(bar, "LCD filtering", TW_TYPE_BOOL32, set_lcd_filtering, get_lcd_filtering, NULL, 
+               "label = 'LCD filtering' "
+              "group = 'Font'        "
+               "help  = ' '             ");
+
+
+    // Rendering
     TwAddVarCB(bar, "Kerning", TW_TYPE_BOOL32, set_kerning, get_kerning, NULL, 
-               "label='Kerning' help='enable/disable kerning.' ");
+               "label = 'Kerning'   "
+               "group = 'Rendering' "
+               "help  = ' '         ");
     TwAddVarCB(bar, "Hinting", TW_TYPE_BOOL32, set_hinting, get_hinting, NULL, 
-               "label='Hinting' help='enable/disable hinting.' ");
-    TwAddVarCB(bar, "Grayscale", TW_TYPE_BOOL32, set_grayscale, get_grayscale, NULL, 
-               "label='Grayscale' help='enable/disable grayscale rendering.' ");
-    TwAddVarCB(bar, "Gamma", TW_TYPE_FLOAT, set_gamma, get_gamma, NULL, 
-               "label='Gamma' min=0.50 max=2.5 step=0.01 help='Gamma correction.' ");
-    TwAddSeparator(bar, "", "");
+               "label = 'Hinting'   "
+               "group = 'Rendering' "
+               "help  = ' '         ");
+
+    // Color
+    TwAddVarCB(bar, "Invert", TW_TYPE_BOOL32, set_invert, get_invert, NULL, 
+               "label = 'Invert' "
+               "group = 'Color'  "
+               "help  = ' '      ");
+    
+    // Glyph
     TwAddVarCB(bar, "Width", TW_TYPE_FLOAT, set_width, get_width, NULL, 
-               "label='Glyph width' min=0.75 max=1.25 step=0.01 help='Width.' ");
+               "label = 'Width' "
+               "group = 'Glyph' "
+               "min   = 0.75    "
+               "max   = 1.25    " 
+               "step  = 0.01    "
+               "help  = ' '     ");
+
     TwAddVarCB(bar, "Interval", TW_TYPE_FLOAT, set_interval, get_interval, NULL, 
-               "label='Glyph spacing' min=-0.2 max=0.2 step=0.01 help='Spacing between glyphs.' ");
-    //TwAddVarCB(bar, "Faux weight", TW_TYPE_FLOAT, set_faux_weight, get_faux_weight, NULL, 
-    //           "label='Faux weight' min=-1.0 max=1.0 step=0.01 help='Faux weight.' ");
+               "label = 'Spacing' "
+               "group = 'Glyph'   "
+               "min   = -0.2      "
+               "max   = 0.2       "
+               "step  = 0.01      "
+               "help  = ' '       " );
+
     TwAddVarCB(bar, "Faux italic", TW_TYPE_FLOAT, set_faux_italic, get_faux_italic, NULL, 
-               "label='Faux italic' min=-1.0 max=1.0 step=0.01 help='Faux italic.' ");
+               "label = 'Faux italic' "
+               "group = 'Glyph'       "
+               "min   = -1.0          "
+               "max   = 1.0           "
+               "step  = 0.01          "
+               "help  = ' '           ");
+
+    // Energy distribution
+    TwAddVarRW(bar, "Primary", TW_TYPE_FLOAT, &p_primary,
+               "label = 'Primary weight'      "
+               "group = 'Energy distribution' "
+               "min   = 0                     "
+               "max   = 1                     "
+               "step  = 0.01                  "
+               "help  = ' '                   " );
+
+    TwAddVarRW(bar, "Secondary", TW_TYPE_FLOAT, &p_secondary,
+               "label = 'Secondy weight'      "
+               "group = 'Energy distribution' "
+               "min   = 0                     "
+               "max   = 1                     "
+               "step  = 0.01                  "
+               "help  = ' '                   " );
+
+    TwAddVarRW(bar, "Tertiary", TW_TYPE_FLOAT, &p_tertiary,
+               "label = 'Tertiary weight'      "
+               "group = 'Energy distribution' "
+               "min   = 0                     "
+               "max   = 1                     "
+               "step  = 0.01                  "
+               "help  = ' '                   " );
+
+    TwAddSeparator(bar, "",
+                   "group = 'Energy distribution' " );
+
+    TwAddVarCB(bar, "Gamma", TW_TYPE_FLOAT, set_gamma, get_gamma, NULL, 
+               "label = 'Gamma correction'    "
+               "group = 'Energy distribution' "
+               "min   = 0.50                  "
+               "max   = 2.5                   "
+               "step  = 0.01                  "
+               "help  = ' '                   ");
+
     TwAddSeparator(bar, "", "");
     TwAddButton(bar, "Reset", (TwButtonCallback) reset, NULL,
                 "help='Reset all parameters to default values.'");
-    TwAddButton(bar, "Quit", (TwButtonCallback) quit, NULL,  "help='Quit.'");
+
+    TwAddButton(bar, "Quit", (TwButtonCallback) quit, NULL,
+                "help='Quit.'");
 
 
-    atlas_gray = texture_atlas_new( 512, 512, 1 );
-    atlas_rgb  = texture_atlas_new( 512, 512, 3 );
-    if( p_grayscale )
-    {
-        atlas = atlas_gray;
-    }
-    else
-    {
-        atlas = atlas_rgb;
-    }
-
+    atlas_gray = texture_atlas_new( 512, 256, 1 );
+    atlas_rgb  = texture_atlas_new( 512, 256, 3 );
     buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f" ); 
-    build_buffer();
+    reset();
 
     // Create the GLSL program
     char * vertex_shader_source   = read_shader("./subpixel.vert");
     char * fragment_shader_source = read_shader("./subpixel-gamma.frag");
     program = build_program( vertex_shader_source, fragment_shader_source );
-    texture_location = glGetUniformLocation(program, "texture");
-    pixel_location   = glGetUniformLocation(program, "pixel");
-    gamma_location   = glGetUniformLocation(program, "gamma");
-    // glEnable(GL_FRAMEBUFFER_SRGB);
+    texture_location = glGetUniformLocation( program, "texture" );
+    pixel_location = glGetUniformLocation( program, "pixel" );
+    gamma_location = glGetUniformLocation( program, "gamma" );
+    primary_location   = glGetUniformLocation( program, "primary" );
+    secondary_location = glGetUniformLocation( program, "secondary" );
+    tertiary_location  = glGetUniformLocation( program, "tertiary" );
 
+    //glEnable(GL_FRAMEBUFFER_SRGB);
     glutTimerFunc( 1000.0/60.0, timer, 60 );
     glutMainLoop();
     return EXIT_SUCCESS;

@@ -34,14 +34,62 @@ uniform sampler2D texture;
 uniform vec2 pixel;
 uniform float gamma;
 varying float m;
+uniform float primary, secondary, tertiary;
+
+vec3
+energy_distribution( vec4 previous, vec4 current, vec4 next )
+{
+    // Energy distribution as explained on:
+    // http://www.grc.com/freeandclear.htm
+    //
+    //  .. v..
+    // RGB RGB RGB
+    // previous.g + previous.b + current.r + current.g + current.b
+    //
+    //   . .v. .
+    // RGB RGB RGB
+    // previous.b + current.r + current.g + current.b + next.r
+    //
+    //     ..v ..
+    // RGB RGB RGB
+    // current.r + current.g + current.b + next.r + next.g
+
+    float r =
+        tertiary  * previous.g +
+        secondary * previous.b +
+        primary   * current.r  +
+        secondary * current.g  +
+        tertiary  * current.b;
+
+    float g =
+        tertiary  * previous.b +
+        secondary * current.r +
+        primary   * current.g  +
+        secondary * current.b  +
+        tertiary  * next.r;
+
+    float b =
+        tertiary  * current.r +
+        secondary * current.g +
+        primary   * current.b +
+        secondary * next.r    +
+        tertiary  * next.g;
+
+    return vec3(r,g,b);
+}
+
+
 void main() {
-    vec2 uv    = gl_TexCoord[0].xy;
+    vec2 uv      = gl_TexCoord[0].xy;
     vec4 current = texture2D(texture, uv);
     vec4 previous= texture2D(texture, uv+vec2(-1,0)*pixel);
+    vec4 next    = texture2D(texture, uv+vec2(+1,0)*pixel);
+
     float r = current.r;
     float g = current.g;
     float b = current.b;
     float a = current.a;
+
     if( m <= 0.333 )
     {
         float z = m/0.333;
@@ -63,6 +111,15 @@ void main() {
         g = mix(previous.b, previous.g, z);
         b = mix(current.r,  previous.b, z);
     }
+
+    // This is probably wrong because we do not take into account the shifting
+    // above.
+    vec3 color = energy_distribution(previous, vec4(r,g,b,1), next);
+    r = color.r;
+    g = color.g;
+    b = color.b;
+
+
 
     gl_FragColor.rgb = pow( vec3(r,g,b), vec3(1.0/gamma));
 }
