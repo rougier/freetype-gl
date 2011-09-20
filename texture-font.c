@@ -76,6 +76,12 @@ texture_font_new( TextureAtlas *atlas,
     self->ascender = 0;
     self->descender = 0;
     self->hinting = 1;
+    self->lcd_filter = 0;
+    self->lcd_weights[0] = 0;
+    self->lcd_weights[1] = 0;
+    self->lcd_weights[2] = 255;
+    self->lcd_weights[3] = 0;
+    self->lcd_weights[4] = 0;
 
     /* Get font metrics at high resolution */
     FT_Library library;
@@ -232,6 +238,10 @@ texture_font_cache_glyphs( TextureFont *self,
         {
             FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
             flags |= FT_LOAD_TARGET_LCD;
+            if( self->lcd_filter )
+            {
+                FT_Library_SetLcdFilterWeights( library, self->lcd_weights );
+            }
         }
         error = FT_Load_Glyph( face, glyph_index, flags );
 

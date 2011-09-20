@@ -266,6 +266,13 @@ build_buffer( void )
     }
 
     font->hinting = p_hinting;
+    font->lcd_filter = 1;
+    float norm = 1.0/(p_primary + 2*p_secondary + 2*p_tertiary);
+    font->lcd_weights[0] = (unsigned char)(p_tertiary*norm*256);
+    font->lcd_weights[1] = (unsigned char)(p_secondary*norm*256);
+    font->lcd_weights[2] = (unsigned char)(p_primary*norm*256);
+    font->lcd_weights[3] = (unsigned char)(p_secondary*norm*256);
+    font->lcd_weights[4] = (unsigned char)(p_tertiary*norm*256);
 
     texture_font_cache_glyphs( font, 
                                L" !\"#$%&'()*+,-./0123456789:;<=>?"
@@ -398,12 +405,17 @@ void reset( void )
     p_width     = 1.0;
     p_faux_weight = 0.0;
     p_faux_italic = 0.0;
-    p_primary   = 1.0;
-    p_secondary = 0.0;
-    p_tertiary  = 0.0;
+
+    // FT_LCD_FILTER_LIGHT
+    p_primary   = 1.0/3.0;
+    p_secondary = 1.0/3.0;
+    p_tertiary  = 0.0/3.0;
+
+    // FT_LCD_FILTER_DEFAULT
     // p_primary   = 3.0/9.0;
     // p_secondary = 2.0/9.0;
     // p_tertiary  = 1.0/9.0;
+
     if( !p_lcd_filtering )
     {
         atlas = atlas_gray;
@@ -569,6 +581,42 @@ void TW_CALL get_family( void *value, void *data )
 {
     *(Family *)value = p_family;
 }
+
+// ----------------------------------------------------------- get/set primary ---
+void TW_CALL set_primary( const void *value, void *data )
+{
+    p_primary = *(const float *) value;
+    build_buffer();
+
+}
+void TW_CALL get_primary( void *value, void *data )
+{
+    *(float *)value = p_primary;
+}
+
+// ----------------------------------------------------------- get/set secondary ---
+void TW_CALL set_secondary( const void *value, void *data )
+{
+    p_secondary = *(const float *) value;
+    build_buffer();
+
+}
+void TW_CALL get_secondary( void *value, void *data )
+{
+    *(float *)value = p_secondary;
+}
+
+// ----------------------------------------------------------- get/set tertiary ---
+void TW_CALL set_tertiary( const void *value, void *data )
+{
+    p_tertiary = *(const float *) value;
+    build_buffer();
+
+}
+void TW_CALL get_tertiary( void *value, void *data )
+{
+    *(float *)value = p_tertiary;
+}
  
 
 // Main
@@ -673,7 +721,7 @@ int main(int argc, char *argv[])
                "help  = ' '           ");
 
     // Energy distribution
-    TwAddVarRW(bar, "Primary", TW_TYPE_FLOAT, &p_primary,
+    TwAddVarCB(bar, "Primary", TW_TYPE_FLOAT, set_primary, get_primary, NULL,
                "label = 'Primary weight'      "
                "group = 'Energy distribution' "
                "min   = 0                     "
@@ -681,7 +729,7 @@ int main(int argc, char *argv[])
                "step  = 0.01                  "
                "help  = ' '                   " );
 
-    TwAddVarRW(bar, "Secondary", TW_TYPE_FLOAT, &p_secondary,
+    TwAddVarCB(bar, "Secondary", TW_TYPE_FLOAT, set_secondary, get_secondary, NULL,
                "label = 'Secondy weight'      "
                "group = 'Energy distribution' "
                "min   = 0                     "
@@ -689,7 +737,7 @@ int main(int argc, char *argv[])
                "step  = 0.01                  "
                "help  = ' '                   " );
 
-    TwAddVarRW(bar, "Tertiary", TW_TYPE_FLOAT, &p_tertiary,
+    TwAddVarCB(bar, "Tertiary", TW_TYPE_FLOAT, set_tertiary, get_tertiary, NULL,
                "label = 'Tertiary weight'      "
                "group = 'Energy distribution' "
                "min   = 0                     "

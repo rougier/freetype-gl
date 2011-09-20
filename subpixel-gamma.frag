@@ -112,14 +112,12 @@ void main() {
         b = mix(current.r,  previous.b, z);
     }
 
-    // This is probably wrong because we do not take into account the shifting
-    // above.
-    vec3 color = energy_distribution(previous, vec4(r,g,b,1), next);
-    r = color.r;
-    g = color.g;
-    b = color.b;
-
-
-
+    // This would be probably wrong because we do not take into account the
+    // shifting above.
+    // vec3 color = energy_distribution(previous, vec4(r,g,b,1), next);
+    // r = color.r;
+    // g = color.g;
+    // b = color.b;
+    
     gl_FragColor.rgb = pow( vec3(r,g,b), vec3(1.0/gamma));
 }

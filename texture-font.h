@@ -60,6 +60,9 @@ struct TextureFont_
     float          linegap;
     float          ascender;
     float          descender;
+
+    int            lcd_filter;
+    unsigned char  lcd_weights[5];
 };
 typedef struct TextureFont_ TextureFont;
 
