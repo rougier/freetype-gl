@@ -310,7 +310,6 @@ void display(void)
         glClearColor( 1, 1, 1, 1 );
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    TwDraw( );
 
     glEnable( GL_TEXTURE_2D );
     glBindTexture( GL_TEXTURE_2D, atlas->texid );
@@ -365,6 +364,8 @@ void display(void)
         vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
         glUseProgram( 0 );
     }
+
+    TwDraw( );
     glutSwapBuffers( );
 }
 
@@ -400,9 +401,9 @@ void reset( void )
     p_primary   = 1.0;
     p_secondary = 0.0;
     p_tertiary  = 0.0;
-    //p_primary   = 3.0/9.0;
-    //p_secondary = 2.0/9.0;
-    //p_tertiary  = 1.0/9.0;
+    // p_primary   = 3.0/9.0;
+    // p_secondary = 2.0/9.0;
+    // p_tertiary  = 1.0/9.0;
     if( !p_lcd_filtering )
     {
         atlas = atlas_gray;
@@ -576,7 +577,7 @@ int main(int argc, char *argv[])
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
     glutInitWindowSize( 800, 600 );
-    glutCreateWindow( "AntTweakBar simple example using GLUT" );
+    glutCreateWindow( "Font rendering advanced tweaking" );
     glutCreateMenu( NULL );
 
 
@@ -599,7 +600,7 @@ int main(int argc, char *argv[])
              "size          = '280 400'     "
              "position      = '500 20'      "
              "color         = '127 127 127' "
-             "alpha         = 200           "
+             "alpha         = 240           "
              "label         = 'Parameters'  "
              "resizable     = True          "
              "fontresizable = True          "
@@ -710,10 +711,9 @@ int main(int argc, char *argv[])
     TwAddSeparator(bar, "", "");
     TwAddButton(bar, "Reset", (TwButtonCallback) reset, NULL,
                 "help='Reset all parameters to default values.'");
-
+    TwAddSeparator(bar, "", "");
     TwAddButton(bar, "Quit", (TwButtonCallback) quit, NULL,
                 "help='Quit.'");
-
 
     atlas_gray = texture_atlas_new( 512, 256, 1 );
     atlas_rgb  = texture_atlas_new( 512, 256, 3 );
