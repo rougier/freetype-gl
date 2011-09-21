@@ -211,12 +211,12 @@ void add_glyph( const TextureGlyph *glyph,
     GLuint indices[] = {index, index+1, index+2,
                         index, index+2, index+3};
 
-    float dx = sin(p_faux_italic * M_PI/6) * glyph->height;
 
-    GlyphVertex vertices[] = { { (int)x0+dx,y0,0,  u0,v0,  r,g,b,a,  x0+dx-((int)(x0+dx)) },
-                               { (int)x0,   y1,0,  u0,v1,  r,g,b,a,  x0-((int)x0) },
-                               { (int)x1,   y1,0,  u1,v1,  r,g,b,a,  x1-((int)x1) },
-                               { (int)x1+dx,y0,0,  u1,v0,  r,g,b,a,  x1+dx-((int)(x1+dx)) } };
+    float dx = tan(p_faux_italic/180.0 * M_PI) * (glyph->height);
+    GlyphVertex vertices[] = { { (int)(x0+dx),y0,0,  u0,v0,  r,g,b,a,  x0+dx-((int)(x0+dx)) },
+                               { (int)(x0   ),y1,0,  u0,v1,  r,g,b,a,  x0-((int)x0) },
+                               { (int)(x1   ),y1,0,  u1,v1,  r,g,b,a,  x1-((int)x1) },
+                               { (int)(x1+dx),y0,0,  u1,v0,  r,g,b,a,  x1+dx-((int)(x1+dx)) } };
     vertex_buffer_push_back_indices( buffer, indices, 6 );
     vertex_buffer_push_back_vertices( buffer, vertices, 4 );
     pen->x += glyph->advance_x * (1.0 + p_interval);
@@ -261,7 +261,7 @@ build_buffer( void )
     }
     else
     {
-        fprintf( stderr, "Error : Unknonw family type\n" );
+        fprintf( stderr, "Error : Unknown family type\n" );
         return;
     }
 
@@ -301,6 +301,8 @@ build_buffer( void )
             add_glyph( glyph, buffer, &markup, &pen, kerning );
         }
     }
+
+    texture_font_delete (font );
 }
 
 
@@ -715,9 +717,9 @@ int main(int argc, char *argv[])
     TwAddVarCB(bar, "Faux italic", TW_TYPE_FLOAT, set_faux_italic, get_faux_italic, NULL, 
                "label = 'Faux italic' "
                "group = 'Glyph'       "
-               "min   = -1.0          "
-               "max   = 1.0           "
-               "step  = 0.01          "
+               "min   = -30.0         "
+               "max   =  30.0         "
+               "step  = 0.1           "
                "help  = ' '           ");
 
     // Energy distribution
