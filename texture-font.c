@@ -156,7 +156,7 @@ texture_font_generate_kerning( TextureFont *self )
         {
             prev_glyph = (TextureGlyph *) vector_get( self->glyphs, j );
             prev_index = FT_Get_Char_Index( face, prev_glyph->charcode );
-            FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNSCALED, &kerning );
+            FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
             if( kerning.x != 0.0 )
             {
                 count++;
@@ -177,16 +177,19 @@ texture_font_generate_kerning( TextureFont *self )
         {
             prev_glyph = (TextureGlyph *) vector_get( self->glyphs, j );
             prev_index = FT_Get_Char_Index( face, prev_glyph->charcode );
-            FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNSCALED, &kerning );
+            FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
             if( kerning.x != 0.0 )
             {
                 glyph->kerning[k].charcode = prev_glyph->charcode;
-                glyph->kerning[k].kerning = kerning.x / 64.0f;
+                // 64 * 64 because of 26.6 encoding AND the transform matrix used
+                // in texture_font_load_face (hres = 64)
+                glyph->kerning[k].kerning = kerning.x/ (float)(64.0f*64.0f);
                 ++k;
             }
         }
     }
 
+    FT_Done_Face( face );
     FT_Done_FreeType( library );
 }
 
@@ -306,6 +309,7 @@ texture_font_cache_glyphs( TextureFont *self,
         vector_push_back( self->glyphs, glyph );
         texture_glyph_delete( glyph );
     }
+    FT_Done_Face( face );
     FT_Done_FreeType( library );
     texture_atlas_upload( self->atlas );
     texture_font_generate_kerning( self );
@@ -392,6 +396,7 @@ texture_font_load_face( FT_Library * library,
     {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
                 __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+        FT_Done_Face( *face );
         FT_Done_FreeType( *library );
         return 0;
     }
@@ -404,6 +409,7 @@ texture_font_load_face( FT_Library * library,
     {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
                 __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+        FT_Done_Face( *face );
         FT_Done_FreeType( *library );
         return 0;
     }
