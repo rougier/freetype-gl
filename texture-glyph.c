@@ -60,6 +60,7 @@ texture_glyph_new( void )
     self->v0        = 0.0;
     self->u1        = 0.0;
     self->v1        = 0.0;
+    self->kerning_count = 0;
     return self;
 }
 
