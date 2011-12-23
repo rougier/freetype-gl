@@ -3,7 +3,7 @@
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
  * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -39,20 +39,20 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
-#include "vector.h"
 #include "vertex-buffer.h"
 
 
 // --------------------------------------------------- typedef & structures ---
-typedef struct { float x, y;
-                 float u, v;
-                 float r, g, b, a;
-                 float thickness;} Vertex;
-
+typedef struct {
+    float x, y;
+    float u, v;
+    float r, g, b, a;
+    float thickness;}
+vertex_t;
 
 
 // ------------------------------------------------------- global variables ---
-VertexBuffer *lines;
+vertex_buffer_t * lines;
 GLuint program = 0;
 
 const char *vertex_shader_source = 
@@ -81,21 +81,16 @@ const char *fragment_shader_source =
     "}                                                                 ";
 
 
-
-
-
 // ---------------------------------------------------------------- display ---
 void display( void )
 {
     glClear( GL_COLOR_BUFFER_BIT );
-
     glColor4f( 0.0f, 0.0f, 0.0f, 1.0f);
     glUseProgram( program );
     vertex_buffer_render( lines, GL_TRIANGLES, "vtc" );
     glUseProgram( 0 );
     glutSwapBuffers( );
 }
-
 
 
 // ---------------------------------------------------------------- reshape ---
@@ -110,7 +105,6 @@ void reshape( int width, int height )
 }
 
 
-
 // --------------------------------------------------------------- keyboard ---
 void
 keyboard( unsigned char key, int x, int y )
@@ -120,7 +114,6 @@ keyboard( unsigned char key, int x, int y )
         exit( EXIT_SUCCESS );
     }
 }
-
 
 
 // ----------------------------------------------------------- build_shader ---
@@ -142,7 +135,6 @@ build_shader( const char* source, GLenum type )
     }
     return handle;
 }
-
 
 
 // ---------------------------------------------------------- build_program ---
@@ -172,9 +164,8 @@ build_program( const char * vertex_source,
 }
 
 
-
-// --------------------------------------------------------------- mek_segment ---
-void make_segment( VertexBuffer *buffer,
+// ----------------------------------------------------------- make_segment ---
+void make_segment( vertex_buffer_t * buffer,
                    float x0, float y0,
                    float x1, float y1,
                    float thickness,
@@ -209,13 +200,13 @@ void make_segment( VertexBuffer *buffer,
         t = 1.0;
     }
 
-    Vertex body[6] = { {x0+dy,y0-dx, 0,-d, r,g,b,a, t},
-                       {x0-dy,y0+dx, 0,+d, r,g,b,a, t},
-                       {x1-dy,y1+dx, 0,+d, r,g,b,a, t},
+    vertex_t body[6] = { {x0+dy,y0-dx, 0,-d, r,g,b,a, t},
+                         {x0-dy,y0+dx, 0,+d, r,g,b,a, t},
+                         {x1-dy,y1+dx, 0,+d, r,g,b,a, t},
 
-                       {x0+dy,y0-dx, 0,-d, r,g,b,a, t},
-                       {x1-dy,y1+dx, 0,+d, r,g,b,a, t},
-                       {x1+dy,y1-dx, 0,-d, r,g,b,a, t} };
+                         {x0+dy,y0-dx, 0,-d, r,g,b,a, t},
+                         {x1-dy,y1+dx, 0,+d, r,g,b,a, t},
+                         {x1+dy,y1-dx, 0,-d, r,g,b,a, t} };
     vertex_buffer_push_back_vertices ( buffer, body, 6);
 
     // If line is too thin, no caps
@@ -225,23 +216,23 @@ void make_segment( VertexBuffer *buffer,
     }
 
     // Line Cap 0
-    Vertex cap0[6] = { {x0+dy,   y0-dx,     0,-1, r,g,b,a, t},
-                       {x0-dy,   y0+dx,     0,+1, r,g,b,a, t},
-                       {x0-dy-dx,y0+dx-dy, +1,+1, r,g,b,a, t},
+    vertex_t cap0[6] = { {x0+dy,   y0-dx,     0,-1, r,g,b,a, t},
+                         {x0-dy,   y0+dx,     0,+1, r,g,b,a, t},
+                         {x0-dy-dx,y0+dx-dy, +1,+1, r,g,b,a, t},
 
-                       {x0+dy,   y0-dx,     0,-1, r,g,b,a, t},
-                       {x0-dy-dx,y0+dx-dy, +1,+1, r,g,b,a, t},
-                       {x0+dy-dx,y0-dx-dy, +1,-1, r,g,b,a, t} };
+                         {x0+dy,   y0-dx,     0,-1, r,g,b,a, t},
+                         {x0-dy-dx,y0+dx-dy, +1,+1, r,g,b,a, t},
+                         {x0+dy-dx,y0-dx-dy, +1,-1, r,g,b,a, t} };
     vertex_buffer_push_back_vertices ( buffer, cap0, 6);
 
     // Line Cap 1
-    Vertex cap1[6] = { {x1-dy,    y1+dx,     0,-1, r,g,b,a, t},
-                       {x1+dy,    y1-dx,     0,+1, r,g,b,a, t},
-                       {x1+dy+dx, y1-dx+dy, +1,+1, r,g,b,a, t},
-
-                       {x1-dy,    y1+dx,     0,-1, r,g,b,a, t},
-                       {x1+dy+dx, y1-dx+dy, +1,+1, r,g,b,a, t},
-                       {x1-dy+dx, y1+dx+dy, +1,-1, r,g,b,a, t} };
+    vertex_t cap1[6] = { {x1-dy,    y1+dx,     0,-1, r,g,b,a, t},
+                         {x1+dy,    y1-dx,     0,+1, r,g,b,a, t},
+                         {x1+dy+dx, y1-dx+dy, +1,+1, r,g,b,a, t},
+                         
+                         {x1-dy,    y1+dx,     0,-1, r,g,b,a, t},
+                         {x1+dy+dx, y1-dx+dy, +1,+1, r,g,b,a, t},
+                         {x1-dy+dx, y1+dx+dy, +1,-1, r,g,b,a, t} };
     vertex_buffer_push_back_vertices ( buffer, cap1, 6);
 }
 

@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,22 +29,11 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-#include <stdlib.h>
-#include <stdio.h>
-#include <wchar.h>
-#include "vector.h"
-#include "texture-font.h"
-#include "texture-glyph.h"
-#include "texture-atlas.h"
-#include "font-manager.h"
+ * ============================================================================
+ */
+#include "freetype-gl.h"
 
-
+// ---------------------------------------------------------------- display ---
 void display( void )
 {
     int viewport[4];
@@ -67,6 +56,8 @@ void display( void )
     glutSwapBuffers( );
 }
 
+
+// ---------------------------------------------------------------- reshape ---
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -77,6 +68,8 @@ void reshape(int width, int height)
     glutPostRedisplay();
 }
 
+
+// --------------------------------------------------------------- keyboard ---
 void keyboard( unsigned char key, int x, int y )
 {
     if ( key == 27 )
@@ -85,6 +78,8 @@ void keyboard( unsigned char key, int x, int y )
     }
 }
 
+
+// ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
     size_t i, j;
@@ -94,13 +89,12 @@ int main( int argc, char **argv )
         L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
         L"`abcdefghijklmnopqrstuvwxyz{|}~";
 
-    char * font_family = "arial";
     float  font_size   = 16.0;
-    char * font_filename   = "arial.ttf";
+    char * font_filename   = "./Arial.ttf";
     char * header_filename = "arial-16.h";
 
-    TextureAtlas * atlas = texture_atlas_new( 128, 128, 1 );
-    TextureFont  * font  = texture_font_new( atlas, font_filename, font_size );
+    texture_atlas_t * atlas = texture_atlas_new( 128, 128, 1 );
+    texture_font_t  * font  = texture_font_new( atlas, font_filename, font_size );
     
 
     glutInit( &argc, argv );
@@ -110,9 +104,9 @@ int main( int argc, char **argv )
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
-    glBindTexture( GL_TEXTURE_2D, atlas->texid );
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
 
-    size_t missed = texture_font_cache_glyphs( font, font_cache );
+    size_t missed = texture_font_load_glyphs( font, font_cache );
 
     wprintf( L"Font filename              : %s\n", font_filename );
     wprintf( L"Font size                  : %.1f\n", font_size );
@@ -125,20 +119,15 @@ int main( int argc, char **argv )
     wprintf( L"Header filename            : %s\n", header_filename );
 
 
-
-
-//    glutMainLoop();
-
-
     size_t texture_size = atlas->width * atlas->height *atlas->depth;
     size_t glyph_count = font->glyphs->size;
     size_t max_kerning_count = 1;
     for( i=0; i < glyph_count; ++i )
     {
-        TextureGlyph *glyph = (TextureGlyph *) vector_get( font->glyphs, i );
-        if( glyph->kerning_count > max_kerning_count )
+        texture_glyph_t *glyph = (texture_glyph_t *) vector_get( font->glyphs, i );
+        if( vector_size(glyph->kerning) > max_kerning_count )
         {
-            max_kerning_count = glyph->kerning_count;
+            max_kerning_count = vector_size(glyph->kerning);
         }
     }
 
@@ -149,12 +138,12 @@ int main( int argc, char **argv )
     // Header
     // -------------
     fwprintf( file, 
-        L"/* =========================================================================\n"
+        L"/* ============================================================================\n"
         L" * Freetype GL - A C OpenGL Freetype engine\n"
         L" * Platform:    Any\n"
         L" * WWW:         http://code.google.com/p/freetype-gl/\n"
-        L" * -------------------------------------------------------------------------\n"
-        L" * Copyright 2011 Nicolas P. Rougier. All rights reserved.\n"
+        L" * ----------------------------------------------------------------------------\n"
+        L" * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.\n"
         L" *\n"
         L" * Redistribution and use in source and binary forms, with or without\n"
         L" * modification, are permitted provided that the following conditions are met:\n"
@@ -180,8 +169,8 @@ int main( int argc, char **argv )
         L" * The views and conclusions contained in the software and documentation are\n"
         L" * those of the authors and should not be interpreted as representing official\n"
         L" * policies, either expressed or implied, of Nicolas P. Rougier.\n"
-        L" * ========================================================================= */\n" );
-
+        L" * ===============================================================================\n"
+        L" *\n");
 
 
     // ----------------------
@@ -192,7 +181,7 @@ int main( int argc, char **argv )
         L"{\n"
         L"    wchar_t charcode;\n"
         L"    float kerning;\n"
-        L"} Kerning;\n\n" );
+        L"} kerning_t;\n\n" );
 
     fwprintf( file,
         L"typedef struct\n"
@@ -201,10 +190,10 @@ int main( int argc, char **argv )
         L"    int width, height;\n"
         L"    int offset_x, offset_y;\n"
         L"    float advance_x, advance_y;\n"
-        L"    float u0, v0, u1, v1;\n"
+        L"    float s0, t0, s1, t1;\n"
         L"    size_t kerning_count;\n"
-        L"    Kerning kerning[%d];\n"
-        L"} TextureGlyph;\n\n", max_kerning_count );
+        L"    kerning_t kerning[%d];\n"
+        L"} texture_glyph_t;\n\n", max_kerning_count );
 
     fwprintf( file,
         L"typedef struct\n"
@@ -219,12 +208,12 @@ int main( int argc, char **argv )
         L"    float ascender;\n"
         L"    float descender;\n"
         L"    size_t glyphs_count;\n"
-        L"    TextureGlyph glyphs[%d];\n"
-        L"} TextureFont;\n\n", texture_size, glyph_count );
+        L"    texture_glyph_t glyphs[%d];\n"
+        L"} texture_font_t;\n\n", texture_size, glyph_count );
 
 
     
-    fwprintf( file, L"TextureFont font = {\n" );
+    fwprintf( file, L"texture_font_t font = {\n" );
 
 
     // ------------
@@ -267,7 +256,7 @@ int main( int argc, char **argv )
     fwprintf( file, L" {\n" );
     for( i=0; i < glyph_count; ++i )
     {
-        TextureGlyph *glyph = (TextureGlyph *) vector_get( font->glyphs, i );
+        texture_glyph_t * glyph = (texture_glyph_t *) vector_get( font->glyphs, i );
 
 /*
         // Debugging information
@@ -314,27 +303,28 @@ int main( int argc, char **argv )
         fwprintf( file, L"%d, %d, ", glyph->width, glyph->height );
         fwprintf( file, L"%d, %d, ", glyph->offset_x, glyph->offset_y );
         fwprintf( file, L"%f, %f, ", glyph->advance_x, glyph->advance_y );
-        fwprintf( file, L"%f, %f, %f, %f, ", glyph->u0, glyph->v0, glyph->u1, glyph->v1 );
-        fwprintf( file, L"%d, ", max_kerning_count );
+        fwprintf( file, L"%f, %f, %f, %f, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
+        fwprintf( file, L"%d, ", vector_size(glyph->kerning) );
         fwprintf( file, L"{ " );
-        for( j=0; j < glyph->kerning_count; ++j )
+        for( j=0; j < vector_size(glyph->kerning); ++j )
         {
-            wchar_t charcode = glyph->kerning[j].charcode;
+            kerning_t *kerning = (kerning_t *) vector_get( glyph->kerning, j);
+            wchar_t charcode = kerning->charcode;
 
             if( (charcode == L'\'' ) || (charcode == L'\\') )
             {
-                fwprintf( file, L"{L'\\%lc', %f}", charcode, glyph->kerning[j].kerning );
+                fwprintf( file, L"{L'\\%lc', %f}", charcode, kerning->kerning );
             }
             else
             {
-                fwprintf( file, L"{L'%lc', %f}", charcode, glyph->kerning[j].kerning );
+                fwprintf( file, L"{L'%lc', %f}", charcode, kerning->kerning );
             }
-            if( j < (glyph->kerning_count-1) )
+            if( j < (vector_size(glyph->kerning)-1))
             {
                 fwprintf( file, L", " );
             }
         }
-        if( i < (glyph_count-1) )
+        if( i < (vector_size(glyph->kerning)-1) )
         {
             fwprintf( file, L"} },\n" );
         }

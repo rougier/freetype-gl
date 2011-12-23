@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,44 +29,37 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
+ * ============================================================================
+ */
 #include <AntTweakBar.h>
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-#include <stdlib.h>
-#include <stdio.h>
-#include <wchar.h>
-#include <math.h>
-#include "vector.h"
-#include "texture-font.h"
-#include "texture-atlas.h"
+#include "freetype-gl.h"
 #include "vertex-buffer.h"
+#include "markup.h"
+
 
 // ------------------------------------------------------- typedef & struct ---
 typedef enum {
-    GEORGIA=1,
+    GEORGIA = 1,
     TIMES,
     VERDANA,
     TAHOMA,
     ARIAL,
-} Family;
-
-typedef struct {
-    float x, y, z;
-    float u, v;
-    float r, g, b, a;
-    float m;
-} GlyphVertex;
+} font_family_e;
 
 #define NUM_FONTS 5
 
+typedef struct {
+    float x, y, z;
+    float s, t;
+    float r, g, b, a;
+    float m;
+} vertex_t;
+
+
 // ------------------------------------------------------- global variables ---
 TwBar *bar;
-VertexBuffer *buffer;
-TextureAtlas *atlas_gray, *atlas_rgb, *atlas;
+vertex_buffer_t * buffer;
+texture_atlas_t * atlas_gray, * atlas_rgb, * atlas;
 GLuint program = 0;
 GLuint texture_location;
 GLuint pixel_location;
@@ -75,7 +68,7 @@ GLuint primary_location;
 GLuint secondary_location;
 GLuint tertiary_location;
 
-Family p_family;
+font_family_e p_family;
 float p_size;
 int p_invert;
 int p_kerning;
@@ -180,11 +173,10 @@ GLuint build_program( const char * vertex_source,
 
 
 // -------------------------------------------------------------- add_glyph ---
-void add_glyph( const TextureGlyph *glyph,
-                VertexBuffer *buffer,
-                const Markup *markup,
-                Pen *pen,
-                float kerning )
+void add_glyph( const texture_glyph_t * glyph,
+                vertex_buffer_t * buffer,
+                const markup_t * markup,
+                vec2 *pen, float kerning )
 {
     if( p_kerning )
     {
@@ -203,20 +195,18 @@ void add_glyph( const TextureGlyph *glyph,
     float x1  = ( x0 + glyph->width * p_width );
     float y1  = (int)( y0 - glyph->height );
 
-    float u0 = glyph->u0;
-    float v0 = glyph->v0;
-    float u1 = glyph->u1;
-    float v1 = glyph->v1;
+    float s0 = glyph->s0;
+    float t0 = glyph->t0;
+    float s1 = glyph->s1;
+    float t1 = glyph->t1;
     GLuint index = buffer->vertices->size;
     GLuint indices[] = {index, index+1, index+2,
                         index, index+2, index+3};
-
-
     float dx = tan(p_faux_italic/180.0 * M_PI) * (glyph->height);
-    GlyphVertex vertices[] = { { (int)(x0+dx),y0,0,  u0,v0,  r,g,b,a,  x0+dx-((int)(x0+dx)) },
-                               { (int)(x0   ),y1,0,  u0,v1,  r,g,b,a,  x0-((int)x0) },
-                               { (int)(x1   ),y1,0,  u1,v1,  r,g,b,a,  x1-((int)x1) },
-                               { (int)(x1+dx),y0,0,  u1,v0,  r,g,b,a,  x1+dx-((int)(x1+dx)) } };
+    vertex_t vertices[] = { { (int)(x0+dx),y0,0,  s0,t0,  r,g,b,a,  x0+dx-((int)(x0+dx)) },
+                            { (int)(x0   ),y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0) },
+                            { (int)(x1   ),y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1) },
+                            { (int)(x1+dx),y0,0,  s1,t0,  r,g,b,a,  x1+dx-((int)(x1+dx)) } };
     vertex_buffer_push_back_indices( buffer, indices, 6 );
     vertex_buffer_push_back_vertices( buffer, vertices, 4 );
     pen->x += glyph->advance_x * (1.0 + p_interval);
@@ -227,37 +217,36 @@ void add_glyph( const TextureGlyph *glyph,
 void
 build_buffer( void )
 { 
-    Pen pen;
+    vec2 pen;
     size_t i;
-    TextureFont *font;
-    TextureGlyph *glyph;
-    Markup markup = { "Arial", 10, 0, 0, 0.0, 0.0,
-                      {1,1,1,1}, {0,0,0,0},
-                      0, {0,0,0,1}, 0, {0,0,0,1},
-                      0, {0,0,0,1}, 0, {0,0,0,1}, 0 };
-
+    texture_font_t *font;
+    texture_glyph_t *glyph;
+    markup_t markup = { "Arial", 10, 0, 0, 0.0, 0.0,
+                        {{{1,1,1,1}}}, {{{0,0,0,0}}},
+                        0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}},
+                        0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}}, 0 };
     vertex_buffer_clear( buffer );
     texture_atlas_clear( atlas );
 
     if( p_family == GEORGIA)
     {
-        font = texture_font_new( atlas, "Georgia.ttf", p_size );
+        font = texture_font_new( atlas, "./Georgia.ttf", p_size );
     }
     else if( p_family == TIMES )
     {
-        font = texture_font_new( atlas, "Times.ttf", p_size );
+        font = texture_font_new( atlas, "./Times.ttf", p_size );
     }
     else if( p_family == TAHOMA )
     {
-        font = texture_font_new( atlas, "Tahoma.ttf", p_size );
+        font = texture_font_new( atlas, "./Tahoma.ttf", p_size );
     }
     else if( p_family == ARIAL )
     {
-        font = texture_font_new( atlas, "Arial.ttf", p_size );
+        font = texture_font_new( atlas, "./Arial.ttf", p_size );
     }
     else if( p_family == VERDANA )
     {
-        font = texture_font_new( atlas, "Verdana.ttf", p_size );
+        font = texture_font_new( atlas, "./Verdana.ttf", p_size );
     }
     else
     {
@@ -266,7 +255,7 @@ build_buffer( void )
     }
 
     font->hinting = p_hinting;
-    font->lcd_filter = 1;
+    font->filtering = 1;
     float norm = 1.0/(p_primary + 2*p_secondary + 2*p_tertiary);
     font->lcd_weights[0] = (unsigned char)(p_tertiary*norm*256);
     font->lcd_weights[1] = (unsigned char)(p_secondary*norm*256);
@@ -274,10 +263,10 @@ build_buffer( void )
     font->lcd_weights[3] = (unsigned char)(p_secondary*norm*256);
     font->lcd_weights[4] = (unsigned char)(p_tertiary*norm*256);
 
-    texture_font_cache_glyphs( font, 
-                               L" !\"#$%&'()*+,-./0123456789:;<=>?"
-                               L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-                               L"`abcdefghijklmnopqrstuvwxyz{|}~" );
+    texture_font_load_glyphs( font, 
+                              L" !\"#$%&'()*+,-./0123456789:;<=>?"
+                              L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
+                              L"`abcdefghijklmnopqrstuvwxyz{|}~" );
     pen.x = 10;
     pen.y = 600 - font->height - 10;
 
@@ -321,7 +310,7 @@ void display(void)
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glEnable( GL_TEXTURE_2D );
-    glBindTexture( GL_TEXTURE_2D, atlas->texid );
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
     if( !p_lcd_filtering )
     {
         glEnable( GL_COLOR_MATERIAL );
@@ -387,7 +376,6 @@ void reshape( int width, int height )
     glLoadIdentity();
     glOrtho(0, width, 0, height, -1, 1);
     glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
     TwWindowSize( width, height );
 }
 
@@ -576,12 +564,12 @@ void TW_CALL get_size( void *value, void *data )
 // --------------------------------------------------------- get/set family ---
 void TW_CALL set_family( const void *value, void *data )
 {
-    p_family = *(const Family *) value;
+    p_family = *(const font_family_e *) value;
     build_buffer();
 }
 void TW_CALL get_family( void *value, void *data )
 {
-    *(Family *)value = p_family;
+    *(font_family_e *)value = p_family;
 }
 
 // ----------------------------------------------------------- get/set primary ---

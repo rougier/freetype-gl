@@ -3,7 +3,7 @@
 # Platform:    Any
 # WWW:         http://code.google.com/p/freetype-gl/
 # -------------------------------------------------------------------------
-# Copyright 2011 Nicolas P. Rougier. All rights reserved.
+# Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -32,7 +32,7 @@
 # =========================================================================
 PLATFORM		= $(shell uname)
 CC				= gcc
-CFLAGS			= -Wall `freetype-config --cflags` -I/usr/X11/include
+CFLAGS			= -Wall `freetype-config --cflags` -I/usr/X11/include -g -O0
 LIBS			= -lGL -lglut -lGLU -lglew \
 	              `freetype-config --libs` -lfontconfig
 ifeq ($(PLATFORM), Darwin)
@@ -88,7 +88,7 @@ makefont: makefont.o $(OBJECTS) $(HEADERS)
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -o $@
 
 clean:
-	@-rm -f $(DEMOS) $(DEMOS_ATB) *.o
+	@-rm -f $(DEMOS) $(DEMOS_ATB) makefont *.o
 	@-rm -f $(TESTS) *.o
 
 distclean: clean

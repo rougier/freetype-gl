@@ -51,7 +51,7 @@ typedef struct
 
      /** Size (in bytes) of a single item. */
      size_t item_size;
-} Vector;
+} vector_t;
 
 /**
  *  Creates a vector.
@@ -59,7 +59,7 @@ typedef struct
  *  @param  item_size    item size in bytes
  *  @return              a new empty vector
  */
-  Vector *
+  vector_t *
   vector_new( size_t item_size );
 
 /**
@@ -68,7 +68,7 @@ typedef struct
  *  @param  self a vector structure
  */
   void
-  vector_delete( Vector *self );
+  vector_delete( vector_t *self );
 
 /**
  *  Returns a pointer to the item located at specified index.
@@ -78,7 +78,7 @@ typedef struct
  *  @return       pointer on the specified item
  */
   const void *
-  vector_get( const Vector *self,
+  vector_get( const vector_t *self,
               size_t index );
 
 /**
@@ -88,7 +88,7 @@ typedef struct
  *  @return       pointer on the first item
  */
   const void *
-  vector_front( const Vector *self );
+  vector_front( const vector_t *self );
 
 /**
  *  Returns a pointer to the last item
@@ -97,7 +97,7 @@ typedef struct
  *  @return pointer on the last item
  */
   const void *
-  vector_back( const Vector *self );
+  vector_back( const vector_t *self );
 
 /**
  *  Check if an item is contained within the vector.
@@ -108,7 +108,7 @@ typedef struct
  *  @return       1 if item is contained within the vector, 0 otherwise
  */
   int
-  vector_contains( const Vector *self,
+  vector_contains( const vector_t *self,
                    const void *item,
                    int (*cmp)(const void *, const void *) );
 
@@ -119,7 +119,7 @@ typedef struct
  *  @return       1 if the vector is empty, 0 otherwise
  */
   int
-  vector_empty( const Vector *self );
+  vector_empty( const vector_t *self );
 
 /**
  *  Returns the number of items
@@ -128,7 +128,7 @@ typedef struct
  *  @return       number of items
  */
   size_t
-  vector_size( const Vector *self );
+  vector_size( const vector_t *self );
 
 /**
  *  Reserve storage such that it can hold at last size items.
@@ -137,7 +137,7 @@ typedef struct
  *  @param  size  the new storage capacity
  */
   void
-  vector_reserve( Vector *self,
+  vector_reserve( vector_t *self,
                   const size_t size );
 
 /**
@@ -147,7 +147,7 @@ typedef struct
  *  @return       storage capacity
  */
   size_t
-  vector_capacity( const Vector *self );
+  vector_capacity( const vector_t *self );
 
 /**
  *  Decrease capacity to fit actual size.
@@ -155,7 +155,7 @@ typedef struct
  *  @param  self  a vector structure
  */
   void
-  vector_shrink( Vector *self );
+  vector_shrink( vector_t *self );
 
 /**
  *  Removes all items.
@@ -163,7 +163,7 @@ typedef struct
  *  @param  self  a vector structure
  */
   void
-  vector_clear( Vector *self );
+  vector_clear( vector_t *self );
 
 /**
  *  Replace an item.
@@ -173,7 +173,7 @@ typedef struct
  *  @param  item  the new item
  */
   void
-  vector_set( Vector *self,
+  vector_set( vector_t *self,
               const size_t index,
               const void *item );
 
@@ -184,7 +184,7 @@ typedef struct
  *  @param  index the index of the item to be erased
  */
   void
-  vector_erase( Vector *self,
+  vector_erase( vector_t *self,
                 const size_t index );
 
 /**
@@ -195,7 +195,7 @@ typedef struct
  *  @param  last  the index of the last item to be erased
  */
   void
-  vector_erase_range( Vector *self,
+  vector_erase_range( vector_t *self,
                       const size_t first,
                       const size_t last );
 
@@ -206,7 +206,7 @@ typedef struct
  *  @param  item the item to be inserted
  */
   void
-  vector_push_back( Vector *self,
+  vector_push_back( vector_t *self,
                     const void *item );
 
 /**
@@ -215,7 +215,7 @@ typedef struct
  *  @param  self a vector structure
  */
   void
-  vector_pop_back( Vector *self );
+  vector_pop_back( vector_t *self );
 
 /**
  *  Resizes the vector to contain size items
@@ -228,7 +228,7 @@ typedef struct
  *  @param  size the new size
  */
   void
-  vector_resize( Vector *self,
+  vector_resize( vector_t *self,
                  const size_t size );
 
 /**
@@ -239,7 +239,7 @@ typedef struct
  *  @param  item  the item to be inserted
  */
   void
-  vector_insert( Vector *self,
+  vector_insert( vector_t *self,
                  const size_t index,
                  const void *item );
 
@@ -252,7 +252,7 @@ typedef struct
  *  @param  count the number of items to be inserted
  */
   void
-  vector_insert_data( Vector *self,
+  vector_insert_data( vector_t *self,
                       const size_t index,
                       const void * data,
                       const size_t count );
@@ -265,7 +265,7 @@ typedef struct
  *  @param  count the number of items to be inserted
  */
   void
-  vector_push_back_data( Vector *self,
+  vector_push_back_data( vector_t *self,
                          const void * data, 
                          const size_t count );
 
@@ -276,7 +276,7 @@ typedef struct
  *  @param  cmp   a pointer a comparison function
  */
   void
-  vector_sort( Vector *self,
+  vector_sort( vector_t *self,
                int (*cmp)(const void *, const void *) );
 
 #endif /* __VECTOR_H__ */

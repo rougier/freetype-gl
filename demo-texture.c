@@ -3,7 +3,7 @@
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
  * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,20 +30,11 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-#include <stdlib.h>
-#include <stdio.h>
-#include <wchar.h>
-#include "font-manager.h"
-#include "texture-font.h"
-#include "texture-atlas.h"
+#include "freetype-gl.h"
 
 
 
+// ---------------------------------------------------------------- display ---
 void display( void )
 {
     int viewport[4];
@@ -51,12 +42,7 @@ void display( void )
     GLuint width  = viewport[2];
     GLuint height = viewport[3];
 
-    glClearColor(1,1,1,1);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_TEXTURE_2D );
-    glColor4f(0,0,0,1);
     glBegin(GL_QUADS);
     glTexCoord2f( 0, 1 ); glVertex2i( 0, 0 );
     glTexCoord2f( 0, 0 ); glVertex2i( 0, height );
@@ -66,7 +52,9 @@ void display( void )
     glutSwapBuffers( );
 }
 
-void reshape(int width, int height)
+
+// ---------------------------------------------------------------- reshape ---
+void reshape( int width, int height )
 {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
@@ -76,6 +64,8 @@ void reshape(int width, int height)
     glutPostRedisplay();
 }
 
+
+// --------------------------------------------------------------- keyboard ---
 void keyboard( unsigned char key, int x, int y )
 {
     if ( key == 27 )
@@ -84,21 +74,9 @@ void keyboard( unsigned char key, int x, int y )
     }
 }
 
+// ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
-    int bold   = 0;
-    int italic = 0;
-    char * family = "Bitstream Vera Sans";
-    float minsize = 8, maxsize = 25;
-    size_t count = maxsize - minsize;
-    wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
-                     L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-                     L"`abcdefghijklmnopqrstuvwxyz{|}~";
-    char * filename;
-    TextureAtlas *atlas;
-    TextureFont *font;
-    size_t i, missed = 0;
-
     glutInit( &argc, argv );
     glutInitWindowSize( 512, 512 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
@@ -107,15 +85,22 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    atlas = texture_atlas_new( 512, 512, 1 );
-    for( i=0; i < count; ++i)
+    texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
+    const char *filename = "./Vera.ttf";
+    const wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
+                           L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
+                           L"`abcdefghijklmnopqrstuvwxyz{|}~";
+    size_t minsize = 8, maxsize = 27;
+    size_t count = maxsize - minsize;
+    size_t i, missed = 0;
+
+    for( i=minsize; i < maxsize; ++i )
     {
-        filename = font_manager_match_description( 0, family, minsize+i, bold, italic );
-        font = texture_font_new( atlas, filename, minsize+i );
-        missed += texture_font_cache_glyphs( font, cache );
-        texture_font_delete(font);
+        texture_font_t * font = texture_font_new( atlas, filename, i );
+        missed += texture_font_load_glyphs( font, cache );
+        texture_font_delete( font );
     }
-    glBindTexture( GL_TEXTURE_2D, atlas->texid );
+
     printf( "Matched font               : %s\n", filename );
     printf( "Number of fonts            : %ld\n", count );
     printf( "Number of glyphs per font  : %ld\n", wcslen(cache) );
@@ -125,6 +110,14 @@ int main( int argc, char **argv )
     printf( "Texture size               : %ldx%ld\n", atlas->width, atlas->height );
     printf( "Texture occupancy          : %.2f%%\n", 
             100.0*atlas->used/(float)(atlas->width*atlas->height) );
+
+    glClearColor(1,1,1,1);
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glEnable( GL_TEXTURE_2D );
+    glColor4f(0,0,0,1);
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
     glutMainLoop( );
+
     return 0;
 }

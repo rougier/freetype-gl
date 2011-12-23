@@ -3,7 +3,7 @@
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
  * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,9 +33,9 @@
 #ifndef __VERTEX_BUFFER_H__
 #define __VERTEX_BUFFER_H__
 #if defined(__APPLE__)
-    #include <Glut/glut.h>
+    #include <OpenGL/gl.h>
 #else
-    #include <GL/glut.h>
+    #include <GL/gl.h>
 #endif
 #include "vector.h"
 
@@ -99,7 +99,7 @@ typedef struct
     /** Pointer to the function that enable this attribute. */
     void ( * enable )(void *);
 
-} VertexAttribute;
+} vertex_attribute_t;
 
 
 
@@ -112,13 +112,13 @@ typedef struct
     char * format;
 
     /** Vector of vertices. */
-    Vector * vertices;
+    vector_t * vertices;
 
     /** GL identity of the vertices buffer. */
     GLuint vertices_id;
 
     /** Vector of indices. */
-    Vector * indices;
+    vector_t * indices;
 
     /** GL identity of the indices buffer. */
     GLuint indices_id;
@@ -127,8 +127,8 @@ typedef struct
     char dirty;
 
     /** Array of attributes. */
-    VertexAttribute *attributes[MAX_VERTEX_ATTRIBUTE];
-} VertexBuffer;
+    vertex_attribute_t *attributes[MAX_VERTEX_ATTRIBUTE];
+} vertex_buffer_t;
 
 
 
@@ -138,7 +138,7 @@ typedef struct
  * @param  format a string describing vertex format.
  * @return        an empty vertex buffer.
  */
-  VertexBuffer *
+  vertex_buffer_t *
   vertex_buffer_new( char *format );
 
 
@@ -152,7 +152,7 @@ typedef struct
  * @param  indices  raw indices data
  * @return          an empty vertex buffer.
  */
-  VertexBuffer *
+  vertex_buffer_t *
   vertex_buffer_new_from_data( char *format,
                                size_t vcount,
                                void * vertices,
@@ -166,7 +166,7 @@ typedef struct
  * @param  self  a vertex buffer
  */
   void
-  vertex_buffer_delete( VertexBuffer * self );
+  vertex_buffer_delete( vertex_buffer_t * self );
 
 
 
@@ -176,7 +176,7 @@ typedef struct
  * @param  self  a vertex buffer
  */
   void
-  vertex_buffer_print( VertexBuffer * self );
+  vertex_buffer_print( vertex_buffer_t * self );
 
 
 /**
@@ -217,7 +217,7 @@ typedef struct
  * @param  what  attributes to be rendered
  */
   void
-  vertex_buffer_render ( VertexBuffer *self,
+  vertex_buffer_render ( vertex_buffer_t *self,
                          GLenum mode,
                          char *what );
 
@@ -228,7 +228,7 @@ typedef struct
  * @param  self  a vertex buffer
  */
   void
-  vertex_buffer_upload( VertexBuffer *self );
+  vertex_buffer_upload( vertex_buffer_t *self );
 
 
 /**
@@ -237,7 +237,7 @@ typedef struct
  * @param  self  a vertex buffer
  */
   void
-  vertex_buffer_clear( VertexBuffer *self );
+  vertex_buffer_clear( vertex_buffer_t *self );
 
 
 /**
@@ -247,7 +247,7 @@ typedef struct
  * @param  index index to be appended
  */
   void
-  vertex_buffer_push_back_index ( VertexBuffer *self,
+  vertex_buffer_push_back_index ( vertex_buffer_t *self,
                                   GLuint index );
 
 
@@ -258,7 +258,7 @@ typedef struct
  * @param  vertex vertex to be appended
  */
   void
-  vertex_buffer_push_back_vertex ( VertexBuffer *self,
+  vertex_buffer_push_back_vertex ( vertex_buffer_t *self,
                                    void *vertex );
 
 
@@ -270,7 +270,7 @@ typedef struct
  * @param  count   number of indices to be appended
  */
   void
-  vertex_buffer_push_back_indices ( VertexBuffer *self,
+  vertex_buffer_push_back_indices ( vertex_buffer_t *self,
                                     GLuint *indices,
                                     size_t count );
 
@@ -283,7 +283,7 @@ typedef struct
  * @param  count    number of vertices to be appended
  */
   void
-  vertex_buffer_push_back_vertices ( VertexBuffer *self,
+  vertex_buffer_push_back_vertices ( vertex_buffer_t *self,
                                      void *vertices,
                                      size_t count );
 
@@ -297,7 +297,7 @@ typedef struct
  * @param  count   number of indices to be appended
  */
   void
-  vertex_buffer_insert_indices ( VertexBuffer *self,
+  vertex_buffer_insert_indices ( vertex_buffer_t *self,
                                  size_t index,
                                  GLuint *indices,
                                  size_t count );
@@ -315,7 +315,7 @@ typedef struct
  * Indices after index will be increased by count. 
  */
   void
-  vertex_buffer_add_vertices ( VertexBuffer *self,
+  vertex_buffer_add_vertices ( vertex_buffer_t *self,
                                size_t index,
                                void *vertices,
                                size_t count );
@@ -336,7 +336,7 @@ typedef struct
  *                   element in the array.
  * @return           a new initialized vertex attribute.
  */
-VertexAttribute *
+vertex_attribute_t *
 vertex_attribute_new( GLenum target,
                       GLuint index,
                       GLint size,
@@ -353,7 +353,7 @@ vertex_attribute_new( GLenum target,
  * @return        an initialized vertex attribute
  *
  */
-  VertexAttribute *
+  vertex_attribute_t *
   vertex_attribute_parse( char *format );
 
 
@@ -363,7 +363,7 @@ vertex_attribute_new( GLenum target,
  * @param  attr a vertex attribute
  */
   void
-  vertex_attribute_position_enable( VertexAttribute *attr );
+  vertex_attribute_position_enable( vertex_attribute_t *attr );
 
 
 /**
@@ -372,7 +372,7 @@ vertex_attribute_new( GLenum target,
  * @param  attr a vertex attribute
  */
   void
-  vertex_attribute_normal_enable( VertexAttribute *attr );
+  vertex_attribute_normal_enable( vertex_attribute_t *attr );
 
 
 /**
@@ -381,7 +381,7 @@ vertex_attribute_new( GLenum target,
  * @param attr  a vertex attribute
  */
   void
-  vertex_attribute_color_enable( VertexAttribute *attr );
+  vertex_attribute_color_enable( vertex_attribute_t *attr );
 
 
 /**
@@ -390,7 +390,7 @@ vertex_attribute_new( GLenum target,
  * @param attr  a vertex attribute
  */
   void
-  vertex_attribute_tex_coord_enable( VertexAttribute *attr );
+  vertex_attribute_tex_coord_enable( vertex_attribute_t *attr );
 
 
 /**
@@ -399,7 +399,7 @@ vertex_attribute_new( GLenum target,
  * @param attr  a vertex attribute
  */
   void
-  vertex_attribute_fog_coord_enable( VertexAttribute *attr );
+  vertex_attribute_fog_coord_enable( vertex_attribute_t *attr );
 
 
 /**
@@ -408,7 +408,7 @@ vertex_attribute_new( GLenum target,
  * @param attr  a vertex attribute
  */
   void
-  vertex_attribute_edge_flag_enable( VertexAttribute *attr );
+  vertex_attribute_edge_flag_enable( vertex_attribute_t *attr );
 
 
 /**
@@ -417,7 +417,7 @@ vertex_attribute_new( GLenum target,
  * @param attr  a vertex attribute
  */
   void
-  vertex_attribute_secondary_color_enable( VertexAttribute *attr );
+  vertex_attribute_secondary_color_enable( vertex_attribute_t *attr );
 
 /**
  * Enable a generic vertex attribute.
@@ -425,7 +425,7 @@ vertex_attribute_new( GLenum target,
  * @param attr  a vertex attribute
  */
   void
-  vertex_attribute_generic_attribute_enable( VertexAttribute *attr );
+  vertex_attribute_generic_attribute_enable( vertex_attribute_t *attr );
 
 
 /**

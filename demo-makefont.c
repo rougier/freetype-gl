@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,7 +29,8 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
+ * ============================================================================
+ */
 #if defined(__APPLE__)
     #include <Glut/glut.h>
 #else
@@ -45,7 +46,7 @@ void print_at( int pen_x, int pen_y, wchar_t *text )
     size_t i, j;
     for( i=0; i<wcslen(text); ++i)
     {
-        TextureGlyph *glyph = 0;
+        texture_glyph_t *glyph = 0;
         for( j=0; j<font.glyphs_count; ++j)
         {
             if( font.glyphs[j].charcode == text[i] )
@@ -64,12 +65,12 @@ void print_at( int pen_x, int pen_y, wchar_t *text )
         int h  = glyph->height;
         glBegin( GL_TRIANGLES );
         {
-            glTexCoord2f( glyph->u0, glyph->v0 ); glVertex2i( x,   y   );
-            glTexCoord2f( glyph->u0, glyph->v1 ); glVertex2i( x,   y-h );
-            glTexCoord2f( glyph->u1, glyph->v1 ); glVertex2i( x+w, y-h );
-            glTexCoord2f( glyph->u0, glyph->v0 ); glVertex2i( x,   y   );
-            glTexCoord2f( glyph->u1, glyph->v1 ); glVertex2i( x+w, y-h );
-            glTexCoord2f( glyph->u1, glyph->v0 ); glVertex2i( x+w, y   );
+            glTexCoord2f( glyph->s0, glyph->t0 ); glVertex2i( x,   y   );
+            glTexCoord2f( glyph->s0, glyph->t1 ); glVertex2i( x,   y-h );
+            glTexCoord2f( glyph->s1, glyph->t1 ); glVertex2i( x+w, y-h );
+            glTexCoord2f( glyph->s0, glyph->t0 ); glVertex2i( x,   y   );
+            glTexCoord2f( glyph->s1, glyph->t1 ); glVertex2i( x+w, y-h );
+            glTexCoord2f( glyph->s1, glyph->t0 ); glVertex2i( x+w, y   );
         }
         glEnd();
         pen_x += glyph->advance_x;

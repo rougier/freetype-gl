@@ -3,7 +3,7 @@
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
  * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,79 +30,42 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
 #include <assert.h>
 #include <stdlib.h>
 #include "texture-font.h"
 #include "texture-glyph.h"
 
 
-/* ------------------------------------------------------------------------- */
-TextureGlyph *
-texture_glyph_new( void )
-{
-    TextureGlyph *self = (TextureGlyph *) malloc( sizeof(TextureGlyph) );
-    if(! self )
-    {
-        return NULL;
-    }
-    self->width     = 0;
-    self->height    = 0;
-    self->offset_x  = 0;
-    self->offset_y  = 0;
-    self->advance_x = 0.0;
-    self->advance_y = 0.0;
-    self->u0        = 0.0;
-    self->v0        = 0.0;
-    self->u1        = 0.0;
-    self->v1        = 0.0;
-    self->kerning_count = 0;
-    return self;
-}
 
-
-
-/* ------------------------------------------------------------------------- */
+// -------------------------------------------------------------------------
 void
-texture_glyph_delete( TextureGlyph *self )
+texture_glyph_render( texture_glyph_t * self,
+                      markup_t * markup,
+                      vec2 * pen )
 {
     assert( self );
-    free( self );
-}
-
-
-
-/* ------------------------------------------------------------------------- */
-void
-texture_glyph_render( TextureGlyph *self,
-                      Markup *markup,
-                      Pen *pen )
-{
-    assert( self );
+    assert( markup );
+    assert( pen );
 
     int x  = pen->x + self->offset_x;
     int y  = pen->y + self->offset_y + markup->rise;
     int w  = self->width;
     int h  = self->height;
 
-    float u0 = self->u0;
-    float v0 = self->v0;
-    float u1 = self->u1;
-    float v1 = self->v1;
+    float s0 = self->s0;
+    float t0 = self->t0;
+    float s1 = self->s1;
+    float t1 = self->t1;
 
     glBegin( GL_TRIANGLES );
     {
-        glTexCoord2f( u0, v0 ); glVertex2i( x,   y   );
-        glTexCoord2f( u0, v1 ); glVertex2i( x,   y-h );
-        glTexCoord2f( u1, v1 ); glVertex2i( x+w, y-h );
+        glTexCoord2f( s0, t0 ); glVertex2i( x,   y   );
+        glTexCoord2f( s0, t1 ); glVertex2i( x,   y-h );
+        glTexCoord2f( s1, t1 ); glVertex2i( x+w, y-h );
         
-        glTexCoord2f( u0, v0 ); glVertex2i( x,   y   );
-        glTexCoord2f( u1, v1 ); glVertex2i( x+w, y-h );
-        glTexCoord2f( u1, v0 ); glVertex2i( x+w, y   );
+        glTexCoord2f( s0, t0 ); glVertex2i( x,   y   );
+        glTexCoord2f( s1, t1 ); glVertex2i( x+w, y-h );
+        glTexCoord2f( s1, t0 ); glVertex2i( x+w, y   );
     }
     glEnd();
 
@@ -111,15 +74,14 @@ texture_glyph_render( TextureGlyph *self,
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// -------------------------------------------------------------------------
 void
-texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
-                                    VertexBuffer *buffer,
-                                    const Markup *markup,
-                                    Pen *pen, int kerning )
+texture_glyph_add_to_vertex_buffer( const texture_glyph_t * self,
+                                    vertex_buffer_t * buffer,
+                                    const markup_t * markup,
+                                    vec2 * pen, int kerning )
 {
-    TextureFont *font = self->font;
+//    texture_font_t *font = self->font;
     float r = 1;
     float g = 1;
     float b = 1;
@@ -136,6 +98,7 @@ texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
     pen->x += kerning;
 
     // Background
+/*
     if( markup && markup->background_color.a > 0 )
     {
         float u0 = font->atlas->black.x / (float) font->atlas->width;
@@ -160,6 +123,7 @@ texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
         vertex_buffer_push_back_indices( buffer, indices, 6 );
         vertex_buffer_push_back_vertices( buffer, vertices, 4 );
     }
+*/
 
     // Underline
 
@@ -181,17 +145,17 @@ texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
     int y0  = (int)( pen->y + self->offset_y + rise );
     int x1  = (int)( x0 + self->width );
     int y1  = (int)( y0 - self->height );
-    float u0 = self->u0;
-    float v0 = self->v0;
-    float u1 = self->u1;
-    float v1 = self->v1;
+    float s0 = self->s0;
+    float t0 = self->t0;
+    float s1 = self->s1;
+    float t1 = self->t1;
     GLuint index = buffer->vertices->size;
     GLuint indices[] = {index, index+1, index+2,
                         index, index+2, index+3};
-    TextureGlyphVertex vertices[] = { { x0,y0,0,  u0,v0,  r,g,b,a },
-                                      { x0,y1,0,  u0,v1,  r,g,b,a },
-                                      { x1,y1,0,  u1,v1,  r,g,b,a },
-                                      { x1,y0,0,  u1,v0,  r,g,b,a } };
+    texture_glyph_vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a },
+                                          { x0,y1,0,  s0,t1,  r,g,b,a },
+                                          { x1,y1,0,  s1,t1,  r,g,b,a },
+                                          { x1,y0,0,  s1,t0,  r,g,b,a } };
     vertex_buffer_push_back_indices( buffer, indices, 6 );
     vertex_buffer_push_back_vertices( buffer, vertices, 4 );
 
@@ -200,26 +164,3 @@ texture_glyph_add_to_vertex_buffer( const TextureGlyph *self,
 }
 
 
-
-/* ------------------------------------------------------------------------- */
-float 
-texture_glyph_get_kerning( TextureGlyph *self,
-                           wchar_t charcode )
-{
-    size_t i;
-
-    assert( self );
-    if( !self->kerning )
-    {
-        return 0;
-    }
-
-    for( i=0; i<self->kerning_count; ++i )
-    {
-        if( self->kerning[i].charcode == charcode )
-        {
-            return self->kerning[i].kerning;
-        }
-    }
-    return 0;
-}

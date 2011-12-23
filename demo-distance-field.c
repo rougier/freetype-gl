@@ -30,31 +30,19 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-#include <GL/glew.h>
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-#include <stdlib.h>
-#include <stdio.h>
-#include <wchar.h>
-#include "font-manager.h"
-#include "texture-font.h"
-#include "texture-atlas.h"
+// #include <GL/glew.h>
+#include "freetype-gl.h"
 #include "edtaa3func.h"
 
 
-// ----------------------------------------------------------------- macros ---
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#define min(a,b) ((a) < (b) ? (a) : (b))
-
 // ------------------------------------------------------- typedef & struct ---
-typedef struct { float x, y, zoom; } Viewport;
+typedef struct {
+    float x, y, zoom;
+} viewport_t;
 
 // ------------------------------------------------------- global variables ---
-TextureAtlas *atlas = 0;
-Viewport viewport = {0,0,1};
+texture_atlas_t * atlas = 0;
+viewport_t viewport = {0,0,1};
 GLuint program = 0;
 
 
@@ -81,6 +69,7 @@ read_shader( const char *filename )
     fclose( file );
     return buffer;
 }
+
 
 // ----------------------------------------------------------- build_shader ---
 GLuint
@@ -140,11 +129,10 @@ display( void )
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, atlas->texid);
+    glBindTexture(GL_TEXTURE_2D, atlas->id);
     glEnable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    //glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
 
     GLuint handle;
     handle = glGetUniformLocation( program, "texture" );
@@ -169,8 +157,6 @@ display( void )
 }
 
 
-
-
 // ----------------------------------------------------------- mouse_motion ---
 void
 mouse_motion( int x, int y )
@@ -184,7 +170,6 @@ mouse_motion( int x, int y )
     viewport.y = ny*height*(1-viewport.zoom);
     glutPostRedisplay();
 }
-
 
 
 // ------------------------------------------------------------- mouse_drag ---
@@ -320,50 +305,34 @@ main( int argc, char **argv )
     glutPassiveMotionFunc( mouse_motion );
     glutKeyboardFunc( keyboard );
 
-    int bold   = 0;
-    int italic = 0;
-    char * family = "Bitstream Vera Sans";
-    float minsize = 72, maxsize = 73;
-    size_t count = maxsize - minsize;
-    wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
-                     L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-                     L"`abcdefghijklmnopqrstuvwxyz{|}~";
-    TextureFont *font;
-    char * filename;
-    size_t i, missed = 0;
+
+    unsigned char *map;
+    texture_font_t * font;
+    const char *filename = "./Vera.ttf";
+    const wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
+                           L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
+                           L"`abcdefghijklmnopqrstuvwxyz{|}~";
+
     atlas = texture_atlas_new( 512, 512, 1 );
-    for( i=0; i < count; ++i)
-    {
-        filename = font_manager_match_description( 0, family, minsize+i, bold, italic );
-        font = texture_font_new( atlas, filename, minsize+i );
-        missed += texture_font_cache_glyphs( font, cache );
-        texture_font_delete(font);
-    }
+    font = texture_font_new( atlas, filename, 72 );
+    texture_font_load_glyphs( font, cache );
+    texture_font_delete( font );
 
-    printf( "Matched font               : %s\n", filename );
-    printf( "Number of fonts            : %ld\n", count );
-    printf( "Number of glyphs per font  : %ld\n", wcslen(cache) );
-    printf( "Number of missed glyphs    : %ld\n", missed );
-    printf( "Total number of glyphs     : %ld/%ld\n",
-            wcslen(cache)*count - missed, wcslen(cache)*count );
-    printf( "Texture size               : %ldx%ld\n", atlas->width, atlas->height );
-    printf( "Texture occupancy          : %.2f%%\n\n", 
-            100.0*atlas->used/(float)(atlas->width*atlas->height) );
+    fprintf( stderr, "Generating distance map...\n" );
+    map = make_distance_map(atlas->data, atlas->width, atlas->height);
+    fprintf( stderr, "done !\n");
 
-    printf( "Generating distance map...\n" );
-    unsigned char *map = make_distance_map(atlas->data, atlas->width, atlas->height);
-    printf( "done !\n");
-    memcpy(atlas->data, map, atlas->width*atlas->height*sizeof(unsigned char));
+    memcpy( atlas->data, map, atlas->width*atlas->height*sizeof(unsigned char) );
     free(map);
-    texture_atlas_upload(atlas);
+    texture_atlas_upload( atlas );
 
     // glew initialization and OpenGL version checking
-	glewInit( );
-	if( ! glewIsSupported("GL_VERSION_2_0") )
-    {
-		fprintf( stderr, "OpenGL 2.0 not supported\n" );
-		exit( EXIT_FAILURE );
-	}
+	// glewInit( );
+	// if( ! glewIsSupported("GL_VERSION_2_0") )
+    // {
+    //     fprintf( stderr, "OpenGL 2.0 not supported\n" );
+    //     exit( EXIT_FAILURE );
+    // } 
 
     // Create the GLSL program
     char * vertex_shader_source   = read_shader("./distance-field.vert");

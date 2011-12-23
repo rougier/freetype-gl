@@ -40,109 +40,112 @@
    http://clb.demon.fi/files/RectangleBinPack/
 
    ========================================================================= */
-#pragma once
 #ifndef __TEXTURE_ATLAS_H__
 #define __TEXTURE_ATLAS_H__
 #include "vector.h"
+#include "vec234.h"
+
 
 /**
- * A Region describes
+ * A texture atlas is used to pack several small regions into a single texture.
  *
+ * The actual implementation is based on the article by Jukka Jylänki : "A
+ * Thousand Ways to Pack the Bin - A Practical Approach to Two-Dimensional
+ * Rectangle Bin Packing", February 27, 2010.
  *
+ * More precisely, this is an implementation of the Skyline Bottom-Left
+ * algorithm based on C++ sources provided by Jukka Jylänki at:
+ * http://clb.demon.fi/files/RectangleBinPack/
  */
 typedef struct
 {
-    int x;
-    int y;
-    int width;
-    int height;
-} Region;
+    /**
+     * Allocated nodes
+     */
+    vector_t * nodes;
 
-
-typedef struct { float x,y,z,w; }  vec4;
-typedef struct { float x,y,z;   }  vec3;
-typedef struct { float x,y;     }  vec2;
-typedef struct { int x,y,z,w;   } ivec4;
-typedef struct { int x,y,z;     } ivec3;
-typedef struct { int x,y;       } ivec2;
-
-
-typedef struct
-{
-    /** Current allocated nodes */
-    Vector *nodes;
-
-    /** Width (in pixels) of the underlying texture */
+    /**
+     *  Width (in pixels) of the underlying texture
+     */
     size_t width;
 
-    /** Height (in pixels) of the underlying texture */
+    /**
+     * Height (in pixels) of the underlying texture
+     */
     size_t height;
 
-    /** Texture format (1, 3 or 4) */
+    /**
+     * Depth (in bytes) of the underlying texture
+     */
     size_t depth;
 
-    /** Allocated surface  */
+    /**
+     * Allocated surface size
+     */
     size_t used;
 
-    /** Texture identity (OpenGL) */
-    unsigned int texid;
+    /**
+     * Texture identity (OpenGL)
+     */
+    unsigned int id;
 
-    unsigned char *data;
+    /**
+     * Atlas data
+     */
+    unsigned char * data;
 
-    /** A special region */
-    Region black;
+} texture_atlas_t;
 
-} TextureAtlas;
-
-
-/**
- *
- */
-  TextureAtlas *
-  texture_atlas_new( size_t width,
-                     size_t height,
-                     size_t depth );
 
 
 /**
  *
  */
-  void
-  texture_atlas_delete( TextureAtlas *self );
+  texture_atlas_t *
+  texture_atlas_new( const size_t width,
+                     const size_t height,
+                     const size_t depth );
 
 
 /**
  *
  */
   void
-  texture_atlas_upload( TextureAtlas *self );
-
-
-/**
- *
- */
-  Region
-  texture_atlas_get_region( TextureAtlas *self,
-                            size_t width,
-                            size_t height );
+  texture_atlas_delete( texture_atlas_t * self );
 
 
 /**
  *
  */
   void
-  texture_atlas_set_region( TextureAtlas *self,
-                            size_t x,
-                            size_t y,
-                            size_t width,
-                            size_t height,
-                            unsigned char *data,
-                            size_t stride );
+  texture_atlas_upload( texture_atlas_t * self );
+
+
+/**
+ *
+ */
+  ivec4
+  texture_atlas_get_region( texture_atlas_t * self,
+                            const size_t width,
+                            const size_t height );
+
 
 /**
  *
  */
   void
-  texture_atlas_clear( TextureAtlas *self );
+  texture_atlas_set_region( texture_atlas_t * self,
+                            const size_t x,
+                            const size_t y,
+                            const size_t width,
+                            const size_t height,
+                            const unsigned char *data,
+                            const size_t stride );
+
+/**
+ *
+ */
+  void
+  texture_atlas_clear( texture_atlas_t * self );
 
 #endif /* __TEXTURE_ATLAS_H__ */

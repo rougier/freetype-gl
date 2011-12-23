@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,14 +29,20 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
-#include <fontconfig/fontconfig.h>
+ * ============================================================================
+ */
+#if !defined _WIN32 && !defined _WIN64
+#  include <fontconfig/fontconfig.h>
+#endif
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <wchar.h>
 #include "font-manager.h"
 
 
+// ----------------------------------------------------------------- wcsdup ---
 wchar_t *
 wcsdup( const wchar_t *string )
 {
@@ -48,32 +54,30 @@ wcsdup( const wchar_t *string )
 }
 
 
-FontManager *
+// ------------------------------------------------------- font_manager_new ---
+font_manager_t *
 font_manager_new( size_t width, size_t height, size_t depth )
 {
-    static FontManager *self = 0;
+    font_manager_t *self;
+    texture_atlas_t *atlas = texture_atlas_new( width, height, depth );
+    self = (font_manager_t *) malloc( sizeof(font_manager_t) );
     if( !self )
     {
-        TextureAtlas *atlas = texture_atlas_new( width, height, depth );
-        self = (FontManager *) malloc( sizeof(FontManager) );
-        if( !self )
-        {
-            return 0;
-        }
-        self->atlas = atlas;
-        self->fonts = vector_new( sizeof(TextureFont) );
-        self->cache = wcsdup( L" " );
-/*
-        self->cache = wcsdup( L" !\"#$%&'()*+,-./0123456789:;<=>?"
-                              L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-                              L"`abcdefghijklmnopqrstuvwxyz{|}~" );
-*/
+        fprintf( stderr,
+                 "line %d: No more memory for allocating data\n", __LINE__ );
+        exit( EXIT_FAILURE );
     }
+    self->atlas = atlas;
+    self->fonts = vector_new( sizeof(texture_font_t) );
+    self->cache = wcsdup( L" " );
+
     return self;
 }
 
+
+// ---------------------------------------------------- font_manager_delete ---
 void
-font_manager_delete( FontManager *self )
+font_manager_delete( font_manager_t * self )
 {
     assert( self );
     vector_delete( self->fonts );
@@ -85,26 +89,27 @@ font_manager_delete( FontManager *self )
     free( self );
 }
 
-TextureFont *
-font_manager_get_from_filename( FontManager *self,
+// ----------------------------------------- font_manager_get_from_filename ---
+texture_font_t *
+font_manager_get_from_filename( font_manager_t *self,
                                 const char * filename,
                                 const float size )
 {
     size_t i;
-    TextureFont *font;
+    texture_font_t *font;
 
     assert( self );
 
     for( i=0; i<self->fonts->size;++i )
     {
-        font = (TextureFont *) vector_get( self->fonts, i );
+        font = (texture_font_t *) vector_get( self->fonts, i );
         if( (strcmp(font->filename, filename) == 0) && ( font->size == size) )
         {
             return font;
         }
     }
     font = texture_font_new( self->atlas, filename, size );
-    texture_font_cache_glyphs( font, self->cache );
+    texture_font_load_glyphs( font, self->cache );
     if( font )
     {
         vector_push_back( self->fonts, font );
@@ -113,8 +118,9 @@ font_manager_get_from_filename( FontManager *self,
 }
 
 
-TextureFont *
-font_manager_get_from_description( FontManager *self,
+// ----------------------------------------- font_manager_get_from_description ---
+texture_font_t *
+font_manager_get_from_description( font_manager_t *self,
                                    const char * family,
                                    const float size,
                                    const int bold,
@@ -122,11 +128,17 @@ font_manager_get_from_description( FontManager *self,
 {
     assert( self );
 
-    TextureFont *font;
+#ifdef  _WIN32 || _WIN64
+    fprintf( stderr, "\"font_manager_get_from_description\" not implemented yet.\n" );
+    return 0;
+#endif
+
+    texture_font_t *font;
     char *filename = font_manager_match_description( self, family, size, bold, italic );
-    // fprintf(stderr, "Matched filename for %s: %s\n", family, filename);
     if( !filename )
     {
+        fprintf( stderr, "No \"%s (size=%.1f, bold=%d, italic=%d)\" font available.\n",
+                 family, size, bold, italic );
         return 0;
     }
     font = font_manager_get_from_filename( self, filename, size );
@@ -134,26 +146,35 @@ font_manager_get_from_description( FontManager *self,
     return font;
 }
 
-TextureFont *
-font_manager_get_from_markup( FontManager *self,
-                              const Markup *markup )
+// ------------------------------------------- font_manager_get_from_markup ---
+texture_font_t *
+font_manager_get_from_markup( font_manager_t *self,
+                              const markup_t *markup )
 {
     assert( self );
     assert( markup );
-    TextureFont *font =
-        font_manager_get_from_description( self, markup->family, markup->size,
-                                           markup->bold,   markup->italic );
-    return font;
+
+#ifdef  _WIN32 || _WIN64
+    fprintf( stderr, "\"font_manager_get_from_markup\" not implemented yet.\n" );
+    return 0;
+#endif
+
+    return font_manager_get_from_description( self, markup->family, markup->size,
+                                              markup->bold,   markup->italic );
 }
 
-
+// ----------------------------------------- font_manager_match_description ---
 char *
-font_manager_match_description( FontManager *self,
+font_manager_match_description( font_manager_t * self,
                                 const char * family,
                                 const float size,
                                 const int bold,
                                 const int italic )
 {
+#if defined _WIN32 || defined _WIN64
+    return 0;
+#endif
+
     char *filename = 0;
     int weight = FC_WEIGHT_REGULAR;
     int slant = FC_SLANT_ROMAN;
@@ -200,15 +221,18 @@ font_manager_match_description( FontManager *self,
 }
 
 
+// ------------------------------------------------- font_manager_get_cache ---
 const wchar_t *
-font_manager_get_cache( FontManager *self )
+font_manager_get_cache( font_manager_t * self )
 {
     assert( self );
     return self->cache;
 }
 
+
+// ------------------------------------------------- font_manager_set_cache ---
 void
-font_manager_set_cache( FontManager *self,
+font_manager_set_cache( font_manager_t * self,
                         const wchar_t * cache )
 {
     assert( self );

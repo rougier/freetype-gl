@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,24 +29,27 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-#include <wchar.h>
-#include "vector.h"
-#include "markup.h"
+ * ============================================================================
+ */
+#include "freetype-gl.h"
 #include "font-manager.h"
-#include "texture-font.h"
-#include "texture-glyph.h"
 #include "vertex-buffer.h"
+#include "markup.h"
 
 
-VertexBuffer *buffer;
-FontManager *manager;
+// ------------------------------------------------------- typedef & struct ---
+typedef struct {
+    float x, y, z;    // position
+    float s, t;       // texture
+    float r, g, b, a; // color
+} vertex_t;
 
+
+// ------------------------------------------------------- global variables ---
+vertex_buffer_t *buffer;
+
+
+// ---------------------------------------------------------------- display ---
 void display( void )
 {
     int viewport[4];
@@ -64,6 +67,8 @@ void display( void )
     glutSwapBuffers( );
 }
 
+
+// --------------------------------------------------------------- reshape ---
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -74,6 +79,8 @@ void reshape(int width, int height)
     glutPostRedisplay();
 }
 
+
+// --------------------------------------------------------------- keyboard ---
 void keyboard( unsigned char key, int x, int y )
 {
     if ( key == 27 )
@@ -83,25 +90,52 @@ void keyboard( unsigned char key, int x, int y )
 }
 
 
-void add_text( wchar_t *      text,
-               VertexBuffer * buffer,
-               Markup *       markup,
-               Pen *          pen )
+// --------------------------------------------------------------- add_text ---
+void add_text( vertex_buffer_t * buffer, wchar_t *text,
+               markup_t * markup, vec2 * pen )
 {
     size_t i;
-    //TextureFont *font = font_manager_get_from_markup( manager, markup );
-    //markup->font = font;
-    TextureGlyph *glyph  = texture_font_get_glyph( markup->font, text[0] );
-    texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen, 0 );
-    for( i=1; i<wcslen(text); ++i )
+    texture_font_t * font = markup->font;
+    float r = markup->foreground_color.red;
+    float g = markup->foreground_color.green;
+    float b = markup->foreground_color.blue;
+    float a = markup->foreground_color.alpha;
+
+    for( i=0; i<wcslen(text); ++i )
     {
-        TextureGlyph *glyph = texture_font_get_glyph( markup->font, text[i] );
-        int kerning = texture_glyph_get_kerning( glyph, text[i-1] );
-        texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen, kerning );
+        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
+        if( glyph != NULL )
+        {
+            int kerning = 0;
+            if( i > 0)
+            {
+                kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+            }
+            pen->x += kerning;
+            int x0  = (int)( pen->x + glyph->offset_x );
+            int y0  = (int)( pen->y + glyph->offset_y );
+            int x1  = (int)( x0 + glyph->width );
+            int y1  = (int)( y0 - glyph->height );
+            float s0 = glyph->s0;
+            float t0 = glyph->t0;
+            float s1 = glyph->s1;
+            float t1 = glyph->t1;
+            GLuint index = buffer->vertices->size;
+            GLuint indices[] = {index, index+1, index+2,
+                                index, index+2, index+3};
+            vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a },
+                                    { x0,y1,0,  s0,t1,  r,g,b,a },
+                                    { x1,y1,0,  s1,t1,  r,g,b,a },
+                                    { x1,y0,0,  s1,t0,  r,g,b,a } };
+            vertex_buffer_push_back_indices( buffer, indices, 6 );
+            vertex_buffer_push_back_vertices( buffer, vertices, 4 );
+            pen->x += glyph->advance_x;
+        }
     }
-    glBindTexture( GL_TEXTURE_2D, manager->atlas->texid );
 }
 
+
+// ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
     glutInit( &argc, argv );
@@ -113,33 +147,33 @@ int main( int argc, char **argv )
     glutKeyboardFunc( keyboard );
 
 
-    Color white = {1,1,1,1};
-    Color black = {0,0,0,1};
-    Color red  = {1,0,0,1};
-    Color green= {0,1,0,1};
-    Color blue = {0,0,1,1};
-    Markup normal = { "Liberation Sans", 20, 0, 0, 0.0, 0.0,
-                      {0,0,0,1}, {0,0,0,0},
-                      0, {0,0,0,1}, 0, {0,0,0,1},
-                      0, {0,0,0,1}, 0, {0,0,0,1}, 0 };
-    Markup title  = normal; title.size = 32;
-    Markup bold   = normal; bold.bold = 1;
-    Markup italic = normal; italic.italic = 1;
-    Markup inverse = normal;
+    vec4 white = {{{1,1,1,1}}};
+    vec4 black = {{{0,0,0,1}}};
+    vec4 red  = {{{1,0,0,1}}};
+    vec4 green= {{{0,1,0,1}}};
+    vec4 blue = {{{0,0,1,1}}};
+    markup_t normal = { "Liberation Sans", 18, 0, 0, 0.0, 0.0,
+                      {{{0,0,0,1}}}, {{{0,0,0,0}}},
+                      0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}},
+                      0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}}, 0 };
+    markup_t title  = normal; title.size = 32;
+    markup_t bold   = normal; bold.bold = 1;
+    markup_t italic = normal; italic.italic = 1;
+    markup_t inverse = normal;
     inverse.foreground_color = white;
     inverse.background_color = black;
-    Markup condensed = normal; condensed.spacing = -2.0;
-    Markup expanded = normal; expanded.spacing   = +2.0;
-    Markup subscript   = normal; subscript.rise   =-2; subscript.size = 12;
-    Markup superscript = normal; superscript.rise = 2; superscript.size = 12;
-    Markup m_red   = normal; m_red.foreground_color   = red;
-    Markup m_green = normal; m_green.foreground_color = green;
-    Markup m_blue  = normal; m_blue.foreground_color  = blue;
-    Markup zapfino = normal; zapfino.family = "Zapfino";
+    markup_t condensed = normal; condensed.spacing = -2.0;
+    markup_t expanded = normal; expanded.spacing   = +2.0;
+    markup_t subscript   = normal; subscript.rise   =-2; subscript.size = 12;
+    markup_t superscript = normal; superscript.rise = 2; superscript.size = 12;
+    markup_t m_red   = normal; m_red.foreground_color   = red;
+    markup_t m_green = normal; m_green.foreground_color = green;
+    markup_t m_blue  = normal; m_blue.foreground_color  = blue;
+    markup_t zapfino = normal; zapfino.family = "Zapfino";
 
 
-    Pen pen = {0.0, 0.0} ;
-    manager = font_manager_new( 512, 512, 1 );
+    vec2 pen = {{{0,0}}};
+    font_manager_t * manager = font_manager_new( 512, 512, 1 );
     buffer= vertex_buffer_new( "v3f:t2f:c4f" ); 
 
     title.font       = font_manager_get_from_markup( manager, &title );
@@ -155,48 +189,48 @@ int main( int argc, char **argv )
     expanded.font    = font_manager_get_from_markup( manager, &expanded);
 
     pen.y -= title.font->ascender; pen.x = 0;
-    add_text( L"Freetype OpenGL™", buffer, &title, &pen );
+    add_text( buffer, L"Freetype OpenGL™", &title, &pen );
     pen.y += title.font->descender;
 
     pen.y -= normal.font->ascender; pen.x = 0;
-    add_text( L"Freetype text handling using a single"
+    add_text( buffer,
+              L"Freetype text handling using a single"
               L"vertex buffer and a single texture featuring:",
-              buffer, &normal, &pen);
+              &normal, &pen);
     pen.y += normal.font->descender;
 
     pen.y -= normal.font->ascender; pen.x = 0;
-    add_text( L" • Unicode characters: ²³€¥∑∫∞√©Ω¿«»", buffer, &normal, &pen );
+    add_text( buffer, L" • Unicode characters: ²³€¥∑∫∞√©Ω¿«»",  &normal, &pen );
     pen.y += normal.font->descender;
 
     pen.y -= normal.font->ascender; pen.x = 0;
-    add_text( L" • ", buffer, &normal, &pen );
-    add_text( L"superscript ", buffer, &superscript, &pen );
-    add_text( L" and ", buffer, &normal, &pen );
-    add_text( L"subscript ", buffer, &subscript, &pen );
+    add_text( buffer,  L" • ", &normal, &pen );
+    add_text( buffer,  L"superscript ", &superscript, &pen );
+    add_text( buffer,  L" and ", &normal, &pen );
+    add_text( buffer,  L"subscript ", &subscript, &pen );
     pen.y += normal.font->descender;
 
     pen.y -= inverse.font->ascender; pen.x = 0;
-    add_text( L" • Inverse video mode ", buffer, &inverse, &pen );
+    add_text( buffer, L" • Inverse video mode ", &inverse, &pen );
     pen.y += inverse.font->descender;
 
     pen.y -= normal.font->ascender; pen.x = 0;
-    add_text( L" • Any ", buffer, &m_green, &pen );
-    add_text( L"color ", buffer, &m_blue, &pen );
-    add_text( L"you like", buffer, &m_red, &pen );
+    add_text( buffer, L" • Any ", &m_green, &pen );
+    add_text( buffer, L"color ", &m_blue, &pen );
+    add_text( buffer, L"you like", &m_red, &pen );
     pen.y += normal.font->descender;
 
     pen.y -= zapfino.font->ascender; pen.x = 0;
-    add_text( L" • ", buffer, &normal, &pen );
-    add_text( L"Any (installed) font", buffer, &zapfino, &pen );
+    add_text( buffer, L" • ", &normal, &pen );
+    add_text( buffer, L"Any (installed) font", &zapfino, &pen );
     pen.y += zapfino.font->descender;
 
     pen.y -= normal.font->ascender; pen.x = 0;
-    add_text( L" • ", buffer, &normal, &pen );
-    add_text( L"condensed", buffer, &condensed, &pen );
-    add_text( L" or ", buffer, &normal, &pen );
-    add_text( L"expanded", buffer, &expanded, &pen );
+    add_text( buffer, L" • ", &normal, &pen );
+    add_text( buffer, L"condensed", &condensed, &pen );
+    add_text( buffer, L" or ", &normal, &pen );
+    add_text( buffer, L"expanded", &expanded, &pen );
     pen.y += normal.font->descender; pen.x = 0;
-
 
     glutMainLoop( );
     return 0;

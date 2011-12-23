@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,11 +29,10 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
-#pragma once
+ * ============================================================================
+ */
 #ifndef __FONT_MANAGER_H__
 #define __FONT_MANAGER_H__
-
 #include "vector.h"
 #include "markup.h"
 #include "texture-font.h"
@@ -44,18 +43,29 @@
  *
  */
 typedef struct {
-    TextureAtlas * atlas;
-    Vector *       fonts;
-    wchar_t *      cache;
-    Region         black;
-} FontManager;
+    /**
+     *
+     */
+    texture_atlas_t * atlas;
+
+    /**
+     *
+     */
+    vector_t * fonts;
+
+    /**
+     *
+     */
+    wchar_t * cache;
+
+} font_manager_t;
 
 
 
 /**
  *
  */
-  FontManager *
+  font_manager_t *
   font_manager_new( size_t width, size_t height, size_t depth );
 
 
@@ -63,14 +73,14 @@ typedef struct {
  *
  */
   void
-  font_manager_delete( FontManager *self );
+  font_manager_delete( font_manager_t *self );
 
 
 /**
  *
  */
-  TextureFont *
-  font_manager_get_from_filename( FontManager * self,
+  texture_font_t *
+  font_manager_get_from_filename( font_manager_t * self,
                                   const char * filename,
                                   const float size );
 
@@ -78,8 +88,8 @@ typedef struct {
 /**
  *
  */
-  TextureFont *
-  font_manager_get_from_description( FontManager * self,
+  texture_font_t *
+  font_manager_get_from_description( font_manager_t * self,
                                      const char * family,
                                      const float size,
                                      const int bold,
@@ -89,16 +99,16 @@ typedef struct {
 /**
  *
  */
-  TextureFont *
-  font_manager_get_from_markup( FontManager *self,
-                                const Markup *markup );
+  texture_font_t *
+  font_manager_get_from_markup( font_manager_t *self,
+                                const markup_t *markup );
 
 
 /**
  *
  */
   char *
-  font_manager_match_description( FontManager * self,
+  font_manager_match_description( font_manager_t * self,
                                   const char * family,
                                   const float size,
                                   const int bold,
@@ -109,14 +119,14 @@ typedef struct {
  *
  */
   const wchar_t *
-  font_manager_get_cache( FontManager * self );
+  font_manager_get_cache( font_manager_t * self );
 
 
 /**
  *
  */
   void
-  font_manager_set_cache( FontManager * self,
+  font_manager_set_cache( font_manager_t * self,
                           const wchar_t * cache );
 
 #endif /* __FONT_MANAGER_H__ */

@@ -3,7 +3,7 @@
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
  * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,44 +30,12 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-#pragma once
 #ifndef __TEXTURE_GLYPH_H__
 #define __TEXTURE_GLYPH_H__
-
-#include <wchar.h>
-#include "markup.h"
+#include "texture-font.h"
 #include "vertex-buffer.h"
+#include "markup.h"
 
-/**
- *
- */
-typedef struct {
-    wchar_t   charcode;
-    float     kerning;       
-} KerningPair;
-
-
-/**
- *
- */
-typedef struct {
-    float x,y;
-} Pen;
-
-
-/**
- *
- */
-typedef struct {
-    wchar_t       charcode;
-    int           width, height;
-    int           offset_x, offset_y;
-    float         advance_x, advance_y;
-    float         u0, v0, u1, v1;
-    KerningPair * kerning;
-    size_t        kerning_count;
-    struct TextureFont_   *font;
-} TextureGlyph;
 
 
 /**
@@ -77,47 +45,25 @@ typedef struct {
     float x, y, z;
     float u, v;
     float r, g, b, a;
-} TextureGlyphVertex;
-
-
-/**
- *
- */
-  TextureGlyph *
-  texture_glyph_new( void );
+} texture_glyph_vertex_t;
 
 
 /**
  *
  */
   void
-  texture_glyph_delete( TextureGlyph * self );
+  texture_glyph_render( texture_glyph_t * self,
+                        markup_t * markup,
+                        vec2 * pen );
 
 
 /**
  *
  */
   void
-  texture_glyph_render( TextureGlyph * self,
-                        Markup * markup,
-                        Pen * pen );
-
-
-/**
- *
- */
-  void
-  texture_glyph_add_to_vertex_buffer( const TextureGlyph * self,
-                                      VertexBuffer * buffer,
-                                      const Markup * markup,
-                                      Pen * pen, int kerning );
-
-
-/**
- *
- */
-  float
-  texture_glyph_get_kerning( TextureGlyph * self,
-                             wchar_t charcode );
+  texture_glyph_add_to_vertex_buffer( const texture_glyph_t * self,
+                                      vertex_buffer_t * buffer,
+                                      const markup_t * markup,
+                                      vec2 * pen, int kerning );
 
 #endif /* __TEXTURE_GLYPH_H__ */

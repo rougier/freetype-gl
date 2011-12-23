@@ -3,7 +3,7 @@
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
  * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,13 +36,14 @@
 #include "font-manager.h"
 #include "markup.h"
 
-Markup *
+// ------------------------------------------------------------- markup_new ---
+markup_t *
 markup_new( void )
 {
-    Color black = {0,0,0,1};
-    Color white = {1,1,1,1};
+    vec4 black = {{{0,0,0,1}}};
+    vec4 white = {{{1,1,1,1}}};
 
-    Markup *self = (Markup *) malloc( sizeof(Markup) );
+    markup_t * self = (markup_t *) malloc( sizeof(markup_t) );
     if( !self )
     {
         return NULL;
@@ -69,8 +70,10 @@ markup_new( void )
     return self;
 }
 
+
+// ---------------------------------------------------------- markup_delete ---
 void
-markup_delete( Markup *self )
+markup_delete( markup_t * self )
 {
     assert( self );
    
@@ -78,217 +81,323 @@ markup_delete( Markup *self )
     free( self );
 }
 
-
+// ------------------------------------------------------------- markup_cmp ---
 int
-markup_cmp( const Markup *self,
-            const Markup *other )
+markup_cmp( const markup_t * self,
+            const markup_t *other )
 {
-    size_t n = sizeof( Markup ) - sizeof( TextureFont * );
+    size_t n = sizeof( markup_t ) - sizeof( texture_font_t * );
     return memcmp( self, other, n );
 }
 
 
+// ------------------------------------------------------ markup_get_family ---
 const char *
-markup_get_family( Markup *self )
+markup_get_family( const markup_t * self )
 {
     assert( self );
+
     return self->family;
 }
 
+
+// ------------------------------------------------------ markup_set_family ---
 void
-markup_set_family( Markup *self,
+markup_set_family( markup_t * self,
                    const char *family )
 {
+    assert( self );
+    assert( family );
 }
 
+
+// ------------------------------------------------------ markup_get_italic ---
 int
-markup_get_italic( Markup *self )
+markup_get_italic( const markup_t * self )
 {
     assert( self );
+
     return self->italic;
 }
 
+
+// ------------------------------------------------------ markup_set_italic ---
 void
-markup_set_italic( Markup *self,
+markup_set_italic( markup_t * self,
                    const int italic )
 {
+    assert( self );
 }
 
+
+// -------------------------------------------------------- markup_get_bold ---
 int
-markup_get_bold( Markup *self )
+markup_get_bold( const markup_t * self )
 {
     assert( self );
+
     return self->bold;
 }
 
+// -------------------------------------------------------- markup_set_bold ---
 void
-markup_set_bold( Markup *self,
+markup_set_bold( markup_t * self,
                  const int bold )
 {
+    assert( self );
+
 }
 
+// -------------------------------------------------------- markup_get_size ---
 float
-markup_get_size( Markup *self )
+markup_get_size( const markup_t * self )
 {
     assert( self );
 
     return self->size;
 }
 
+
+// -------------------------------------------------------- markup_set_size ---
 void
-markup_set_size( Markup *self,
+markup_set_size( markup_t * self,
                  const float size )
 {
+    assert( self );
+
 }
 
+
+// -------------------------------------------------------- markup_get_rise ---
 float
-markup_get_rise( Markup *self )
+markup_get_rise( const markup_t * self )
 {
     assert( self );
+
     return self->rise;
 }
 
-void
-markup_set_rise( Markup *self, const float rise )
-{
-}
 
-float
-markup_get_spacing( Markup *self )
+// -------------------------------------------------------- markup_set_rise ---
+void
+markup_set_rise( markup_t * self,
+                 const float rise )
 {
     assert( self );
+}
+
+
+// ----------------------------------------------------- markup_get_spacing ---
+float
+markup_get_spacing( const markup_t * self )
+{
+    assert( self );
+
     return self->spacing;
 }
 
-void
-markup_set_spacing( Markup *self, const float spacing )
-{
-}
 
-Color
-markup_get_foreground_color( Markup *self )
+// ----------------------------------------------------- markup_set_spacing ---
+void
+markup_set_spacing( markup_t * self,
+                    const float spacing )
 {
     assert( self );
+
+}
+
+// -------------------------------------------- markup_get_foreground_color ---
+vec4
+markup_get_foreground_color( const markup_t * self )
+{
+    assert( self );
+
     return self->foreground_color;
 }
 
-void
-markup_set_foreground_color( Markup *self, const Color * color )
-{
-}
 
-Color
-markup_get_background_color( Markup *self )
+// -------------------------------------------- markup_set_foreground_color ---
+void
+markup_set_foreground_color( markup_t * self,
+                             const vec4 * color )
 {
     assert( self );
+    assert( color );
+
+}
+
+
+// -------------------------------------------- markup_get_background_color ---
+vec4
+markup_get_background_color( const markup_t * self )
+{
+    assert( self );
+
     return self->background_color;
 }
 
-void
-markup_set_background_color( Markup *self, const Color * color )
-{
-}
 
-int
-markup_get_outline( Markup *self )
+// -------------------------------------------- markup_get_background_color ---
+void
+markup_set_background_color( markup_t * self, const vec4 * color )
 {
     assert( self );
+    assert( color );
+}
+
+// ----------------------------------------------------- markup_get_outline ---
+int
+markup_get_outline( const markup_t * self )
+{
+    assert( self );
+
     return self->outline;
 }
 
+
+// ----------------------------------------------------- markup_set_outline ---
 void
-markup_set_outline( Markup *self,
+markup_set_outline( markup_t * self,
                     const int outline )
 {
+    assert( self );
+
 }
 
-Color
-markup_get_outline_color( Markup *self )
+
+// ----------------------------------------------- markup_get_outline_color ---
+vec4
+markup_get_outline_color( const markup_t * self )
 {
     assert( self );
+
     return self->outline_color;
 }
 
-void
-markup_set_outline_color( Markup *self,
-                          const Color * color )
-{
-}
 
-int
-markup_get_underline( Markup *self )
+// ----------------------------------------------- markup_set_outline_color ---
+void
+markup_set_outline_color( markup_t * self,
+                          const vec4 * color )
 {
     assert( self );
+    assert( color );
+
+}
+
+// --------------------------------------------------- markup_get_underline ---
+int
+markup_get_underline( const markup_t * self )
+{
+    assert( self );
+
     return self->underline;
 }
 
+
+// --------------------------------------------------- markup_set_underline ---
 void
-markup_set_underline( Markup *self,
+markup_set_underline( markup_t * self,
                       const int underline )
 {
+    assert( self );
+
 }
 
-Color
-markup_get_underline_color( Markup *self )
+
+// --------------------------------------------- markup_get_underline_color ---
+vec4
+markup_get_underline_color( const markup_t * self )
 {
     assert( self );
     return self->underline_color;
 }
 
-void
-markup_set_underline_color( Markup *self,
-                            const Color * color )
-{
-}
 
-int
-markup_get_overline( Markup *self )
+// --------------------------------------------- markup_set_underline_color ---
+void
+markup_set_underline_color( markup_t * self,
+                            const vec4 * color )
 {
     assert( self );
+    assert( color );
+}
+
+
+// ---------------------------------------------------- markup_get_overline ---
+int
+markup_get_overline( const markup_t * self )
+{
+    assert( self );
+
     return self->overline;
 }
 
+
+// ---------------------------------------------------- markup_set_overline ---
 void
-markup_set_overline( Markup *self,
+markup_set_overline( markup_t * self,
                      const int overline )
 {
+    assert( self );
+
 }
 
-Color
-markup_get_overline_color( Markup *self )
+
+// ---------------------------------------------- markup_get_overline_color ---
+vec4
+markup_get_overline_color( const markup_t * self )
 {
     assert( self );
+
     return self->overline_color;
 }
 
+
+// ---------------------------------------------- markup_set_overline_color ---
 void
-markup_set_overline_color( Markup *self,
-                           const Color * color )
+markup_set_overline_color( markup_t * self,
+                           const vec4 * color )
 {
+    assert( self );
+    assert( color );
 }
 
+
+// ----------------------------------------------- markup_get_strikethrough ---
 int
-markup_get_strikethrough( Markup *self )
+markup_get_strikethrough( const markup_t * self )
 {
     assert( self );
     return self->strikethrough;
 }
 
+
+// ----------------------------------------------- markup_set_strikethrough ---
 void
-markup_set_strikethrough( Markup *self,
+markup_set_strikethrough( markup_t * self,
                           const int strikethrough )
 {
+    assert( self );
+
 }
 
-Color
-markup_get_strikethrough_color( Markup *self )
+
+// ---------------------------------------- markup_get_strikethrought_color ---
+vec4
+markup_get_strikethrough_color( const markup_t * self )
 {
     assert( self );
+
     return self->strikethrough_color;
 }
 
+
+// ---------------------------------------- markup_set_strikethrought_color ---
 void
-markup_set_strikethrough_color( Markup *self,
-                                const Color * color )
+markup_set_strikethrough_color( markup_t * self,
+                                const vec4 * color )
 {
+    assert( self );
+    assert( color );
 }

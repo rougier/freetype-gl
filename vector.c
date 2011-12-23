@@ -3,7 +3,7 @@
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
  * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,16 +38,18 @@
 
 
 
-/* ------------------------------------------------------------------------- */
-Vector *
+// ------------------------------------------------------------- vector_new ---
+vector_t *
 vector_new( size_t item_size )
 {
     assert( item_size );
 
-    Vector *self = (Vector *) malloc( sizeof(Vector) );
+    vector_t *self = (vector_t *) malloc( sizeof(vector_t) );
     if( !self )
     {
-        return NULL;
+        fprintf( stderr,
+                 "line %d: No more memory for allocating data\n", __LINE__ );
+        exit( EXIT_FAILURE );
     }
     self->item_size = item_size;
     self->size      = 0;
@@ -58,60 +60,63 @@ vector_new( size_t item_size )
 
 
 
-/* ------------------------------------------------------------------------- */
+// ---------------------------------------------------------- vector_delete ---
 void
-vector_delete( Vector *self )
+vector_delete( vector_t *self )
 {
     assert( self );
+
     free( self->items );
     free( self );
 }
 
 
 
-/* ------------------------------------------------------------------------- */
+// ------------------------------------------------------------- vector_get ---
 const void *
-vector_get( const Vector *self,
+vector_get( const vector_t *self,
             size_t index )
 {
     assert( self );
     assert( self->size );
     assert( index  < self->size );
+
     return self->items + index * self->item_size;
 }
 
 
 
-/* ------------------------------------------------------------------------- */
+// ----------------------------------------------------------- vector_front ---
 const void *
-vector_front( const Vector *self )
+vector_front( const vector_t *self )
 {
     assert( self );
     assert( self->size );
+
     return vector_get( self, 0 );
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ------------------------------------------------------------ vector_back ---
 const void *
-vector_back( const Vector *self )
+vector_back( const vector_t *self )
 {
     assert( self );
     assert( self->size );
+
     return vector_get( self, self->size-1 );
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// -------------------------------------------------------- vector_contains ---
 int
-vector_contains( const Vector *self,
+vector_contains( const vector_t *self,
                  const void *item,
                  int (*cmp)(const void *, const void *) )
 {
-    size_t i;
     assert( self );
+
+    size_t i;
     for( i=0; i<self->size; ++i )
     {
         if( (*cmp)(item, vector_get(self,i) ) == 0 )
@@ -123,33 +128,33 @@ vector_contains( const Vector *self,
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ----------------------------------------------------------- vector_empty ---
 int
-vector_empty( const Vector *self )
+vector_empty( const vector_t *self )
 {
     assert( self );
+
     return self->size == 0;
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ------------------------------------------------------------ vector_size ---
 size_t
-vector_size( const Vector *self )
+vector_size( const vector_t *self )
 {
     assert( self );
+
     return self->size;
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// --------------------------------------------------------- vector_reserve ---
 void
-vector_reserve( Vector *self,
+vector_reserve( vector_t *self,
                 const size_t size )
 {
     assert( self );
+
     if( self->capacity < size);
     {
         self->items = realloc( self->items, size * self->item_size );
@@ -158,22 +163,22 @@ vector_reserve( Vector *self,
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// -------------------------------------------------------- vector_capacity ---
 size_t
-vector_capacity( const Vector *self )
+vector_capacity( const vector_t *self )
 {
     assert( self );
+
     return self->capacity;
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ---------------------------------------------------------- vector_shrink ---
 void
-vector_shrink( Vector *self )
+vector_shrink( vector_t *self )
 {
     assert( self );
+
     if( self->capacity > self->size )
     {
         self->items = realloc( self->items, self->size * self->item_size );
@@ -182,35 +187,34 @@ vector_shrink( Vector *self )
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ----------------------------------------------------------- vector_clear ---
 void
-vector_clear( Vector *self )
+vector_clear( vector_t *self )
 {
     assert( self );
+
     self->size = 0;
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ------------------------------------------------------------- vector_set ---
 void
-vector_set( Vector *self,
+vector_set( vector_t *self,
             const size_t index,
             const void *item )
 {
     assert( self );
     assert( self->size );
     assert( index  < self->size );
+
     memcpy( self->items + index * self->item_size,
             item, self->item_size );
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ---------------------------------------------------------- vector_insert ---
 void
-vector_insert( Vector *self,
+vector_insert( vector_t *self,
                const size_t index,
                const void *item )
 {
@@ -232,10 +236,9 @@ vector_insert( Vector *self,
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ----------------------------------------------------- vector_erase_range ---
 void
-vector_erase_range( Vector *self,
+vector_erase_range( vector_t *self,
                     const size_t first,
                     const size_t last )
 {
@@ -243,6 +246,7 @@ vector_erase_range( Vector *self,
     assert( first < self->size );
     assert( last  < self->size+1 );
     assert( first < last );
+
     memmove( self->items + first * self->item_size,
              self->items + last  * self->item_size,
              (self->size - last)   * self->item_size);
@@ -250,10 +254,9 @@ vector_erase_range( Vector *self,
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ----------------------------------------------------------- vector_erase ---
 void
-vector_erase( Vector *self,
+vector_erase( vector_t *self,
               const size_t index )
 {
     assert( self );
@@ -263,34 +266,33 @@ vector_erase( Vector *self,
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ------------------------------------------------------- vector_push_back ---
 void
-vector_push_back( Vector *self,
+vector_push_back( vector_t *self,
                   const void *item )
 {
     vector_insert( self, self->size, item );
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// -------------------------------------------------------- vector_pop_back ---
 void
-vector_pop_back( Vector *self )
+vector_pop_back( vector_t *self )
 {
     assert( self );
     assert( self->size );
+
     self->size--;
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ---------------------------------------------------------- vector_resize ---
 void
-vector_resize( Vector *self,
+vector_resize( vector_t *self,
                const size_t size )
 {
     assert( self );
+
     if( size > self->capacity)
     {
         vector_reserve( self, size );
@@ -303,10 +305,9 @@ vector_resize( Vector *self,
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// -------------------------------------------------- vector_push_back_data ---
 void
-vector_push_back_data( Vector *self,
+vector_push_back_data( vector_t *self,
                        const void * data,
                        const size_t count )
 {
@@ -324,10 +325,9 @@ vector_push_back_data( Vector *self,
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ----------------------------------------------------- vector_insert_data ---
 void
-vector_insert_data( Vector *self,
+vector_insert_data( vector_t *self,
                     const size_t index,
                     const void * data,
                     const size_t count )
@@ -350,13 +350,13 @@ vector_insert_data( Vector *self,
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ------------------------------------------------------------ vector_sort ---
 void
-vector_sort( Vector *self,
+vector_sort( vector_t *self,
              int (*cmp)(const void *, const void *) )
 {
     assert( self );
     assert( self->size );
+
     qsort(self->items, self->size, self->item_size, cmp);
 }

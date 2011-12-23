@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,12 +29,14 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
+ * ============================================================================
+ */
 #if defined(__APPLE__)
-    #include <Glut/glut.h>
+    #include <OpenGL/gl.h>
 #else
-    #include <GL/glut.h>
+    #include <GL/gl.h>
 #endif
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -44,54 +46,46 @@
 #define max(a,b) (a)>(b)?(a):(b)
 #define min(a,b) (a)<(b)?(a):(b)
 
-typedef struct { int x, y, width; } Node;
 
-
-
-
-/* ------------------------------------------------------------------------- */
-TextureAtlas *
-texture_atlas_new( size_t width, size_t height, size_t depth )
+// ------------------------------------------------------ texture_atlas_new ---
+texture_atlas_t *
+texture_atlas_new( const size_t width,
+                   const size_t height,
+                   const size_t depth )
 {
     assert( (depth == 1) || (depth == 3) );
 
-    TextureAtlas *self = (TextureAtlas *) malloc( sizeof(TextureAtlas) );
-    if( !self )
+    texture_atlas_t *self = (texture_atlas_t *) malloc( sizeof(texture_atlas_t) );
+    if( self == NULL)
     {
-        return NULL;
+        fprintf( stderr,
+                 "line %d: No more memory for allocating data\n", __LINE__ );
+        exit( EXIT_FAILURE );
     }
-    self->nodes = vector_new( sizeof(Node) );
+    self->nodes = vector_new( sizeof(ivec3) );
     self->used = 0;
     self->width = width;
     self->height = height;
     self->depth = depth;
-    Node node = {0,0,width};
+    ivec3 node = {{{0,0,width}}};
     vector_push_back( self->nodes, &node );
-    self->texid = 0;
     self->data = (unsigned char *)
         calloc( width*height*depth, sizeof(unsigned char) );
 
-
-    // This is a special region that is used for background and underlined
-    // decorations of glyphs
-    int n = 4;
-    unsigned char buffer[n*n];
-    memset(buffer, 255, n*n);
-    Region r = texture_atlas_get_region( self, n, n );
-    texture_atlas_set_region( self, r.x, r.y, r.width, r.height, buffer, 1);
-    self->black.x     = r.x + 1;
-    self->black.y     = r.y + 1;
-    self->black.width = r.width - 2;
-    self->black.height= r.height - 2;
+    if( self->data == NULL)
+    {
+        fprintf( stderr,
+                 "line %d: No more memory for allocating data\n", __LINE__ );
+        exit( EXIT_FAILURE );
+    }
 
     return self;
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// --------------------------------------------------- texture_atlas_delete ---
 void
-texture_atlas_delete( TextureAtlas *self )
+texture_atlas_delete( texture_atlas_t *self )
 {
     assert( self );
     vector_delete( self->nodes );
@@ -99,56 +93,26 @@ texture_atlas_delete( TextureAtlas *self )
     {
         free( self->data );
     }
-    if( self->texid )
-    {
-        glDeleteTextures( 1, &self->texid );
-    }
     free( self );
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ----------------------------------------------- texture_atlas_set_region ---
 void
-texture_atlas_upload( TextureAtlas *self )
-{
-    assert( self );
-    assert( self->data );
-    if( !self->texid )
-    {
-        glGenTextures( 1, &self->texid );
-    }
-    glBindTexture( GL_TEXTURE_2D, self->texid );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    if( self->depth == 3 )
-    {
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, self->width, self->height,
-                      0, GL_RGB, GL_UNSIGNED_BYTE, self->data );
-    }
-    else
-    {
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->width, self->height,
-                      0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
-    }
-}
-
-
-
-/* ------------------------------------------------------------------------- */
-void
-texture_atlas_set_region( TextureAtlas *self,
-                          size_t x, size_t y,
-                          size_t width, size_t height,
-                          unsigned char *data, size_t stride )
+texture_atlas_set_region( texture_atlas_t * self,
+                          const size_t x,
+                          const size_t y,
+                          const size_t width,
+                          const size_t height,
+                          const unsigned char * data,
+                          const size_t stride )
 {
     assert( self );
     assert( x < self->width);
     assert( (x + width) <= self->width);
     assert( y < self->height);
     assert( (y + height) <= self->height);
+
     size_t i;
     size_t depth = self->depth;
     size_t charsize = sizeof(char);
@@ -160,13 +124,16 @@ texture_atlas_set_region( TextureAtlas *self,
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ------------------------------------------------------ texture_atlas_fit ---
 int
-texture_atlas_fit( TextureAtlas *self,
-                   size_t index, size_t width, size_t height )
+texture_atlas_fit( texture_atlas_t * self,
+                   const size_t index,
+                   const size_t width,
+                   const size_t height )
 {
-    Node *node = (Node *) (vector_get( self->nodes, index ));
+    assert( self );
+
+    ivec3 *node = (ivec3 *) (vector_get( self->nodes, index ));
     int x = node->x, y, width_left = width;
 	size_t i = index;
 
@@ -177,35 +144,35 @@ texture_atlas_fit( TextureAtlas *self,
 	y = node->y;
 	while( width_left > 0 )
 	{
-        node = (Node *) (vector_get( self->nodes, i ));
+        node = (ivec3 *) (vector_get( self->nodes, i ));
 		y = max( y, node->y );
 		if( (y + height) > self->height )
         {
 			return -1;
         }
-		width_left -= node->width;
+		width_left -= node->z;
 		++i;
 	}
 	return y;
 }
 
 
-
-/* ------------------------------------------------------------------------- */
+// ---------------------------------------------------- texture_atlas_merge ---
 void
-texture_atlas_merge( TextureAtlas *self )
+texture_atlas_merge( texture_atlas_t * self )
 {
-    Node *node, *next;
+    assert( self );
+
+    ivec3 *node, *next;
     size_t i;
 
 	for( i=0; i< self->nodes->size-1; ++i )
     {
-        node = (Node *) (vector_get( self->nodes, i ));
-        next = (Node *) (vector_get( self->nodes, i+1 ));
-
+        node = (ivec3 *) (vector_get( self->nodes, i ));
+        next = (ivec3 *) (vector_get( self->nodes, i+1 ));
 		if( node->y == next->y )
 		{
-			node->width += next->width;
+			node->z += next->z;
             vector_erase( self->nodes, i+1 );
 			--i;
 		}
@@ -213,20 +180,17 @@ texture_atlas_merge( TextureAtlas *self )
 }
 
 
-
-/* ------------------------------------------------------------------------- */
-Region
-texture_atlas_get_region( TextureAtlas *self,
-                          size_t width, size_t height )
+// ----------------------------------------------- texture_atlas_get_region ---
+ivec4
+texture_atlas_get_region( texture_atlas_t * self,
+                          const size_t width,
+                          const size_t height )
 {
     assert( self );
-/*
-    assert( width );
-    assert( height );
-*/
+
 	int y, best_height, best_width, best_index;
-    Node *node, *prev;
-    Region region = {0,0,width,height};
+    ivec3 *node, *prev;
+    ivec4 region = {{{0,0,width,height}}};
     size_t i;
 
     best_height = INT_MAX;
@@ -237,13 +201,13 @@ texture_atlas_get_region( TextureAtlas *self,
         y = texture_atlas_fit( self, i, width, height );
 		if( y >= 0 )
 		{
-            node = (Node *) vector_get( self->nodes, i );
+            node = (ivec3 *) vector_get( self->nodes, i );
 			if( ( y + height < best_height ) ||
-                ( y + height == best_height && node->width < best_width) )
+                ( y + height == best_height && node->z < best_width) )
 			{
 				best_height = y + height;
 				best_index = i;
-				best_width = node->width;
+				best_width = node->z;
 				region.x = node->x;
 				region.y = y;
 			}
@@ -259,24 +223,30 @@ texture_atlas_get_region( TextureAtlas *self,
         return region;
     }
 
-    node = (Node *) malloc( sizeof(Node) );
-    node->x     = region.x;
-    node->y     = region.y + height;
-    node->width = width;
+    node = (ivec3 *) malloc( sizeof(ivec3) );
+    if( node == NULL)
+    {
+        fprintf( stderr,
+                 "line %d: No more memory for allocating data\n", __LINE__ );
+        exit( EXIT_FAILURE );
+    }
+    node->x = region.x;
+    node->y = region.y + height;
+    node->z = width;
     vector_insert( self->nodes, best_index, node );
     free( node );
 
     for(i = best_index+1; i < self->nodes->size; ++i)
     {
-        node = (Node *) vector_get( self->nodes, i );
-        prev = (Node *) vector_get( self->nodes, i-1 );
+        node = (ivec3 *) vector_get( self->nodes, i );
+        prev = (ivec3 *) vector_get( self->nodes, i-1 );
 
-        if (node->x < (prev->x + prev->width) )
+        if (node->x < (prev->x + prev->z) )
         {
-            int shrink = prev->x + prev->width - node->x;
-            node->x     += shrink;
-            node->width -= shrink;
-            if (node->width <= 0)
+            int shrink = prev->x + prev->z - node->x;
+            node->x += shrink;
+            node->z -= shrink;
+            if (node->z <= 0)
             {
                 vector_erase( self->nodes, i );
                 --i;
@@ -297,28 +267,46 @@ texture_atlas_get_region( TextureAtlas *self,
 }
 
 
-/* ------------------------------------------------------------------------- */
+// ---------------------------------------------------- texture_atlas_clear ---
 void
-texture_atlas_clear( TextureAtlas *self )
+texture_atlas_clear( texture_atlas_t * self )
 {
+    assert( self );
+    assert( self->data );
 
     vector_clear( self->nodes );
     self->used = 0;
-    Node node = {0,0,self->width};
+    ivec3 node = {{{0,0,self->width}}};
     vector_push_back( self->nodes, &node );
-
     memset( self->data, 0, self->width*self->height*self->depth );
+}
 
 
-    // This is a special region that is used for background and underlined
-    // decorations of glyphs
-    int n = 4;
-    unsigned char buffer[n*n];
-    memset(buffer, 255, n*n);
-    Region r = texture_atlas_get_region( self, n, n );
-    texture_atlas_set_region( self, r.x, r.y, r.width, r.height, buffer, 1);
-    self->black.x     = r.x + 1;
-    self->black.y     = r.y + 1;
-    self->black.width = r.width - 2;
-    self->black.height= r.height - 2;
+// --------------------------------------------------- texture_atlas_upload ---
+void
+texture_atlas_upload( texture_atlas_t * self )
+{
+    assert( self );
+    assert( self->data );
+
+    if( !self->id )
+    {
+        glGenTextures( 1, &self->id );
+    }
+
+    glBindTexture( GL_TEXTURE_2D, self->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    if( self->depth == 3 )
+    {
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, self->width, self->height,
+                      0, GL_RGB, GL_UNSIGNED_BYTE, self->data );
+    }
+    else
+    {
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->width, self->height,
+                      0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
+    }
 }

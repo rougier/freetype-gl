@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,25 +29,67 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-#include <stdlib.h>
-#include "vector.h"
-#include "markup.h"
-#include "font-manager.h"
-#include "texture-font.h"
-#include "texture-glyph.h"
+ * ============================================================================
+ */
+#include "freetype-gl.h"
 #include "vertex-buffer.h"
 
+// ------------------------------------------------------- typedef & struct ---
+typedef struct {
+    float x, y, z;    // position
+    float s, t;       // texture
+    float r, g, b, a; // color
+} vertex_t;
 
-VertexBuffer *cube, *text_buffer;
-FontManager *manager;
+
+// ------------------------------------------------------- global variables ---
+vertex_buffer_t * buffer;
+vertex_buffer_t * cube;
+texture_font_t * font;
+texture_atlas_t * atlas;
 
 
+// --------------------------------------------------------------- add_text ---
+void add_text( vertex_buffer_t * buffer, texture_font_t * font,
+               wchar_t * text, vec4 * color, vec2 * pen )
+{
+    size_t i;
+    float r = color->red, g = color->green, b = color->blue, a = color->alpha;
+    for( i=0; i<wcslen(text); ++i )
+    {
+        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
+        if( glyph != NULL )
+        {
+            int kerning = 0;
+            if( i > 0)
+            {
+                kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+            }
+            pen->x += kerning;
+            int x0  = (int)( pen->x + glyph->offset_x );
+            int y0  = (int)( pen->y + glyph->offset_y );
+            int x1  = (int)( x0 + glyph->width );
+            int y1  = (int)( y0 - glyph->height );
+            float s0 = glyph->s0;
+            float t0 = glyph->t0;
+            float s1 = glyph->s1;
+            float t1 = glyph->t1;
+            GLuint index = buffer->vertices->size;
+            GLuint indices[] = {index, index+1, index+2,
+                                index, index+2, index+3};
+            vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a },
+                                    { x0,y1,0,  s0,t1,  r,g,b,a },
+                                    { x1,y1,0,  s1,t1,  r,g,b,a },
+                                    { x1,y0,0,  s1,t0,  r,g,b,a } };
+            vertex_buffer_push_back_indices( buffer, indices, 6 );
+            vertex_buffer_push_back_vertices( buffer, vertices, 4 );
+            pen->x += glyph->advance_x;
+        }
+    }
+}
+
+
+// ------------------------------------------------------------------- init ---
 void init( void )
 {
     GLfloat ambient[]  = {0.1f, 0.1f, 0.1f, 1.0f};
@@ -68,6 +110,8 @@ void init( void )
     glEnable( GL_LINE_SMOOTH );
 }
 
+
+// ---------------------------------------------------------------- display ---
 void display( void )
 {
     static float theta=0, phi=0;
@@ -83,28 +127,14 @@ void display( void )
 
     if (time - timebase > 1000)
     {
-        wchar_t fps[64]; 
-        size_t i;
-        Pen pen = {5.0, 5.0};
-        Markup markup = { "Arial", 64, 0, 0, 0.0, 0.0,
-                          {.5,.5,.5,.5}, {1,1,1,0},
-                          0, {0,0,0,1}, 0, {0,0,0,1},
-                          0, {0,0,0,1}, 0, {0,0,0,1} };
-        TextureFont *font= font_manager_get_from_markup( manager, &markup );
-        TextureGlyph *glyph;
+        wchar_t fps[64];
+        vec2 pen = {{{5.0, 5.0}}};
+        vec4 color = {{{0.5,0.5,0.5,0.5}}};
         swprintf( fps, 64, L"%.2f", frame*1000.0/(time-timebase) );
+        vertex_buffer_clear( buffer );
+        add_text( buffer, font, fps, &color, &pen );
         timebase = time;
         frame = 0;
-
-        vertex_buffer_clear( text_buffer );
-        glyph = texture_font_get_glyph( font, fps[0] );
-        texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &markup, &pen, 0 );
-        for( i=1; i<wcslen(fps); ++i )
-        {
-            glyph = texture_font_get_glyph( font, fps[i] );
-            int kerning = texture_glyph_get_kerning( glyph, fps[i-1] );
-            texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &markup, &pen, kerning );
-        }
     }
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -134,7 +164,7 @@ void display( void )
 
     /* Display FPS */
     glEnable( GL_TEXTURE_2D );
-    glBindTexture( GL_TEXTURE_2D, manager->atlas->texid );
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -142,7 +172,7 @@ void display( void )
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    vertex_buffer_render( text_buffer, GL_TRIANGLES, "vtc" );
+    vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
@@ -152,6 +182,8 @@ void display( void )
     glutSwapBuffers( );
 }
 
+
+// ---------------------------------------------------------------- reshape ---
 void reshape( int width, int height )
 {
     glViewport(0, 0, width, height);
@@ -163,6 +195,8 @@ void reshape( int width, int height )
     glTranslatef( 0.0, 0.0, -5.0 );
 }
 
+
+// --------------------------------------------------------------- keyboard ---
 void keyboard( unsigned char key, int x, int y )
 {
     if ( key == 27 )
@@ -171,29 +205,35 @@ void keyboard( unsigned char key, int x, int y )
     }
 }
 
+
+// ------------------------------------------------------------------ timer ---
 void timer( int dt )
 {
     glutPostRedisplay();
     glutTimerFunc( dt, timer, dt );
 }
 
-void idle( void )
-{
-    glutPostRedisplay();
-}
 
-
+// ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
-    int fps = 50;
-    typedef struct { float x,y,z; } vec3;
-    typedef struct { vec3 position, normal, color;} vertex;
-    vec3 v[] = { { 1, 1, 1},  {-1, 1, 1},  {-1,-1, 1}, { 1,-1, 1},
-                 { 1,-1,-1},  { 1, 1,-1},  {-1, 1,-1}, {-1,-1,-1} };
-    vec3 n[] = { { 0, 0, 1},  { 1, 0, 0},  { 0, 1, 0} ,
-                 {-1, 0, 1},  { 0,-1, 0},  { 0, 0,-1} };
-    vec3 c[] = { {1, 1, 1},  {1, 1, 0},  {1, 0, 1},  {0, 1, 1},
-                 {1, 0, 0},  {0, 0, 1},  {0, 1, 0},  {0, 0, 0} };
+    glutInit( &argc, argv );
+    glutInitWindowSize( 400, 400 );
+    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
+    glutCreateWindow( "Vertex buffer cube" );
+    glutReshapeFunc( reshape );
+    glutDisplayFunc( display );
+    glutKeyboardFunc( keyboard );
+    glutTimerFunc( 1000/50, timer, 1000/50 );
+
+    typedef struct { float x,y,z;} xyz;
+    typedef struct { xyz position, normal, color;} vertex;
+    xyz v[] = { { 1, 1, 1},  {-1, 1, 1},  {-1,-1, 1}, { 1,-1, 1},
+                { 1,-1,-1},  { 1, 1,-1},  {-1, 1,-1}, {-1,-1,-1} };
+    xyz n[] = { { 0, 0, 1},  { 1, 0, 0},  { 0, 1, 0} ,
+                {-1, 0, 1},  { 0,-1, 0},  { 0, 0,-1} };
+    xyz c[] = { {1, 1, 1},  {1, 1, 0},  {1, 0, 1},  {0, 1, 1},
+                {1, 0, 0},  {0, 0, 1},  {0, 1, 0},  {0, 0, 0} };
     vertex vertices[24] =  {
       {v[0],n[0],c[0]}, {v[1],n[0],c[1]}, {v[2],n[0],c[2]}, {v[3],n[0],c[3]},
       {v[0],n[1],c[0]}, {v[3],n[1],c[3]}, {v[4],n[1],c[4]}, {v[5],n[1],c[5]},
@@ -205,18 +245,11 @@ int main( int argc, char **argv )
                            12,13,14,15,  16,17,18,19,  20,21,22,23 };
     cube = vertex_buffer_new_from_data( "v3f:n3f:c3f",
                                         24, vertices, 24, indices );
-    manager = font_manager_new( 512, 512, 1 );
-    text_buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
 
-    glutInit( &argc, argv );
-    glutInitWindowSize( 400, 400 );
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Vertex buffer cube" );
-    glutReshapeFunc( reshape );
-    glutDisplayFunc( display );
-    glutKeyboardFunc( keyboard );
-    glutTimerFunc( 1000/fps, timer, 1000/fps );
-    //glutIdleFunc( idle );
+    atlas = texture_atlas_new( 512, 512, 1 );
+    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    font = texture_font_new( atlas, "./Vera.ttf", 64 );
+
     init( );
     glutMainLoop( );
     return EXIT_SUCCESS;

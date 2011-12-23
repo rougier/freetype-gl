@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,19 +30,9 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-#include <stdlib.h>
-#include <stdio.h>
-#include <wchar.h>
-#include "vector.h"
+#include "freetype-gl.h"
 #include "vertex-buffer.h"
-#include "font-manager.h"
-#include "texture-font.h"
-#include "texture-atlas.h"
+#include "markup.h"
 
 
 
@@ -69,33 +59,39 @@ const int MARKUP_FAINT       = 7;
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
     float x,y;
-    Color color;
-} Point;
-struct Console_ {
-    Vector *       lines;
+    vec4 color;
+} point_t;
+
+typedef struct {
+    float x, y, z;
+    float s, t;
+    float r, g, b, a;
+} vertex_t;
+
+struct _console_t {
+    vector_t *     lines;
     wchar_t *      prompt;
     wchar_t        killring[MAX_LINE_LENGTH+1];
     wchar_t        input[MAX_LINE_LENGTH+1];
     size_t         cursor;
-    Markup         markup[MARKUP_COUNT];
-    VertexBuffer * buffer;
-    Pen            pen; 
-    void (*handlers[4])( struct Console_ *, wchar_t * );
+    markup_t       markup[MARKUP_COUNT];
+    vertex_buffer_t * buffer;
+    vec2           pen; 
+    void (*handlers[4])( struct _console_t *, wchar_t * );
 };
-typedef struct Console_ Console;
+typedef struct _console_t console_t;
 
 
 // ------------------------------------------------------- global variables ---
-static Console * console = 0;
-static FontManager * manager = 0;
-static VertexBuffer *lines_buffer;
+static console_t * console;
+static vertex_buffer_t *lines_buffer;
 
 
 // ------------------------------------------------------------ console_new ---
-Console *
+console_t *
 console_new( void )
 {
-    Console *self = (Console *) malloc( sizeof(Console) );
+    console_t *self = (console_t *) malloc( sizeof(console_t) );
     if( !self )
     {
         return self;
@@ -110,48 +106,58 @@ console_new( void )
     self->handlers[__SIGNAL_COMPLETE__]     = 0;
     self->handlers[__SIGNAL_HISTORY_NEXT__] = 0;
     self->handlers[__SIGNAL_HISTORY_PREV__] = 0;
-    self->pen.x = self->pen.y = 0; 
-    Markup normal = { "Bitstream Vera Sans Mono", 13, 0, 0, 0.0, 0.0,
-                      {0,0,0,1}, {1,1,1,0},
-                      0, {0,0,0,1}, 0, {0,0,0,1},
-                      0, {0,0,0,1}, 0, {0,0,0,1} };
-    Markup bold        = normal; bold.bold = 1;
-    Markup italic      = normal; italic.italic = 1;
-    Markup bold_italic = normal; bold.bold = 1; italic.italic = 1;
-    Markup faint       = normal;
+    self->pen.x = self->pen.y = 0;
+
+    texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
+ 
+    markup_t normal = { "Bitstream Vera Sans Mono", 13, 0, 0, 0.0, 0.0,
+                        {{{0,0,0,1}}}, {{{1,1,1,0}}},
+                        0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}},
+                        0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}} };
+    normal.font = texture_font_new( atlas, "./VeraMono.ttf", 13 );
+
+    markup_t bold = normal;
+    bold.bold = 1;
+    bold.font = texture_font_new( atlas, "./VeraMoBd.ttf", 13 );
+
+    markup_t italic = normal;
+    italic.italic = 1;
+    bold.font = texture_font_new( atlas, "./VeraMoIt.ttf", 13 );
+
+    markup_t bold_italic = normal;
+    bold.bold = 1;
+    italic.italic = 1;
+    italic.font = texture_font_new( atlas, "./VeraMoBI.ttf", 13 );
+
+    markup_t faint = normal;
     faint.foreground_color.r = 0.35;
     faint.foreground_color.g = 0.35;
     faint.foreground_color.b = 0.35;
-    Markup error        = normal;
+
+    markup_t error = normal;
     error.foreground_color.r = 1.00;
     error.foreground_color.g = 0.00;
     error.foreground_color.b = 0.00;
-    Markup warning       = normal;
+
+    markup_t warning = normal;
     warning.foreground_color.r = 1.00;
     warning.foreground_color.g = 0.50;
     warning.foreground_color.b = 0.50;
-    Markup output        = normal;
+
+    markup_t output = normal;
     output.foreground_color.r = 0.00;
     output.foreground_color.g = 0.00;
     output.foreground_color.b = 1.00;
-    self->markup[MARKUP_NORMAL]      = normal;
-    self->markup[MARKUP_ERROR]       = error;
-    self->markup[MARKUP_WARNING]     = warning;
-    self->markup[MARKUP_OUTPUT]      = output;
-    self->markup[MARKUP_FAINT]       = faint;
-    self->markup[MARKUP_BOLD]        = bold;
-    self->markup[MARKUP_ITALIC]      = italic;
+
+    self->markup[MARKUP_NORMAL] = normal;
+    self->markup[MARKUP_ERROR] = error;
+    self->markup[MARKUP_WARNING] = warning;
+    self->markup[MARKUP_OUTPUT] = output;
+    self->markup[MARKUP_FAINT] = faint;
+    self->markup[MARKUP_BOLD] = bold;
+    self->markup[MARKUP_ITALIC] = italic;
     self->markup[MARKUP_BOLD_ITALIC] = bold_italic;
 
-    if( !manager )
-    {
-        manager = font_manager_new( 512, 512, 1 );
-    }
-    size_t i;
-    for( i=0; i < MARKUP_COUNT; ++i )
-    {
-        self->markup[i].font = font_manager_get_from_markup( manager, &self->markup[i] );
-    }
     return self;
 }
 
@@ -159,19 +165,19 @@ console_new( void )
 
 // -------------------------------------------------------- console_delete ---
 void
-console_delete( Console *self )
+console_delete( console_t *self )
 { }
 
 
 
 // ----------------------------------------------------- console_add_glyph ---
 void
-console_add_glyph( Console *self,
+console_add_glyph( console_t *self,
                    wchar_t current,
                    wchar_t previous,
-                   Markup *markup )
+                   markup_t *markup )
 {
-    TextureGlyph *glyph  = texture_font_get_glyph( markup->font, current );
+    texture_glyph_t *glyph  = texture_font_get_glyph( markup->font, current );
     if( previous != L'\0' )
     {
         self->pen.x += texture_glyph_get_kerning( glyph, previous );
@@ -180,10 +186,10 @@ console_add_glyph( Console *self,
     int y0  = self->pen.y + glyph->offset_y;
     int x1  = x0 + glyph->width;
     int y1  = y0 - glyph->height;
-    float u0 = glyph->u0;
-    float v0 = glyph->v0;
-    float u1 = glyph->u1;
-    float v1 = glyph->v1;
+    float s0 = glyph->s0;
+    float t0 = glyph->t0;
+    float s1 = glyph->s1;
+    float t1 = glyph->t1;
     GLuint index = self->buffer->vertices->size;
     GLuint indices[] = {index, index+1, index+2,
                         index, index+2, index+3};
@@ -192,10 +198,10 @@ console_add_glyph( Console *self,
     float g = markup->foreground_color.g;
     float b = markup->foreground_color.b;
     float a = markup->foreground_color.a;
-    TextureGlyphVertex vertices[] = { { x0,y0,0,  u0,v0,  r,g,b,a },
-                                      { x0,y1,0,  u0,v1,  r,g,b,a },
-                                      { x1,y1,0,  u1,v1,  r,g,b,a },
-                                      { x1,y0,0,  u1,v0,  r,g,b,a } };
+    vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a },
+                            { x0,y1,0,  s0,t1,  r,g,b,a },
+                            { x1,y1,0,  s1,t1,  r,g,b,a },
+                            { x1,y0,0,  s1,t0,  r,g,b,a } };
     vertex_buffer_push_back_indices( self->buffer, indices, 6 );
     vertex_buffer_push_back_vertices( self->buffer, vertices, 4 );
     self->pen.x += glyph->advance_x;
@@ -206,7 +212,7 @@ console_add_glyph( Console *self,
 
 // -------------------------------------------------------- console_render ---
 void
-console_render( Console *self )
+console_render( console_t *self )
 {
     int viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
@@ -219,9 +225,9 @@ console_render( Console *self )
     int cursor_x = self->pen.x;
     int cursor_y = self->pen.y;
 
-    Markup markup;
+    markup_t markup;
 
-    // Console buffer
+    // console_t buffer
     markup = self->markup[MARKUP_FAINT];
 
     self->pen.y -= markup.font->height;
@@ -277,7 +283,7 @@ console_render( Console *self )
     // Cursor
     vertex_buffer_clear( lines_buffer );
 
-    Point p = {cursor_x+1, cursor_y, markup.foreground_color};
+    point_t p = {cursor_x+1, cursor_y, markup.foreground_color};
     p.y += markup.font->descender;
     vertex_buffer_push_back_vertex( lines_buffer, &p );
 
@@ -296,9 +302,9 @@ console_render( Console *self )
 
 // ------------------------------------------------------- console_connect ---
 void
-console_connect( Console *self,
+console_connect( console_t *self,
                   const char *signal,
-                  void (*handler)(Console *, wchar_t *))
+                  void (*handler)(console_t *, wchar_t *))
 {
     if( strcmp( signal,"activate" ) == 0 )
     {
@@ -322,7 +328,7 @@ console_connect( Console *self,
 
 // --------------------------------------------------------- console_print ---
 void
-console_print( Console *self, wchar_t *text )
+console_print( console_t *self, wchar_t *text )
 {
     // Make sure there is at least one line
     if( self->lines->size == 0 )
@@ -377,7 +383,7 @@ console_print( Console *self, wchar_t *text )
 
 // ------------------------------------------------------- console_process ---
 void
-console_process( Console *self,
+console_process( console_t *self,
                   const char *action,
                   const unsigned char key )
 {
@@ -617,31 +623,26 @@ void on_reshape (int width, int height)
 // ---------------------------------------------------------------- on_init ---
 void on_init( void )
 {
-    glClearColor( 1.00, 1.00, 0.95, 1.00 );
-    glDisable( GL_DEPTH_TEST ); 
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_TEXTURE_2D );
-    glEnable( GL_BLEND );
 }
 
 
 // ----------------------------------------------------------------------------
-void console_activate (Console *self, wchar_t * input)
+void console_activate (console_t *self, wchar_t * input)
 {
     //console_print( self, L"Activate callback\n" );
     fwprintf( stderr, L"Activate callback : %ls\n", input );
 }
-void console_complete (Console *self, wchar_t *input)
+void console_complete (console_t *self, wchar_t *input)
 {
     // console_print( self, L"Complete callback\n" );
     fwprintf( stderr, L"Complete callback : %ls\n", input );
 }
-void console_history_prev (Console *self, wchar_t *input)
+void console_history_prev (console_t *self, wchar_t *input)
 {
     // console_print( self, L"History prev callback\n" );
     fwprintf( stderr, L"History prev callback : %ls\n", input );
 }
-void console_history_next (Console *self, wchar_t *input)
+void console_history_next (console_t *self, wchar_t *input)
 {
     // console_print( self, L"History next callback\n" );
     fwprintf( stderr, L"History next callback : %ls\n", input );
@@ -653,7 +654,7 @@ main( int argc, char **argv )
 {
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "GL Console" );
+    glutCreateWindow( "Freetype OpenGL / console" );
     glutReshapeFunc( on_reshape );
     glutDisplayFunc( on_display );
     glutKeyboardFunc( on_key_press );
@@ -670,8 +671,13 @@ main( int argc, char **argv )
     console_connect( console, "history-prev", console_history_prev );
     console_connect( console, "history-next", console_history_next );
 
-    on_init();
-    glEnable(GL_FRAMEBUFFER_SRGB);
+    glClearColor( 1.00, 1.00, 0.95, 1.00 );
+    glDisable( GL_DEPTH_TEST ); 
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glEnable( GL_TEXTURE_2D );
+    glEnable( GL_BLEND );
+
     glutMainLoop();
+
     return 0;
 }

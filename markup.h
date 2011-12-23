@@ -3,7 +3,7 @@
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
  * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,92 +30,174 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-#pragma once
 #ifndef __MARKUP_H__
 #define __MARKUP_H__
 
-typedef struct {
-    float r,g,b,a;
-} Color;
+#include "texture-font.h"
+#include "vec234.h"
 
+
+/**
+ *
+ */
 typedef struct
 {
-    char *        family;
-    float         size;
-    int           bold;
-    int           italic;
-    float         rise;
-    float         spacing;
-    Color         foreground_color;
-    Color         background_color;
-    int           outline;
-    Color         outline_color;
-    int           underline;
-    Color         underline_color;
-    int           overline;
-    Color         overline_color;
-    int           strikethrough;
-    Color         strikethrough_color;
-    struct TextureFont_  * font;
-} Markup;
+    /**
+     *
+     */
+    char * family;
+
+    /**
+     *
+     */
+    float size;
+
+    /**
+     *
+     */
+    int bold;
+
+    /**
+     *
+     */
+    int italic;
+
+    /**
+     *
+     */
+    float rise;
+
+    /**
+     *
+     */
+    float spacing;
+
+    /**
+     *
+     */
+    vec4 foreground_color;
+
+    /**
+     *
+     */
+    vec4 background_color;
+
+    /**
+     *
+     */
+    int outline;
+
+    /**
+     *
+     */
+    vec4 outline_color;
+
+    /**
+     *
+     */
+    int underline;
+
+    /**
+     *
+     */
+    vec4 underline_color;
+
+    /**
+     *
+     */
+    int overline;
+
+    /**
+     *
+     */
+    vec4 overline_color;
+
+    /**
+     *
+     */
+    int strikethrough;
+
+    /**
+     *
+     */
+    vec4 strikethrough_color;
+
+    /**
+     *
+     */
+    texture_font_t * font;
+} markup_t;
 
 
-Markup *     markup_new( void );
-Markup *     markup_copy( const Markup *other );
+markup_t *     markup_new( void );
+markup_t *     markup_copy( const markup_t *other );
 
+int          markup_cmp( const markup_t *self,
+                         const markup_t *other );
+void         markup_delete( markup_t *self );
 
-int          markup_cmp( const Markup *self,
-                         const Markup *other );
-
-void         markup_delete( Markup *self );
-const char * markup_get_family( Markup *self );
-void         markup_set_family( Markup *self,
+const char * markup_get_family( const markup_t *self );
+void         markup_set_family( markup_t *self,
                                 const char *family );
-int          markup_get_italic( Markup *self );
-void         markup_set_italic( Markup *self,
-                                const int italic );
-int          markup_get_bold( Markup *self );
-void         markup_set_bold( Markup *self,
-                              const int bold );
-float        markup_get_size( Markup *self );
-void         markup_set_size( Markup *self,
-                              const float size );
-float        markup_get_rise( Markup *self );
-void         markup_set_rise( Markup *self,
-                              const float rise );
-float        markup_get_spacing( Markup *self );
-void         markup_set_spacing( Markup *self,
-                                 const float spacing );
-Color        markup_get_foreground_color( Markup *self );
-void         markup_set_foreground_color( Markup *self,
-                                          const Color * color );
-Color        markup_get_background_color( Markup *self );
-void         markup_set_background_color( Markup *self,
-                                          const Color * color );
-int          markup_get_outline( Markup *self );
-void         markup_set_outline( Markup *self,
-                                 const int outline );
-Color        markup_get_outline_color( Markup *self );
-void         markup_set_outline_color( Markup *self,
-                                       const Color * color );
-int          markup_get_underline( Markup *self );
-void         markup_set_underline( Markup *self,
-                                   const int underline );
-Color        markup_get_underline_color( Markup *self );
-void         markup_set_underline_color( Markup *self,
-                                         const Color * color );
-int          markup_get_overline( Markup *self );
-void         markup_set_overline( Markup *self,
-                                  const int overline );
-Color        markup_get_overline_color( Markup *self );
-void         markup_set_overline_color( Markup *self,
-                                        const Color * color );
-int          markup_get_strikethrough( Markup *self );
-void         markup_set_strikethrough( Markup *self,
-                                       const int strikethrough );
-Color        markup_get_strikethrough_color( Markup *self );
-void         markup_set_strikethrough_color( Markup *self,
-                                             const Color * color );
 
+int  markup_get_italic( const markup_t *self );
+void markup_set_italic( markup_t *self,
+                        const int italic );
+
+int  markup_get_bold( const markup_t *self );
+void markup_set_bold( markup_t *self,
+                      const int bold );
+
+float markup_get_size( const markup_t *self );
+void  markup_set_size( markup_t *self,
+                       const float size );
+
+float markup_get_rise( const markup_t *self );
+void  markup_set_rise( markup_t *self,
+                       const float rise );
+
+float markup_get_spacing( const markup_t *self );
+void  markup_set_spacing( markup_t *self,
+                          const float spacing );
+
+vec4  markup_get_foreground_color( const markup_t *self );
+void  markup_set_foreground_color( markup_t *self,
+                                   const vec4 * color );
+
+vec4 markup_get_background_color( const markup_t *self );
+void markup_set_background_color( markup_t *self,
+                                         const vec4 * color );
+
+int  markup_get_outline( const markup_t *self );
+void markup_set_outline( markup_t *self,
+                         const int outline );
+
+vec4 markup_get_outline_color( const markup_t *self );
+void markup_set_outline_color( markup_t *self,
+                               const vec4 * color );
+
+int  markup_get_underline( const markup_t *self );
+void markup_set_underline( markup_t *self,
+                           const int underline );
+
+vec4 markup_get_underline_color( const markup_t *self );
+void markup_set_underline_color( markup_t *self,
+                                 const vec4 * color );
+
+int  markup_get_overline( const markup_t *self );
+void markup_set_overline( markup_t *self,
+                          const int overline );
+
+vec4 markup_get_overline_color( const markup_t *self );
+void markup_set_overline_color( markup_t *self,
+                                const vec4 * color );
+
+int  markup_get_strikethrough( const markup_t *self );
+void markup_set_strikethrough( markup_t *self,
+                               const int strikethrough );
+
+vec4 markup_get_strikethrough_color( const markup_t *self );
+void markup_set_strikethrough_color( markup_t *self,
+                                     const vec4 * color );
 
 #endif /* __MARKUP_H__ */

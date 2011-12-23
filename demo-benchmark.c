@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,67 +29,72 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-#include <stdlib.h>
-#include "vector.h"
-#include "markup.h"
-#include "font-manager.h"
-#include "texture-font.h"
-#include "texture-glyph.h"
+ * ============================================================================
+ */
+#include "freetype-gl.h"
 #include "vertex-buffer.h"
 
 
-VertexBuffer *buffer;
-FontManager *manager;
+// ------------------------------------------------------- typedef & struct ---
+typedef struct {
+    float x, y, z;    // position
+    float s, t;       // texture
+    float r, g, b, a; // color
+} vertex_t;
+
+
+// ------------------------------------------------------- global variables ---
+texture_atlas_t * atlas;
+texture_font_t * font;
+vertex_buffer_t * buffer;
 wchar_t *text =
     L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 "
-    L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 "
     L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 ";
-int line_count = 67;
+int line_count = 42;
 
-void init( void )
+
+
+// --------------------------------------------------------------- add_text ---
+void add_text( vertex_buffer_t * buffer, texture_font_t * font,
+               wchar_t * text, vec4 * color, vec2 * pen )
 {
-    glClearColor( 1.0, 1.0, 1.0, 1.0 );
-    glDisable( GL_DEPTH_TEST ); 
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_TEXTURE_2D );
-    glEnable( GL_BLEND );
-}
-
-void generate_buffer( void)
-{
-    size_t i, j;
-    Pen pen;
-    Markup markup = { "Monotype", 12, 0, 0, 0.0, 0.0,
-                      {0,0,0,1}, {1,1,1,0},
-                      0, {0,0,0,1}, 0, {0,0,0,1},
-                      0, {0,0,0,1}, 0, {0,0,0,1} };
-    TextureFont *font= font_manager_get_from_markup( manager, &markup );
-    TextureGlyph *glyph;
-    vertex_buffer_clear( buffer );
-
-    pen.y = -font->descender;
-    for( j=0; j<line_count; ++j )
+    size_t i;
+    float r = color->red, g = color->green, b = color->blue, a = color->alpha;
+    for( i=0; i<wcslen(text); ++i )
     {
-        pen.x = 10.0;
-        glyph = texture_font_get_glyph( font, text[0] );
-        texture_glyph_add_to_vertex_buffer( glyph, buffer, &markup, &pen, 0 );
-        for( i=1; i<wcslen(text); ++i )
+        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
+        if( glyph != NULL )
         {
-            glyph = texture_font_get_glyph( font, text[i] );
-            int kerning = texture_glyph_get_kerning( glyph, text[i-1] );
-            texture_glyph_add_to_vertex_buffer( glyph, buffer, &markup, &pen, kerning );
+            int kerning = 0;
+            if( i > 0)
+            {
+                kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+            }
+            pen->x += kerning;
+            int x0  = (int)( pen->x + glyph->offset_x );
+            int y0  = (int)( pen->y + glyph->offset_y );
+            int x1  = (int)( x0 + glyph->width );
+            int y1  = (int)( y0 - glyph->height );
+            float s0 = glyph->s0;
+            float t0 = glyph->t0;
+            float s1 = glyph->s1;
+            float t1 = glyph->t1;
+            GLuint index = buffer->vertices->size;
+            GLuint indices[] = {index, index+1, index+2,
+                                index, index+2, index+3};
+            vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a },
+                                    { x0,y1,0,  s0,t1,  r,g,b,a },
+                                    { x1,y1,0,  s1,t1,  r,g,b,a },
+                                    { x1,y0,0,  s1,t0,  r,g,b,a } };
+            vertex_buffer_push_back_indices( buffer, indices, 6 );
+            vertex_buffer_push_back_vertices( buffer, vertices, 4 );
+            pen->x += glyph->advance_x;
         }
-        pen.y += font->height - font->linegap;
     }
 }
 
 
+// ---------------------------------------------------------------- display ---
 void display( void )
 {
     static int frame=0, time, timebase=0;
@@ -126,16 +131,28 @@ void display( void )
     }
     if( count < 5 )
     {
-        generate_buffer( );
+        size_t i;
+        vec4 color = {{{0,0,0,1}}};
+        vec2 pen = {{{0,0}}};
+        vertex_buffer_clear( buffer );
+
+        pen.y = -font->descender;
+        for( i=0; i<line_count; ++i )
+        {
+            pen.x = 10.0;
+            add_text( buffer, font, text, &color, &pen );
+            pen.y += font->height - font->linegap;
+        }
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glColor4f( 0,0,0,1 );
-    glBindTexture( GL_TEXTURE_2D, manager->atlas->texid );
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
     vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
     glutSwapBuffers( );
 }
 
 
+// ---------------------------------------------------------------- reshape ---
 void reshape( int width, int height )
 {
     glViewport(0, 0, width, height);
@@ -146,6 +163,8 @@ void reshape( int width, int height )
     glLoadIdentity( );
 }
 
+
+// --------------------------------------------------------------- keyboard ---
 void keyboard( unsigned char key, int x, int y )
 {
     if ( key == 27 )
@@ -154,26 +173,48 @@ void keyboard( unsigned char key, int x, int y )
     }
 }
 
+
+// ------------------------------------------------------------------- idle ---
 void idle( void )
 {
     glutPostRedisplay();
 }
 
 
+// ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
-    manager = font_manager_new( 512, 512, 1 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    size_t i;
+    vec4 color = {{{0,0,0,1}}};
+    vec2 pen = {{{0,0}}};
+
     glutInit( &argc, argv );
-    glutInitWindowSize( 1000, 1000 );
+    glutInitWindowSize( 800, 600 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Vertex buffer cube" );
+    glutCreateWindow( "Freetype OpenGL benchmark" );
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
     glutIdleFunc( idle );
-    init( );
-    generate_buffer( );
+
+    atlas  = texture_atlas_new( 512, 512, 1 );
+    font = texture_font_new( atlas, "./VeraMono.ttf", 12 );
+    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+
+    pen.y = -font->descender;
+    for( i=0; i<line_count; ++i )
+    {
+        pen.x = 10.0;
+        add_text( buffer, font, text, &color, &pen );
+        pen.y += font->height - font->linegap;
+    }
+
+    glClearColor( 1.0, 1.0, 1.0, 1.0 );
+    glDisable( GL_DEPTH_TEST ); 
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glEnable( GL_TEXTURE_2D );
+    glEnable( GL_BLEND );
     glutMainLoop( );
+
     return EXIT_SUCCESS;
 }

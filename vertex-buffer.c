@@ -39,14 +39,14 @@
 
 
 // ----------------------------------------------------------------------------
-VertexBuffer *
+vertex_buffer_t *
 vertex_buffer_new( char *format )
 {
     size_t i, index = 0, stride = 0;
     char *start = 0, *end = 0;
     GLvoid *pointer = 0;
 
-    VertexBuffer *self = (VertexBuffer *) malloc (sizeof(VertexBuffer));
+    vertex_buffer_t *self = (vertex_buffer_t *) malloc (sizeof(vertex_buffer_t));
     if( !self )
     {
         return NULL;
@@ -72,7 +72,7 @@ vertex_buffer_new( char *format )
         {
             desc = strndup(start, end-start);
         }
-        VertexAttribute *attribute = vertex_attribute_parse( desc );
+        vertex_attribute_t *attribute = vertex_attribute_parse( desc );
         start = end+1;
         free(desc);
         attribute->pointer = pointer;
@@ -98,14 +98,14 @@ vertex_buffer_new( char *format )
 
 
 // ----------------------------------------------------------------------------
-VertexBuffer *
+vertex_buffer_t *
 vertex_buffer_new_from_data( char *format,
                              size_t vcount,
                              void *vertices,
                              size_t icount,
                              GLuint *indices )
 {
-    VertexBuffer *self = vertex_buffer_new( format );
+    vertex_buffer_t *self = vertex_buffer_new( format );
 
     vector_resize( self->vertices, vcount );
     assert( self->vertices->size == vcount);
@@ -121,7 +121,7 @@ vertex_buffer_new_from_data( char *format,
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_delete( VertexBuffer *self )
+vertex_buffer_delete( vertex_buffer_t *self )
 {
     assert( self );
 
@@ -152,7 +152,7 @@ vertex_buffer_delete( VertexBuffer *self )
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_print( VertexBuffer * self )
+vertex_buffer_print( vertex_buffer_t * self )
 {
     assert(self);
 
@@ -210,7 +210,7 @@ vertex_buffer_print( VertexBuffer * self )
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_upload ( VertexBuffer *self )
+vertex_buffer_upload ( vertex_buffer_t *self )
 {
     if( !self->vertices_id )
     {
@@ -236,7 +236,7 @@ vertex_buffer_upload ( VertexBuffer *self )
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_clear( VertexBuffer *self )
+vertex_buffer_clear( vertex_buffer_t *self )
 {
     assert( self );
 
@@ -249,7 +249,7 @@ vertex_buffer_clear( VertexBuffer *self )
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_render ( VertexBuffer *self,
+vertex_buffer_render ( vertex_buffer_t *self,
                        GLenum mode,
                        char *what )
 { 
@@ -272,7 +272,7 @@ vertex_buffer_render ( VertexBuffer *self,
     size_t i;
     for( i=0; i<MAX_VERTEX_ATTRIBUTE; ++i )
     {
-        VertexAttribute *attribute = self->attributes[i];
+        vertex_attribute_t *attribute = self->attributes[i];
         if ( attribute == 0 )
         {
             break;
@@ -309,7 +309,7 @@ vertex_buffer_render ( VertexBuffer *self,
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_push_back_index ( VertexBuffer *self,
+vertex_buffer_push_back_index ( vertex_buffer_t *self,
                                 GLuint index )
 {
     assert( self );
@@ -322,7 +322,7 @@ vertex_buffer_push_back_index ( VertexBuffer *self,
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_push_back_vertex ( VertexBuffer *self,
+vertex_buffer_push_back_vertex ( vertex_buffer_t *self,
                                  void *vertex )
 {
     assert( self );
@@ -335,7 +335,7 @@ vertex_buffer_push_back_vertex ( VertexBuffer *self,
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_push_back_indices ( VertexBuffer *self,
+vertex_buffer_push_back_indices ( vertex_buffer_t *self,
                                   GLuint *indices,
                                   size_t count )
 {
@@ -349,7 +349,7 @@ vertex_buffer_push_back_indices ( VertexBuffer *self,
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_push_back_vertices ( VertexBuffer *self,
+vertex_buffer_push_back_vertices ( vertex_buffer_t *self,
                                    void *vertices,
                                    size_t count )
 {
@@ -364,7 +364,7 @@ vertex_buffer_push_back_vertices ( VertexBuffer *self,
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_insert_indices ( VertexBuffer *self,
+vertex_buffer_insert_indices ( vertex_buffer_t *self,
                                size_t index,
                                GLuint *indices,
                                size_t count )
@@ -379,7 +379,7 @@ vertex_buffer_insert_indices ( VertexBuffer *self,
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_insert_vertices ( VertexBuffer *self,
+vertex_buffer_insert_vertices ( vertex_buffer_t *self,
                                 size_t index,
                                 void *vertices,
                                 size_t count )
@@ -405,7 +405,7 @@ vertex_buffer_insert_vertices ( VertexBuffer *self,
 
 // ----------------------------------------------------------------------------
 void
-vertex_attribute_position_enable( VertexAttribute *attr )
+vertex_attribute_position_enable( vertex_attribute_t *attr )
 {
     glEnableClientState( attr->target );
     glVertexPointer( attr->size, attr->type, attr->stride, attr->pointer );
@@ -415,7 +415,7 @@ vertex_attribute_position_enable( VertexAttribute *attr )
 
 // ----------------------------------------------------------------------------
 void
-vertex_attribute_normal_enable( VertexAttribute *attr )
+vertex_attribute_normal_enable( vertex_attribute_t *attr )
 {
     glEnableClientState( attr->target );
     glNormalPointer( attr->type, attr->stride, attr->pointer );
@@ -425,7 +425,7 @@ vertex_attribute_normal_enable( VertexAttribute *attr )
 
 // ----------------------------------------------------------------------------
 void
-vertex_attribute_color_enable( VertexAttribute *attr )
+vertex_attribute_color_enable( vertex_attribute_t *attr )
 {
     glEnableClientState( attr->target );
     glColorPointer( attr->size, attr->type, attr->stride, attr->pointer );
@@ -435,7 +435,7 @@ vertex_attribute_color_enable( VertexAttribute *attr )
 
 // ----------------------------------------------------------------------------
 void
-vertex_attribute_tex_coord_enable( VertexAttribute *attr )
+vertex_attribute_tex_coord_enable( vertex_attribute_t *attr )
 {
     glEnableClientState( attr->target );
     glTexCoordPointer( attr->size, attr->type, attr->stride, attr->pointer );
@@ -445,7 +445,7 @@ vertex_attribute_tex_coord_enable( VertexAttribute *attr )
 
 // ----------------------------------------------------------------------------
 void
-vertex_attribute_fog_coord_enable( VertexAttribute *attr )
+vertex_attribute_fog_coord_enable( vertex_attribute_t *attr )
 {
     glEnableClientState( attr->target );
     glFogCoordPointer( attr->type, attr->stride, attr->pointer );
@@ -455,7 +455,7 @@ vertex_attribute_fog_coord_enable( VertexAttribute *attr )
 
 // ----------------------------------------------------------------------------
 void
-vertex_attribute_edge_flag_enable( VertexAttribute *attr )
+vertex_attribute_edge_flag_enable( vertex_attribute_t *attr )
 {
     glEnableClientState( attr->target );
     glEdgeFlagPointer( attr->stride, attr->pointer );
@@ -465,7 +465,7 @@ vertex_attribute_edge_flag_enable( VertexAttribute *attr )
 
 // ----------------------------------------------------------------------------
 void
-vertex_attribute_secondary_color_enable( VertexAttribute *attr )
+vertex_attribute_secondary_color_enable( vertex_attribute_t *attr )
 {
     glEnableClientState( attr->target );
     glSecondaryColorPointer( attr->size, attr->type, attr->stride, attr->pointer );
@@ -475,7 +475,7 @@ vertex_attribute_secondary_color_enable( VertexAttribute *attr )
 
 // ----------------------------------------------------------------------------
 void
-vertex_attribute_generic_enable( VertexAttribute *attr )
+vertex_attribute_generic_enable( vertex_attribute_t *attr )
 {
     glEnableVertexAttribArray( attr->index );
     glVertexAttribPointer( attr->index, attr->size, attr->type,
@@ -485,7 +485,7 @@ vertex_attribute_generic_enable( VertexAttribute *attr )
 
 
 // ----------------------------------------------------------------------------
-VertexAttribute *
+vertex_attribute_t *
 vertex_attribute_parse( char *format )
 {
     // Generic attribute
@@ -531,7 +531,7 @@ vertex_attribute_parse( char *format )
 
 
 // ----------------------------------------------------------------------------
-VertexAttribute *
+vertex_attribute_t *
 vertex_attribute_new( GLenum target,
                       GLuint index,
                       GLint size,
@@ -540,7 +540,7 @@ vertex_attribute_new( GLenum target,
                       GLsizei stride,
                       GLvoid *pointer )
 {
-    VertexAttribute *attribute = (VertexAttribute *) malloc (sizeof(VertexAttribute));
+    vertex_attribute_t *attribute = (vertex_attribute_t *) malloc (sizeof(vertex_attribute_t));
     assert( size > 0 );
 
     // Generic attribute

@@ -3,7 +3,7 @@
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
  * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,23 +30,31 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-#include <wchar.h>
-#include "vector.h"
-#include "markup.h"
-#include "font-manager.h"
-#include "texture-font.h"
-#include "texture-glyph.h"
+#include "freetype-gl.h"
 #include "vertex-buffer.h"
+#include "markup.h"
 
 
-VertexBuffer *text_buffer, *line_buffer, *point_buffer;
-FontManager *manager;
+// ------------------------------------------------------- typedef & struct ---
+typedef struct {
+    float x, y, z;    // position
+    float s, t;       // texture
+    float r, g, b, a; // color
+} vertex_t;
 
+typedef struct {
+    float x, y;        // position
+    float r, g, b, a; // color
+} point_t;
+
+
+// ------------------------------------------------------- global variables ---
+vertex_buffer_t * text_buffer;
+vertex_buffer_t * line_buffer;
+vertex_buffer_t * point_buffer;
+
+
+// ---------------------------------------------------------------- display ---
 void display( void )
 {
     int viewport[4];
@@ -70,6 +78,8 @@ void display( void )
     glutSwapBuffers( );
 }
 
+
+// ---------------------------------------------------------------- reshape ---
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -80,6 +90,7 @@ void reshape(int width, int height)
     glutPostRedisplay();
 }
 
+// --------------------------------------------------------------- keyboard ---
 void keyboard( unsigned char key, int x, int y )
 {
     if ( key == 27 )
@@ -89,24 +100,47 @@ void keyboard( unsigned char key, int x, int y )
 }
 
 
-void add_text( wchar_t *      text,
-               VertexBuffer * buffer,
-               Markup *       markup,
-               Pen *          pen )
+// --------------------------------------------------------------- add_text ---
+void add_text( vertex_buffer_t * buffer, texture_font_t * font,
+               wchar_t *  text, vec4 * color, vec2 * pen )
 {
     size_t i;
-    TextureFont *font    = font_manager_get_from_markup( manager, markup );
-    TextureGlyph *glyph  = texture_font_get_glyph( font, text[0] );
-    texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen, 0 );
-    for( i=1; i<wcslen(text); ++i )
+    float r = color->red, g = color->green, b = color->blue, a = color->alpha;
+    for( i=0; i<wcslen(text); ++i )
     {
-        TextureGlyph *glyph = texture_font_get_glyph( font, text[i] );
-        int kerning = texture_glyph_get_kerning( glyph, text[i-1] );
-        texture_glyph_add_to_vertex_buffer( glyph, buffer, markup, pen, kerning );
+        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
+        if( glyph != NULL )
+        {
+            int kerning = 0;
+            if( i > 0)
+            {
+                kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+            }
+            pen->x += kerning;
+            int x0  = (int)( pen->x + glyph->offset_x );
+            int y0  = (int)( pen->y + glyph->offset_y );
+            int x1  = (int)( x0 + glyph->width );
+            int y1  = (int)( y0 - glyph->height );
+            float s0 = glyph->s0;
+            float t0 = glyph->t0;
+            float s1 = glyph->s1;
+            float t1 = glyph->t1;
+            GLuint index = buffer->vertices->size;
+            GLuint indices[] = {index, index+1, index+2,
+                                index, index+2, index+3};
+            vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a },
+                                    { x0,y1,0,  s0,t1,  r,g,b,a },
+                                    { x1,y1,0,  s1,t1,  r,g,b,a },
+                                    { x1,y0,0,  s1,t0,  r,g,b,a } };
+            vertex_buffer_push_back_indices( buffer, indices, 6 );
+            vertex_buffer_push_back_vertices( buffer, vertices, 4 );
+            pen->x += glyph->advance_x;
+        }
     }
-    glBindTexture( GL_TEXTURE_2D, manager->atlas->texid );
 }
 
+
+// ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
     int width  = 600;
@@ -120,43 +154,34 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    typedef struct { float x,y; float r,g,b,a; } Point;
+    vec4 blue  = {{{0,0,1,1}}};
+    vec4 black = {{{0,0,0,1}}};
 
-    Markup normal = { "Liberation Sans", 18, 0, 0, 0.0, 0.0,
-                      {0,0,0,1}, {1,1,1,0},
-                      0, {0,0,0,1}, 0, {0,0,0,1},
-                      0, {0,0,0,1}, 0, {0,0,0,1} };
-    Markup blue = normal; blue.foreground_color.b = 1;
-    Markup big    = { "Bitstream Vera Serif", 400, 0, 0, 0.0, 0.0,
-                      {0,0,0,1}, {1,1,1,0},
-                      0, {0,0,0,1}, 0, {0,0,0,1},
-                      0, {0,0,0,1}, 0, {0,0,0,1} };
-    Markup title  = { "Bitstream Vera Serif", 32, 0, 0, 0.0, 0.0,
-                      {.2,.2,.2,1}, {1,1,1,0},
-                      0, {0,0,0,1}, 0, {0,0,0,1},
-                      0, {0,0,0,1}, 0, {0,0,0,1} };
-    
-    manager = font_manager_new( 512, 512, 1 );
+    texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1);
+    texture_font_t * big = texture_font_new( atlas, "./Vera.ttf", 400);
+    texture_font_t * small = texture_font_new( atlas, "./Vera.ttf", 18);
+    texture_font_t * title = texture_font_new( atlas, "./Vera.ttf", 32);
+
     text_buffer  = vertex_buffer_new( "v3f:t2f:c4f" ); 
     line_buffer  = vertex_buffer_new( "v2f:c4f" ); 
     point_buffer = vertex_buffer_new( "v2f:c4f" ); 
 
-    Pen   pen, origin;
-    Point p1, p2;
+    vec2  pen, origin;
+    point_t p1, p2;
 
     p1.r = p1.g = p1.b = 0; p1.a = 1;
     p2.r = p2.g = p2.b = 0; p2.a = 1;
 
-    TextureFont *font = font_manager_get_from_markup( manager, &big );
-    TextureGlyph *glyph  = texture_font_get_glyph( font, L'g' );
+    texture_glyph_t *glyph  = texture_font_get_glyph( big, L'g' );
     origin.x = width/2  - glyph->offset_x - glyph->width/2;
     origin.y = height/2 - glyph->offset_y + glyph->height/2;
-    texture_glyph_add_to_vertex_buffer( glyph, text_buffer, &big, &origin, 0 );
+    add_text( text_buffer, big, L"g", &black, &origin );
 
     // title
     pen.x = 50;
     pen.y = 560;
-    add_text( L"Glyph metrics", text_buffer, &title, &pen );
+    add_text( text_buffer, title, L"Glyph metrics", &black, &pen );
+
 
     // Baseline
     p1.x = 0.1*width;
@@ -186,9 +211,10 @@ int main( int argc, char **argv )
     p1.x = width/2  - glyph->offset_x - glyph->width/2;
     p1.y = height/2 - glyph->offset_y + glyph->height/2;
     vertex_buffer_push_back_vertex( point_buffer, &p1 );
-    pen.x = p1.x - 54;
+    pen.x = p1.x - 58;
     pen.y = p1.y - 20;
-    add_text( L"Origin", text_buffer, &normal, &pen );
+    add_text( text_buffer, small, L"Origin", &black, &pen );
+
 
     // Advance point
     p1.x = width/2  - glyph->offset_x - glyph->width/2 + glyph->advance_x;
@@ -239,7 +265,7 @@ int main( int argc, char **argv )
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = width/2 - 20;
     pen.y = .8*height + 3;
-    add_text( L"width", text_buffer, &blue, &pen );
+    add_text( text_buffer, small, L"width", &blue, &pen );
 
     // advance_x
     p1.x = width/2 - glyph->width/2 - glyph->offset_x;
@@ -250,7 +276,7 @@ int main( int argc, char **argv )
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = width/2 - 48;
     pen.y = .2*height - 18;
-    add_text( L"advance_x", text_buffer, &blue, &pen );
+    add_text( text_buffer, small, L"advance_x", &blue, &pen );
 
     // Offset_x
     p1.x = width/2 - glyph->width/2 -glyph->offset_x;
@@ -261,7 +287,7 @@ int main( int argc, char **argv )
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = width/2 - glyph->width/2 + 5;
     pen.y = .85*height-8;
-    add_text( L"offset_x", text_buffer, &blue, &pen );
+    add_text( text_buffer, small, L"offset_x", &blue, &pen );
 
     // Height
     p1.x = 0.3*width/2;
@@ -272,7 +298,7 @@ int main( int argc, char **argv )
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = 0.2*width/2-30;
     pen.y = origin.y + glyph->offset_y - glyph->height/2;
-    add_text( L"height", text_buffer, &blue, &pen );
+    add_text( text_buffer, small, L"height", &blue, &pen );
 
 
     // Offset y
@@ -284,8 +310,7 @@ int main( int argc, char **argv )
     vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = 0.8*width+3;
     pen.y = origin.y + glyph->offset_y/2 -6;
-    add_text( L"offset_y", text_buffer, &blue, &pen );
-
+    add_text( text_buffer, small, L"offset_y", &blue, &pen );
 
     glutMainLoop( );
     return 0;
