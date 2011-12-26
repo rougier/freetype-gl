@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,7 +29,7 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * =========================================================================
+ * ============================================================================
 
    This source is based on the article by Jukka Jylänki :
    "A Thousand Ways to Pack the Bin - A Practical Approach to
@@ -39,7 +39,8 @@
    algorithm based on C++ sources provided by Jukka Jylänki at:
    http://clb.demon.fi/files/RectangleBinPack/
 
-   ========================================================================= */
+ *  ============================================================================
+ */
 #ifndef __TEXTURE_ATLAS_H__
 #define __TEXTURE_ATLAS_H__
 #include "vector.h"

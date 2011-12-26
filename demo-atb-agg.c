@@ -384,7 +384,7 @@ void reshape( int width, int height )
 void reset( void )
 { 
     p_family    = GEORGIA;
-    p_size      = 16.0;
+    p_size      = 12.0;
     p_invert    = 0;
     p_kerning   = 1;
     p_hinting   = 1;
