@@ -155,7 +155,7 @@ vector_reserve( vector_t *self,
 {
     assert( self );
 
-    if( self->capacity < size);
+    if( self->capacity < size)
     {
         self->items = realloc( self->items, size * self->item_size );
         self->capacity = size;
