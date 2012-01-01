@@ -272,6 +272,10 @@ texture_font_new( texture_atlas_t * atlas,
 
     FT_Done_Face( face );
     FT_Done_FreeType( library );
+
+    /* -1 is a special glyph */
+    texture_font_get_glyph( self, -1 );
+
     return self;
 }
 
@@ -363,6 +367,7 @@ texture_font_load_glyphs( texture_font_t * self,
         if ( region.x < 0 )
         {
             missed++;
+            fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
             continue;
         }
         w = w - 1;
@@ -428,7 +433,50 @@ texture_font_get_glyph( texture_font_t * self,
         }
     }
 
-    /* If not, load it */
+    /* charcode -1 is special : it is used for line drawing (overline,
+     * underline, strikethrough) and background.
+     */
+    if( charcode == (wchar_t)(-1) )
+    {
+        size_t x, y, width, height, depth, w, h;
+        texture_glyph_t *glyph;
+        ivec4 region;
+
+        width  = self->atlas->width;
+        height = self->atlas->height;
+        depth  = self->atlas->depth;
+        w = 2 + 1;
+        h = 2 + 1;
+        region = texture_atlas_get_region( self->atlas, w, h );
+        if ( region.x < 0 )
+        {
+            fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
+            return NULL;
+        }
+        w = w - 1;
+        h = h - 1;
+        x = region.x;
+        y = region.y;
+        unsigned char data[4] = {255,255,255,255};
+        texture_atlas_set_region( self->atlas, x, y, w, h, data, 0 );
+        glyph = texture_glyph_new( );
+        glyph->charcode = (wchar_t)(-1);
+        glyph->width    = w;
+        glyph->height   = h;
+        glyph->offset_x = 0;
+        glyph->offset_y = 0;
+        glyph->s0       = x/(float)width;
+        glyph->t0       = y/(float)height;
+        glyph->s1       = (x + glyph->width)/(float)width;
+        glyph->t1       = (y + glyph->height)/(float)height;
+        glyph->advance_x = 0;
+        glyph->advance_y = 0;
+        vector_push_back( self->glyphs, glyph );
+        free( glyph );
+        return (texture_glyph_t *) vector_back( self->glyphs );
+    }
+
+    /* Glyph has not been already loaded */
     if( !buffer)
     {
         buffer = (wchar_t *) calloc( 2, sizeof(wchar_t) );
