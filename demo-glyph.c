@@ -154,8 +154,8 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    vec4 blue  = {{{0,0,1,1}}};
-    vec4 black = {{{0,0,0,1}}};
+    vec4 blue  = {{0,0,1,1}};
+    vec4 black = {{0,0,0,1}};
 
     texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1);
     texture_font_t * big = texture_font_new( atlas, "./Vera.ttf", 400);

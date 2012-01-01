@@ -37,137 +37,88 @@
 /**
  * Tuple of 4 floats
  */
-typedef struct {
-    union {
-        /** */
-        float data[4];
-        /** */
-        float rgba[4];
-        /** */
-        float xyz[3];
-        /** */
-        float rgb[3];
-        struct {
-            /** First component */
-            union { float x;               float r; float red;   };
-            /** Second component */
-            union { float y;               float g; float green; };
-            /** Third component */
-            union { float z; float width;  float b; float blue;  };
-            /** Fourth component */
-            union { float w; float height; float a; float alpha; };
-        };
-    };
+typedef union
+{
+	float data[4];
+    float xyzw[4];
+    float rgba[4];
+    float rgb[3];
+    float xyz[3];
+	struct { float x;   float y;     float z;     float w;      };
+	struct { float x;   float y;     float width; float height; };
+	struct { float r;   float g;     float b;     float a;      };
+	struct { float red; float green; float blue;  float alpha;  };
 } vec4;
 
 /**
  * Tuple of 3 floats
  */
-typedef struct {
-    union {
-        /** */
-        float data[3];
-        /** */
-        float rgb[3];
-        /** */
-        float xyz[3];
-        struct {
-            /** First component */
-            union { float x; float width;  float r; float red;   };
-            /** Second component */
-            union { float y; float height; float g; float green; };
-            /** Third component */
-            union { float z; float depth;  float b; float blue;  };
-        };
-    };
+typedef union {
+	float data[3];
+    float rgb[3];
+    float xyz[3];
+    float xy[2];
+	struct { float x;     float y;      float z;     };
+	struct { float width; float height; float depth; };
+	struct { float r;     float g;      float b;     };
+	struct { float red;   float green;  float blue;  };
 } vec3;
 
 /**
  * Tuple of 2 floats
  */
-typedef struct {
-    union {
-        /** */
-        float data[2];
-        /** */
-        float xy[2];
-        struct {
-            /** First component */
-            union { float x; float width;  float l; float luminance; };
-            /** Second component */
-            union { float y; float height; float a; float alpha;     };
-        };
-    };
+typedef union
+{
+	float data[2];
+	float xy[2];
+	struct { float x;         float y;      };
+	struct { float width;     float height; };
+	struct { float l;         float a;      };
+	struct { float luminance; float alpha;  };
 } vec2;
+
 
 /**
  * Tuple of 4 ints
  */
-typedef struct {
-    union {
-        /** */
-        int data[4];
-        /** */
-        int rgba[4];
-        /** */
-        int xyz[3];
-        /** */
-        int rgb[3];
-        struct {
-            /** First component */
-            union { int x;             int r; int red;   };
-            /** Second component */
-            union { int y;             int g; int green; };
-            /** Third component */
-            union { int z; int width;  int b; int blue;  };
-            /** Fourth component */
-            union { int w; int height; int a; int alpha; };
-        };
-    };
+typedef union
+{
+	int data[4];
+    int xyzw[4];
+    int rgba[4];
+    int rgb[3];
+    int xyz[3];
+	struct { int x;   int y;     int z;     int w;      };
+	struct { int x;   int y;     int width; int height; };
+	struct { int r;   int g;     int b;     int a;      };
+	struct { int red; int green; int blue;  int alpha;  };
 } ivec4;
 
 /**
  * Tuple of 3 ints
  */
-typedef struct {
-    union {
-        /** */
-        int data[3];
-        /** */
-        int rgb[3];
-        /** */
-        int xyz[3];
-        /** */
-        int xy[2];
-        struct {
-            /** First component */
-            union { int x; int width;  int r; int red;   };
-            /** Second component */
-            union { int y; int height; int g; int green; };
-            /** Fourth component */
-            union { int z; int depth;  int b; int blue;  };
-        };
-    };
+typedef union {
+	int data[3];
+    int rgb[3];
+    int xyz[3];
+    int xy[2];
+	struct { int x;     int y;      int z;     };
+	struct { int width; int height; int depth; };
+	struct { int r;     int g;      int b;     };
+	struct { int red;   int green;  int blue;  };
 } ivec3;
 
 /**
  * Tuple of 2 ints
  */
-typedef struct {
-    union {
-        /** */
-        int data[2];
-        /** */
-        int xy[2];
-        struct {
-            /** First component */
-            union { int x; int width;  int l; int luminance; };
-            /** Second component */
-            union { int y; int height; int a; int alpha;     };
-        };
-    };
+typedef union
+{
+	int data[2];
+	int xy[2];
+	struct { int x;         int y;      };
+	struct { int width;     int height; };
+	struct { int l;         int a;      };
+	struct { int luminance; int alpha;  };
 } ivec2;
-
-
 
 #endif /* __VEC234_H__ */

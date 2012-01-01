@@ -132,8 +132,8 @@ void display( void )
     if( count < 5 )
     {
         size_t i;
-        vec4 color = {{{0,0,0,1}}};
-        vec2 pen = {{{0,0}}};
+        vec4 color = {{0,0,0,1}};
+        vec2 pen = {{0,0}};
         vertex_buffer_clear( buffer );
 
         pen.y = -font->descender;
@@ -185,8 +185,8 @@ void idle( void )
 int main( int argc, char **argv )
 {
     size_t i;
-    vec4 color = {{{0,0,0,1}}};
-    vec2 pen = {{{0,0}}};
+    vec4 color = {{0,0,0,1}};
+    vec2 pen = {{0,0}};
 
     glutInit( &argc, argv );
     glutInitWindowSize( 800, 600 );

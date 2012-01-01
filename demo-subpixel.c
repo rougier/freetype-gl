@@ -249,8 +249,8 @@ int main( int argc, char **argv )
     texture_font_t *font;
     const char * filename = "./Arial.ttf";
     wchar_t *text = L"|... A Quick Brown Fox Jumps Over The Lazy Dog";
-    vec2 pen = {{{0,0}}};
-    vec4 black = {{{0,0,0,1}}};
+    vec2 pen = {{0,0}};
+    vec4 black = {{0,0,0,1}};
 
     atlas = texture_atlas_new( 512, 512, 3 );
     font = texture_font_new( atlas, filename, 9 );

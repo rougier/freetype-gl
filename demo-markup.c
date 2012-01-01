@@ -54,7 +54,8 @@ void display( void )
 {
     int viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
-    glClearColor(1,1,1,1);
+    // glClearColor(0.30,0.30,0.32,1.00);
+    glClearColor(1.00,1.00,1.00,1.00);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -146,16 +147,15 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-
-    vec4 white = {{{1,1,1,1}}};
-    vec4 black = {{{0,0,0,1}}};
-    vec4 red  = {{{1,0,0,1}}};
-    vec4 green= {{{0,1,0,1}}};
-    vec4 blue = {{{0,0,1,1}}};
+    vec4 white = {{1,1,1,1}};
+    vec4 black = {{0,0,0,1}};
+    vec4 red  = {{1,0,0,1}};
+    vec4 green= {{0,1,0,1}};
+    vec4 blue = {{0,0,1,1}};
     markup_t normal = { "Liberation Sans", 18, 0, 0, 0.0, 0.0,
-                      {{{0,0,0,1}}}, {{{0,0,0,0}}},
-                      0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}},
-                      0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}}, 0 };
+                      {{0,0,0,1}}, {{0,0,0,0}},
+                      0, {{0,0,0,1}}, 0, {{0,0,0,1}},
+                      0, {{0,0,0,1}}, 0, {{0,0,0,1}}, 0 };
     markup_t title  = normal; title.size = 32;
     markup_t bold   = normal; bold.bold = 1;
     markup_t italic = normal; italic.italic = 1;
@@ -172,7 +172,7 @@ int main( int argc, char **argv )
     markup_t zapfino = normal; zapfino.family = "Zapfino";
 
 
-    vec2 pen = {{{0,0}}};
+    vec2 pen = {{0,0}};
     font_manager_t * manager = font_manager_new( 512, 512, 1 );
     buffer= vertex_buffer_new( "v3f:t2f:c4f" ); 
 

@@ -111,9 +111,9 @@ console_new( void )
     texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
  
     markup_t normal = { "Bitstream Vera Sans Mono", 13, 0, 0, 0.0, 0.0,
-                        {{{0,0,0,1}}}, {{{1,1,1,0}}},
-                        0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}},
-                        0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}} };
+                        {{0,0,0,1}}, {{1,1,1,0}},
+                        0, {{0,0,0,1}}, 0, {{0,0,0,1}},
+                        0, {{0,0,0,1}}, 0, {{0,0,0,1}} };
     normal.font = texture_font_new( atlas, "./VeraMono.ttf", 13 );
 
     markup_t bold = normal;

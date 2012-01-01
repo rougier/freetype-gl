@@ -222,9 +222,9 @@ build_buffer( void )
     texture_font_t *font;
     texture_glyph_t *glyph;
     markup_t markup = { "Arial", 10, 0, 0, 0.0, 0.0,
-                        {{{1,1,1,1}}}, {{{0,0,0,0}}},
-                        0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}},
-                        0, {{{0,0,0,1}}}, 0, {{{0,0,0,1}}}, 0 };
+                        {{1,1,1,1}}, {{0,0,0,0}},
+                        0, {{0,0,0,1}}, 0, {{0,0,0,1}},
+                        0, {{0,0,0,1}}, 0, {{0,0,0,1}}, 0 };
     vertex_buffer_clear( buffer );
     texture_atlas_clear( atlas );
 

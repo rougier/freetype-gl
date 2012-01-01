@@ -148,8 +148,8 @@ int main( int argc, char **argv )
     const char * filename = "./Vera.ttf";
     wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
     buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
-    vec2 pen = {{{0,0}}};
-    vec4 color = {{{1,1,1,1}}};
+    vec2 pen = {{0,0}};
+    vec4 color = {{1,1,1,1}};
 
     for( i=7; i < 27; ++i)
     {

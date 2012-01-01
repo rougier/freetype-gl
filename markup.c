@@ -40,8 +40,8 @@
 markup_t *
 markup_new( void )
 {
-    vec4 black = {{{0,0,0,1}}};
-    vec4 white = {{{1,1,1,1}}};
+    vec4 black = {{0,0,0,1}};
+    vec4 white = {{1,1,1,1}};
 
     markup_t * self = (markup_t *) malloc( sizeof(markup_t) );
     if( !self )

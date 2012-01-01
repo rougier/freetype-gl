@@ -13,7 +13,7 @@
  *
  *  2. Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
+ *     documentation and/or other materials proided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -128,8 +128,8 @@ void display( void )
     if (time - timebase > 1000)
     {
         wchar_t fps[64];
-        vec2 pen = {{{5.0, 5.0}}};
-        vec4 color = {{{0.5,0.5,0.5,0.5}}};
+        vec2 pen = {{5.0, 5.0}};
+        vec4 color = {{0.5,0.5,0.5,0.5}};
         swprintf( fps, 64, L"%.2f", frame*1000.0/(time-timebase) );
         vertex_buffer_clear( buffer );
         add_text( buffer, font, fps, &color, &pen );
