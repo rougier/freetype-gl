@@ -199,17 +199,22 @@ texture_font_generate_kerning( texture_font_t *self )
     }
 
     /* For each glyph couple combination, check if kerning is necessary */
-    for( i=0; i<self->glyphs->size; ++i )
+    /* Starts at index 1 since 0 is for the special backgroudn glyph */
+    for( i=1; i<self->glyphs->size; ++i )
     {
         glyph = (texture_glyph_t *) vector_get( self->glyphs, i );
+        glyph_index = FT_Get_Char_Index( face, glyph->charcode );
         vector_clear( glyph->kerning );
 
-        for( j=0; j<self->glyphs->size; ++j )
+        for( j=1; j<self->glyphs->size; ++j )
         {
             prev_glyph = (texture_glyph_t *) vector_get( self->glyphs, j );
             prev_index = FT_Get_Char_Index( face, prev_glyph->charcode );
             FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
-            if( kerning.x != 0.0 )
+            // printf("%c(%d)-%c(%d): %ld\n",
+            //       prev_glyph->charcode, prev_glyph->charcode,
+            //       glyph_index, glyph_index, kerning.x);
+            if( kerning.x )
             {
                 // 64 * 64 because of 26.6 encoding AND the transform matrix used
                 // in texture_font_load_face (hres = 64)
@@ -438,39 +443,23 @@ texture_font_get_glyph( texture_font_t * self,
      */
     if( charcode == (wchar_t)(-1) )
     {
-        size_t x, y, width, height, depth, w, h;
-        texture_glyph_t *glyph;
-        ivec4 region;
-
-        width  = self->atlas->width;
-        height = self->atlas->height;
-        depth  = self->atlas->depth;
-        w = 2 + 1;
-        h = 2 + 1;
-        region = texture_atlas_get_region( self->atlas, w, h );
+        size_t width  = self->atlas->width;
+        size_t height = self->atlas->height;
+        ivec4 region = texture_atlas_get_region( self->atlas, 4, 4 );
+        texture_glyph_t * glyph = texture_glyph_new( );
+        static unsigned char data[4*3] = {-1,-1,-1,-1,-1,-1,
+                                          -1,-1,-1,-1,-1,-1};
         if ( region.x < 0 )
         {
             fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
             return NULL;
         }
-        w = w - 1;
-        h = h - 1;
-        x = region.x;
-        y = region.y;
-        unsigned char data[4] = {255,255,255,255};
-        texture_atlas_set_region( self->atlas, x, y, w, h, data, 0 );
-        glyph = texture_glyph_new( );
+        texture_atlas_set_region( self->atlas, region.x, region.y, 4, 4, data, 0 );
         glyph->charcode = (wchar_t)(-1);
-        glyph->width    = w;
-        glyph->height   = h;
-        glyph->offset_x = 0;
-        glyph->offset_y = 0;
-        glyph->s0       = x/(float)width;
-        glyph->t0       = y/(float)height;
-        glyph->s1       = (x + glyph->width)/(float)width;
-        glyph->t1       = (y + glyph->height)/(float)height;
-        glyph->advance_x = 0;
-        glyph->advance_y = 0;
+        glyph->s0 = (region.x+2)/(float)width;
+        glyph->t0 = (region.y+2)/(float)height;
+        glyph->s1 = (region.x+3)/(float)width;
+        glyph->t1 = (region.y+3)/(float)height;
         vector_push_back( self->glyphs, glyph );
         free( glyph );
         return (texture_glyph_t *) vector_back( self->glyphs );
