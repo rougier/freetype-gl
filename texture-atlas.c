@@ -67,7 +67,7 @@ texture_atlas_new( const size_t width,
     self->width = width;
     self->height = height;
     self->depth = depth;
-    ivec3 node = {{{0,0,width}}};
+    ivec3 node = {{0,0,width}};
     vector_push_back( self->nodes, &node );
     self->data = (unsigned char *)
         calloc( width*height*depth, sizeof(unsigned char) );
@@ -190,7 +190,7 @@ texture_atlas_get_region( texture_atlas_t * self,
 
 	int y, best_height, best_width, best_index;
     ivec3 *node, *prev;
-    ivec4 region = {{{0,0,width,height}}};
+    ivec4 region = {{0,0,width,height}};
     size_t i;
 
     best_height = INT_MAX;
@@ -276,7 +276,7 @@ texture_atlas_clear( texture_atlas_t * self )
 
     vector_clear( self->nodes );
     self->used = 0;
-    ivec3 node = {{{0,0,self->width}}};
+    ivec3 node = {{0,0,self->width}};
     vector_push_back( self->nodes, &node );
     memset( self->data, 0, self->width*self->height*self->depth );
 }
