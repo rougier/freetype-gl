@@ -72,6 +72,11 @@ typedef struct
      */
     float spacing;
 
+    /*
+     *
+     */
+    float gamma;
+
     /**
      *
      */
@@ -159,6 +164,10 @@ void  markup_set_rise( markup_t *self,
 float markup_get_spacing( const markup_t *self );
 void  markup_set_spacing( markup_t *self,
                           const float spacing );
+
+float markup_get_gamma( const markup_t *self );
+void  markup_set_gamma( markup_t *self,
+                          const float gamma );
 
 vec4  markup_get_foreground_color( const markup_t *self );
 void  markup_set_foreground_color( markup_t *self,

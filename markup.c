@@ -55,6 +55,7 @@ markup_new( void )
     self->size   = 16;
     self->rise   = 0;
     self->spacing= 0;
+    self->gamma  = 1.0;
 
     self->foreground_color    = black;
     self->background_color    = white;
@@ -201,6 +202,26 @@ markup_get_spacing( const markup_t * self )
 void
 markup_set_spacing( markup_t * self,
                     const float spacing )
+{
+    assert( self );
+
+}
+
+
+// -------------------------------------------------------- markup_get_gamma ---
+float
+markup_get_gamma( const markup_t * self )
+{
+    assert( self );
+
+    return self->gamma;
+}
+
+
+// -------------------------------------------------------- markup_set_gamma ---
+void
+markup_set_gamma( markup_t * self,
+                  const float gamma )
 {
     assert( self );
 
