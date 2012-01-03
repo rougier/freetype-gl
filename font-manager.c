@@ -68,9 +68,8 @@ font_manager_new( size_t width, size_t height, size_t depth )
         exit( EXIT_FAILURE );
     }
     self->atlas = atlas;
-    self->fonts = vector_new( sizeof(texture_font_t) );
+    self->fonts = vector_new( sizeof(texture_font_t *) );
     self->cache = wcsdup( L" " );
-
     return self;
 }
 
@@ -99,22 +98,23 @@ font_manager_get_from_filename( font_manager_t *self,
     texture_font_t *font;
 
     assert( self );
-
-    for( i=0; i<self->fonts->size;++i )
+    for( i=0; i<vector_size(self->fonts); ++i )
     {
-        font = (texture_font_t *) vector_get( self->fonts, i );
+        font = * (texture_font_t **) vector_get( self->fonts, i );
         if( (strcmp(font->filename, filename) == 0) && ( font->size == size) )
         {
             return font;
         }
     }
     font = texture_font_new( self->atlas, filename, size );
-    texture_font_load_glyphs( font, self->cache );
     if( font )
     {
-        vector_push_back( self->fonts, font );
+        vector_push_back( self->fonts, &font );
+        texture_font_load_glyphs( font, self->cache );
+        return font;
     }
-    return font;
+    fprintf( stderr, "Unable to load \"%s\" (size=%.1f)\n", filename, size );
+    return 0;
 }
 
 
@@ -142,6 +142,7 @@ font_manager_get_from_description( font_manager_t *self,
         return 0;
     }
     font = font_manager_get_from_filename( self, filename, size );
+    // fprintf( stderr, "Matched font filename : %s\n", filename );
     free( filename );
     return font;
 }
@@ -158,6 +159,9 @@ font_manager_get_from_markup( font_manager_t *self,
     fprintf( stderr, "\"font_manager_get_from_markup\" not implemented yet.\n" );
     return 0;
 #endif
+
+    // fprintf( stderr, "Matching %s, %f, %d, %d\n",
+    //         markup->family, markup->size, markup->bold,   markup->italic );
 
     return font_manager_get_from_description( self, markup->family, markup->size,
                                               markup->bold,   markup->italic );
