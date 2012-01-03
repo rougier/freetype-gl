@@ -251,6 +251,18 @@ typedef struct
      */
     float descender;
 
+    /**
+     * The position of the underline line for this face. It is the center of
+     * the underlining stem. Only relevant for scalable formats.
+     */
+    float underline_position;
+
+    /**
+     * The thickness of the underline for this face. Only relevant for scalable
+     * formats.
+     */
+    float underline_thickness;
+
 } texture_font_t;
 
 

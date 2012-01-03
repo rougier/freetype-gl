@@ -218,7 +218,7 @@ texture_font_generate_kerning( texture_font_t *self )
             {
                 // 64 * 64 because of 26.6 encoding AND the transform matrix used
                 // in texture_font_load_face (hres = 64)
-                kerning_t k = {prev_glyph->charcode, kerning.x/ (float)(64.0f*64.0f)};
+                kerning_t k = {prev_glyph->charcode, kerning.x / (float)(64.0f*64.0f)};
                 vector_push_back( glyph->kerning, &k );
             }
         }
@@ -269,12 +269,27 @@ texture_font_new( texture_atlas_t * atlas,
         return self;
     }
 
+    // 64 * 64 because of 26.6 encoding AND the transform matrix used
+    // in texture_font_load_face (hres = 64)
+    self->underline_position = face->underline_position / (float)(64.0f*64.0f) * self->size;
+    self->underline_position = round( self->underline_position );
+    if( self->underline_position > -2 )
+    {
+        self->underline_position = -2.0;
+    }
+
+    self->underline_thickness = face->underline_thickness / (float)(64.0f*64.0f) * self->size;
+    self->underline_thickness = round( self->underline_thickness );
+    if( self->underline_thickness < 1 )
+    {
+        self->underline_thickness = 1.0;
+    }
+
     FT_Size_Metrics metrics = face->size->metrics; 
     self->ascender = (metrics.ascender >> 6) / 100.0;
     self->descender = (metrics.descender >> 6) / 100.0;
     self->height = (metrics.height >> 6) / 100.0;
     self->linegap = self->height - self->ascender + self->descender;
-
     FT_Done_Face( face );
     FT_Done_FreeType( library );
 
