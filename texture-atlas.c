@@ -53,7 +53,7 @@ texture_atlas_new( const size_t width,
                    const size_t height,
                    const size_t depth )
 {
-    assert( (depth == 1) || (depth == 3) );
+    assert( (depth == 1) || (depth == 3) || (depth == 4) );
 
     texture_atlas_t *self = (texture_atlas_t *) malloc( sizeof(texture_atlas_t) );
     if( self == NULL)
@@ -299,7 +299,12 @@ texture_atlas_upload( texture_atlas_t * self )
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    if( self->depth == 3 )
+    if( self->depth == 4 )
+    {
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self->width, self->height,
+                      0, GL_RGBA, GL_UNSIGNED_BYTE, self->data );
+    }
+    else if( self->depth == 3 )
     {
         glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, self->width, self->height,
                       0, GL_RGB, GL_UNSIGNED_BYTE, self->data );
