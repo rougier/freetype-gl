@@ -110,10 +110,27 @@ console_new( void )
 
     texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
  
-    markup_t normal = { "Bitstream Vera Sans Mono", 13, 0, 0, 0.0, 0.0,
-                        {{0,0,0,1}}, {{1,1,1,0}},
-                        0, {{0,0,0,1}}, 0, {{0,0,0,1}},
-                        0, {{0,0,0,1}}, 0, {{0,0,0,1}} };
+    vec4 white = {{1,1,1,1}};
+    vec4 black = {{0,0,0,1}};
+    vec4 none = {{0,0,1,0}};
+    markup_t normal = {
+        .family  = "Bistream Vera Sans Mono",
+        .size    = 13.0,
+        .bold    = 0,
+        .italic  = 0,
+        .rise    = 0.0,
+        .spacing = 0.0,
+        .gamma   = 1.0,
+        .foreground_color    = black,
+        .background_color    = none,
+        .underline           = 0,
+        .underline_color     = white,
+        .overline            = 0,
+        .overline_color      = white,
+        .strikethrough       = 0,
+        .strikethrough_color = white,
+        .font = 0,
+    };
     normal.font = texture_font_new( atlas, "./VeraMono.ttf", 13 );
 
     markup_t bold = normal;

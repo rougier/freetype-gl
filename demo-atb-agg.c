@@ -221,10 +221,30 @@ build_buffer( void )
     size_t i;
     texture_font_t *font;
     texture_glyph_t *glyph;
-    markup_t markup = { "Arial", 10, 0, 0, 0.0, 0.0,
-                        {{1,1,1,1}}, {{0,0,0,0}},
-                        0, {{0,0,0,1}}, 0, {{0,0,0,1}},
-                        0, {{0,0,0,1}}, 0, {{0,0,0,1}}, 0 };
+
+    vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
+    vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+    markup_t markup = {
+        .family  = "Arial",
+        .size    = 10.0,
+        .bold    = 0,
+        .italic  = 0,
+        .rise    = 0.0,
+        .spacing = 0.0,
+        .gamma   = 2.2,
+        .foreground_color    = white,
+        .background_color    = none,
+        .underline           = 0,
+        .underline_color     = white,
+        .overline            = 0,
+        .overline_color      = white,
+        .strikethrough       = 0,
+        .strikethrough_color = white,
+        .font = 0,
+    };
+
+
+
     vertex_buffer_clear( buffer );
     texture_atlas_clear( atlas );
 

@@ -152,10 +152,25 @@ int main( int argc, char **argv )
     vec4 red  = {{1,0,0,1}};
     vec4 green= {{0,1,0,1}};
     vec4 blue = {{0,0,1,1}};
-    markup_t normal = { "Liberation Sans", 18, 0, 0, 0.0, 0.0,
-                      {{0,0,0,1}}, {{0,0,0,0}},
-                      0, {{0,0,0,1}}, 0, {{0,0,0,1}},
-                      0, {{0,0,0,1}}, 0, {{0,0,0,1}}, 0 };
+    vec4 none = {{0,0,1,0}};
+    markup_t normal = {
+        .family  = "Liberation Sans",
+        .size    = 18.0,
+        .bold    = 0,
+        .italic  = 0,
+        .rise    = 0.0,
+        .spacing = 0.0,
+        .gamma   = 1.0,
+        .foreground_color    = black,
+        .background_color    = none,
+        .underline           = 0,
+        .underline_color     = white,
+        .overline            = 0,
+        .overline_color      = white,
+        .strikethrough       = 0,
+        .strikethrough_color = white,
+        .font = 0,
+    };
     markup_t title  = normal; title.size = 32;
     markup_t bold   = normal; bold.bold = 1;
     markup_t italic = normal; italic.italic = 1;
