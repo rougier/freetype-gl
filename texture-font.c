@@ -33,6 +33,7 @@
  */
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_STROKER_H
 // #include FT_ADVANCES_H
 #include FT_LCD_FILTER_H
 #include <stdint.h>
@@ -232,10 +233,12 @@ texture_font_generate_kerning( texture_font_t *self )
 texture_font_t *
 texture_font_new( texture_atlas_t * atlas,
                   const char * filename,
-                  const float size )
+                  const float size)
 {
     assert( filename );
     assert( size );
+
+    const float thickness = .2;
 
     texture_font_t *self = (texture_font_t *) malloc( sizeof(texture_font_t) );
     if( self == NULL)
@@ -251,6 +254,7 @@ texture_font_new( texture_atlas_t * atlas,
     self->descender = 0;
     self->filename = strdup( filename );
     self->size = size;
+    self->thickness = thickness;
     self->hinting = 1;
     self->filtering = 1;
     // FT_LCD_FILTER_LIGHT   is (0x00, 0x55, 0x56, 0x55, 0x00)
@@ -327,7 +331,10 @@ texture_font_load_glyphs( texture_font_t * self,
     FT_Library library;
     FT_Error error;
     FT_Face face;
-    FT_GlyphSlot  slot;
+    FT_Glyph ft_glyph;
+    FT_GlyphSlot slot;
+    FT_Bitmap ft_bitmap;
+
     FT_UInt glyph_index;
     texture_glyph_t *glyph;
     ivec4 region;
@@ -345,10 +352,18 @@ texture_font_load_glyphs( texture_font_t * self,
     for( i=0; i<wcslen(charcodes); ++i )
     {
         glyph_index = FT_Get_Char_Index( face, charcodes[i] );
-
         // WARNING: We use texture-atlas depth to guess if user wants
         //          LCD subpixel rendering
-        FT_Int32 flags = FT_LOAD_RENDER;
+        FT_Int32 flags = 0;
+
+        if( self->thickness > 0 )
+        {
+            flags |= FT_LOAD_NO_BITMAP;
+        }
+        else
+        {
+            flags |= FT_LOAD_RENDER;
+        }
 
         if( !self->hinting )
         {
@@ -358,6 +373,7 @@ texture_font_load_glyphs( texture_font_t * self,
         {
             flags |= FT_LOAD_FORCE_AUTOHINT;
         }
+
 
         if( depth == 3 )
         {
@@ -377,12 +393,83 @@ texture_font_load_glyphs( texture_font_t * self,
             FT_Done_FreeType( library );
             return wcslen(charcodes)-i;
         }
-        slot = face->glyph;
+
+        int ft_bitmap_width = 0;
+        int ft_bitmap_rows = 0;
+        int ft_bitmap_pitch = 0;
+        int ft_glyph_top = 0;
+        int ft_glyph_left = 0;
+        if( self->thickness == 0 )
+        {
+            slot            = face->glyph;
+            ft_bitmap       = slot->bitmap;
+            ft_bitmap_width = slot->bitmap.width;
+            ft_bitmap_rows  = slot->bitmap.rows;
+            ft_bitmap_pitch = slot->bitmap.pitch;
+            ft_glyph_top    = slot->bitmap_top;
+            ft_glyph_left   = slot->bitmap_left;
+        }
+        else
+        {
+            FT_Stroker stroker;
+            error = FT_Stroker_New( library, &stroker );
+            if( error )
+            {
+                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                        FT_Errors[error].code, FT_Errors[error].message);
+                return 0;
+            }
+            FT_Stroker_Set( stroker,
+                            (int)(self->thickness *64),
+                            FT_STROKER_LINECAP_ROUND,
+                            FT_STROKER_LINEJOIN_ROUND,
+                            0);
+            error = FT_Get_Glyph( face->glyph, &ft_glyph);
+            if( error )
+            {
+                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                        FT_Errors[error].code, FT_Errors[error].message);
+                return 0;
+            }
+
+            //FT_Glyph_StrokeBorder( &ft_glyph, stroker, 0, 1 );
+            FT_Glyph_Stroke( &ft_glyph, stroker, 1 );
+            
+            if( depth == 1)
+            {
+                error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_NORMAL, 0, 1);
+                if( error )
+                {
+                    fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                            FT_Errors[error].code, FT_Errors[error].message);
+                    return 0;
+                }
+            }
+            else
+            {
+                error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_LCD, 0, 1);
+                if( error )
+                {
+                    fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                            FT_Errors[error].code, FT_Errors[error].message);
+                    return 0;
+                }
+            }
+            FT_BitmapGlyph ft_bitmap_glyph = (FT_BitmapGlyph) ft_glyph;
+            ft_bitmap       = ft_bitmap_glyph->bitmap;
+            ft_bitmap_width = ft_bitmap.width;
+            ft_bitmap_rows  = ft_bitmap.rows;
+            ft_bitmap_pitch = ft_bitmap.pitch;
+            ft_glyph_top    = ft_bitmap_glyph->top;
+            ft_glyph_left   = ft_bitmap_glyph->left;
+            FT_Stroker_Done(stroker);
+        }
+
 
         // We want each glyph to be separated by at least one black pixel
         // (for example for shader used in demo-subpixel.c)
-        w = slot->bitmap.width/depth + 1;
-        h = slot->bitmap.rows + 1;
+        w = ft_bitmap_width/depth + 1;
+        h = ft_bitmap_rows + 1;
         region = texture_atlas_get_region( self->atlas, w, h );
         if ( region.x < 0 )
         {
@@ -395,14 +482,14 @@ texture_font_load_glyphs( texture_font_t * self,
         x = region.x;
         y = region.y;
         texture_atlas_set_region( self->atlas, x, y, w, h,
-                                  slot->bitmap.buffer, slot->bitmap.pitch );
+                                  ft_bitmap.buffer, ft_bitmap.pitch );
 
         glyph = texture_glyph_new( );
         glyph->charcode = charcodes[i];
         glyph->width    = w;
         glyph->height   = h;
-        glyph->offset_x = slot->bitmap_left;
-        glyph->offset_y = slot->bitmap_top;
+        glyph->offset_x = ft_glyph_left;
+        glyph->offset_y = ft_glyph_top;
         glyph->s0       = x/(float)width;
         glyph->t0       = y/(float)height;
         glyph->s1       = (x + glyph->width)/(float)width;
@@ -411,8 +498,8 @@ texture_font_load_glyphs( texture_font_t * self,
         // Discard hinting to get advance
         FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
         slot = face->glyph;
-        glyph->advance_x    = slot->advance.x/64.0;
-        glyph->advance_y    = slot->advance.y/64.0;
+        glyph->advance_x = slot->advance.x/64.0;
+        glyph->advance_y = slot->advance.y/64.0;
 
         vector_push_back( self->glyphs, glyph );
 
@@ -420,6 +507,9 @@ texture_font_load_glyphs( texture_font_t * self,
         // vector  (and the glyphs vector holds a copy)
         free( glyph );
     }
+
+    // FT_Done_Glyph(ft_glyph);
+
     FT_Done_Face( face );
     FT_Done_FreeType( library );
     texture_atlas_upload( self->atlas );

@@ -204,6 +204,11 @@ typedef struct
      */
     int hinting;
 
+    /**
+     * Outline thickness
+     */
+    float thickness;
+
     /** 
      * Whether to use our own lcd filter.
      */

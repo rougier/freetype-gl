@@ -385,6 +385,7 @@ int main( int argc, char **argv )
     markup_t japanese  = normal; japanese.family = "Droid Sans Japanese";
                                  japanese.size = 18.0;
     markup_t math      = normal; math.family = "DejaVu Sans";
+    markup_t arabic    = normal; arabic.family = "Droid Arabic Naskh";
 
     // We need fonts to calculate line height
     normal.font    = font_manager_get_from_markup( manager, &normal );
@@ -398,8 +399,9 @@ int main( int argc, char **argv )
     italic.font    = font_manager_get_from_markup( manager, &italic );
     japanese.font  = font_manager_get_from_markup( manager, &japanese );
     math.font      = font_manager_get_from_markup( manager, &math );
+    arabic.font    = font_manager_get_from_markup( manager, &arabic );
 
-    vec2 pen = {{20.0, 160.0}};
+    vec2 pen = {{20.0, 170.0}};
     add_text( buffer, &pen, &underline, L"The",
                             &normal,    L" Quick",
                             &big,       L" brown ",
