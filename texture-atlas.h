@@ -43,6 +43,11 @@
  */
 #ifndef __TEXTURE_ATLAS_H__
 #define __TEXTURE_ATLAS_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "vector.h"
 #include "vec234.h"
 
@@ -148,5 +153,10 @@ typedef struct
  */
   void
   texture_atlas_clear( texture_atlas_t * self );
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __TEXTURE_ATLAS_H__ */

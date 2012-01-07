@@ -33,10 +33,16 @@
  */
 #ifndef __FONT_MANAGER_H__
 #define __FONT_MANAGER_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "vector.h"
 #include "markup.h"
 #include "texture-font.h"
 #include "texture-atlas.h"
+
 
 
 /**
@@ -74,6 +80,14 @@ typedef struct {
  */
   void
   font_manager_delete( font_manager_t *self );
+
+
+/**
+ *
+ */
+  void
+  font_manager_delete_font( font_manager_t * self,
+                            texture_font_t * font );
 
 
 /**
@@ -128,6 +142,10 @@ typedef struct {
   void
   font_manager_set_cache( font_manager_t * self,
                           const wchar_t * cache );
+
+#ifdef __cplusplus
+}
+#endif // ifdef __cplusplus
 
 #endif /* __FONT_MANAGER_H__ */
 

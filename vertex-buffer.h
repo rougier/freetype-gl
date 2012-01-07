@@ -32,6 +32,11 @@
  * ========================================================================= */
 #ifndef __VERTEX_BUFFER_H__
 #define __VERTEX_BUFFER_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(__APPLE__)
     #include <OpenGL/gl.h>
 #else
@@ -467,5 +472,8 @@ vertex_attribute_new( GLenum target,
   char *
   GL_TYPE_STRING( GLenum gtype );
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __VERTEX_BUFFER_H__ */

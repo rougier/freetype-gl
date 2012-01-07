@@ -30,9 +30,14 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-#pragma once
 #ifndef __VEC234_H__
 #define __VEC234_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 
 /**
  * Tuple of 4 floats
@@ -120,5 +125,10 @@ typedef union
 	struct { int l;         int a;      };
 	struct { int luminance; int alpha;  };
 } ivec2;
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __VEC234_H__ */

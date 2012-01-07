@@ -88,6 +88,33 @@ font_manager_delete( font_manager_t * self )
     free( self );
 }
 
+
+
+// ----------------------------------------------- font_manager_delete_font ---
+void
+font_manager_delete_font( font_manager_t * self,
+                          texture_font_t * font)
+{
+    size_t i;
+    assert( self );
+    assert( font );
+    
+    texture_font_t *other;
+    for( i=0; i<self->fonts->size;++i )
+    {
+        other = (texture_font_t *) vector_get( self->fonts, i );
+        if ( (strcmp(font->filename, other->filename) == 0)
+               && ( font->size == other->size) )
+        {
+            vector_erase( self->fonts, i);
+            break;
+        }
+    }
+    texture_font_delete( font );
+}
+
+
+
 // ----------------------------------------- font_manager_get_from_filename ---
 texture_font_t *
 font_manager_get_from_filename( font_manager_t *self,

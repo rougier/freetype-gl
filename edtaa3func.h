@@ -55,7 +55,12 @@
  * Updated in 2011 to avoid a corner case infinite loop.
  *
  */
+#ifndef __EDTAA3FUNC_H__
+#define __EDTAA3FUNC_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 #include <math.h>
@@ -86,3 +91,10 @@ double distaa3(double *img, double *gximg, double *gyimg, int w, int c, int xc, 
 #define DISTAA(c,xc,yc,xi,yi) (distaa3(img, gx, gy, w, c, xc, yc, xi, yi))
 
 void edtaa3(double *img, double *gx, double *gy, int w, int h, short *distx, short *disty, double *dist);
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __EDTAA3FUNC_H__

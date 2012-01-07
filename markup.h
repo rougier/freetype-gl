@@ -33,6 +33,10 @@
 #ifndef __MARKUP_H__
 #define __MARKUP_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "texture-font.h"
 #include "vec234.h"
 
@@ -208,5 +212,9 @@ void markup_set_strikethrough( markup_t *self,
 vec4 markup_get_strikethrough_color( const markup_t *self );
 void markup_set_strikethrough_color( markup_t *self,
                                      const vec4 * color );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __MARKUP_H__ */

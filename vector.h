@@ -33,6 +33,9 @@
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 /**
@@ -278,5 +281,9 @@ typedef struct
   void
   vector_sort( vector_t *self,
                int (*cmp)(const void *, const void *) );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __VECTOR_H__ */
