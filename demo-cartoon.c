@@ -39,7 +39,7 @@
 typedef struct {
     float x, y, z;
     float u, v;
-    float r, g, b, a;
+    vec4 color;
 } vertex_t;
 
 
@@ -86,66 +86,41 @@ void keyboard( unsigned char key, int x, int y )
 
 
 // --------------------------------------------------------------- add_text ---
-void add_text( vertex_buffer_t * buffer, vec2 * pen, ... )
+void add_text( vertex_buffer_t * buffer, texture_font_t * font,
+               wchar_t *text, vec2 pen, vec4 fg_color_1, vec4 fg_color_2 )
 {
-    markup_t *markup;
-    wchar_t *text;
-    va_list args;
-    va_start ( args, pen ); 
-
-    do {
-        markup = va_arg( args, markup_t * );
-        if( markup == NULL )
+    size_t i;
+    for( i=0; i<wcslen(text); ++i )
+    {
+        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
+        float kerning = 0;
+        if( i > 0)
         {
-            break;
+            kerning = texture_glyph_get_kerning( glyph, text[i-1] );
         }
-        text = va_arg( args, wchar_t * );
+        pen.x += kerning;
 
-        size_t i;
-        texture_font_t * font = markup->font;
-        float r = markup->foreground_color.red;
-        float g = markup->foreground_color.green;
-        float b = markup->foreground_color.blue;
-        float a = markup->foreground_color.alpha;
-
-        for( i=0; i<wcslen(text); ++i )
-        {
-            texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
-
-            if( glyph != NULL )
-            {
-                float kerning = 0;
-                if( i > 0)
-                {
-                    kerning = texture_glyph_get_kerning( glyph, text[i-1] );
-                }
-                pen->x += kerning;
-
-                /* Actual glyph */
-                float x0  = ( pen->x + glyph->offset_x );
-                float y0  = (int)( pen->y + glyph->offset_y );
-                float x1  = ( x0 + glyph->width );
-                float y1  = (int)( y0 - glyph->height );
-                float s0 = glyph->s0;
-                float t0 = glyph->t0;
-                float s1 = glyph->s1;
-                float t1 = glyph->t1;
-                GLuint index = buffer->vertices->size;
-                GLuint indices[] = {index, index+1, index+2,
-                                    index, index+2, index+3};
-                vertex_t vertices[] = {
-                    { (int)x0,y0,0,  s0,t0,  r,g,b,a },
-                    { (int)x0,y1,0,  s0,t1,  r,g,b,a },
-                    { (int)x1,y1,0,  s1,t1,  r,g,b,a },
-                    { (int)x1,y0,0,  s1,t0,  r,g,b,a } };
-                vertex_buffer_push_back_indices( buffer, indices, 6 );
-                vertex_buffer_push_back_vertices( buffer, vertices, 4 );
-                pen->x += glyph->advance_x;
-            }
-
-        }
-    } while( markup != 0 );
-    va_end ( args );
+        /* Actual glyph */
+        float x0  = ( pen.x + glyph->offset_x );
+        float y0  = (int)( pen.y + glyph->offset_y );
+        float x1  = ( x0 + glyph->width );
+        float y1  = (int)( y0 - glyph->height );
+        float s0 = glyph->s0;
+        float t0 = glyph->t0;
+        float s1 = glyph->s1;
+        float t1 = glyph->t1;
+        GLuint index = buffer->vertices->size;
+        GLuint indices[] = {index, index+1, index+2,
+                            index, index+2, index+3};
+        vertex_t vertices[] = {
+            { (int)x0,y0,0,  s0,t0,  fg_color_1 },
+            { (int)x0,y1,0,  s0,t1,  fg_color_2 },
+            { (int)x1,y1,0,  s1,t1,  fg_color_2 },
+            { (int)x1,y0,0,  s1,t0,  fg_color_1 } };
+        vertex_buffer_push_back_indices( buffer, indices, 6 );
+        vertex_buffer_push_back_vertices( buffer, vertices, 4 );
+        pen.x += glyph->advance_x;
+    }
 }
 
 // ------------------------------------------------------------------- main ---
@@ -161,61 +136,32 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    atlas = texture_atlas_new( 512, 512, 1 );
+    atlas = texture_atlas_new( 1024, 1024, 1 );
     buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    texture_font_t *font = texture_font_new( atlas, "./ObelixPro.ttf", 128 );
 
+    vec2 pen    = {{30, 60}};
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
-    vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
     vec4 yellow = {{1.0, 1.0, 0.0, 1.0}};
-    vec4 orange = {{1.0, 0.7, 0.0, 1.0}};
-    vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
-    markup_t markup = {
-        .family  = "BD Cartoon Shout",
-        .size    = 100,
-        .bold    = 0,
-        .italic  = 0,
-        .rise    = 0.0,
-        .spacing = 0.0,
-        .gamma   = 1.5,
-        .foreground_color    = white,
-        .background_color    = none,
-        .underline           = 0,
-        .underline_color     = white,
-        .overline            = 0,
-        .overline_color      = white,
-        .strikethrough       = 0,
-        .strikethrough_color = white,
-        .font = 0,
-    };
-    markup.font = texture_font_new( atlas, "./Cartoon.ttf", markup.size );
+    vec4 orange1 = {{1.0, 0.9, 0.0, 1.0}};
+    vec4 orange2 = {{1.0, 0.6, 0.0, 1.0}};
 
-    markup.font->outline_type = 1;
 
-    vec2 pen;
+    font->outline_type = 2;
+    font->outline_thickness = 7;
+    add_text( buffer, font, L"Cartoon", pen, black, black );
 
-    pen.x = 30; pen.y = 60;
-    markup.font->outline_type = 2;
-    markup.font->outline_thickness = 7;
-    markup.foreground_color = black;
-    add_text( buffer, &pen, &markup, L"Cartoon", NULL );
+    font->outline_type = 2;
+    font->outline_thickness = 5;
+    add_text( buffer, font, L"Cartoon", pen, yellow, yellow );
 
-    pen.x = 30; pen.y = 60;
-    markup.font->outline_type = 2;
-    markup.font->outline_thickness = 5;
-    markup.foreground_color = yellow;
-    add_text( buffer, &pen, &markup, L"Cartoon", NULL );
+    font->outline_type = 1;
+    font->outline_thickness = 3;
+    add_text( buffer, font, L"Cartoon", pen, black, black );
 
-    pen.x = 30; pen.y = 60;
-    markup.font->outline_type = 1;
-    markup.font->outline_thickness = 3;
-    markup.foreground_color = black;
-    add_text( buffer, &pen, &markup, L"Cartoon", NULL );
-
-    pen.x = 30; pen.y = 60;
-    markup.font->outline_type = 0;
-    markup.font->outline_thickness = 0;
-    markup.foreground_color = orange;
-    add_text( buffer, &pen, &markup, L"Cartoon", NULL );
+    font->outline_type = 0;
+    font->outline_thickness = 0;
+    add_text( buffer, font, L"Cartoon", pen, orange1, orange2 );
 
     glutMainLoop( );
     return 0;
