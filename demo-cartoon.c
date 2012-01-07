@@ -140,7 +140,7 @@ int main( int argc, char **argv )
     buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
     texture_font_t *font = texture_font_new( atlas, "./ObelixPro.ttf", 128 );
 
-    vec2 pen    = {{30, 60}};
+    vec2 pen    = {{30, 50}};
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     vec4 yellow = {{1.0, 1.0, 0.0, 1.0}};
     vec4 orange1 = {{1.0, 0.9, 0.0, 1.0}};
