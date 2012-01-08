@@ -79,6 +79,14 @@ void
 font_manager_delete( font_manager_t * self )
 {
     assert( self );
+
+    size_t i;
+    texture_font_t *font;
+    for( i=0; i<vector_size( self->fonts ); ++i)
+    {
+        font = *(texture_font_t **) vector_get( self->fonts, i );
+        texture_font_delete( font );
+    }
     vector_delete( self->fonts );
     texture_atlas_delete( self->atlas );
     if( self->cache )

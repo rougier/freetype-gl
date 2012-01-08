@@ -157,7 +157,6 @@ void
 texture_glyph_delete( texture_glyph_t *self )
 {
     assert( self );
-
     vector_delete( self->kerning );
     free( self );
 }
@@ -205,13 +204,13 @@ texture_font_generate_kerning( texture_font_t *self )
     /* Starts at index 1 since 0 is for the special backgroudn glyph */
     for( i=1; i<self->glyphs->size; ++i )
     {
-        glyph = (texture_glyph_t *) vector_get( self->glyphs, i );
+        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
         glyph_index = FT_Get_Char_Index( face, glyph->charcode );
         vector_clear( glyph->kerning );
 
         for( j=1; j<self->glyphs->size; ++j )
         {
-            prev_glyph = (texture_glyph_t *) vector_get( self->glyphs, j );
+            prev_glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
             prev_index = FT_Get_Char_Index( face, prev_glyph->charcode );
             FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
             // printf("%c(%d)-%c(%d): %ld\n",
@@ -247,7 +246,7 @@ texture_font_new( texture_atlas_t * atlas,
                  "line %d: No more memory for allocating data\n", __LINE__ );
         exit( EXIT_FAILURE );
     }
-    self->glyphs = vector_new( sizeof(texture_glyph_t) );
+    self->glyphs = vector_new( sizeof(texture_glyph_t *) );
     self->atlas = atlas;
     self->height = 0;
     self->ascender = 0;
@@ -315,6 +314,15 @@ texture_font_delete( texture_font_t *self )
     {
         free( self->filename );
     }
+
+    size_t i;
+    texture_glyph_t *glyph;
+    for( i=0; i<vector_size( self->glyphs ); ++i)
+    {
+        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
+        texture_glyph_delete( glyph);
+    }
+
     vector_delete( self->glyphs );
     free( self );
 }
@@ -435,16 +443,23 @@ texture_font_load_glyphs( texture_font_t * self,
 
             if( self->outline_type == 1 )
             {
-                FT_Glyph_Stroke( &ft_glyph, stroker, 1 );
+                error =FT_Glyph_Stroke( &ft_glyph, stroker, 1 );
             }
             else if ( self->outline_type == 2 )
             {
-                FT_Glyph_StrokeBorder( &ft_glyph, stroker, 0, 1 );
+                error = FT_Glyph_StrokeBorder( &ft_glyph, stroker, 0, 1 );
             }
             else if ( self->outline_type == 3 )
             {
-                FT_Glyph_StrokeBorder( &ft_glyph, stroker, 1, 1 );
+                error = FT_Glyph_StrokeBorder( &ft_glyph, stroker, 1, 1 );
             }
+            if( error )
+            {
+                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                        FT_Errors[error].code, FT_Errors[error].message);
+                return 0;
+            }
+
           
             if( depth == 1)
             {
@@ -514,15 +529,12 @@ texture_font_load_glyphs( texture_font_t * self,
         glyph->advance_x = slot->advance.x/64.0;
         glyph->advance_y = slot->advance.y/64.0;
 
-        vector_push_back( self->glyphs, glyph );
-
-        // We cannot use texture_glyph_delete since it would delete the kerning
-        // vector  (and the glyphs vector holds a copy)
-        free( glyph );
+        vector_push_back( self->glyphs, &glyph );
     }
-
-//    if( self->outline_thickness )
-//        FT_Done_Glyph( ft_glyph );
+    if( self->outline_type > 0 )
+    {
+        FT_Done_Glyph( ft_glyph );
+    }
     FT_Done_Face( face );
     FT_Done_FreeType( library );
     texture_atlas_upload( self->atlas );
@@ -549,7 +561,7 @@ texture_font_get_glyph( texture_font_t * self,
     /* Check if charcode has been already loaded */
     for( i=0; i<self->glyphs->size; ++i )
     {
-        glyph = (texture_glyph_t *) vector_get( self->glyphs, i );
+        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
         if( (glyph->charcode == charcode) &&
             (glyph->outline_type == self->outline_type) &&
             (glyph->outline_thickness == self->outline_thickness) )
@@ -582,9 +594,8 @@ texture_font_get_glyph( texture_font_t * self,
         glyph->t0 = (region.y+2)/(float)height;
         glyph->s1 = (region.x+3)/(float)width;
         glyph->t1 = (region.y+3)/(float)height;
-        vector_push_back( self->glyphs, glyph );
-        free( glyph );
-        return (texture_glyph_t *) vector_back( self->glyphs );
+        vector_push_back( self->glyphs, &glyph );
+        return glyph; //*(texture_glyph_t **) vector_back( self->glyphs );
     }
 
     /* Glyph has not been already loaded */
@@ -596,7 +607,7 @@ texture_font_get_glyph( texture_font_t * self,
 
     if( texture_font_load_glyphs( self, buffer ) == 0 )
     {
-        return (texture_glyph_t *) vector_back( self->glyphs );
+        return *(texture_glyph_t **) vector_back( self->glyphs );
     }
     return NULL;
 }
