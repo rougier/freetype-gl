@@ -40,3 +40,10 @@ edtaa3func:    Distance field computation by Stefan Gustavson
 
 makefont:      Allow to generate header file with font information (texture + glyphs)
                such that it can be used without freetype.
+
+
+Contributors:
+============
+
+Julian Mayer (several bugfixes and demo-opengl-4.cc)
+

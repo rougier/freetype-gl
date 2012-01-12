@@ -43,9 +43,6 @@
 #include <limits.h>
 #include "texture-atlas.h"
 
-#define max(a,b) (a)>(b)?(a):(b)
-#define min(a,b) (a)<(b)?(a):(b)
-
 
 // ------------------------------------------------------ texture_atlas_new ---
 texture_atlas_t *
@@ -92,6 +89,10 @@ texture_atlas_delete( texture_atlas_t *self )
     if( self->data )
     {
         free( self->data );
+    }
+    if( !self->id )
+    {
+        glDeleteTextures( 1, &self->id );
     }
     free( self );
 }
@@ -145,7 +146,10 @@ texture_atlas_fit( texture_atlas_t * self,
 	while( width_left > 0 )
 	{
         node = (ivec3 *) (vector_get( self->nodes, i ));
-		y = max( y, node->y );
+        if( node->y > y )
+        {
+            y = node->y;
+        }
 		if( (y + height) > self->height )
         {
 			return -1;
@@ -202,8 +206,8 @@ texture_atlas_get_region( texture_atlas_t * self,
 		if( y >= 0 )
 		{
             node = (ivec3 *) vector_get( self->nodes, i );
-			if( ( y + height < best_height ) ||
-                ( y + height == best_height && node->z < best_width) )
+			if( ( (y + height) < best_height ) ||
+                ( ((y + height) == best_height) && (node->z < best_width)) )
 			{
 				best_height = y + height;
 				best_index = i;
@@ -295,14 +299,19 @@ texture_atlas_upload( texture_atlas_t * self )
     }
 
     glBindTexture( GL_TEXTURE_2D, self->id );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     if( self->depth == 4 )
     {
+#ifdef GL_UNSIGNED_INT_8_8_8_8_REV
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self->width, self->height,
+                      0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, self->data );
+#else
         glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self->width, self->height,
                       0, GL_RGBA, GL_UNSIGNED_BYTE, self->data );
+#endif
     }
     else if( self->depth == 3 )
     {

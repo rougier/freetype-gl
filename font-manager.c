@@ -31,7 +31,7 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-#if !defined _WIN32 && !defined _WIN64
+#if !defined(_WIN32) && !defined(_WIN64)
 #  include <fontconfig/fontconfig.h>
 #endif
 #include <assert.h>
@@ -163,7 +163,7 @@ font_manager_get_from_description( font_manager_t *self,
 {
     assert( self );
 
-#ifdef  _WIN32 || _WIN64
+#if defined(_WIN32) || defined(_WIN64)
     fprintf( stderr, "\"font_manager_get_from_description\" not implemented yet.\n" );
     return 0;
 #endif
@@ -190,7 +190,7 @@ font_manager_get_from_markup( font_manager_t *self,
     assert( self );
     assert( markup );
 
-#ifdef  _WIN32 || _WIN64
+#if defined(_WIN32) || defined(_WIN64)
     fprintf( stderr, "\"font_manager_get_from_markup\" not implemented yet.\n" );
     return 0;
 #endif

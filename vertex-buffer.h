@@ -144,7 +144,7 @@ typedef struct
  * @return        an empty vertex buffer.
  */
   vertex_buffer_t *
-  vertex_buffer_new( char *format );
+  vertex_buffer_new( const char *format );
 
 
 /**
@@ -158,7 +158,7 @@ typedef struct
  * @return          an empty vertex buffer.
  */
   vertex_buffer_t *
-  vertex_buffer_new_from_data( char *format,
+  vertex_buffer_new_from_data( const char *format,
                                size_t vcount,
                                void * vertices,
                                size_t icount,
@@ -224,7 +224,7 @@ typedef struct
   void
   vertex_buffer_render ( vertex_buffer_t *self,
                          GLenum mode,
-                         char *what );
+                         const char *what );
 
 
 /**
@@ -469,7 +469,7 @@ vertex_attribute_new( GLenum target,
  * @param  gtype a GL enum type
  * @return       the literal string describing the type
  */
-  char *
+  const char *
   GL_TYPE_STRING( GLenum gtype );
 
 #ifdef __cplusplus

@@ -3,7 +3,7 @@
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
  * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -36,14 +36,19 @@
 #include <stdio.h>
 #include "vertex-buffer.h"
 
-
+// If GL_DOUBLE does not exist we define it as GL_FLOAT
+#ifndef GL_DOUBLE
+#define GL_DOUBLE GL_FLOAT
+#else
+#define GL_DOUBLE_ GL_FLOAT
+#endif 
 
 // ----------------------------------------------------------------------------
 vertex_buffer_t *
-vertex_buffer_new( char *format )
+vertex_buffer_new( const char *format )
 {
     size_t i, index = 0, stride = 0;
-    char *start = 0, *end = 0;
+    const char *start = 0, *end = 0;
     GLvoid *pointer = 0;
 
     vertex_buffer_t *self = (vertex_buffer_t *) malloc (sizeof(vertex_buffer_t));
@@ -70,7 +75,14 @@ vertex_buffer_new( char *format )
         }
         else
         {
-            desc = strndup(start, end-start);
+ // strndup() was only added in OSX lion
+#ifdef __APPLE__
+            size_t len = end-start;
+            desc = calloc( len+1, sizeof(char) );
+            memcpy( desc, start, len );
+#else
+             desc = strndup(start, end-start);
+#endif
         }
         vertex_attribute_t *attribute = vertex_attribute_parse( desc );
         start = end+1;
@@ -99,7 +111,7 @@ vertex_buffer_new( char *format )
 
 // ----------------------------------------------------------------------------
 vertex_buffer_t *
-vertex_buffer_new_from_data( char *format,
+vertex_buffer_new_from_data( const char *format,
                              size_t vcount,
                              void *vertices,
                              size_t icount,
@@ -137,7 +149,7 @@ vertex_buffer_delete( vertex_buffer_t *self )
     self->indices = 0;
     if( self->indices_id )
     {
-        glDeleteBuffers( 1, &self->vertices_id );
+        glDeleteBuffers( 1, &self->indices_id );
     }
     self->indices_id = 0;
     if( self->format )
@@ -251,7 +263,7 @@ vertex_buffer_clear( vertex_buffer_t *self )
 void
 vertex_buffer_render ( vertex_buffer_t *self,
                        GLenum mode,
-                       char *what )
+                       const char *what )
 { 
     assert( self );
 
@@ -266,7 +278,9 @@ vertex_buffer_render ( vertex_buffer_t *self,
         self->dirty = 0;
     }
     
+#ifdef GL_CLIENT_VERTEX_ARRAY_BIT
     glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
+#endif
     glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
 
     size_t i;
@@ -302,7 +316,9 @@ vertex_buffer_render ( vertex_buffer_t *self,
 
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+#ifdef GL_CLIENT_VERTEX_ARRAY_BIT
     glPopClientAttrib( );
+#endif
 }
 
 
@@ -618,7 +634,7 @@ vertex_attribute_new( GLenum target,
             assert( (type == GL_BYTE)  || (type == GL_UNSIGNED_BYTE)  ||
                     (type == GL_SHORT) || (type == GL_UNSIGNED_SHORT) ||
                     (type == GL_INT)   ||  (type == GL_UNSIGNED_INT)  ||
-                (type == GL_FLOAT) || (type == GL_DOUBLE) );
+                    (type == GL_FLOAT) || (type == GL_DOUBLE) );
             attribute->enable =
                 (void(*)(void *)) vertex_attribute_secondary_color_enable;
             break;
@@ -656,7 +672,9 @@ GL_TYPE( char ctype )
     case 'i': return GL_INT;
     case 'I': return GL_UNSIGNED_INT;
     case 'f': return GL_FLOAT;
+#if defined(GL_DOUBLE) && (GL_DOUBLE != GL_FLOAT)
     case 'd': return GL_DOUBLE;
+#endif
     default:  return 0;
     }
 }
@@ -696,14 +714,17 @@ GL_TYPE_SIZE( GLenum gtype )
     case GL_INT:            return sizeof(GLint);
     case GL_UNSIGNED_INT:   return sizeof(GLuint);
     case GL_FLOAT:          return sizeof(GLfloat);
+#if defined(GL_DOUBLE) && (GL_DOUBLE != GL_FLOAT)
     case GL_DOUBLE:         return sizeof(GLdouble);
+#endif
     default:                return 0;
     }
 }
 
 
 
-char *
+// ----------------------------------------------------------------------------
+const char *
 GL_TYPE_STRING( GLenum gtype )
 {
     switch( gtype )
@@ -716,7 +737,9 @@ GL_TYPE_STRING( GLenum gtype )
     case GL_INT:            return "GL_INT";
     case GL_UNSIGNED_INT:   return "GL_UNSIGNED_INT";
     case GL_FLOAT:          return "GL_FLOAT";
+#if defined(GL_DOUBLE) && (GL_DOUBLE != GL_FLOAT)
     case GL_DOUBLE:         return "GL_DOUBLE";
+#endif
     default:                return "GL_VOID";
     }
 }
