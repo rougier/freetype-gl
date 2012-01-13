@@ -64,6 +64,7 @@ texture_atlas_new( const size_t width,
     self->width = width;
     self->height = height;
     self->depth = depth;
+    self->id = 0;
     ivec3 node = {{0,0,width}};
     vector_push_back( self->nodes, &node );
     self->data = (unsigned char *)

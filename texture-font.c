@@ -443,7 +443,7 @@ texture_font_load_glyphs( texture_font_t * self,
 
             if( self->outline_type == 1 )
             {
-                error =FT_Glyph_Stroke( &ft_glyph, stroker, 1 );
+                error = FT_Glyph_Stroke( &ft_glyph, stroker, 1 );
             }
             else if ( self->outline_type == 2 )
             {
@@ -459,7 +459,6 @@ texture_font_load_glyphs( texture_font_t * self,
                         FT_Errors[error].code, FT_Errors[error].message);
                 return 0;
             }
-
           
             if( depth == 1)
             {
