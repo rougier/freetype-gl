@@ -44,7 +44,7 @@ makefont:      Allow to generate header file with font information (texture + gl
 
 Contributors:
 =============
-
+Ryan.H.Kawicki (Initial CMake project)
 Julian Mayer (several bugfixes and made code for demo-opengl-4.cc)
-
-
+Sylvain Duclos (Android port)
+Wang Yongcong (Improvements on the windows build)
