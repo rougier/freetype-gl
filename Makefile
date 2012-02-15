@@ -82,7 +82,6 @@ demo-atb-agg: demo-atb-agg.o $(OBJECTS) $(HEADERS) \
 	@echo "Building $@... "
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -lAntTweakBar -o $@
 
-
 makefont: makefont.o $(OBJECTS) $(HEADERS)
 	@echo "Building $@... "
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -o $@

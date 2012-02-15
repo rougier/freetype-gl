@@ -561,9 +561,11 @@ texture_font_get_glyph( texture_font_t * self,
     for( i=0; i<self->glyphs->size; ++i )
     {
         glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
+        // If charcode is -1, we don't care about outline type or thickness
         if( (glyph->charcode == charcode) &&
-            (glyph->outline_type == self->outline_type) &&
-            (glyph->outline_thickness == self->outline_thickness) )
+            ((charcode == (wchar_t)(-1) ) || 
+             ((glyph->outline_type == self->outline_type) &&
+              (glyph->outline_thickness == self->outline_thickness)) ))
         {
             return glyph;
         }

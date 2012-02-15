@@ -18,7 +18,22 @@ IF (WIN32)
         $ENV{ANT_TWEAK_BAR_ROOT}/lib
         DOC "The AntTweakBar library")
 ELSE (WIN32)
-	# need to define for this platform
+    FIND_PATH(ANT_TWEAK_BAR_INCLUDE_PATH AntTweakBar.h
+      PATHS
+      /usr/local/include
+      /usr/X11/include
+      /usr/include)
+
+FIND_LIBRARY( ANT_TWEAK_BAR_LIBRARY AntTweakBar
+  PATHS
+    /usr/local
+    /usr/X11
+    /usr
+  PATH_SUFFIXES
+    lib64
+    lib
+    dylib
+)
 ENDIF (WIN32)
 
 SET(ANT_TWEAK_BAR_FOUND "NO")

@@ -43,7 +43,7 @@ makefont:      Allow to generate header file with font information (texture + gl
 
 
 Contributors:
-============
+=============
 
 Julian Mayer (several bugfixes and made code for demo-opengl-4.cc)
 
