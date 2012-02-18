@@ -57,6 +57,7 @@ ELSE( WIN32 )
     FIND_PACKAGE( Freetype REQUIRED )
     FIND_PACKAGE( FontConfig )
     FIND_PACKAGE( AntTweakBar )
+    FIND_LIBRARY( MATH_LIBRARY m )
 ENDIF( WIN32 )
 
 INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIRS}
@@ -79,6 +80,9 @@ MACRO( DEMO _target _sources)
      target_link_libraries(${_target} ${GLUT_LIBRARY})
      target_link_libraries(${_target} ${FREETYPE_LIBRARY})
      target_link_libraries(${_target} ${FREETYPE_GL_LIBRARY})
+     IF( MATH_LIBRARY )
+         target_link_libraries(${_target} ${MATH_LIBRARY})
+     ENDIF( MATH_LIBRARY )
 ENDMACRO( DEMO )
 
 DEMO( demo-texture        "demo-texture.c" )

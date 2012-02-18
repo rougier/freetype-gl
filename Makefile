@@ -33,10 +33,10 @@
 PLATFORM		= $(shell uname)
 CC				= gcc
 CFLAGS			= -Wall `freetype-config --cflags` -I/usr/X11/include -g -O0
-LIBS			= -lGL -lglut -lGLU -lglew \
+LIBS			= -lGL -lglut -lGLU -lm \
 	              `freetype-config --libs` -lfontconfig
 ifeq ($(PLATFORM), Darwin)
-	LIBS		= -framework OpenGL -framework GLUT -lglew \
+	LIBS		= -framework OpenGL -framework GLUT -lm \
 	               `freetype-config --libs` -L /usr/X11/lib -lfontconfig
 endif
 
