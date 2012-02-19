@@ -40,7 +40,7 @@
 // ------------------------------------------------------- global variables ---
 vector_t * fonts;
 texture_atlas_t *atlas;
-char *filename = "./Verdana.ttf";
+char *filename = "./Vera.ttf";
 wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
 
 

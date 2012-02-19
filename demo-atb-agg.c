@@ -39,14 +39,15 @@
 
 // ------------------------------------------------------- typedef & struct ---
 typedef enum {
-    GEORGIA = 1,
+    VERA = 1,
+    GEORGIA,
     TIMES,
     VERDANA,
     TAHOMA,
     ARIAL,
 } font_family_e;
 
-#define NUM_FONTS 5
+#define NUM_FONTS 6
 
 typedef struct {
     float x, y, z;
@@ -248,7 +249,11 @@ build_buffer( void )
     vertex_buffer_clear( buffer );
     texture_atlas_clear( atlas );
 
-    if( p_family == GEORGIA)
+    if( p_family == VERA)
+    {
+        font = texture_font_new( atlas, "./Vera.ttf", p_size );
+    }
+    else if( p_family == GEORGIA)
     {
         font = texture_font_new( atlas, "./Georgia.ttf", p_size );
     }
@@ -403,7 +408,7 @@ void reshape( int width, int height )
 // ------------------------------------------------------------------- quit ---
 void reset( void )
 { 
-    p_family    = GEORGIA;
+    p_family    = VERA;
     p_size      = 12.0;
     p_invert    = 0;
     p_kerning   = 1;
@@ -665,11 +670,13 @@ int main(int argc, char *argv[])
              "iconifiable   = True          ");
 
     {
-        TwEnumVal familyEV[NUM_FONTS] = { {GEORGIA, "Georgia"},
-                                          {TIMES,   "Times"},
-                                          {VERDANA, "Verdana"},
-                                          {TAHOMA,  "Tahoma"},
-                                          {ARIAL,   "Arial"} };
+        TwEnumVal familyEV[NUM_FONTS] = {
+            {VERA,    "Vera"},
+            {GEORGIA, "Georgia"},
+            {TIMES,   "Times"},
+            {VERDANA, "Verdana"},
+            {TAHOMA,  "Tahoma"},
+            {ARIAL,   "Arial"} };
         TwType family_type = TwDefineEnum("Family", familyEV, NUM_FONTS);
         TwAddVarCB(bar, "Family", family_type, set_family, get_family, NULL, 
                    "label = 'Family'      "

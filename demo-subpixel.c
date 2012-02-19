@@ -161,8 +161,8 @@ void display( void )
     glBegin(GL_LINES);
     glVertex2i(15,0);
     glVertex2i(15, 330);
-    glVertex2i(225, 0);
-    glVertex2i(225, 330);
+    glVertex2i(245, 0);
+    glVertex2i(245, 330);
     glEnd();
 
     glutSwapBuffers( );
@@ -238,7 +238,7 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
 int main( int argc, char **argv )
 {
     glutInit( &argc, argv );
-    glutInitWindowSize( 240, 330 );
+    glutInitWindowSize( 260, 330 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
     glutCreateWindow( "Freetype OpenGL / subpixel rendering" );
     glutReshapeFunc( reshape );
@@ -247,7 +247,7 @@ int main( int argc, char **argv )
 
     size_t i;
     texture_font_t *font;
-    const char * filename = "./Arial.ttf";
+    const char * filename = "./Vera.ttf";
     wchar_t *text = L"|... A Quick Brown Fox Jumps Over The Lazy Dog";
     vec2 pen = {{0,0}};
     vec4 black = {{0,0,0,1}};
