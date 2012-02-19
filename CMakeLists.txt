@@ -56,8 +56,9 @@ ELSE( WIN32 )
     FIND_PACKAGE( GLUT REQUIRED )
     FIND_PACKAGE( Freetype REQUIRED )
     FIND_PACKAGE( FontConfig )
-    FIND_PACKAGE( AntTweakBar )
     FIND_LIBRARY( MATH_LIBRARY m )
+    #FIND_LIBRARY( STDC_LIBRARY stdc++) #Buggy Cmake can't find libstdc++
+    FIND_PACKAGE( AntTweakBar )
 ENDIF( WIN32 )
 
 INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIRS}
@@ -74,15 +75,18 @@ SET(FREETYPE_GL_SRC freetype-gl.h   vec234.h
                     platform.c      platform.h)
 ADD_LIBRARY( ${FREETYPE_GL_LIBRARY} STATIC ${FREETYPE_GL_SRC} )
 
+LINK_DIRECTORIES(${PROJECT_SOURCE_DIR})
+
 MACRO( DEMO _target _sources)
      add_executable(${_target} ${_sources})
+     target_link_libraries(${_target} ${FREETYPE_GL_LIBRARY})
      target_link_libraries(${_target} ${OPENGL_LIBRARY})
      target_link_libraries(${_target} ${GLUT_LIBRARY})
      target_link_libraries(${_target} ${FREETYPE_LIBRARY})
-     target_link_libraries(${_target} ${FREETYPE_GL_LIBRARY})
      IF( MATH_LIBRARY )
          target_link_libraries(${_target} ${MATH_LIBRARY})
      ENDIF( MATH_LIBRARY )
+
 ENDMACRO( DEMO )
 
 DEMO( demo-texture        "demo-texture.c" )
@@ -108,9 +112,30 @@ IF (FONTCONFIG_FOUND)
    target_link_libraries(demo-markup ${FONTCONFIG_LIBRARY})
 ENDIF (FONTCONFIG_FOUND)
 
-IF (ANT_TWEAK_BAR_FOUND)
-   DEMO( demo-atb-agg     "demo-atb-agg.c;markup.c;markup.h;subpixel.vert;subpixel-gamma.frag")
-   target_link_libraries( demo-atb-agg ${ANT_TWEAK_BAR_LIBRARY})
+IF (ANT_TWEAK_BAR_FOUND)  
+ #DEMO( demo-atb-agg     "demo-atb-agg.c;markup.c;markup.h;subpixel.vert;subpixel-gamma.frag")
+ FILE(WRITE ${CMAKE_SOURCE_DIR}/stdc_test.c
+  "int main(void){return 0;}\n")
+  EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -lstdc++ OUTPUT_VARIABLE out_res ERROR_VARIABLE err_res)
+  string(FIND VAL"${err_res}" "main" substr_index ) 
+  if(${substr_index} STRGREATER "0")
+      message (STATUS "Found Libstdc++ needed by demo-atb-agg.c ." )
+
+      add_executable(demo-atb-agg  demo-atb-agg.c markup.c markup.h subpixel.vert subpixel-gamma.frag) 
+      target_link_libraries( demo-atb-agg ${FREETYPE_GL_LIBRARY})
+      target_link_libraries( demo-atb-agg ${GLUT_LIBRARY})
+      target_link_libraries( demo-atb-agg ${FREETYPE_LIBRARY})
+      target_link_libraries( demo-atb-agg ${ANT_TWEAK_BAR_LIBRARY})
+      # target_link_libraries( demo-atb-agg ${STDC_LIBRARY}) # Buggy Cmake can't find libstdc++
+      # quirk: because of link order libstdc++ must be linked before libGLU
+      target_link_libraries( demo-atb-agg "-lstdc++")
+      target_link_libraries( demo-atb-agg ${OPENGL_LIBRARY})
+      IF(MATH_LIBRARY)
+        target_link_libraries( demo-atb-agg ${MATH_LIBRARY})
+      ENDIF(MATH_LIBRARY) 
+  else()
+      message (STATUS "NOT FOUND: Libstdc++ is not installed. It is needed by demo-atb-agg.c" )
+  endif()
 ENDIF (ANT_TWEAK_BAR_FOUND)
 
 # Copy font and shaders into build directory for in-place testing
