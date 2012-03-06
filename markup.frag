@@ -69,5 +69,5 @@ void main() {
 
     vec3 color = pow( vec3(r,g,b), vec3(1.0/vgamma));
     gl_FragColor.rgb = color*gl_Color.rgb;
-    gl_FragColor.a = (color.r+color.g+color.b)/3.0;
+    gl_FragColor.a = (color.r+color.g+color.b)/3.0 * gl_Color.a;
 }
