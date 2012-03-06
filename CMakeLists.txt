@@ -86,7 +86,6 @@ MACRO( DEMO _target _sources)
      IF( MATH_LIBRARY )
          target_link_libraries(${_target} ${MATH_LIBRARY})
      ENDIF( MATH_LIBRARY )
-
 ENDMACRO( DEMO )
 
 DEMO( demo-texture        "demo-texture.c" )
@@ -109,6 +108,8 @@ IF (FONTCONFIG_FOUND)
    INCLUDE_DIRECTORIES( ${FONTCONFIG_INCLUDE_DIR} )
    DEMO( demo-markup      "demo-markup.c;font-manager.c;markup.vert;markup.frag" )
    target_link_libraries(demo-markup ${FONTCONFIG_LIBRARY})
+   DEMO( demo-ansi      "demo-ansi.c;font-manager.c;markup.vert;markup.frag" )
+   target_link_libraries(demo-ansi ${FONTCONFIG_LIBRARY})
 ENDIF (FONTCONFIG_FOUND)
 
 IF (ANT_TWEAK_BAR_FOUND)  
