@@ -112,7 +112,8 @@ int main( int argc, char **argv )
     wprintf( L"Font size                  : %.1f\n", font_size );
     wprintf( L"Number of glyphs           : %ld\n", wcslen(font_cache) );
     wprintf( L"Number of missed glyphs    : %ld\n", missed );
-    wprintf( L"Texture size               : %ldx%ldx%ld\n", atlas->width, atlas->height, atlas->depth );
+    wprintf( L"Texture size               : %ldx%ldx%ld\n",
+             atlas->width, atlas->height, atlas->depth );
     wprintf( L"Texture occupancy          : %.2f%%\n", 
             100.0*atlas->used/(float)(atlas->width*atlas->height) );
     wprintf( L"\n" );
@@ -124,12 +125,14 @@ int main( int argc, char **argv )
     size_t max_kerning_count = 1;
     for( i=0; i < glyph_count; ++i )
     {
-        texture_glyph_t *glyph = (texture_glyph_t *) vector_get( font->glyphs, i );
+        texture_glyph_t *glyph = *(texture_glyph_t **) vector_get( font->glyphs, i );
+
         if( vector_size(glyph->kerning) > max_kerning_count )
         {
             max_kerning_count = vector_size(glyph->kerning);
         }
     }
+
 
     FILE *file = fopen( header_filename, "w" );
 
@@ -256,7 +259,7 @@ int main( int argc, char **argv )
     fwprintf( file, L" {\n" );
     for( i=0; i < glyph_count; ++i )
     {
-        texture_glyph_t * glyph = (texture_glyph_t *) vector_get( font->glyphs, i );
+        texture_glyph_t * glyph = *(texture_glyph_t **) vector_get( font->glyphs, i );
 
 /*
         // Debugging information
