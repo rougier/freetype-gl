@@ -149,7 +149,7 @@ make_display_lists( texture_font_t * self )
 
     for( i=0; i<vector_size(self->glyphs) ; ++i)
     {
-        glyph = (texture_glyph_t *) vector_get( self->glyphs, i);
+        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i);
         int x  = glyph->offset_x;
         int y  = glyph->offset_y;
         int w  = glyph->width;
