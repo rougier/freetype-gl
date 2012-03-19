@@ -173,7 +173,7 @@ int main( int argc, char **argv )
         L" * those of the authors and should not be interpreted as representing official\n"
         L" * policies, either expressed or implied, of Nicolas P. Rougier.\n"
         L" * ===============================================================================\n"
-        L" *\n");
+        L" */\n");
 
 
     // ----------------------
@@ -294,14 +294,22 @@ int main( int argc, char **argv )
         wprintf( L"\n\n" );
 */
 
+
         // TextureFont
         if( (glyph->charcode == L'\'' ) || (glyph->charcode == L'\\' ) )
         {
             fwprintf( file, L"  {L'\\%lc', ", glyph->charcode );
+            //wprintf( L"  {L'\\%lc', ", glyph->charcode );
+        }
+        else if( (glyph->charcode == (wchar_t)(-1) ) )
+        {
+            fwprintf( file, L"  {L'\\0', " );
+            //wprintf( L"  {L'\\0', " );
         }
         else
         {
             fwprintf( file, L"  {L'%lc', ", glyph->charcode );
+            //wprintf( L"  {L'%lc', ", glyph->charcode );
         }
         fwprintf( file, L"%d, %d, ", glyph->width, glyph->height );
         fwprintf( file, L"%d, %d, ", glyph->offset_x, glyph->offset_y );
@@ -318,7 +326,7 @@ int main( int argc, char **argv )
             {
                 fwprintf( file, L"{L'\\%lc', %f}", charcode, kerning->kerning );
             }
-            else
+            else if( (charcode != (wchar_t)(-1) ) )
             {
                 fwprintf( file, L"{L'%lc', %f}", charcode, kerning->kerning );
             }
@@ -327,14 +335,7 @@ int main( int argc, char **argv )
                 fwprintf( file, L", " );
             }
         }
-        if( i < (vector_size(glyph->kerning)-1) )
-        {
-            fwprintf( file, L"} },\n" );
-        }
-        else
-        {
-            fwprintf( file, L"} }\n" );
-        }
+        fwprintf( file, L"} },\n" );
     }
     fwprintf( file, L" }\n};\n" );
 
