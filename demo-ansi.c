@@ -110,7 +110,7 @@ GLuint build_program( const char * vertex_source,
     GLuint handle = glCreateProgram( );
     glAttachShader( handle, vertex_shader);
     glAttachShader( handle, fragment_shader);
-    glLinkProgram( handle);
+    glLinkProgram( handle );
     
     GLint link_status;
     glGetProgramiv( handle, GL_LINK_STATUS, &link_status );
@@ -135,11 +135,9 @@ void display( void )
     glEnable( GL_TEXTURE_2D );
     glEnable( GL_COLOR_MATERIAL );
     glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    // glBlendFunc( GL_CONSTANT_COLOR_EXT, GL_ONE_MINUS_SRC_COLOR );
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-    glColor4f( 1.0, 1.0, 1.0, 1.0);     // alpha does not work yet
-    glBlendColor( 1.0, 1.0, 1.0, 1.0 ); // alpha does not work yet
+    glColor4f( 1.0, 1.0, 1.0, 1.0); 
+    glBlendColor( 1.0, 1.0, 1.0, 1.0 );
     glUseProgram( program );
     glUniform1i( texture_location, 0 );
     glUniform2f( pixel_location,
@@ -197,6 +195,11 @@ void add_text( vertex_buffer_t * buffer, vec2 * pen,
 
     for( i=0; i<length; ++i )
     {
+        if( text[i] == L'\n' )
+        {
+            continue;
+        }
+
         texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
         texture_glyph_t *black = texture_font_get_glyph( font, -1 );
 
@@ -404,6 +407,23 @@ ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
         init_colors( colors );
     }
 
+
+    if( length <= 1 )
+    {
+        markup->foreground_color = colors[0];
+        markup->underline_color = markup->foreground_color;
+        markup->overline_color = markup->foreground_color;
+        markup->strikethrough_color = markup->foreground_color;
+        markup->outline_color = markup->foreground_color;
+        markup->background_color = none;
+        markup->underline = 0;
+        markup->overline = 0;
+        markup->bold = 0;
+        markup->italic = 0;
+        markup->strikethrough = 0;
+        return;
+    }
+
     for( i=0; i<length; ++i)
     {
         wchar_t c = *(sequence+i);
@@ -549,7 +569,7 @@ int main( int argc, char **argv )
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
     markup_t markup = {
         .family  = "Bitstream Vera Sans Mono",
-        .size    = 15.0,
+        .size    = 14.0,
         .bold    = 0,
         .italic  = 0,
         .rise    = 0.0,
@@ -574,7 +594,6 @@ int main( int argc, char **argv )
         wchar_t line[1024];
         while( fgetws ( line, sizeof(line), file ) != NULL )
         {
-            line[wcslen(line)-1] = L'\0';
             print(buffer, &pen, line, &markup);
             pen.x = 10;
             pen.y -= markup.font->height-1;
