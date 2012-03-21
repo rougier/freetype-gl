@@ -38,7 +38,6 @@ void main(void)
     float width = fwidth(dist);
     float alpha = smoothstep(0.5-width, 0.5+width, dist);
     gl_FragColor = vec4(gl_Color.rgb, alpha);
-
 }
 
 

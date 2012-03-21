@@ -31,6 +31,8 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ===============================================================================
  */
+#include <stddef.h>
+
 typedef struct
 {
     wchar_t charcode;

@@ -180,6 +180,8 @@ int main( int argc, char **argv )
     // Structure declarations
     // ----------------------
     fwprintf( file,
+        L"#include <stddef.h>\n"
+        L"\n"
         L"typedef struct\n"
         L"{\n"
         L"    wchar_t charcode;\n"
