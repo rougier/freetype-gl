@@ -181,11 +181,6 @@ extern "C" {
  * points from the previous page, except that the first point is blue and the
  * second green:
  *
- * @code
- * cyglet::graphics::draw( GL_POINTS, { "v2i", {10,15,    30 35  } },
- *                                    { "c3B", {0,0,255,  0,255,0} } );
- * @endcode
- *
  * It is an error to provide more than one set of data for any attribute, or to
  * mismatch the size of the initial data with the number of vertices specified
  * in the first argument.
