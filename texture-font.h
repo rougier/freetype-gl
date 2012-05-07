@@ -41,6 +41,27 @@ extern "C" {
 #include "vector.h"
 #include "texture-atlas.h"
 
+/**
+ * @file   texture-font.h
+ * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
+ *
+ * @defgroup texture-font Texture font
+ *
+ * Texture font.
+ *
+ * Example Usage:
+ * @code
+ * #include "texture-font.h"
+ *
+ * int main( int arrgc, char *argv[] )
+ * {
+ *   return 0;
+ * }
+ * @endcode
+ *
+ * @{
+ */
+
 
 
 /**
@@ -65,11 +86,8 @@ typedef struct
 
 
 
-/**
- *
- * A structure that describe a glyph.
- *
- *
+
+/*
  * Glyph metrics:
  * --------------
  *
@@ -100,6 +118,10 @@ typedef struct
  *              |         +-------------------------+----------------- ymin
  *              |                                   |
  *              |------------- advance_x ---------->|
+ */
+
+/**
+ * A structure that describe a glyph.
  */
 typedef struct
 {
@@ -341,8 +363,8 @@ typedef struct
 /**
  * Request the loading of several glyphs at once.
  *
- * @param self     A valid texture font
- * @param charcode Character codepoints to be loaded.
+ * @param self      a valid texture font
+ * @param charcodes character codepoints to be loaded.
  *
  * @return Number of missed glyph if the texture is not big enough to hold
  *         every glyphs.
@@ -363,6 +385,7 @@ float
 texture_glyph_get_kerning( const texture_glyph_t * self,
                            const wchar_t charcode );
 
+/** @} */
 
 #ifdef __cplusplus
 }

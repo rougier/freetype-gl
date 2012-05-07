@@ -31,62 +31,19 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-#include "freetype-gl.h"
+#if defined(__APPLE__)
+#    include <OpenGL/gl.h>
+#    include <Glut/glut.h>
+#else
+    #include <GL/gl.h>
+    #include <GL/glut.h>
+#endif
+#include <stdlib.h>
 #include "vertex-buffer.h"
-
-// ------------------------------------------------------- typedef & struct ---
-typedef struct {
-    float x, y, z;    // position
-    float s, t;       // texture
-    float r, g, b, a; // color
-} vertex_t;
 
 
 // ------------------------------------------------------- global variables ---
-vertex_buffer_t * buffer;
 vertex_buffer_t * cube;
-texture_font_t * font;
-texture_atlas_t * atlas;
-
-
-// --------------------------------------------------------------- add_text ---
-void add_text( vertex_buffer_t * buffer, texture_font_t * font,
-               wchar_t * text, vec4 * color, vec2 * pen )
-{
-    size_t i;
-    float r = color->red, g = color->green, b = color->blue, a = color->alpha;
-    for( i=0; i<wcslen(text); ++i )
-    {
-        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
-        if( glyph != NULL )
-        {
-            int kerning = 0;
-            if( i > 0)
-            {
-                kerning = texture_glyph_get_kerning( glyph, text[i-1] );
-            }
-            pen->x += kerning;
-            int x0  = (int)( pen->x + glyph->offset_x );
-            int y0  = (int)( pen->y + glyph->offset_y );
-            int x1  = (int)( x0 + glyph->width );
-            int y1  = (int)( y0 - glyph->height );
-            float s0 = glyph->s0;
-            float t0 = glyph->t0;
-            float s1 = glyph->s1;
-            float t1 = glyph->t1;
-            GLuint index = buffer->vertices->size;
-            GLuint indices[] = {index, index+1, index+2,
-                                index, index+2, index+3};
-            vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a },
-                                    { x0,y1,0,  s0,t1,  r,g,b,a },
-                                    { x1,y1,0,  s1,t1,  r,g,b,a },
-                                    { x1,y0,0,  s1,t0,  r,g,b,a } };
-            vertex_buffer_push_back_indices( buffer, indices, 6 );
-            vertex_buffer_push_back_vertices( buffer, vertices, 4 );
-            pen->x += glyph->advance_x;
-        }
-    }
-}
 
 
 // ------------------------------------------------------------------- init ---
@@ -115,27 +72,8 @@ void init( void )
 void display( void )
 {
     static float theta=0, phi=0;
-    int viewport[4];
-    glGetIntegerv( GL_VIEWPORT, viewport );
-    GLuint width  = viewport[2];
-    GLuint height = viewport[3];
-    static int frame=0, time, timebase=0;
 
     theta += .5; phi += .5;
-	frame++;
-	time = glutGet( GLUT_ELAPSED_TIME );
-
-    if (time - timebase > 1000)
-    {
-        wchar_t fps[64];
-        vec2 pen = {{5.0, 5.0}};
-        vec4 color = {{0.5,0.5,0.5,0.5}};
-        swprintf( fps, 64, L"%.2f", frame*1000.0/(time-timebase) );
-        vertex_buffer_clear( buffer );
-        add_text( buffer, font, fps, &color, &pen );
-        timebase = time;
-        frame = 0;
-    }
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glPushMatrix();
@@ -161,23 +99,6 @@ void display( void )
     glDepthMask( GL_TRUE );
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
     glPopMatrix();
-
-    /* Display FPS */
-    glEnable( GL_TEXTURE_2D );
-    glBindTexture( GL_TEXTURE_2D, atlas->id );
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glDisable( GL_TEXTURE_2D );
 
     glutSwapBuffers( );
 }
@@ -220,11 +141,11 @@ int main( int argc, char **argv )
     glutInit( &argc, argv );
     glutInitWindowSize( 400, 400 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Vertex buffer cube" );
+    glutCreateWindow( argv[0] );
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
-    glutTimerFunc( 1000/50, timer, 1000/50 );
+    glutTimerFunc( 1000/60, timer, 1000/60 );
 
     typedef struct { float x,y,z;} xyz;
     typedef struct { xyz position, normal, color;} vertex;
@@ -243,12 +164,8 @@ int main( int argc, char **argv )
       {v[4],n[5],c[4]}, {v[7],n[5],c[7]}, {v[6],n[5],c[6]}, {v[5],n[5],c[5]} };
     GLuint indices[24] = { 0, 1, 2, 3,    4, 5, 6, 7,   8, 9,10,11,
                            12,13,14,15,  16,17,18,19,  20,21,22,23 };
-    cube = vertex_buffer_new_from_data( "v3f:n3f:c3f",
-                                        24, vertices, 24, indices );
-
-    atlas = texture_atlas_new( 512, 512, 1 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
-    font = texture_font_new( atlas, "./Vera.ttf", 64 );
+    cube = vertex_buffer_new( "v3f:n3f:c3f" );
+    vertex_buffer_push_back( cube, vertices, 24, indices, 24 );
 
     init( );
     glutMainLoop( );

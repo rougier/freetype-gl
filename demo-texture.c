@@ -1,8 +1,8 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,12 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
+ * ============================================================================
+ *
+ * Example showing texture atlas packing
+ *
+ * ============================================================================
+ */
 #include "freetype-gl.h"
 
 
@@ -80,13 +85,13 @@ int main( int argc, char **argv )
     glutInit( &argc, argv );
     glutInitWindowSize( 512, 512 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Freetype OpenGL" );
+    glutCreateWindow( argv[0] );
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
     texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
-    const char *filename = "./Vera.ttf";
+    const char *filename = "fonts/Vera.ttf";
     const wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
                            L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
                            L"`abcdefghijklmnopqrstuvwxyz{|}~";

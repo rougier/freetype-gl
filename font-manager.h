@@ -43,24 +43,47 @@ extern "C" {
 #include "texture-font.h"
 #include "texture-atlas.h"
 
+/**
+ * @file   font-manager.h
+ * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
+ *
+ * @defgroup font-manager Font manager
+ *
+ * Structure in charge of caching fonts.
+ *
+ * <b>Example Usage</b>:
+ * @code
+ * #include "font-manager.h"
+ *
+ * int main( int arrgc, char *argv[] )
+ * {
+ *     font_manager_t * manager = manager_new( 512, 512, 1 );
+ *     texture_font_t * font = font_manager_get( manager, "Mono", 12, 0, 0 );
+ *
+ *     return 0;
+ * }
+ * @endcode
+ *
+ * @{
+ */
 
 
 /**
- *
+ * Structure in charge of caching fonts.
  */
 typedef struct {
     /**
-     *
+     * Texture atlas to hold font glyphs.
      */
     texture_atlas_t * atlas;
 
     /**
-     *
+     * Cached textures.
      */
     vector_t * fonts;
 
     /**
-     *
+     * Default glyphs to be loaded when loading a new font.
      */
     wchar_t * cache;
 
@@ -69,20 +92,37 @@ typedef struct {
 
 
 /**
+ * Creates a new empty font manager.
+ *
+ * @param   width   width of the underlying atlas
+ * @param   height  height of the underlying atlas
+ * @param   depth   bit depth of the underlying atlas
+ *
+ * @return          a new font manager.
  *
  */
   font_manager_t *
-  font_manager_new( size_t width, size_t height, size_t depth );
+  font_manager_new( size_t width,
+                    size_t height,
+                    size_t depth );
 
 
 /**
+ *  Deletes a font manager.
  *
+ *  @param self a font manager.
  */
   void
   font_manager_delete( font_manager_t *self );
 
 
 /**
+ *  Deletes a font from the font manager.
+ *
+ *  Note that font glyphs are not removed from the atlas.
+ *
+ *  @param self a font manager.
+ *  @param font font to be deleted
  *
  */
   void
@@ -91,7 +131,13 @@ typedef struct {
 
 
 /**
+ *  Request for a font based on a filename.
  *
+ *  @param self     a font manager.
+ *  @param filename font filename
+ *  @param size     font size
+ *
+ *  @return Requested font
  */
   texture_font_t *
   font_manager_get_from_filename( font_manager_t * self,
@@ -100,7 +146,15 @@ typedef struct {
 
 
 /**
+ *  Request for a font based on a description
  *
+ *  @param self     a font manager
+ *  @param family   font family
+ *  @param size     font size
+ *  @param bold     whether font is bold
+ *  @param italic   whether font is italic
+ *
+ *  @return Requested font
  */
   texture_font_t *
   font_manager_get_from_description( font_manager_t * self,
@@ -111,7 +165,12 @@ typedef struct {
 
 
 /**
+ *  Request for a font based on a markup
  *
+ *  @param self    a font manager
+ *  @param markup  Markup describing a font
+ *
+ *  @return Requested font
  */
   texture_font_t *
   font_manager_get_from_markup( font_manager_t *self,
@@ -119,7 +178,15 @@ typedef struct {
 
 
 /**
+ *  Search for a font filename that match description.
  *
+ *  @param self    a font manager
+ *  @param family   font family
+ *  @param size     font size
+ *  @param bold     whether font is bold
+ *  @param italic   whether font is italic
+ *
+ *  @return Requested font filename
  */
   char *
   font_manager_match_description( font_manager_t * self,
@@ -128,20 +195,7 @@ typedef struct {
                                   const int bold,
                                   const int italic );
 
-
-/**
- *
- */
-  const wchar_t *
-  font_manager_get_cache( font_manager_t * self );
-
-
-/**
- *
- */
-  void
-  font_manager_set_cache( font_manager_t * self,
-                          const wchar_t * cache );
+/** @} */
 
 #ifdef __cplusplus
 }

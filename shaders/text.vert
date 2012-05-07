@@ -32,7 +32,7 @@
  * ============================================================================
  */
 uniform sampler2D texture;
-uniform vec2 pixel;
+uniform vec3 pixel;
 attribute float agamma;
 attribute float ashift;
 varying float vshift;

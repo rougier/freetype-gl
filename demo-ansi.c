@@ -31,99 +31,13 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-#include <stdarg.h>
 #include "freetype-gl.h"
-#include "font-manager.h"
-#include "vertex-buffer.h"
-#include "markup.h"
-
-
-// ------------------------------------------------------- typedef & struct ---
-typedef struct {
-    float x, y, z;
-    float u, v;
-    float r, g, b, a;
-    float shift, gamma;
-} vertex_t;
 
 
 // ------------------------------------------------------- global variables ---
-font_manager_t * manager;
-vertex_buffer_t * buffer;
-GLuint program = 0;
-GLuint texture_location;
-GLuint pixel_location;
-
-// ------------------------------------------------------------ read_shader ---
-char *
-read_shader( const char *filename )
-{
-    FILE * file;
-    char * buffer;
-	size_t size;
-
-    file = fopen( filename, "rb" );
-    if( !file )
-    {
-        fprintf( stderr, "Unable to open file \"%s\".\n", filename );
-		return 0;
-    }
-	fseek( file, 0, SEEK_END );
-	size = ftell( file );
-	fseek(file, 0, SEEK_SET );
-    buffer = (char *) malloc( (size+1) * sizeof( char *) );
-	fread( buffer, sizeof(char), size, file );
-    buffer[size] = 0;
-    fclose( file );
-    return buffer;
-}
+text_buffer_t * text_buffer;
 
 
-// ----------------------------------------------------------- build_shader ---
-GLuint
-build_shader( const char* source, GLenum type )
-{
-    GLuint handle = glCreateShader( type );
-    glShaderSource( handle, 1, &source, 0 );
-    glCompileShader( handle );
-
-    GLint compile_status;
-    glGetShaderiv( handle, GL_COMPILE_STATUS, &compile_status );
-    if( compile_status == GL_FALSE )
-    {
-        GLchar messages[256];
-        glGetShaderInfoLog( handle, sizeof(messages), 0, &messages[0] );
-        fprintf( stderr, "%s\n", messages );
-        exit( EXIT_FAILURE );
-    }
-    return handle;
-}
-
-
-// ---------------------------------------------------------- build_program ---
-GLuint build_program( const char * vertex_source,
-                      const char * fragment_source )
-{
-    GLuint vertex_shader   = build_shader( vertex_source, GL_VERTEX_SHADER);
-    GLuint fragment_shader = build_shader( fragment_source, GL_FRAGMENT_SHADER);
-    
-    GLuint handle = glCreateProgram( );
-    glAttachShader( handle, vertex_shader);
-    glAttachShader( handle, fragment_shader);
-    glLinkProgram( handle );
-    
-    GLint link_status;
-    glGetProgramiv( handle, GL_LINK_STATUS, &link_status );
-    if (link_status == GL_FALSE)
-    {
-        GLchar messages[256];
-        glGetProgramInfoLog( handle, sizeof(messages), 0, &messages[0] );
-        fprintf( stderr, "%s\n", messages );
-        exit(1);
-    }
-    
-    return handle;
-}
 
 
 // ---------------------------------------------------------------- display ---
@@ -131,20 +45,7 @@ void display( void )
 {
     glClearColor(1.00,1.00,1.00,1.00);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glEnable( GL_BLEND );
-    glEnable( GL_TEXTURE_2D );
-    glEnable( GL_COLOR_MATERIAL );
-    glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-    glColor4f( 1.0, 1.0, 1.0, 1.0); 
-    glBlendColor( 1.0, 1.0, 1.0, 1.0 );
-    glUseProgram( program );
-    glUniform1i( texture_location, 0 );
-    glUniform2f( pixel_location,
-                 1.0/manager->atlas->width,
-                 1.0/manager->atlas->height );
-    vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
-    glUseProgram( 0 );
+    text_buffer_render( text_buffer );
     glutSwapBuffers( );
 }
 
@@ -167,181 +68,6 @@ void keyboard( unsigned char key, int x, int y )
     if ( key == 27 )
     {
         exit( EXIT_SUCCESS );
-    }
-}
-
-
-// --------------------------------------------------------------- add_text ---
-void add_text( vertex_buffer_t * buffer, vec2 * pen,
-               wchar_t * text, size_t length, markup_t *markup )
-{
-    if( !markup->font )
-    {
-        markup->font = font_manager_get_from_markup( manager, markup );
-        if( ! markup->font )
-        {
-            fprintf( stderr, "Houston, we've got a problem !\n" );
-            exit( EXIT_FAILURE );
-        }
-    }
-
-    size_t i;
-    texture_font_t * font = markup->font;
-    float r = markup->foreground_color.red;
-    float g = markup->foreground_color.green;
-    float b = markup->foreground_color.blue;
-    float a = markup->foreground_color.alpha;
-    float gamma = markup->gamma;
-
-    for( i=0; i<length; ++i )
-    {
-        if( text[i] == L'\n' )
-        {
-            continue;
-        }
-
-        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
-        texture_glyph_t *black = texture_font_get_glyph( font, -1 );
-
-        if( glyph != NULL )
-        {
-            float kerning = 0;
-            if( i > 0)
-            {
-                kerning = texture_glyph_get_kerning( glyph, text[i-1] );
-            }
-            pen->x += kerning;
-
-            /* Background */
-            if( markup->background_color.alpha > 0 )
-            {
-                float r = markup->background_color.r;
-                float g = markup->background_color.g;
-                float b = markup->background_color.b;
-                float a = markup->background_color.a;
-                float x0  = ( pen->x -kerning );
-                float y0  = (int)( pen->y + font->descender );
-                float x1  = ( x0 + glyph->advance_x );
-                float y1  = (int)( y0 + font->height + font->linegap );
-                float s0 = black->s0;
-                float t0 = black->t0;
-                float s1 = black->s1;
-                float t1 = black->t1;
-                GLuint index = buffer->vertices->size;
-                GLuint indices[] = {index, index+1, index+2,
-                                    index, index+2, index+3};
-                vertex_t vertices[] = {
-                    { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma },
-                    { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma },
-                    { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma },
-                    { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma } };
-                vertex_buffer_push_back_indices( buffer, indices, 6 );
-                vertex_buffer_push_back_vertices( buffer, vertices, 4 );
-            }
-
-            /* Underline */
-            if( markup->underline )
-            {
-                float r = markup->underline_color.r;
-                float g = markup->underline_color.g;
-                float b = markup->underline_color.b;
-                float a = markup->underline_color.a;
-                float x0  = ( pen->x - kerning );
-                float y0  = (int)( pen->y + font->underline_position );
-                float x1  = ( x0 + glyph->advance_x );
-                float y1  = (int)( y0 + font->underline_thickness ); 
-                float s0 = black->s0;
-                float t0 = black->t0;
-                float s1 = black->s1;
-                float t1 = black->t1;
-                GLuint index = buffer->vertices->size;
-                GLuint indices[] = {index, index+1, index+2,
-                                    index, index+2, index+3};
-                vertex_t vertices[] = {
-                    { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma },
-                    { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma },
-                    { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma },
-                    { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma } };
-                vertex_buffer_push_back_indices( buffer, indices, 6 );
-                vertex_buffer_push_back_vertices( buffer, vertices, 4 );
-            }
-
-            /* Overline */
-            if( markup->overline )
-            {
-                float r = markup->overline_color.r;
-                float g = markup->overline_color.g;
-                float b = markup->overline_color.b;
-                float a = markup->overline_color.a;
-                float x0  = ( pen->x -kerning );
-                float y0  = (int)( pen->y + (int)font->ascender );
-                float x1  = ( x0 + glyph->advance_x );
-                float y1  = (int)( y0 + (int)font->underline_thickness ); 
-                float s0 = black->s0;
-                float t0 = black->t0;
-                float s1 = black->s1;
-                float t1 = black->t1;
-                GLuint index = buffer->vertices->size;
-                GLuint indices[] = {index, index+1, index+2,
-                                    index, index+2, index+3};
-                vertex_t vertices[] = {
-                    { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma },
-                    { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma },
-                    { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma },
-                    { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma } };
-                vertex_buffer_push_back_indices( buffer, indices, 6 );
-                vertex_buffer_push_back_vertices( buffer, vertices, 4 );
-            }
-
-            /* Strikethrough */
-            if( markup->strikethrough )
-            {
-                float r = markup->overline_color.r;
-                float g = markup->overline_color.g;
-                float b = markup->overline_color.b;
-                float a = markup->overline_color.a;
-                float x0  = ( pen->x -kerning );
-                float y0  = (int)( pen->y + (int)font->ascender*.25);
-                float x1  = ( x0 + glyph->advance_x );
-                float y1  = (int)( y0 + (int)font->underline_thickness ); 
-                float s0 = black->s0;
-                float t0 = black->t0;
-                float s1 = black->s1;
-                float t1 = black->t1;
-                GLuint index = buffer->vertices->size;
-                GLuint indices[] = {index, index+1, index+2,
-                                    index, index+2, index+3};
-                vertex_t vertices[] = {
-                    { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma },
-                    { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma },
-                    { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma },
-                    { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma } };
-                vertex_buffer_push_back_indices( buffer, indices, 6 );
-                vertex_buffer_push_back_vertices( buffer, vertices, 4 );
-            }
-
-            /* Actual glyph */
-            float x0  = ( pen->x + glyph->offset_x );
-            float y0  = (int)( pen->y + glyph->offset_y );
-            float x1  = ( x0 + glyph->width );
-            float y1  = (int)( y0 - glyph->height );
-            float s0 = glyph->s0;
-            float t0 = glyph->t0;
-            float s1 = glyph->s1;
-            float t1 = glyph->t1;
-            GLuint index = buffer->vertices->size;
-            GLuint indices[] = {index, index+1, index+2,
-                                index, index+2, index+3};
-            vertex_t vertices[] = {
-                { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma },
-                { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma },
-                { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma },
-                { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma } };
-
-            vertex_buffer_push_back_indices( buffer, indices, 6 );
-            vertex_buffer_push_back_vertices( buffer, vertices, 4 );
-            pen->x += glyph->advance_x;
-        }
     }
 }
 
@@ -406,7 +132,6 @@ ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
         colors = (vec4 *) malloc( sizeof(vec4) * 256 );
         init_colors( colors );
     }
-
 
     if( length <= 1 )
     {
@@ -508,7 +233,7 @@ ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
 
 // ------------------------------------------------------------------ print ---
 void
-print( vertex_buffer_t * buffer, vec2 * pen,
+print( text_buffer_t * buffer, vec2 * pen,
        wchar_t *text, markup_t *markup )
 {
     wchar_t *seq_start = text, *seq_end = text;
@@ -542,11 +267,9 @@ print( vertex_buffer_t * buffer, vec2 * pen,
                 text_size = text+wcslen(text)-p;
                 p = text+wcslen(text);
             }                
-            //wprintf( L"\033[%.*lsm", seq_size, seq_start);
-            //wprintf( L"%.*ls", text_size, text_start);
             ansi_to_markup(seq_start, seq_size, markup );
-            markup->font = font_manager_get_from_markup( manager, markup );
-            add_text( buffer, pen, text_start, text_size, markup );
+            markup->font = font_manager_get_from_markup( text_buffer->manager, markup );
+            text_buffer_add_text( text_buffer, pen, markup, text_start, text_size );
         }
     }
 }
@@ -558,56 +281,36 @@ int main( int argc, char **argv )
     glutInit( &argc, argv );
     glutInitWindowSize( 800, 500 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Freetype OpenGL" );
+    glutCreateWindow( argv[0] );
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    manager = font_manager_new( 512, 512, 3 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f:2g1f" ); 
-    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
-    vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+    text_buffer = text_buffer_new( LCD_FILTERING_ON );
+    vec4 black = {{0.0, 0.0, 0.0, 1.0}};
+    vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
     markup_t markup = {
-        .family  = "Bitstream Vera Sans Mono",
-        .size    = 14.0,
-        .bold    = 0,
-        .italic  = 0,
-        .rise    = 0.0,
-        .spacing = 0.0,
-        .gamma   = 0.85,
-        .foreground_color    = black,
-        .background_color    = none,
-        .underline           = 0,
-        .underline_color     = black,
-        .overline            = 0,
-        .overline_color      = black,
-        .strikethrough       = 0,
-        .strikethrough_color = black,
+        .family  = "fonts/VeraMono.ttf",
+        .size    = 15.0, .bold    = 0,   .italic  = 0,
+        .rise    = 0.0,  .spacing = 0.0, .gamma   = 1.0,
+        .foreground_color    = black, .background_color    = none,
+        .underline           = 0,     .underline_color     = black,
+        .overline            = 0,     .overline_color      = black,
+        .strikethrough       = 0,     .strikethrough_color = black,
         .font = 0,
     };
-    markup.font = font_manager_get_from_markup( manager, &markup );
-    vec2 pen = {{10.0, 480.0}};
 
-    FILE *file = fopen ( "256colors.txt", "r" );
+    vec2 pen = {{10.0, 480.0}};
+    FILE *file = fopen ( "data/256colors.txt", "r" );
     if ( file != NULL )
     {
         wchar_t line[1024];
         while( fgetws ( line, sizeof(line), file ) != NULL )
         {
-            print(buffer, &pen, line, &markup);
-            pen.x = 10;
-            pen.y -= markup.font->height-1;
+            print( text_buffer, &pen, line, &markup );
         }
         fclose ( file );
     }
-
-
-    // Create the GLSL program
-    char * vertex_shader_source   = read_shader("./markup.vert");
-    char * fragment_shader_source = read_shader("./markup.frag");
-    program = build_program( vertex_shader_source, fragment_shader_source );
-    texture_location = glGetUniformLocation(program, "texture");
-    pixel_location   = glGetUniformLocation(program, "pixel");
 
     glutMainLoop( );
     return 0;

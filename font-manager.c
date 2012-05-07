@@ -42,6 +42,19 @@
 #include "font-manager.h"
 
 
+// ------------------------------------------------------------ file_exists ---
+int
+file_exists( const char * filename )
+{
+    FILE * file = fopen( filename, "r" );
+    if ( file )
+    {
+        fclose(file);
+        return 1;
+    }
+    return 0;
+}
+
 // ----------------------------------------------------------------- wcsdup ---
 wchar_t *
 wcsdup( const wchar_t *string )
@@ -163,21 +176,30 @@ font_manager_get_from_description( font_manager_t *self,
 {
     assert( self );
 
-#if defined(_WIN32) || defined(_WIN64)
-    fprintf( stderr, "\"font_manager_get_from_description\" not implemented yet.\n" );
-    return 0;
-#endif
 
     texture_font_t *font;
-    char *filename = font_manager_match_description( self, family, size, bold, italic );
-    if( !filename )
+    char *filename = 0;
+
+    if( file_exists( family ) )
     {
-        fprintf( stderr, "No \"%s (size=%.1f, bold=%d, italic=%d)\" font available.\n",
-                 family, size, bold, italic );
+        filename = strdup( family );
+    }
+    else
+    {
+#if defined(_WIN32) || defined(_WIN64)
+        fprintf( stderr, "\"font_manager_get_from_description\" not implemented yet.\n" );
         return 0;
+#endif
+        filename = font_manager_match_description( self, family, size, bold, italic );
+        if( !filename )
+        {
+            fprintf( stderr, "No \"%s (size=%.1f, bold=%d, italic=%d)\" font available.\n",
+                     family, size, bold, italic );
+            return 0;
+        }
     }
     font = font_manager_get_from_filename( self, filename, size );
-    // fprintf( stderr, "Matched font filename : %s\n", filename );
+
     free( filename );
     return font;
 }
@@ -190,11 +212,10 @@ font_manager_get_from_markup( font_manager_t *self,
     assert( self );
     assert( markup );
 
-#if defined(_WIN32) || defined(_WIN64)
-    fprintf( stderr, "\"font_manager_get_from_markup\" not implemented yet.\n" );
-    return 0;
-#endif
-
+//#if defined(_WIN32) || defined(_WIN64)
+//    fprintf( stderr, "\"font_manager_get_from_markup\" not implemented yet.\n" );
+//    return 0;
+//#endif
     // fprintf( stderr, "Matching %s, %f, %d, %d\n",
     //         markup->family, markup->size, markup->bold,   markup->italic );
 
@@ -257,29 +278,4 @@ font_manager_match_description( font_manager_t * self,
     }
     FcPatternDestroy( match );
     return filename;
-}
-
-
-// ------------------------------------------------- font_manager_get_cache ---
-const wchar_t *
-font_manager_get_cache( font_manager_t * self )
-{
-    assert( self );
-    return self->cache;
-}
-
-
-// ------------------------------------------------- font_manager_set_cache ---
-void
-font_manager_set_cache( font_manager_t * self,
-                        const wchar_t * cache )
-{
-    assert( self );
-    assert( cache );
-
-    if( self->cache )
-    {
-        free( self->cache );
-    }
-    self->cache = wcsdup( cache );
 }

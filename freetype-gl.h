@@ -51,12 +51,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <limits.h>
 #include <assert.h>
 
+/* Mandatory */
 #include "vec234.h"
 #include "vector.h"
 #include "texture-atlas.h"
 #include "texture-font.h"
+
+/* Optional */
+#include "font-manager.h"
+#include "vertex-buffer.h"
+#include "text-buffer.h"
+#include "markup.h"
+#include "shader.h"
 
 #endif /* FREETYPE_GL_H */

@@ -72,6 +72,7 @@ void reshape(int width, int height)
     glLoadIdentity();
     glOrtho(0, width, 0, height, -1, 1);
     glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     glutPostRedisplay();
 }
 
@@ -185,7 +186,7 @@ int main( int argc, char **argv )
         .strikethrough_color = white,
         .font = 0,
     };
-    markup.font = texture_font_new( atlas, "./Vera.ttf", markup.size );
+    markup.font = texture_font_new( atlas, "fonts/Vera.ttf", markup.size );
 
     markup.font->outline_type = 1;
 

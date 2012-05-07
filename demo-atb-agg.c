@@ -33,8 +33,6 @@
  */
 #include <AntTweakBar.h>
 #include "freetype-gl.h"
-#include "vertex-buffer.h"
-#include "markup.h"
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -102,75 +100,6 @@ static wchar_t text[] =
     L"and the outputs of adjacent pixels are not perfectly independent."
     L"\n";
 
-
-// ------------------------------------------------------------ read_shader ---
-char *
-read_shader( const char *filename )
-{
-    FILE * file;
-    char * buffer;
-	size_t size;
-
-    file = fopen( filename, "rb" );
-    if( !file )
-    {
-        fprintf( stderr, "Unable to open file \"%s\".\n", filename );
-		return 0;
-    }
-	fseek( file, 0, SEEK_END );
-	size = ftell( file );
-	fseek(file, 0, SEEK_SET );
-    buffer = (char *) malloc( (size+1) * sizeof( char *) );
-	fread( buffer, sizeof(char), size, file );
-    buffer[size] = 0;
-    fclose( file );
-    return buffer;
-}
-
-// ----------------------------------------------------------- build_shader ---
-GLuint
-build_shader( const char* source, GLenum type )
-{
-    GLuint handle = glCreateShader( type );
-    glShaderSource( handle, 1, &source, 0 );
-    glCompileShader( handle );
-
-    GLint compile_status;
-    glGetShaderiv( handle, GL_COMPILE_STATUS, &compile_status );
-    if( compile_status == GL_FALSE )
-    {
-        GLchar messages[256];
-        glGetShaderInfoLog( handle, sizeof(messages), 0, &messages[0] );
-        fprintf( stderr, "%s\n", messages );
-        exit( EXIT_FAILURE );
-    }
-    return handle;
-}
-
-// ---------------------------------------------------------- build_program ---
-GLuint build_program( const char * vertex_source,
-                      const char * fragment_source )
-{
-    GLuint vertex_shader   = build_shader( vertex_source, GL_VERTEX_SHADER);
-    GLuint fragment_shader = build_shader( fragment_source, GL_FRAGMENT_SHADER);
-    
-    GLuint handle = glCreateProgram( );
-    glAttachShader( handle, vertex_shader);
-    glAttachShader( handle, fragment_shader);
-    glLinkProgram( handle);
-    
-    GLint link_status;
-    glGetProgramiv( handle, GL_LINK_STATUS, &link_status );
-    if (link_status == GL_FALSE)
-    {
-        GLchar messages[256];
-        glGetProgramInfoLog( handle, sizeof(messages), 0, &messages[0] );
-        fprintf( stderr, "%s\n", messages );
-        exit(1);
-    }
-    
-    return handle;
-}
 
 
 // -------------------------------------------------------------- add_glyph ---
@@ -251,27 +180,27 @@ build_buffer( void )
 
     if( p_family == VERA)
     {
-        font = texture_font_new( atlas, "./Vera.ttf", p_size );
+        font = texture_font_new( atlas, "fonts/Vera.ttf", p_size );
     }
     else if( p_family == GEORGIA)
     {
-        font = texture_font_new( atlas, "./Georgia.ttf", p_size );
+        font = texture_font_new( atlas, "fonts/Georgia.ttf", p_size );
     }
     else if( p_family == TIMES )
     {
-        font = texture_font_new( atlas, "./Times.ttf", p_size );
+        font = texture_font_new( atlas, "fonts/Times.ttf", p_size );
     }
     else if( p_family == TAHOMA )
     {
-        font = texture_font_new( atlas, "./Tahoma.ttf", p_size );
+        font = texture_font_new( atlas, "fonts/Tahoma.ttf", p_size );
     }
     else if( p_family == ARIAL )
     {
-        font = texture_font_new( atlas, "./Arial.ttf", p_size );
+        font = texture_font_new( atlas, "fonts/Arial.ttf", p_size );
     }
     else if( p_family == VERDANA )
     {
-        font = texture_font_new( atlas, "./Verdana.ttf", p_size );
+        font = texture_font_new( atlas, "fonts/Verdana.ttf", p_size );
     }
     else
     {
@@ -785,17 +714,15 @@ int main(int argc, char *argv[])
     buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f" ); 
     reset();
 
-    // Create the GLSL program
-    char * vertex_shader_source   = read_shader("./subpixel.vert");
-    char * fragment_shader_source = read_shader("./subpixel-gamma.frag");
-    program = build_program( vertex_shader_source, fragment_shader_source );
+    // Create the shader
+    program = shader_load( "shaders/agg.vert",
+                           "shaders/agg.frag" );
     texture_location = glGetUniformLocation( program, "texture" );
     pixel_location = glGetUniformLocation( program, "pixel" );
     gamma_location = glGetUniformLocation( program, "gamma" );
     primary_location   = glGetUniformLocation( program, "primary" );
     secondary_location = glGetUniformLocation( program, "secondary" );
     tertiary_location  = glGetUniformLocation( program, "tertiary" );
-
     //glEnable(GL_FRAMEBUFFER_SRGB);
     glutTimerFunc( 1000.0/60.0, timer, 60 );
     glutMainLoop();

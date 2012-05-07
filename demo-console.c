@@ -131,20 +131,20 @@ console_new( void )
         .strikethrough_color = white,
         .font = 0,
     };
-    normal.font = texture_font_new( atlas, "./VeraMono.ttf", 13 );
+    normal.font = texture_font_new( atlas, "fonts/VeraMono.ttf", 13 );
 
     markup_t bold = normal;
     bold.bold = 1;
-    bold.font = texture_font_new( atlas, "./VeraMoBd.ttf", 13 );
+    bold.font = texture_font_new( atlas, "fonts/VeraMoBd.ttf", 13 );
 
     markup_t italic = normal;
     italic.italic = 1;
-    bold.font = texture_font_new( atlas, "./VeraMoIt.ttf", 13 );
+    bold.font = texture_font_new( atlas, "fonts/VeraMoIt.ttf", 13 );
 
     markup_t bold_italic = normal;
     bold.bold = 1;
     italic.italic = 1;
-    italic.font = texture_font_new( atlas, "./VeraMoBI.ttf", 13 );
+    italic.font = texture_font_new( atlas, "fonts/VeraMoBI.ttf", 13 );
 
     markup_t faint = normal;
     faint.foreground_color.r = 0.35;
@@ -199,6 +199,10 @@ console_add_glyph( console_t *self,
     {
         self->pen.x += texture_glyph_get_kerning( glyph, previous );
     }
+    float r = markup->foreground_color.r;
+    float g = markup->foreground_color.g;
+    float b = markup->foreground_color.b;
+    float a = markup->foreground_color.a;
     int x0  = self->pen.x + glyph->offset_x;
     int y0  = self->pen.y + glyph->offset_y;
     int x1  = x0 + glyph->width;
@@ -207,20 +211,14 @@ console_add_glyph( console_t *self,
     float t0 = glyph->t0;
     float s1 = glyph->s1;
     float t1 = glyph->t1;
-    GLuint index = self->buffer->vertices->size;
-    GLuint indices[] = {index, index+1, index+2,
-                        index, index+2, index+3};
 
-    float r = markup->foreground_color.r;
-    float g = markup->foreground_color.g;
-    float b = markup->foreground_color.b;
-    float a = markup->foreground_color.a;
+    GLuint indices[] = {0,1,2, 0,2,3};
     vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a },
                             { x0,y1,0,  s0,t1,  r,g,b,a },
                             { x1,y1,0,  s1,t1,  r,g,b,a },
                             { x1,y0,0,  s1,t0,  r,g,b,a } };
-    vertex_buffer_push_back_indices( self->buffer, indices, 6 );
-    vertex_buffer_push_back_vertices( self->buffer, vertices, 4 );
+    vertex_buffer_push_back( self->buffer, vertices, 4, indices, 6 );
+    
     self->pen.x += glyph->advance_x;
     self->pen.y += glyph->advance_y;
 }
@@ -246,7 +244,6 @@ console_render( console_t *self )
 
     // console_t buffer
     markup = self->markup[MARKUP_FAINT];
-
     self->pen.y -= markup.font->height;
 
     for( i=0; i<self->lines->size; ++i )
@@ -299,14 +296,13 @@ console_render( console_t *self )
 
     // Cursor
     vertex_buffer_clear( lines_buffer );
-
-    point_t p = {cursor_x+1, cursor_y, markup.foreground_color};
-    p.y += markup.font->descender;
-    vertex_buffer_push_back_vertex( lines_buffer, &p );
-
-    p.y += markup.font->height - markup.font->linegap;
-    vertex_buffer_push_back_vertex( lines_buffer, &p );
-
+    float x  = cursor_x+1;
+    float y1 = cursor_y+markup.font->descender;
+    float y2 = y1 + markup.font->height - markup.font->linegap;
+    point_t vertices[2] ={ {x, y1, markup.foreground_color},
+                           {x, y2, markup.foreground_color} };
+    GLuint indices[] = {0,1};
+    vertex_buffer_push_back( lines_buffer, vertices, 2, indices, 2 );
 
     glColor4f(1,1,1,1);
     glEnable( GL_TEXTURE_2D );
@@ -671,7 +667,7 @@ main( int argc, char **argv )
 {
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Freetype OpenGL / console" );
+    glutCreateWindow( argv[0] );
     glutReshapeFunc( on_reshape );
     glutDisplayFunc( on_display );
     glutKeyboardFunc( on_key_press );
@@ -688,7 +684,7 @@ main( int argc, char **argv )
     console_connect( console, "history-prev", console_history_prev );
     console_connect( console, "history-next", console_history_next );
 
-    glClearColor( 1.00, 1.00, 0.95, 1.00 );
+    glClearColor( 1.00, 1.00, 1.00, 1.00 );
     glDisable( GL_DEPTH_TEST ); 
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glEnable( GL_TEXTURE_2D );

@@ -31,8 +31,6 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
 #include "freetype-gl.h"
-#include "vertex-buffer.h"
-#include "markup.h"
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -43,8 +41,8 @@ typedef struct {
 } vertex_t;
 
 typedef struct {
-    float x, y;        // position
-    float r, g, b, a; // color
+    float x, y;
+    vec4 color;
 } point_t;
 
 
@@ -125,15 +123,12 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
             float t0 = glyph->t0;
             float s1 = glyph->s1;
             float t1 = glyph->t1;
-            GLuint index = buffer->vertices->size;
-            GLuint indices[] = {index, index+1, index+2,
-                                index, index+2, index+3};
+            GLuint indices[] = {0,1,2,0,2,3};
             vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a },
                                     { x0,y1,0,  s0,t1,  r,g,b,a },
                                     { x1,y1,0,  s1,t1,  r,g,b,a },
                                     { x1,y0,0,  s1,t0,  r,g,b,a } };
-            vertex_buffer_push_back_indices( buffer, indices, 6 );
-            vertex_buffer_push_back_vertices( buffer, vertices, 4 );
+            vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
             pen->x += glyph->advance_x;
         }
     }
@@ -166,11 +161,7 @@ int main( int argc, char **argv )
     line_buffer  = vertex_buffer_new( "v2f:c4f" ); 
     point_buffer = vertex_buffer_new( "v2f:c4f" ); 
 
-    vec2  pen, origin;
-    point_t p1, p2;
-
-    p1.r = p1.g = p1.b = 0; p1.a = 1;
-    p2.r = p2.g = p2.b = 0; p2.a = 1;
+    vec2 pen, origin;
 
     texture_glyph_t *glyph  = texture_font_get_glyph( big, L'g' );
     origin.x = width/2  - glyph->offset_x - glyph->width/2;
@@ -182,135 +173,100 @@ int main( int argc, char **argv )
     pen.y = 560;
     add_text( text_buffer, title, L"Glyph metrics", &black, &pen );
 
+    point_t vertices[] = 
+        {   // Baseline
+            {0.1*width, origin.y, black},
+            {0.9*width, origin.y, black}, 
 
-    // Baseline
-    p1.x = 0.1*width;
-    p1.y = origin.y;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = 0.9*width;
-    p2.y = p1.y;
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
+            // Top line
+            {0.1*width, origin.y + glyph->offset_y, black},
+            {0.9*width, origin.y + glyph->offset_y, black},
 
-    // Top line
-    p1.x = 0.1*width;
-    p1.y = origin.y + glyph->offset_y;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = 0.9*width;
-    p2.y = p1.y;
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
+            // Bottom line
+            {0.1*width, origin.y + glyph->offset_y - glyph->height, black},
+            {0.9*width, origin.y + glyph->offset_y - glyph->height, black},
 
-    // Bottom line
-    p1.x = 0.1*width;
-    p1.y = origin.y + glyph->offset_y - glyph->height;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = 0.9*width;
-    p2.y = p1.y;
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
+            // Left line at origin
+            {width/2-glyph->offset_x-glyph->width/2, 0.1*height, black},
+            {width/2-glyph->offset_x-glyph->width/2, 0.9*height, black},
 
-    // Origin
-    p1.x = width/2  - glyph->offset_x - glyph->width/2;
-    p1.y = height/2 - glyph->offset_y + glyph->height/2;
-    vertex_buffer_push_back_vertex( point_buffer, &p1 );
-    pen.x = p1.x - 58;
-    pen.y = p1.y - 20;
-    add_text( text_buffer, small, L"Origin", &black, &pen );
+            // Left line
+            {width/2 - glyph->width/2, .3*height, black},
+            {width/2 - glyph->width/2, .9*height, black},
+
+            // Right line
+            {width/2 + glyph->width/2, .3*height, black},
+            {width/2 + glyph->width/2, .9*height, black},
+
+            // Right line at origin
+            {width/2-glyph->offset_x-glyph->width/2+glyph->advance_x, 0.1*height, black},
+            {width/2-glyph->offset_x-glyph->width/2+glyph->advance_x, 0.7*height, black},
+
+            // Width
+            {width/2 - glyph->width/2, 0.8*height, blue},
+            {width/2 + glyph->width/2, 0.8*height, blue},
+
+            // Advance_x
+            {width/2-glyph->width/2-glyph->offset_x, 0.2*height, blue},
+            {width/2-glyph->width/2-glyph->offset_x+glyph->advance_x, 0.2*height, blue},
+            
+            // Offset_x
+            {width/2-glyph->width/2-glyph->offset_x, 0.85*height, blue},
+            {width/2-glyph->width/2, 0.85*height, blue},
+
+            // Height
+            {0.3*width/2, origin.y + glyph->offset_y - glyph->height,blue},
+            {0.3*width/2, origin.y + glyph->offset_y, blue},
+
+            // Offset y
+            {0.8*width, origin.y + glyph->offset_y, blue},
+            {0.8*width, origin.y , blue},
+
+        };
+    GLuint indices [] = {  0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,
+                          13,14,15,16,17,18,19,20,21,22,23,24,25};
+    vertex_buffer_push_back( line_buffer, vertices, 26, indices, 26 );
 
 
-    // Advance point
-    p1.x = width/2  - glyph->offset_x - glyph->width/2 + glyph->advance_x;
-    p1.y = height/2 - glyph->offset_y + glyph->height/2;
-    vertex_buffer_push_back_vertex( point_buffer, &p1 );
 
-    // Left line at origin
-    p1.x = width/2  - glyph->offset_x - glyph->width/2;
-    p1.y = .1*height;
-    p2.x = p1.x;
-    p2.y = .9*height;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
-
-    // Left line
-    p1.x = width/2 - glyph->width/2;
-    p1.y = .3*height;
-    p2.x = p1.x;
-    p2.y = .9*height;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
-
-    // Right line
-    p1.x = width/2 + glyph->width/2;
-    p1.y = .3*height;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = p1.x;
-    p2.y = .9*height;
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
-
-    // Right line
-    p1.x = width/2  - glyph->offset_x - glyph->width/2 + glyph->advance_x;
-    p1.y = .1*height;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = p1.x;
-    p2.y = .7*height;
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
-    
-    // Change line color
-    p1.b = p2.b = 1;
-
-    // width
-    p1.x = width/2 - glyph->width/2;
-    p1.y = .8*height;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = width/2 + glyph->width/2;
-    p2.y = p1.y;
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
-    pen.x = width/2 - 20;
-    pen.y = .8*height + 3;
-    add_text( text_buffer, small, L"width", &blue, &pen );
-
-    // advance_x
-    p1.x = width/2 - glyph->width/2 - glyph->offset_x;
-    p1.y = .2*height;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = width/2 - glyph->width/2 - glyph->offset_x + glyph->advance_x;
-    p2.y = p1.y;
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = width/2 - 48;
     pen.y = .2*height - 18;
     add_text( text_buffer, small, L"advance_x", &blue, &pen );
 
-    // Offset_x
-    p1.x = width/2 - glyph->width/2 -glyph->offset_x;
-    p1.y = .85*height;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = width/2 - glyph->width/2;
-    p2.y = p1.y;
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
+    pen.x = width/2 - 20;
+    pen.y = .8*height + 3;
+    add_text( text_buffer, small, L"width", &blue, &pen );
+
     pen.x = width/2 - glyph->width/2 + 5;
     pen.y = .85*height-8;
     add_text( text_buffer, small, L"offset_x", &blue, &pen );
 
-    // Height
-    p1.x = 0.3*width/2;
-    p1.y = origin.y + glyph->offset_y - glyph->height;
-    p2.x = 0.3*width/2;
-    p2.y = origin.y + glyph->offset_y;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = 0.2*width/2-30;
     pen.y = origin.y + glyph->offset_y - glyph->height/2;
     add_text( text_buffer, small, L"height", &blue, &pen );
 
-
-    // Offset y
-    p1.x = 0.8*width;
-    p1.y = origin.y + glyph->offset_y;
-    vertex_buffer_push_back_vertex( line_buffer, &p1 );
-    p2.x = p1.x;
-    p2.y = origin.y;
-    vertex_buffer_push_back_vertex( line_buffer, &p2 );
     pen.x = 0.8*width+3;
     pen.y = origin.y + glyph->offset_y/2 -6;
     add_text( text_buffer, small, L"offset_y", &blue, &pen );
+
+    pen.x = width/2  - glyph->offset_x - glyph->width/2 - 58;
+    pen.y = height/2 - glyph->offset_y + glyph->height/2 - 20;
+    add_text( text_buffer, small, L"Origin", &black, &pen );
+
+
+    GLuint i = 0;
+    point_t p;
+    p.color = black;
+
+    // Origin point
+    p.x = width/2  - glyph->offset_x - glyph->width/2;
+    p.y = height/2 - glyph->offset_y + glyph->height/2;
+    vertex_buffer_push_back( point_buffer, &p, 1, &i, 1 );
+
+    // Advance point
+    p.x = width/2  - glyph->offset_x - glyph->width/2 + glyph->advance_x;
+    p.y = height/2 - glyph->offset_y + glyph->height/2;
+    vertex_buffer_push_back( point_buffer, &p, 1, &i, 1 );
 
     glutMainLoop( );
     return 0;

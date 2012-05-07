@@ -30,15 +30,15 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
-
-   This source is based on the article by Jukka Jylänki :
-   "A Thousand Ways to Pack the Bin - A Practical Approach to
-    Two-Dimensional Rectangle Bin Packing", February 27, 2010.
-
-   More precisely, this is an implementation of the Skyline Bottom-Left
-   algorithm based on C++ sources provided by Jukka Jylänki at:
-   http://clb.demon.fi/files/RectangleBinPack/
-
+ *
+ * This source is based on the article by Jukka Jylänki :
+ * "A Thousand Ways to Pack the Bin - A Practical Approach to
+ * Two-Dimensional Rectangle Bin Packing", February 27, 2010.
+ *
+ * More precisely, this is an implementation of the Skyline Bottom-Left
+ * algorithm based on C++ sources provided by Jukka Jylänki at:
+ * http://clb.demon.fi/files/RectangleBinPack/
+ *
  *  ============================================================================
  */
 #ifndef __TEXTURE_ATLAS_H__
@@ -51,17 +51,38 @@ extern "C" {
 #include "vector.h"
 #include "vec234.h"
 
-
 /**
+ * @file   texture-atlas.h
+ * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
+ *
+ * @defgroup texture-atlas Texture atlas
+ *
  * A texture atlas is used to pack several small regions into a single texture.
  *
  * The actual implementation is based on the article by Jukka Jylänki : "A
  * Thousand Ways to Pack the Bin - A Practical Approach to Two-Dimensional
  * Rectangle Bin Packing", February 27, 2010.
- *
  * More precisely, this is an implementation of the Skyline Bottom-Left
  * algorithm based on C++ sources provided by Jukka Jylänki at:
  * http://clb.demon.fi/files/RectangleBinPack/
+ *
+ *
+ * Example Usage:
+ * @code
+ * #include "texture-atlas.h"
+ *
+ * int main( int arrgc, char *argv[] )
+ * {
+ *   return 0;
+ * }
+ * @endcode
+ *
+ * @{
+ */
+
+
+/**
+ * A texture atlas is used to pack several small regions into a single texture.
  */
 typedef struct
 {
@@ -105,6 +126,12 @@ typedef struct
 
 
 /**
+ * Creates a new empty texture atlas.
+ *
+ * @param   width   width of the atlas
+ * @param   height  height of the atlas
+ * @param   depth   bit depth of the atlas
+ * @return          a new empty texture atlas.
  *
  */
   texture_atlas_t *
@@ -114,6 +141,9 @@ typedef struct
 
 
 /**
+ *  Deletes a texture atlas.
+ *
+ *  @param self a texture atlas structure
  *
  */
   void
@@ -121,6 +151,9 @@ typedef struct
 
 
 /**
+ *  Upload atlas to video memory.
+ *
+ *  @param self a texture atlas structure
  *
  */
   void
@@ -128,6 +161,12 @@ typedef struct
 
 
 /**
+ *  Allocate a new region in the atlas.
+ *
+ *  @param self   a texture atlas structure
+ *  @param width  width of the region to allocate
+ *  @param height height of the region to allocate
+ *  @return       Coordinates of the allocated region
  *
  */
   ivec4
@@ -137,6 +176,15 @@ typedef struct
 
 
 /**
+ *  Upload data to the specified atlas region.
+ *
+ *  @param self   a texture atlas structure
+ *  @param x      x coordinate the region
+ *  @param y      y coordinate the region
+ *  @param width  width of the region
+ *  @param height height of the region
+ *  @param data   data to be uploaded into the specified region
+ *  @param stride stride of the data
  *
  */
   void
@@ -149,11 +197,15 @@ typedef struct
                             const size_t stride );
 
 /**
+ *  Remove all allocated regions from the atlas.
  *
+ *  @param self   a texture atlas structure
  */
   void
   texture_atlas_clear( texture_atlas_t * self );
 
+
+/** @} */
 
 #ifdef __cplusplus
 }

@@ -1,35 +1,35 @@
-/* =========================================================================
- * Freetype GL - A C OpenGL Freetype engine
- * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
- * -------------------------------------------------------------------------
- * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
+// ----------------------------------------------------------------------------
+// OpenGL Anti-Grain Geometry (GL-AGG) - Version 0.1
+// A high quality OpenGL rendering engine for C
+// Copyright (C) 2012 Nicolas P. Rougier. All rights reserved.
+// Contact: Nicolas.Rougier@gmail.com
+//          http://code.google.com/p/gl-agg/
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//  1. Redistributions of source code must retain the above copyright notice,
+//     this list of conditions and the following disclaimer.
+//
+//  2. Redistributions in binary form must reproduce the above copyright
+//     notice, this list of conditions and the following disclaimer in the
+//     documentation and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
+// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+// EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+// THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// The views and conclusions contained in the software and documentation are
+// those of the authors and should not be interpreted as representing official
+// policies, either expressed or implied, of Nicolas P. Rougier.
+// ----------------------------------------------------------------------------
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
@@ -37,9 +37,43 @@
 extern "C" {
 #endif
 
+#include <stddef.h>
+
+/**
+ * @file   vector.h
+ * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
+ *
+ * @defgroup vector Vector
+ *
+ * The vector structure and accompanying functions loosely mimic the STL C++
+ * vector class. It is used by @ref texture-atlas (for storing nodes), @ref
+ * texture-font (for storing glyphs) and @ref font-manager (for storing fonts).
+ * More information at http://www.cppreference.com/wiki/container/vector/start
+ *
+ * <b>Example Usage</b>:
+ * @code
+ * #include "vector.h"
+ *
+ * int main( int arrgc, char *argv[] )
+ * {
+ *   int i,j = 1;
+ *   vector_t * vector = vector_new( sizeof(int) );
+ *   vector_push_back( &i );
+ * 
+ *   j = * (int *) vector_get( vector, 0 );
+ *   vector_delete( vector);
+ *
+ *   return 0;
+ * }
+ * @endcode
+ *
+ * @{
+ */
 
 /**
  *  Generic vector structure.
+ *
+ * @memberof vector
  */
 typedef struct
  {
@@ -56,22 +90,27 @@ typedef struct
      size_t item_size;
 } vector_t;
 
+
 /**
- *  Creates a vector.
+ * Creates a new empty vector.
  *
- *  @param  item_size    item size in bytes
- *  @return              a new empty vector
+ * @param   item_size    item size in bytes
+ * @return               a new empty vector
+ *
  */
   vector_t *
   vector_new( size_t item_size );
 
+
 /**
  *  Deletes a vector.
  *
- *  @param  self a vector structure
+ *  @param self a vector structure
+ *
  */
   void
   vector_delete( vector_t *self );
+
 
 /**
  *  Returns a pointer to the item located at specified index.
@@ -84,6 +123,7 @@ typedef struct
   vector_get( const vector_t *self,
               size_t index );
 
+
 /**
  *  Returns a pointer to the first item.
  *
@@ -93,6 +133,7 @@ typedef struct
   const void *
   vector_front( const vector_t *self );
 
+
 /**
  *  Returns a pointer to the last item
  *
@@ -101,6 +142,7 @@ typedef struct
  */
   const void *
   vector_back( const vector_t *self );
+
 
 /**
  *  Check if an item is contained within the vector.
@@ -115,6 +157,7 @@ typedef struct
                    const void *item,
                    int (*cmp)(const void *, const void *) );
 
+
 /**
  *  Checks whether the vector is empty.
  *
@@ -124,6 +167,7 @@ typedef struct
   int
   vector_empty( const vector_t *self );
 
+
 /**
  *  Returns the number of items
  *
@@ -132,6 +176,7 @@ typedef struct
  */
   size_t
   vector_size( const vector_t *self );
+
 
 /**
  *  Reserve storage such that it can hold at last size items.
@@ -143,6 +188,7 @@ typedef struct
   vector_reserve( vector_t *self,
                   const size_t size );
 
+
 /**
  *  Returns current storage capacity
  *
@@ -152,6 +198,7 @@ typedef struct
   size_t
   vector_capacity( const vector_t *self );
 
+
 /**
  *  Decrease capacity to fit actual size.
  *
@@ -160,6 +207,7 @@ typedef struct
   void
   vector_shrink( vector_t *self );
 
+
 /**
  *  Removes all items.
  *
@@ -167,6 +215,7 @@ typedef struct
  */
   void
   vector_clear( vector_t *self );
+
 
 /**
  *  Replace an item.
@@ -180,6 +229,7 @@ typedef struct
               const size_t index,
               const void *item );
 
+
 /**
  *  Erase an item.
  *
@@ -189,6 +239,7 @@ typedef struct
   void
   vector_erase( vector_t *self,
                 const size_t index );
+
 
 /**
  *  Erase a range of items.
@@ -202,6 +253,7 @@ typedef struct
                       const size_t first,
                       const size_t last );
 
+
 /**
  *  Appends given item to the end of the vector.
  *
@@ -212,6 +264,7 @@ typedef struct
   vector_push_back( vector_t *self,
                     const void *item );
 
+
 /**
  *  Removes the last item of the vector.
  *
@@ -219,6 +272,7 @@ typedef struct
  */
   void
   vector_pop_back( vector_t *self );
+
 
 /**
  *  Resizes the vector to contain size items
@@ -234,6 +288,7 @@ typedef struct
   vector_resize( vector_t *self,
                  const size_t size );
 
+
 /**
  *  Insert a single item at specified index.
  *
@@ -245,6 +300,7 @@ typedef struct
   vector_insert( vector_t *self,
                  const size_t index,
                  const void *item );
+
 
 /**
  *  Insert raw data at specified index.
@@ -260,6 +316,7 @@ typedef struct
                       const void * data,
                       const size_t count );
 
+
 /**
  *  Append raw data to the end of the vector.
  *
@@ -272,6 +329,7 @@ typedef struct
                          const void * data, 
                          const size_t count );
 
+
 /**
  *  Sort vector items according to cmp function.
  *
@@ -281,6 +339,9 @@ typedef struct
   void
   vector_sort( vector_t *self,
                int (*cmp)(const void *, const void *) );
+
+
+/** @} */
 
 #ifdef __cplusplus
 }

@@ -90,7 +90,7 @@ int main( int argc, char **argv )
         L"`abcdefghijklmnopqrstuvwxyz{|}~";
 
     float  font_size   = 16.0;
-    char * font_filename   = "./Arial.ttf";
+    char * font_filename   = "fonts/Arial.ttf";
     char * header_filename = "arial-16.h";
 
     texture_atlas_t * atlas = texture_atlas_new( 128, 128, 1 );

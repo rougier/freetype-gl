@@ -198,7 +198,7 @@ int main( int argc, char **argv )
     glutIdleFunc( idle );
 
     atlas  = texture_atlas_new( 512, 512, 1 );
-    font = texture_font_new( atlas, "./VeraMono.ttf", 12 );
+    font = texture_font_new( atlas, "fonts/VeraMono.ttf", 12 );
     buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
 
     pen.y = -font->descender;

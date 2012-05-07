@@ -40,178 +40,146 @@ extern "C" {
 #include "texture-font.h"
 #include "vec234.h"
 
+/**
+ * @file   markup.h
+ * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
+ *
+ * @defgroup markup Markup
+ *
+ * Simple structure that describes text properties.
+ *
+ * <b>Example Usage</b>:
+ * @code
+ * #include "markup.h"
+ *
+ * int main( int arrgc, char *argv[] )
+ * {
+ *
+ *     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
+ *     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
+ *     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+ *
+ *     markup_t normal = {
+ *         .family  = "Droid Serif",
+ *         .size = 24.0,
+ *         .bold = 0,
+ *         .italic = 0,
+ *         .rise = 0.0,
+ *         .spacing = 1.0,
+ *         .gamma = 1.0,
+ *         .foreground_color = black, .background_color    = none,
+ *         .underline        = 0,     .underline_color     = black,
+ *         .overline         = 0,     .overline_color      = black,
+ *         .strikethrough    = 0,     .strikethrough_color = black,
+ *         .font = 0,
+ *     };
+ *
+ *     return 0;
+ * }
+ * @endcode
+ *
+ * @{
+ */
+
 
 /**
- *
+ * Simple structure that describes text properties.
  */
 typedef struct
 {
     /**
-     *
+     * A font family name such as "normal", "sans", "serif" or "monospace".
      */
     char * family;
 
     /**
-     *
+     * Font size.
      */
     float size;
 
     /**
-     *
+     * Whether text is bold.
      */
     int bold;
 
     /**
-     *
+     * Whether text is italic.
      */
     int italic;
 
     /**
-     *
+     * Vertical displacement from the baseline.
      */
     float rise;
 
     /**
-     *
+     * Spacing between letters.
      */
     float spacing;
 
-    /*
-     *
+    /**
+     * Gamma correction.
      */
     float gamma;
 
     /**
-     *
+     * Text color.
      */
     vec4 foreground_color;
 
     /**
-     *
+     * Background color.
      */
     vec4 background_color;
 
     /**
-     *
+     * Whether outline is active.
      */
     int outline;
 
     /**
-     *
+     * Outline color.
      */
     vec4 outline_color;
 
     /**
-     *
+     * Whether underline is active.
      */
     int underline;
 
     /**
-     *
+     * Underline color.
      */
     vec4 underline_color;
 
     /**
-     *
+     * Whether overline is active.
      */
     int overline;
 
     /**
-     *
+     * Overline color.
      */
     vec4 overline_color;
 
     /**
-     *
+     * Whether strikethrough is active.
      */
     int strikethrough;
 
     /**
-     *
+     * Strikethrough color.
      */
     vec4 strikethrough_color;
 
     /**
-     *
+     * Pointer on the corresponding font (family/size/bold/italic)
      */
     texture_font_t * font;
+
 } markup_t;
 
-
-markup_t *     markup_new( void );
-markup_t *     markup_copy( const markup_t *other );
-
-int          markup_cmp( const markup_t *self,
-                         const markup_t *other );
-void         markup_delete( markup_t *self );
-
-const char * markup_get_family( const markup_t *self );
-void         markup_set_family( markup_t *self,
-                                const char *family );
-
-int  markup_get_italic( const markup_t *self );
-void markup_set_italic( markup_t *self,
-                        const int italic );
-
-int  markup_get_bold( const markup_t *self );
-void markup_set_bold( markup_t *self,
-                      const int bold );
-
-float markup_get_size( const markup_t *self );
-void  markup_set_size( markup_t *self,
-                       const float size );
-
-float markup_get_rise( const markup_t *self );
-void  markup_set_rise( markup_t *self,
-                       const float rise );
-
-float markup_get_spacing( const markup_t *self );
-void  markup_set_spacing( markup_t *self,
-                          const float spacing );
-
-float markup_get_gamma( const markup_t *self );
-void  markup_set_gamma( markup_t *self,
-                          const float gamma );
-
-vec4  markup_get_foreground_color( const markup_t *self );
-void  markup_set_foreground_color( markup_t *self,
-                                   const vec4 * color );
-
-vec4 markup_get_background_color( const markup_t *self );
-void markup_set_background_color( markup_t *self,
-                                         const vec4 * color );
-
-int  markup_get_outline( const markup_t *self );
-void markup_set_outline( markup_t *self,
-                         const int outline );
-
-vec4 markup_get_outline_color( const markup_t *self );
-void markup_set_outline_color( markup_t *self,
-                               const vec4 * color );
-
-int  markup_get_underline( const markup_t *self );
-void markup_set_underline( markup_t *self,
-                           const int underline );
-
-vec4 markup_get_underline_color( const markup_t *self );
-void markup_set_underline_color( markup_t *self,
-                                 const vec4 * color );
-
-int  markup_get_overline( const markup_t *self );
-void markup_set_overline( markup_t *self,
-                          const int overline );
-
-vec4 markup_get_overline_color( const markup_t *self );
-void markup_set_overline_color( markup_t *self,
-                                const vec4 * color );
-
-int  markup_get_strikethrough( const markup_t *self );
-void markup_set_strikethrough( markup_t *self,
-                               const int strikethrough );
-
-vec4 markup_get_strikethrough_color( const markup_t *self );
-void markup_set_strikethrough_color( markup_t *self,
-                                     const vec4 * color );
+/** @} */
 
 #ifdef __cplusplus
 }

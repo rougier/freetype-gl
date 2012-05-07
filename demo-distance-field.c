@@ -47,77 +47,6 @@ viewport_t viewport = {0,0,1};
 GLuint program = 0;
 
 
-// ------------------------------------------------------------ read_shader ---
-char *
-read_shader( const char *filename )
-{
-    FILE * file;
-    char * buffer;
-	size_t size;
-
-    file = fopen( filename, "rb" );
-    if( !file )
-    {
-        fprintf( stderr, "Unable to open file \"%s\".\n", filename );
-		return 0;
-    }
-	fseek( file, 0, SEEK_END );
-	size = ftell( file );
-	fseek(file, 0, SEEK_SET );
-    buffer = (char *) malloc( (size+1) * sizeof( char *) );
-	fread( buffer, sizeof(char), size, file );
-    buffer[size] = 0;
-    fclose( file );
-    return buffer;
-}
-
-
-// ----------------------------------------------------------- build_shader ---
-GLuint
-build_shader( const char* source, GLenum type )
-{
-    GLuint handle = glCreateShader( type );
-    glShaderSource( handle, 1, &source, 0 );
-    glCompileShader( handle );
-
-    GLint compile_status;
-    glGetShaderiv( handle, GL_COMPILE_STATUS, &compile_status );
-    if( compile_status == GL_FALSE )
-    {
-        GLchar messages[256];
-        glGetShaderInfoLog( handle, sizeof(messages), 0, &messages[0] );
-        fprintf( stderr, "%s\n", messages );
-        exit( EXIT_FAILURE );
-    }
-    return handle;
-}
-
-
-// ---------------------------------------------------------- build_program ---
-GLuint build_program( const char * vertex_source,
-                      const char * fragment_source )
-{
-    GLuint vertex_shader   = build_shader( vertex_source, GL_VERTEX_SHADER);
-    GLuint fragment_shader = build_shader( fragment_source, GL_FRAGMENT_SHADER);
-    
-    GLuint handle = glCreateProgram( );
-    glAttachShader( handle, vertex_shader);
-    glAttachShader( handle, fragment_shader);
-    glLinkProgram( handle);
-    
-    GLint link_status;
-    glGetProgramiv( handle, GL_LINK_STATUS, &link_status );
-    if (link_status == GL_FALSE)
-    {
-        GLchar messages[256];
-        glGetProgramInfoLog( handle, sizeof(messages), 0, &messages[0] );
-        fprintf( stderr, "%s\n", messages );
-        exit(1);
-    }
-    
-    return handle;
-}
-
 // ---------------------------------------------------------------- display ---
 void
 display( void )
@@ -309,7 +238,7 @@ main( int argc, char **argv )
 
     unsigned char *map;
     texture_font_t * font;
-    const char *filename = "./Vera.ttf";
+    const char *filename = "fonts/Vera.ttf";
     const wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
                            L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
                            L"`abcdefghijklmnopqrstuvwxyz{|}~";
@@ -327,18 +256,9 @@ main( int argc, char **argv )
     free(map);
     texture_atlas_upload( atlas );
 
-    // glew initialization and OpenGL version checking
-	// glewInit( );
-	// if( ! glewIsSupported("GL_VERSION_2_0") )
-    // {
-    //     fprintf( stderr, "OpenGL 2.0 not supported\n" );
-    //     exit( EXIT_FAILURE );
-    // } 
-
     // Create the GLSL program
-    char * vertex_shader_source   = read_shader("./distance-field.vert");
-    char * fragment_shader_source = read_shader("./distance-field.frag");
-    program = build_program( vertex_shader_source, fragment_shader_source );
+    program = shader_load( "shaders/distance-field.vert",
+                           "shaders/distance-field.frag" );
     glUseProgram( program );
 
     glutMainLoop( );

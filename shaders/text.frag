@@ -31,13 +31,54 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
 uniform sampler2D texture;
-void main(void)
-{
-    vec4  color = texture2D(texture, gl_TexCoord[0].st);
-    float dist  = color.a;
-    float width = fwidth(dist);
-    float alpha = smoothstep(0.5-width, 0.5+width, dist);
-    gl_FragColor = vec4(gl_Color.rgb, alpha);
+uniform vec3  pixel;
+varying float vgamma;
+varying float vshift;
+
+void main() {
+
+    // LCD Off
+    if( pixel.z == 1.0)
+    {
+        vec2 uv = gl_TexCoord[0].xy;
+        float a = texture2D(texture, uv).a;
+        gl_FragColor = gl_Color * pow( a, 1.0/vgamma );
+        return;
+    }
+
+    // LCD On
+    vec2 uv      = gl_TexCoord[0].xy;
+    vec4 current = texture2D(texture, uv);
+    vec4 previous= texture2D(texture, uv+vec2(-1,0)*pixel.xy);
+    vec4 next    = texture2D(texture, uv+vec2(+1,0)*pixel.xy);
+
+    float r = current.r;
+    float g = current.g;
+    float b = current.b;
+
+    if( vshift <= 0.333 )
+    {
+        float z = vshift/0.333;
+        r = mix(current.r, previous.b, z);
+        g = mix(current.g, current.r,  z);
+        b = mix(current.b, current.g,  z);
+    } 
+    else if( vshift <= 0.666 )
+    {
+        float z = (vshift-0.33)/0.333;
+        r = mix(previous.b, previous.g, z);
+        g = mix(current.r,  previous.b, z);
+        b = mix(current.g,  current.r,  z);
+    }
+   else if( vshift < 1.0 )
+    {
+        float z = (vshift-0.66)/0.334;
+        r = mix(previous.g, previous.r, z);
+        g = mix(previous.b, previous.g, z);
+        b = mix(current.r,  previous.b, z);
+    }
+
+    vec3 color = pow( vec3(r,g,b), vec3(1.0/vgamma));
+    gl_FragColor.rgb = color*gl_Color.rgb;
+    gl_FragColor.a = (color.r+color.g+color.b)/3.0 * gl_Color.a;
 }
-
-
