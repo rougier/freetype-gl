@@ -1,41 +1,67 @@
-// ----------------------------------------------------------------------------
-// OpenGL Anti-Grain Geometry (GL-AGG) - Version 0.1
-// A high quality OpenGL rendering engine for C
-// Copyright (C) 2012 Nicolas P. Rougier. All rights reserved.
-// Contact: Nicolas.Rougier@gmail.com
-//          http://code.google.com/p/gl-agg/
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-//  1. Redistributions of source code must retain the above copyright notice,
-//     this list of conditions and the following disclaimer.
-//
-//  2. Redistributions in binary form must reproduce the above copyright
-//     notice, this list of conditions and the following disclaimer in the
-//     documentation and/or other materials provided with the distribution.
-//
-// THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-// EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-// INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-// THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// The views and conclusions contained in the software and documentation are
-// those of the authors and should not be interpreted as representing official
-// policies, either expressed or implied, of Nicolas P. Rougier.
-// ----------------------------------------------------------------------------
+/* ============================================================================
+ * Freetype GL - A C OpenGL Freetype engine
+ * Platform:    Any
+ * WWW:         http://code.google.com/p/freetype-gl/
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *  1. Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The views and conclusions contained in the software and documentation are
+ * those of the authors and should not be interpreted as representing official
+ * policies, either expressed or implied, of Nicolas P. Rougier.
+ * ============================================================================
+ */
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "vec234.h"
 #include "vertex-buffer.h"
+
+
+// If GL_DOUBLE does not exist we define it as GL_FLOAT
+#ifndef GL_DOUBLE
+#define GL_DOUBLE GL_FLOAT
+#else
+#define GL_DOUBLE_ GL_FLOAT
+#endif 
+
+
+
+
+// strndup() was only added in OSX lion
+#ifdef __APPLE__
+
+char *
+strndup( const char *s1, size_t n)
+{
+    char *copy = calloc( n+1, sizeof(char) );
+    memcpy( copy, s1, n );
+    return copy;
+};
+
+#endif
+
 
 // ----------------------------------------------------------------------------
 vertex_buffer_t *
@@ -65,11 +91,11 @@ vertex_buffer_new( const char *format )
         char *desc = 0;
         if (end == NULL)
         {
-            desc = strdup(start);
+            desc = strdup( start );
         }
         else
         {
-            desc = strndup(start, end-start);
+            desc = strndup( start, end-start );
         }
         vertex_attribute_t *attribute = vertex_attribute_parse( desc );
         start = end+1;
@@ -103,6 +129,18 @@ void
 vertex_buffer_delete( vertex_buffer_t *self )
 {
     assert( self );
+
+    size_t i;
+
+
+    for( i=0; i<MAX_VERTEX_ATTRIBUTE; ++i )
+    {
+        if( self->attributes[i] )
+        {
+            vertex_attribute_delete( self->attributes[i] );
+        }
+    }
+
 
     vector_delete( self->vertices );
     self->vertices = 0;
@@ -214,20 +252,30 @@ vertex_buffer_upload ( vertex_buffer_t *self )
     if( !self->vertices_id )
     {
         glGenBuffers( 1, &self->vertices_id );
+        glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
+        glBufferData( GL_ARRAY_BUFFER,
+                      self->vertices->size*self->vertices->item_size,
+                      self->vertices->items, GL_DYNAMIC_DRAW );
     }
     if( !self->indices_id )
     {
         glGenBuffers( 1, &self->indices_id );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER,
+                      self->indices->size*self->indices->item_size,
+                      self->indices->items, GL_DYNAMIC_DRAW );
     }
+
     glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
-    glBufferData( GL_ARRAY_BUFFER,
-                  self->vertices->size*self->vertices->item_size,
-                  self->vertices->items, GL_DYNAMIC_DRAW );
+    glBufferSubData( GL_ARRAY_BUFFER, 0,
+                     self->vertices->size*self->vertices->item_size,
+                     self->vertices->items );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
+
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                  self->indices->size*self->indices->item_size,
-                  self->indices->items, GL_DYNAMIC_DRAW );
+    glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0,
+                     self->indices->size*self->indices->item_size,
+                     self->indices->items );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 }
 

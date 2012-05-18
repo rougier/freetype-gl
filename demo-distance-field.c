@@ -31,7 +31,14 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
 #include "freetype-gl.h"
+
 #include "edtaa3func.h"
+#include "font-manager.h"
+#include "vertex-buffer.h"
+#include "text-buffer.h"
+#include "markup.h"
+#include "shader.h"
+
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
 

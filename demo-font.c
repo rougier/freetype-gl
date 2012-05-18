@@ -36,19 +36,32 @@
  * ============================================================================
  */
 #include "freetype-gl.h"
+#include "vertex-buffer.h"
 
+
+// ------------------------------------------------------- typedef & struct ---
+typedef struct {
+    float x, y, z;    // position
+    float s, t;       // texture
+    float r, g, b, a; // color
+} vertex_t;
 
 
 // ------------------------------------------------------- global variables ---
-text_buffer_t *buffer;
+vertex_buffer_t *buffer;
 
 
 // ---------------------------------------------------------------- display ---
 void display( void )
 {
-    glClearColor( 1.0,1.0,1.0,1.0 );
+    glClearColor( 1, 1, 1, 1 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    text_buffer_render( buffer );
+
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glEnable( GL_TEXTURE_2D );
+    glColor4f(1,1,0,1);
+    vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
     glutSwapBuffers( );
 }
 
@@ -75,6 +88,43 @@ void keyboard( unsigned char key, int x, int y )
 }
 
 
+// --------------------------------------------------------------- add_text ---
+void add_text( vertex_buffer_t * buffer, texture_font_t * font,
+               wchar_t * text, vec4 * color, vec2 * pen )
+{
+    size_t i;
+    float r = color->red, g = color->green, b = color->blue, a = color->alpha;
+    for( i=0; i<wcslen(text); ++i )
+    {
+        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
+        if( glyph != NULL )
+        {
+            int kerning = 0;
+            if( i > 0)
+            {
+                kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+            }
+            pen->x += kerning;
+            int x0  = (int)( pen->x + glyph->offset_x );
+            int y0  = (int)( pen->y + glyph->offset_y );
+            int x1  = (int)( x0 + glyph->width );
+            int y1  = (int)( y0 - glyph->height );
+            float s0 = glyph->s0;
+            float t0 = glyph->t0;
+            float s1 = glyph->s1;
+            float t1 = glyph->t1;
+            GLuint indices[6] = {0,1,2, 0,2,3};
+            vertex_t vertices[4] = { { x0,y0,0,  s0,t0,  r,g,b,a },
+                                     { x0,y1,0,  s0,t1,  r,g,b,a },
+                                     { x1,y1,0,  s1,t1,  r,g,b,a },
+                                     { x1,y0,0,  s1,t0,  r,g,b,a } };
+            vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
+            pen->x += glyph->advance_x;
+        }
+    }
+}
+
+
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
@@ -86,30 +136,24 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    buffer = text_buffer_new( LCD_FILTERING_ON );
-    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
-    vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
-    markup_t markup = {
-        .family  = "fonts/Vera.ttf",
-        .size    = 24.0, .bold    = 0,   .italic  = 0,
-        .rise    = 0.0,  .spacing = 0.0, .gamma   = 1.0,
-        .foreground_color    = black, .background_color    = none,
-        .underline           = 0,     .underline_color     = black,
-        .overline            = 0,     .overline_color      = black,
-        .strikethrough       = 0,     .strikethrough_color = black,
-        .font = 0,
-    };
-
     size_t i;
-    vec2 pen = {{10, 395}};
-    wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789\n";
+    texture_font_t *font = 0;
+    texture_atlas_t *atlas = texture_atlas_new( 512, 512, 1 );
+    const char * filename = "fonts/Vera.ttf";
+    wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
+    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    vec2 pen = {{5,400}};
+    vec4 black = {{0,0,0,1}};
     for( i=7; i < 27; ++i)
     {
-        markup.size = i;
-        markup.font = 0;
-        text_buffer_add_text( buffer, &pen, &markup, text, wcslen(text) );
+        font = texture_font_new( atlas, filename, i );
+        pen.x = 5;
+        pen.y -= font->height;
+        texture_font_load_glyphs( font, text );
+        add_text( buffer, font, text, &black, &pen );
+        texture_font_delete( font );
     }
-
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
     glutMainLoop( );
     return 0;
 }

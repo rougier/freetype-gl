@@ -34,10 +34,17 @@
 #include <AntTweakBar.h>
 #include "freetype-gl.h"
 
+#include "font-manager.h"
+#include "vertex-buffer.h"
+#include "text-buffer.h"
+#include "markup.h"
+#include "shader.h"
+
 
 // ------------------------------------------------------- typedef & struct ---
 typedef enum {
     VERA = 1,
+    VERA_MONO,
     GEORGIA,
     TIMES,
     VERDANA,
@@ -45,7 +52,7 @@ typedef enum {
     ARIAL,
 } font_family_e;
 
-#define NUM_FONTS 6
+#define NUM_FONTS 7
 
 typedef struct {
     float x, y, z;
@@ -181,6 +188,10 @@ build_buffer( void )
     if( p_family == VERA)
     {
         font = texture_font_new( atlas, "fonts/Vera.ttf", p_size );
+    }
+    else if( p_family == VERA_MONO)
+    {
+        font = texture_font_new( atlas, "fonts/VeraMono.ttf", p_size );
     }
     else if( p_family == GEORGIA)
     {
@@ -600,12 +611,13 @@ int main(int argc, char *argv[])
 
     {
         TwEnumVal familyEV[NUM_FONTS] = {
-            {VERA,    "Vera"},
-            {GEORGIA, "Georgia"},
-            {TIMES,   "Times"},
-            {VERDANA, "Verdana"},
-            {TAHOMA,  "Tahoma"},
-            {ARIAL,   "Arial"} };
+            {VERA,      "Vera"},
+            {VERA_MONO, "Vera Mono"},
+            {GEORGIA,   "Georgia"},
+            {TIMES,     "Times"},
+            {VERDANA,   "Verdana"},
+            {TAHOMA,    "Tahoma"},
+            {ARIAL,     "Arial"} };
         TwType family_type = TwDefineEnum("Family", familyEV, NUM_FONTS);
         TwAddVarCB(bar, "Family", family_type, set_family, get_family, NULL, 
                    "label = 'Family'      "

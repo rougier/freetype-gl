@@ -33,6 +33,12 @@
  */
 #include "freetype-gl.h"
 
+#include "font-manager.h"
+#include "vertex-buffer.h"
+#include "text-buffer.h"
+#include "markup.h"
+#include "shader.h"
+
 
 // ------------------------------------------------------- global variables ---
 text_buffer_t * text_buffer;

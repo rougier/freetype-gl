@@ -52,3 +52,4 @@ Contributors:
 * Marcel Metz (Bug report & fix)
 * Jonas Wielicki (Bug report & fix on the CMakefile)
 * whatmannerofburgeristhis (Bug report in makefont)
+* Andrei Petrovici (Fine analysis of the whole code and report of potential problems)

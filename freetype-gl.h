@@ -34,18 +34,6 @@
 #ifndef __FREETYPE_GL_H__
 #define __FREETYPE_GL_H__
 
-#if defined(__APPLE__)
-#  ifdef GL_ES_VERSION_2_0
-#    include <OpenGLES/ES2/gl.h>
-#  else
-#    include <OpenGL/gl.h>
-#    include <Glut/glut.h>
-#  endif
-#else
-    #include <GL/gl.h>
-    #include <GL/glut.h>
-#endif
-
 #include <math.h>
 #include <wchar.h>
 #include <stdio.h>
@@ -56,16 +44,10 @@
 #include <assert.h>
 
 /* Mandatory */
+#include "opengl.h"
 #include "vec234.h"
 #include "vector.h"
 #include "texture-atlas.h"
 #include "texture-font.h"
-
-/* Optional */
-#include "font-manager.h"
-#include "vertex-buffer.h"
-#include "text-buffer.h"
-#include "markup.h"
-#include "shader.h"
 
 #endif /* FREETYPE_GL_H */
