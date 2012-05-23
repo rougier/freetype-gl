@@ -31,23 +31,12 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-#if defined(__APPLE__)
-#  ifdef GL_ES_VERSION_2_0
-#    include <OpenGLES/ES2/gl.h>
-#  else
-#    include <OpenGL/gl.h>
-#    include <Glut/glut.h>
-#  endif
-#else
-    #include <GL/gl.h>
-    #include <GL/glut.h>
-#endif
 #include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include "opengl.h"
 #include "text-buffer.h"
-
 
 
 // ----------------------------------------------------------------------------
@@ -67,8 +56,6 @@ text_buffer_new( size_t depth )
     self->line_descender = 0;
     return self;
 }
-
-
 
 // ----------------------------------------------------------------------------
 void
@@ -103,8 +90,6 @@ text_buffer_render( text_buffer_t * self )
 
 }
 
-
-
 // ----------------------------------------------------------------------------
 void
 text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
@@ -130,8 +115,6 @@ text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
     } while( markup != 0 );
     va_end ( args );
 }
-
-
 
 // ----------------------------------------------------------------------------
 void
@@ -176,7 +159,8 @@ text_buffer_add_text( text_buffer_t * self,
             ivec4 *item = (ivec4 *) vector_get( buffer->items, i);
             for( j=item->vstart; j<item->vstart+item->vcount; ++j)
             {
-                glyph_vertex_t * vertex = (glyph_vertex_t *) vector_get( buffer->vertices, j );
+                glyph_vertex_t * vertex =
+                    (glyph_vertex_t *)  vector_get( buffer->vertices, j );
                 vertex->y -= dy;
             }
         }
@@ -197,7 +181,6 @@ text_buffer_add_text( text_buffer_t * self,
     }
 }
 
-
 // ----------------------------------------------------------------------------
 void
 text_buffer_add_wchar( text_buffer_t * self,
@@ -211,7 +194,12 @@ text_buffer_add_wchar( text_buffer_t * self,
     texture_font_t * font = markup->font;
     float gamma = markup->gamma;
 
-    // Maximum number of vertices is 20 per glyph (5 x 2 triangles)
+    // Maximum number of vertices is 20 (= 5x2 triangles) per glyph:
+    //  - 2 triangles for background
+    //  - 2 triangles for overline
+    //  - 2 triangles for underline
+    //  - 2 triangles for strikethrough
+    //  - 2 triangles for glyph
     glyph_vertex_t vertices[4*5];
     GLuint indices[6*5];
     

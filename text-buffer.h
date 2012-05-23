@@ -89,12 +89,10 @@ typedef struct {
      */
     font_manager_t *manager;
 
-
     /**
      * Pen origin
      */
     vec2 origin;
-
 
     /**
      * Index (in the vertex buffer) of the line start

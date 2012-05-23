@@ -71,10 +71,19 @@ extern "C" {
  * @code
  * #include "texture-atlas.h"
  *
- * int main( int arrgc, char *argv[] )
- * {
- *   return 0;
- * }
+ * ...
+ *
+ * / Creates a new atlas of 512x512 with a depth of 1
+ * texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
+ *
+ * // Allocates a region of 20x20
+ * ivec4 region = texture_atlas_get_region( atlas, 20, 20 );
+ *
+ * // Fill region with some data
+ * texture_atlas_set_region( atlas, region.x, region.y, region.width, region.height, data, stride )
+ *
+ * ...
+ *
  * @endcode
  *
  * @{

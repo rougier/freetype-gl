@@ -52,30 +52,29 @@ extern "C" {
  * @code
  * #include "markup.h"
  *
- * int main( int arrgc, char *argv[] )
- * {
+ * ...
  *
- *     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
- *     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
- *     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+ * vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
+ * vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
+ * vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
  *
- *     markup_t normal = {
- *         .family  = "Droid Serif",
- *         .size = 24.0,
- *         .bold = 0,
- *         .italic = 0,
- *         .rise = 0.0,
- *         .spacing = 1.0,
- *         .gamma = 1.0,
- *         .foreground_color = black, .background_color    = none,
- *         .underline        = 0,     .underline_color     = black,
- *         .overline         = 0,     .overline_color      = black,
- *         .strikethrough    = 0,     .strikethrough_color = black,
- *         .font = 0,
- *     };
+ * markup_t normal = {
+ *     .family  = "Droid Serif",
+ *     .size = 24.0,
+ *     .bold = 0,
+ *     .italic = 0,
+ *     .rise = 0.0,
+ *     .spacing = 1.0,
+ *     .gamma = 1.0,
+ *     .foreground_color = black, .background_color    = none,
+ *     .underline        = 0,     .underline_color     = black,
+ *     .overline         = 0,     .overline_color      = black,
+ *     .strikethrough    = 0,     .strikethrough_color = black,
+ *     .font = 0,
+ * };
  *
- *     return 0;
- * }
+ * ...
+ *
  * @endcode
  *
  * @{

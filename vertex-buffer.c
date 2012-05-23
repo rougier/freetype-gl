@@ -253,29 +253,25 @@ vertex_buffer_upload ( vertex_buffer_t *self )
     {
         glGenBuffers( 1, &self->vertices_id );
         glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
-        glBufferData( GL_ARRAY_BUFFER,
-                      self->vertices->size*self->vertices->item_size,
-                      self->vertices->items, GL_DYNAMIC_DRAW );
     }
     if( !self->indices_id )
     {
         glGenBuffers( 1, &self->indices_id );
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                      self->indices->size*self->indices->item_size,
-                      self->indices->items, GL_DYNAMIC_DRAW );
     }
 
+    // Always upload vertices first such that indices do not point to non
+    // existing data (if we get interrupted in between for example).
     glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
-    glBufferSubData( GL_ARRAY_BUFFER, 0,
-                     self->vertices->size*self->vertices->item_size,
-                     self->vertices->items );
+    glBufferData( GL_ARRAY_BUFFER,
+                  self->vertices->size*self->vertices->item_size,
+                  self->vertices->items, GL_DYNAMIC_DRAW );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
-    glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0,
-                     self->indices->size*self->indices->item_size,
-                     self->indices->items );
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER,
+                  self->indices->size*self->indices->item_size,
+                  self->indices->items, GL_DYNAMIC_DRAW );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 }
 
@@ -576,6 +572,6 @@ vertex_buffer_erase( vertex_buffer_t * self,
         }
     }
     vertex_buffer_erase_indices( self, istart, istart+icount );
-    vertex_buffer_erase_vertices( self, istart, vstart+vcount );
+    vertex_buffer_erase_vertices( self, vstart, vstart+vcount );
     vector_erase( self->items, index );
 }
