@@ -49,7 +49,7 @@ Contributors:
 * Julian Mayer (Several bugfixes and code for demo-opengl-4.cc)
 * Sylvain Duclos (Android port)
 * Wang Yongcong (Improvements on the windows build)
-* Marcel Metz (Bug report & fix)
+* Marcel Metz (Bug report & fix and CMmake no demo option)
 * Jonas Wielicki (Bug report & fix on the CMakefile)
 * whatmannerofburgeristhis (Bug report in makefont)
 * Andrei Petrovici (Fine analysis of the whole code and report of potential problems)
