@@ -53,3 +53,4 @@ Contributors:
 * Jonas Wielicki (Bug report & fix on the CMakefile)
 * whatmannerofburgeristhis (Bug report in makefont)
 * Andrei Petrovici (Fine analysis of the whole code and report of potential problems)
+* Cristi Caloghera (Report on bad vertex buffer usage)
