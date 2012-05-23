@@ -35,6 +35,7 @@
  *
  * ============================================================================
  */
+#include <fontconfig/fontconfig.h>
 #include "freetype-gl.h"
 
 #include "font-manager.h"
@@ -47,6 +48,63 @@
 
 // ------------------------------------------------------- global variables ---
 text_buffer_t * buffer;
+
+
+// ------------------------------------------------------ match_description ---
+char *
+match_description( char * family, float size, int bold, int italic )
+{
+
+#if defined _WIN32 || defined _WIN64
+    fprintf( stderr, "\"font_manager_match_description\" "
+                     "not implemented for windows.\n" );
+    return 0;
+#endif
+
+    char *filename = 0;
+    int weight = FC_WEIGHT_REGULAR;
+    int slant = FC_SLANT_ROMAN;
+    if ( bold )
+    {
+        weight = FC_WEIGHT_BOLD;
+    }
+    if( italic )
+    {
+        slant = FC_SLANT_ITALIC;
+    }
+    FcInit();
+    FcPattern *pattern = FcPatternCreate();
+    FcPatternAddDouble( pattern, FC_SIZE, size );
+    FcPatternAddInteger( pattern, FC_WEIGHT, weight );
+    FcPatternAddInteger( pattern, FC_SLANT, slant );
+    FcPatternAddString( pattern, FC_FAMILY, (FcChar8*) family );
+    FcConfigSubstitute( 0, pattern, FcMatchPattern );
+    FcDefaultSubstitute( pattern );
+    FcResult result;
+    FcPattern *match = FcFontMatch( 0, pattern, &result );
+    FcPatternDestroy( pattern );
+
+    if ( !match )
+    {
+        fprintf( stderr, "fontconfig error: could not match family '%s'", family );
+        return 0;
+    }
+    else
+    {
+        FcValue value;
+        FcResult result = FcPatternGet( match, FC_FILE, 0, &value );
+        if ( result )
+        {
+            fprintf( stderr, "fontconfig error: could not match family '%s'", family );
+        }
+        else
+        {
+            filename = strdup( (char *)(value.u.s) );
+        }
+    }
+    FcPatternDestroy( match );
+    return filename;
+}
 
 
 // ---------------------------------------------------------------- display ---
@@ -100,8 +158,15 @@ int main( int argc, char **argv )
     vec4 yellow = {{1.0, 1.0, 0.0, 1.0}};
     vec4 grey   = {{0.5, 0.5, 0.5, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+
+    char *f_normal   = match_description("Droid Serif", 24, 0, 0);
+    char *f_bold     = match_description("Droid Serif", 24, 1, 0);
+    char *f_italic   = match_description("Droid Serif", 24, 0, 1);
+    char *f_japanese = match_description("Droid Sans Japanese", 18, 0, 0);
+    char *f_math     = match_description("DejaVu Sans", 24, 0, 0);
+
     markup_t normal = {
-        .family  = "Droid Serif",
+        .family  = f_normal,
         .size    = 24.0, .bold    = 0,   .italic  = 0,
         .rise    = 0.0,  .spacing = 0.0, .gamma   = 1.5,
         .foreground_color    = white, .background_color    = none,
@@ -120,12 +185,11 @@ int main( int argc, char **argv )
     markup_t big       = normal; big.size = 48.0;
                                  big.italic = 1; 
                                  big.foreground_color = yellow;
-    markup_t bold      = normal; bold.bold = 1;
-    markup_t italic    = normal; italic.italic = 1;
-    markup_t japanese  = normal; japanese.family = "Droid Sans Japanese";
+    markup_t bold      = normal; bold.bold = 1; bold.family = f_bold;
+    markup_t italic    = normal; italic.italic = 1; italic.family = f_italic;
+    markup_t japanese  = normal; japanese.family = f_japanese;
                                  japanese.size = 18.0;
-    markup_t math      = normal; math.family = "DejaVu Sans";
-    markup_t arabic    = normal; arabic.family = "Droid Arabic Naskh";
+    markup_t math      = normal; math.family = f_math;
 
 
     vec2 pen = {{20, 200}};

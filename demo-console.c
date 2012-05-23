@@ -114,7 +114,7 @@ console_new( void )
     vec4 black = {{0,0,0,1}};
     vec4 none = {{0,0,1,0}};
     markup_t normal = {
-        .family  = "Bistream Vera Sans Mono",
+        .family  = "fonts/VeraMono.ttf",
         .size    = 13.0,
         .bold    = 0,
         .italic  = 0,

@@ -169,7 +169,7 @@ int main( int argc, char **argv )
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
     markup_t markup = {
-        .family  = "Bistream Vera Serif",
+        .family  = "fonts/Vera.ttf",
         .size    = 80,
         .bold    = 0,
         .italic  = 0,

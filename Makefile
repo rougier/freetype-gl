@@ -34,25 +34,26 @@ PLATFORM		= $(shell uname)
 CC				= gcc
 CFLAGS			= -Wall `freetype-config --cflags` -I/usr/X11/include -g -O0
 LIBS			= -lGL -lglut -lGLU -lm \
-	              `freetype-config --libs` -lfontconfig
+	              `freetype-config --libs`
 ifeq ($(PLATFORM), Darwin)
 	LIBS		= -framework OpenGL -framework GLUT -lm \
-	               `freetype-config --libs` -L /usr/X11/lib -lfontconfig
+	               `freetype-config --libs` -L /usr/X11/lib
 endif
 
 DEMOS     := $(patsubst %.c,%,$(wildcard demo-*.c))
-DEMOS_ATB := $(patsubst %.c,%,$(wildcard demo-atb-*.c))
+DEMOS_ATB := demo-atb-agg
+DEMOS_MKP := demo-markup
 DEMOS     := $(filter-out $(DEMOS_ATB), $(DEMOS))
+DEMOS     := $(filter-out $(DEMOS_MKP), $(DEMOS))
 
 TESTS     := $(patsubst %.c,%,$(wildcard test-*.c))
 HEADERS   := $(wildcard *.h)
 SOURCES   := $(filter-out $(wildcard demo-*.c), $(wildcard *.c))
-SOURCES   := $(filter-out $(wildcard test-*.c), $(SOURCES))
 SOURCES   := $(filter-out makefont.c, $(SOURCES))
 OBJECTS   := $(SOURCES:.c=.o)
 
 .PHONY: all clean distclean
-all: $(DEMOS) makefont demo-atb-agg $(TESTS)
+all: $(DEMOS) makefont demo-atb-agg demo-markup
 
 demos: $(DEMOS)
 
@@ -65,29 +66,25 @@ $(1): $(1).o $(OBJECTS) $(HEADERS)
 endef
 $(foreach demo,$(DEMOS),$(eval $(call DEMO_template,$(demo))))
 
-define TEST_template
-$(1): $(1).o $(OBJECTS) $(HEADERS)
-	@echo "Building $$@... "
-	@$(CC) $(OBJECTS) $(1).o $(LIBS) -o $$@
-endef
-$(foreach test,$(TESTS),$(eval $(call TEST_template,$(test))))
-
 %.o : %.c
 	@echo "Building $@... "
 	@$(CC) -c $(CFLAGS) $< -o $@ 
-
 
 demo-atb-agg: demo-atb-agg.o $(OBJECTS) $(HEADERS) \
 	          fonts/Arial.ttf fonts/Tahoma.ttf fonts/Verdana.ttf fonts/Times.ttf fonts/Georgia.ttf
 	@echo "Building $@... "
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -lAntTweakBar -o $@
 
+demo-markup: demo-markup.o $(OBJECTS) $(HEADERS)
+	@echo "Building $@... "
+	@$(CC) $(OBJECTS) $@.o $(LIBS) -lfontconfig -o $@
+
 makefont: makefont.o $(OBJECTS) $(HEADERS)
 	@echo "Building $@... "
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -o $@
 
 clean:
-	@-rm -f $(DEMOS) $(DEMOS_ATB) makefont *.o
+	@-rm -f $(DEMOS) $(DEMOS_ATB) $(DEMOS_MKP) makefont *.o
 	@-rm -f $(TESTS) *.o
 
 distclean: clean

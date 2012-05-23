@@ -159,9 +159,9 @@ int main( int argc, char **argv )
     vec4 black = {{0,0,0,1}};
 
     texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1);
-    texture_font_t * big = texture_font_new( atlas, "./Vera.ttf", 400);
-    texture_font_t * small = texture_font_new( atlas, "./Vera.ttf", 18);
-    texture_font_t * title = texture_font_new( atlas, "./Vera.ttf", 32);
+    texture_font_t * big = texture_font_new( atlas, "fonts/Vera.ttf", 400);
+    texture_font_t * small = texture_font_new( atlas, "fonts/Vera.ttf", 18);
+    texture_font_t * title = texture_font_new( atlas, "fonts/Vera.ttf", 32);
 
     text_buffer  = vertex_buffer_new( "v3f:t2f:c4f" ); 
     line_buffer  = vertex_buffer_new( "v2f:c4f" ); 

@@ -31,8 +31,10 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-#if !defined(_WIN32) && !defined(_WIN64)
-#  include <fontconfig/fontconfig.h>
+#if 0
+#  if !defined(_WIN32) && !defined(_WIN64)
+#    include <fontconfig/fontconfig.h>
+#  endif
 #endif
 #include <assert.h>
 #include <stdio.h>
@@ -212,13 +214,6 @@ font_manager_get_from_markup( font_manager_t *self,
     assert( self );
     assert( markup );
 
-//#if defined(_WIN32) || defined(_WIN64)
-//    fprintf( stderr, "\"font_manager_get_from_markup\" not implemented yet.\n" );
-//    return 0;
-//#endif
-    // fprintf( stderr, "Matching %s, %f, %d, %d\n",
-    //         markup->family, markup->size, markup->bold,   markup->italic );
-
     return font_manager_get_from_description( self, markup->family, markup->size,
                                               markup->bold,   markup->italic );
 }
@@ -231,10 +226,14 @@ font_manager_match_description( font_manager_t * self,
                                 const int bold,
                                 const int italic )
 {
-#if defined _WIN32 || defined _WIN64
+// Use of fontconfig is disabled by default.
+#if 1
     return 0;
-#endif
-
+#else
+#  if defined _WIN32 || defined _WIN64
+      fprintf( stderr, "\"font_manager_match_description\" not implemented for windows.\n" );
+      return 0;
+#  endif
     char *filename = 0;
     int weight = FC_WEIGHT_REGULAR;
     int slant = FC_SLANT_ROMAN;
@@ -278,4 +277,5 @@ font_manager_match_description( font_manager_t * self,
     }
     FcPatternDestroy( match );
     return filename;
+#endif
 }
