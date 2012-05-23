@@ -47,6 +47,13 @@
 #endif 
 
 
+/**
+ *
+ */
+#define CLEAN  (0)
+#define DIRTY  (1)
+#define FROZEN (2)
+
 
 
 // strndup() was only added in OSX lion
@@ -114,10 +121,14 @@ vertex_buffer_new( const char *format )
 
     self->vertices = vector_new( stride );
     self->vertices_id  = 0;
+    self->GPU_vsize = 0;
+
     self->indices = vector_new( sizeof(GLuint) );
     self->indices_id  = 0;
+    self->GPU_isize = 0;
+
     self->items = vector_new( sizeof(ivec4) );
-    self->dirty = 1;
+    self->state = DIRTY;
     self->mode = GL_TRIANGLES;
     return self;
 }
@@ -162,7 +173,7 @@ vertex_buffer_delete( vertex_buffer_t *self )
         free( self->format );
     }
     self->format = 0;
-    self->dirty = 0;
+    self->state = 0;
     free( self );
 }
 
@@ -249,6 +260,11 @@ vertex_buffer_print( vertex_buffer_t * self )
 void
 vertex_buffer_upload ( vertex_buffer_t *self )
 {
+    if( self->state == FROZEN )
+    {
+        return;
+    }
+
     if( !self->vertices_id )
     {
         glGenBuffers( 1, &self->vertices_id );
@@ -260,18 +276,41 @@ vertex_buffer_upload ( vertex_buffer_t *self )
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
     }
 
+    size_t vsize = self->vertices->size*self->vertices->item_size;
+    size_t isize = self->indices->size*self->indices->item_size;
+
+
     // Always upload vertices first such that indices do not point to non
     // existing data (if we get interrupted in between for example).
+
+    // Upload vertices
     glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
-    glBufferData( GL_ARRAY_BUFFER,
-                  self->vertices->size*self->vertices->item_size,
-                  self->vertices->items, GL_DYNAMIC_DRAW );
+    if( vsize != self->GPU_vsize )
+    {
+        glBufferData( GL_ARRAY_BUFFER,
+                      vsize, self->vertices->items, GL_DYNAMIC_DRAW );
+        self->GPU_vsize = vsize;
+    }
+    else
+    {
+        glBufferSubData( GL_ARRAY_BUFFER,
+                         0, vsize, self->vertices->items );
+    }
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
+    // Upload indices
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                  self->indices->size*self->indices->item_size,
-                  self->indices->items, GL_DYNAMIC_DRAW );
+    if( isize != self->GPU_isize )
+    {
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER,
+                      isize, self->indices->items, GL_DYNAMIC_DRAW );
+        self->GPU_isize = isize;
+    }
+    else
+    {
+        glBufferSubData( GL_ELEMENT_ARRAY_BUFFER,
+                         0, isize, self->indices->items );
+    }
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 }
 
@@ -283,9 +322,10 @@ vertex_buffer_clear( vertex_buffer_t *self )
 {
     assert( self );
 
+    self->state = FROZEN;
     vector_clear( self->indices );
     vector_clear( self->vertices );
-    self->dirty = 1;
+    self->state = DIRTY;
 }
 
 
@@ -295,10 +335,10 @@ void
 vertex_buffer_render_setup ( vertex_buffer_t *self,
                              GLenum mode, const char *what )
 {
-    if( self->dirty )
+    if( self->state != CLEAN )
     {
         vertex_buffer_upload( self );
-        self->dirty = 0;
+        self->state = CLEAN;
     }
     
     glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
@@ -397,7 +437,7 @@ vertex_buffer_push_back_indices ( vertex_buffer_t * self,
 {
     assert( self );
 
-    self->dirty = 1;
+    self->state |= DIRTY;
     vector_push_back_data( self->indices, indices, icount );
 }
 
@@ -411,7 +451,7 @@ vertex_buffer_push_back_vertices ( vertex_buffer_t * self,
 {
     assert( self );
 
-    self->dirty = 1;
+    self->state |= DIRTY;
     vector_push_back_data( self->vertices, vertices, vcount );
 }
 
@@ -428,7 +468,7 @@ vertex_buffer_insert_indices ( vertex_buffer_t *self,
     assert( self->indices );
     assert( index < self->indices->size+1 );
 
-    self->dirty = 1;
+    self->state |= DIRTY;
     vector_insert_data( self->indices, index, indices, count );
 }
 
@@ -445,7 +485,7 @@ vertex_buffer_insert_vertices( vertex_buffer_t *self,
     assert( self->vertices );
     assert( index < self->vertices->size+1 );
 
-    self->dirty = 1;
+    self->state |= DIRTY;
 
     size_t i;
     for( i=0; i<self->indices->size; ++i )
@@ -472,7 +512,7 @@ vertex_buffer_erase_indices( vertex_buffer_t *self,
     assert( first < self->indices->size );
     assert( (last) <= self->indices->size );
 
-    self->dirty = 1;
+    self->state |= DIRTY;
     vector_erase_range( self->indices, first, last );
 }
 
@@ -490,7 +530,7 @@ vertex_buffer_erase_vertices( vertex_buffer_t *self,
     assert( (first+last) <= self->vertices->size );
     assert( last > first );
 
-    self->dirty = 1;
+    self->state |= DIRTY;
     size_t i;
     for( i=0; i<self->indices->size; ++i )
     {
@@ -524,6 +564,8 @@ vertex_buffer_insert( vertex_buffer_t * self, size_t index,
     assert( vertices );
     assert( indices );
 
+    self->state = FROZEN;
+
     // Push back vertices
     size_t vstart = vector_size( self->vertices );
     vertex_buffer_push_back_vertices( self, vertices, vcount );
@@ -543,6 +585,7 @@ vertex_buffer_insert( vertex_buffer_t * self, size_t index,
     ivec4 item = {{ vstart, vcount, istart, icount }};
     vector_insert( self->items, index, &item );
 
+    self->state = DIRTY;
     return index;
 }
 
@@ -571,7 +614,10 @@ vertex_buffer_erase( vertex_buffer_t * self,
             item->istart -= icount;
         }
     }
+
+    self->state = FROZEN;
     vertex_buffer_erase_indices( self, istart, istart+icount );
     vertex_buffer_erase_vertices( self, vstart, vstart+vcount );
     vector_erase( self->items, index );
+    self->state = DIRTY;
 }

@@ -145,7 +145,7 @@ int main( int argc, char **argv )
     size_t i;
     texture_font_t *font = 0;
     texture_atlas_t *atlas = texture_atlas_new( 512, 512, 3 );
-    const char * filename = "./Vera.ttf";
+    const char * filename = "fonts/Vera.ttf";
     wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
     buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
     vec2 pen = {{0,0}};

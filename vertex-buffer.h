@@ -75,11 +75,17 @@ typedef struct
     /** GL identity of the indices buffer. */
     GLuint indices_id;
 
+    /** Current size of the vertices buffer in GPU */
+    size_t GPU_vsize;
+
+    /** Current size of the indices buffer in GPU*/
+    size_t GPU_isize;
+
     /** GL primitives to render. */
     GLenum mode;
 
     /** Whether the vertex buffer needs to be uploaded to GPU memory. */
-    char dirty;
+    char state;
 
     /** Individual items */
     vector_t * items;

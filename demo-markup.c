@@ -137,8 +137,8 @@ int main( int argc, char **argv )
                         &italic,    L"jumps over ",
                         &bold,      L"the lazy ",
                         &normal,    L"dog.\n",
-//                        &small,     L"Now is the time for all good men "
-//                                    L"to come to the aid of the party.\n",
+                        &small,     L"Now is the time for all good men "
+                                    L"to come to the aid of the party.\n",
                         &italic,    L"Ég get etið gler án þess að meiða mig.\n",
                         &japanese,  L"私はガラスを食べられます。 それは私を傷つけません\n",
                         &math,      L"ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ", NULL );
