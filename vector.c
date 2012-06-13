@@ -81,7 +81,7 @@ vector_get( const vector_t *self,
     assert( self->size );
     assert( index  < self->size );
 
-    return self->items + index * self->item_size;
+    return (char*)(self->items) + index * self->item_size;
 }
 
 
@@ -207,7 +207,7 @@ vector_set( vector_t *self,
     assert( self->size );
     assert( index  < self->size );
 
-    memcpy( self->items + index * self->item_size,
+    memcpy( (char *)(self->items) + index * self->item_size,
             item, self->item_size );
 }
 
@@ -227,8 +227,8 @@ vector_insert( vector_t *self,
     }
     if( index < self->size )
     {
-        memmove( self->items + (index + 1) * self->item_size,
-                 self->items + (index + 0) * self->item_size,
+        memmove( (char *)(self->items) + (index + 1) * self->item_size,
+                 (char *)(self->items) + (index + 0) * self->item_size,
                  (self->size - index)  * self->item_size);
     }
     self->size++;
@@ -247,8 +247,8 @@ vector_erase_range( vector_t *self,
     assert( last  < self->size+1 );
     assert( first < last );
 
-    memmove( self->items + first * self->item_size,
-             self->items + last  * self->item_size,
+    memmove( (char *)(self->items) + first * self->item_size,
+             (char *)(self->items) + last  * self->item_size,
              (self->size - last)   * self->item_size);
     self->size -= (last-first);
 }
@@ -319,7 +319,7 @@ vector_push_back_data( vector_t *self,
     {
         vector_reserve(self, self->size+count);
     }
-    memmove( self->items + self->size * self->item_size, data,
+    memmove( (char *)(self->items) + self->size * self->item_size, data,
              count*self->item_size );
     self->size += count;
 }
@@ -341,10 +341,10 @@ vector_insert_data( vector_t *self,
     {
         vector_reserve(self, self->size+count);
     }
-    memmove( self->items + (index + count ) * self->item_size,
-             self->items + (index ) * self->item_size,
+    memmove( (char *)(self->items) + (index + count ) * self->item_size,
+             (char *)(self->items) + (index ) * self->item_size,
              count*self->item_size );
-    memmove( self->items + index * self->item_size, data,
+    memmove( (char *)(self->items) + index * self->item_size, data,
              count*self->item_size );
     self->size += count;
 }

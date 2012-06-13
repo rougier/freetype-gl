@@ -34,7 +34,10 @@
 #include "vertex-buffer.h"
 #include "markup.h"
 
-
+#if defined(_WIN32) || defined(_WIN64)
+#  define wcpncpy wcsncpy
+#  define wcpcpy  wcscpy
+#endif
 
 // -------------------------------------------------------------- constants ---
 const int __SIGNAL_ACTIVATE__     = 0;
@@ -113,6 +116,24 @@ console_new( void )
     vec4 white = {{1,1,1,1}};
     vec4 black = {{0,0,0,1}};
     vec4 none = {{0,0,1,0}};
+
+    markup_t normal;
+    normal.family  = "fonts/VeraMono.ttf";
+    normal.size    = 13.0;
+    normal.bold    = 0;
+    normal.italic  = 0;
+    normal.rise    = 0.0;
+    normal.spacing = 0.0;
+    normal.gamma   = 1.0;
+    normal.foreground_color    = black;
+    normal.background_color    = none;
+    normal.underline           = 0;
+    normal.underline_color     = white;
+    normal.overline            = 0;
+    normal.overline_color      = white;
+    normal.strikethrough       = 0;
+    normal.strikethrough_color = white;
+/*
     markup_t normal = {
         .family  = "fonts/VeraMono.ttf",
         .size    = 13.0,
@@ -131,6 +152,7 @@ console_new( void )
         .strikethrough_color = white,
         .font = 0,
     };
+*/
     normal.font = texture_font_new( atlas, "fonts/VeraMono.ttf", 13 );
 
     markup_t bold = normal;

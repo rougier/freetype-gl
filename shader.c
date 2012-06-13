@@ -30,14 +30,10 @@
 // those of the authors and should not be interpreted as representing official
 // policies, either expressed or implied, of Nicolas P. Rougier.
 // ----------------------------------------------------------------------------
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "opengl.h"
 #include "shader.h"
 
 

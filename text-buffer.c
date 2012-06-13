@@ -39,6 +39,14 @@
 #include "text-buffer.h"
 
 
+#define SET_GLYPH_VERTEX(value,x0,y0,z0,s0,t0,r,g,b,a,sh,gm) { \
+	glyph_vertex_t *gv=&value;                                 \
+	gv->x=x0; gv->y=y0; gv->z=z0;                              \
+	gv->u=s0; gv->v=t0;                                        \
+	gv->r=r; gv->g=g; gv->b=b; gv->a=a;                        \
+	gv->shift=sh; gv->gamma=gm;}
+
+
 // ----------------------------------------------------------------------------
 text_buffer_t *
 text_buffer_new( size_t depth )
@@ -243,6 +251,16 @@ text_buffer_add_wchar( text_buffer_t * self,
         float t0 = black->t0;
         float s1 = black->s1;
         float t1 = black->t1;
+
+        SET_GLYPH_VERTEX(vertices[vcount+0],
+                         (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+1],
+                         (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+2],
+                         (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+3],
+                         (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
+/*
         vertices[vcount+0] =
             (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
         vertices[vcount+1] =
@@ -251,6 +269,7 @@ text_buffer_add_wchar( text_buffer_t * self,
             (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
         vertices[vcount+3] =
             (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
+*/
         indices[icount + 0] = vcount+0;
         indices[icount + 1] = vcount+1;
         indices[icount + 2] = vcount+2;
@@ -276,6 +295,16 @@ text_buffer_add_wchar( text_buffer_t * self,
         float t0 = black->t0;
         float s1 = black->s1;
         float t1 = black->t1;
+
+        SET_GLYPH_VERTEX(vertices[vcount+0],
+                         (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+1],
+                         (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+2],
+                         (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+3],
+                         (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
+/*
         vertices[vcount+0] =
             (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
         vertices[vcount+1] =
@@ -284,6 +313,7 @@ text_buffer_add_wchar( text_buffer_t * self,
             (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
         vertices[vcount+3] =
             (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
+*/
         indices[icount + 0] = vcount+0;
         indices[icount + 1] = vcount+1;
         indices[icount + 2] = vcount+2;
@@ -309,6 +339,15 @@ text_buffer_add_wchar( text_buffer_t * self,
         float t0 = black->t0;
         float s1 = black->s1;
         float t1 = black->t1;
+        SET_GLYPH_VERTEX(vertices[vcount+0],
+                         (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+1],
+                         (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+2],
+                         (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+3],
+                         (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
+/*
         vertices[vcount+0] =
             (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
         vertices[vcount+1] =
@@ -317,6 +356,7 @@ text_buffer_add_wchar( text_buffer_t * self,
             (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
         vertices[vcount+3] =
             (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
+*/
         indices[icount + 0] = vcount+0;
         indices[icount + 1] = vcount+1;
         indices[icount + 2] = vcount+2;
@@ -342,6 +382,15 @@ text_buffer_add_wchar( text_buffer_t * self,
         float t0 = black->t0;
         float s1 = black->s1;
         float t1 = black->t1;
+        SET_GLYPH_VERTEX(vertices[vcount+0],
+                         (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+1],
+                         (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+2],
+                         (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+3],
+                         (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
+/*
         vertices[vcount+0] =
             (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
         vertices[vcount+1] =
@@ -350,6 +399,7 @@ text_buffer_add_wchar( text_buffer_t * self,
             (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
         vertices[vcount+3] =
             (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
+*/
         indices[icount + 0] = vcount+0;
         indices[icount + 1] = vcount+1;
         indices[icount + 2] = vcount+2;
@@ -373,7 +423,16 @@ text_buffer_add_wchar( text_buffer_t * self,
     float t0 = glyph->t0;
     float s1 = glyph->s1;
     float t1 = glyph->t1;
-    
+
+    SET_GLYPH_VERTEX(vertices[vcount+0],
+                     (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
+    SET_GLYPH_VERTEX(vertices[vcount+1],
+                     (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
+    SET_GLYPH_VERTEX(vertices[vcount+2],
+                     (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
+    SET_GLYPH_VERTEX(vertices[vcount+3],
+                     (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
+/*
     vertices[vcount+0] =
         (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
     vertices[vcount+1] =
@@ -382,6 +441,7 @@ text_buffer_add_wchar( text_buffer_t * self,
         (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
     vertices[vcount+3] =
         (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
+*/
     indices[icount + 0] = vcount+0;
     indices[icount + 1] = vcount+1;
     indices[icount + 2] = vcount+2;

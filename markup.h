@@ -178,6 +178,10 @@ typedef struct
 
 } markup_t;
 
+
+extern markup_t default_markup;
+
+
 /** @} */
 
 #ifdef __cplusplus
