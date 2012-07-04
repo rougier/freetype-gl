@@ -529,10 +529,11 @@ texture_font_load_glyphs( texture_font_t * self,
         glyph->advance_y = slot->advance.y/64.0;
 
         vector_push_back( self->glyphs, &glyph );
-    }
-    if( self->outline_type > 0 )
-    {
-        FT_Done_Glyph( ft_glyph );
+
+        if( self->outline_type > 0 )
+        {
+            FT_Done_Glyph( ft_glyph );
+        }
     }
     FT_Done_Face( face );
     FT_Done_FreeType( library );
