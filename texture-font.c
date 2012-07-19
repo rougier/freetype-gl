@@ -551,7 +551,7 @@ texture_font_get_glyph( texture_font_t * self,
     assert( self );
 
     size_t i;
-    static wchar_t *buffer = 0;
+    wchar_t buffer[2] = {0,0};
     texture_glyph_t *glyph;
 
     assert( self );
@@ -601,12 +601,7 @@ texture_font_get_glyph( texture_font_t * self,
     }
 
     /* Glyph has not been already loaded */
-    if( !buffer)
-    {
-        buffer = (wchar_t *) calloc( 2, sizeof(wchar_t) );
-    }
     buffer[0] = charcode;
-
     if( texture_font_load_glyphs( self, buffer ) == 0 )
     {
         return *(texture_glyph_t **) vector_back( self->glyphs );

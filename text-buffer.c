@@ -85,17 +85,15 @@ text_buffer_render( text_buffer_t * self )
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
         glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
         glBlendColor( 1.0, 1.0, 1.0, 1.0 );
-    }
-
-    glUseProgram( self->shader );
-    glUniform1i( self->shader_texture, 0 );
-    glUniform3f( self->shader_pixel,
-                 1.0/self->manager->atlas->width,
-                 1.0/self->manager->atlas->height,
+        glUseProgram( self->shader );
+        glUniform1i( self->shader_texture, 0 );
+        glUniform3f( self->shader_pixel,
+                     1.0/self->manager->atlas->width,
+                     1.0/self->manager->atlas->height,
                  self->manager->atlas->depth );
-    vertex_buffer_render( self->buffer, GL_TRIANGLES, "vtc" );
-    glUseProgram( 0 );
-
+        vertex_buffer_render( self->buffer, GL_TRIANGLES, "vtc" );
+        glUseProgram( 0 );
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -198,7 +196,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     size_t vcount = 0;
     size_t icount = 0;
     vertex_buffer_t * buffer = self->buffer;
-    size_t i;
+    size_t i = 0;
     texture_font_t * font = markup->font;
     float gamma = markup->gamma;
 

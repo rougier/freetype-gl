@@ -33,8 +33,8 @@
  */
 uniform sampler2D texture;
 uniform vec3 pixel;
-attribute float agamma;
 attribute float ashift;
+attribute float agamma;
 varying float vshift;
 varying float vgamma;
 void main()

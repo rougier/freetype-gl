@@ -55,3 +55,5 @@ Contributors:
 * Andrei Petrovici (Fine analysis of the whole code and report of potential problems)
 * Cristi Caloghera (Report on bad vertex buffer usage)
 * Andrei Petrovici (Code review)
+* Kim Jacobsen (Bug report & fix)
+* bsoddd (Bug report & fix)

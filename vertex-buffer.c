@@ -175,6 +175,9 @@ vertex_buffer_delete( vertex_buffer_t *self )
         glDeleteBuffers( 1, &self->indices_id );
     }
     self->indices_id = 0;
+
+    vector_delete( self->items );
+
     if( self->format )
     {
         free( self->format );
@@ -275,12 +278,10 @@ vertex_buffer_upload ( vertex_buffer_t *self )
     if( !self->vertices_id )
     {
         glGenBuffers( 1, &self->vertices_id );
-        glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
     }
     if( !self->indices_id )
     {
         glGenBuffers( 1, &self->indices_id );
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
     }
 
     size_t vsize = self->vertices->size*self->vertices->item_size;
