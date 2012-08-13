@@ -1,0 +1,59 @@
+Freetype GL - A C OpenGL Freetype engine
+========================================
+
+This code intends to show how to display fonts efficiently using regular C,
+Freetype and OpenGL. The idea is to use a single texture and a single vertex
+buffer. The code is fairly simple and organized as follow:
+
+** mandatory **
+
+texture-font:  The texture-font structure is in charge of creating bitmap
+               glyphs and to upload them to the texture atlas.
+
+texture-atlas: This structure is responsible for the packing of small regions
+               into a bigger texture. It is based on the skyline bottom left
+               algorithm which appear to be well suited for storing glyphs.
+
+               More information at:
+               http://clb.demon.fi/files/RectangleBinPack.pdf
+
+vector:        This structure loosely mimics the std::vector class from c++. It
+               is used by texture-atlas (for storing nodes), texture-font (for
+               storing glyphs) and font-manager (for storing fonts).
+
+               More information at:
+               http://www.cppreference.com/wiki/container/vector/start
+
+
+** optional ***
+
+markup:        Simple structure that describes text properties (font family,
+               font size, colors, underline, etc.)
+
+font-manager:  Structure in charge of caching fonts.
+
+vertex-buffer: Generic vertex buffer structure inspired by pyglet (python).
+               (more information at http://www.pyglet.org)
+
+edtaa3func:    Distance field computation by Stefan Gustavson
+               (more information at http://contourtextures.wikidot.com/)
+
+makefont:      Allow to generate header file with font information (texture + glyphs)
+               such that it can be used without freetype.
+
+
+Contributors:
+=============
+
+* Ryan.H.Kawicki (Initial CMake project)
+* Julian Mayer (Several bugfixes and code for demo-opengl-4.cc)
+* Sylvain Duclos (Android port)
+* Wang Yongcong (Improvements on the windows build and code review)
+* Marcel Metz (Bug report & fix and CMmake no demo option)
+* Jonas Wielicki (Bug report & fix on the CMakefile)
+* whatmannerofburgeristhis (Bug report in makefont)
+* Andrei Petrovici (Fine analysis of the whole code and report of potential problems)
+* Cristi Caloghera (Report on bad vertex buffer usage)
+* Andrei Petrovici (Code review)
+* Kim Jacobsen (Bug report & fix)
+* bsoddd (Bug report & fix)
