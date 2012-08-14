@@ -39,31 +39,26 @@
     #include <GL/glut.h>
 #endif
 #include <stdlib.h>
+
+#include "shader.h"
 #include "vertex-buffer.h"
 
 
 // ------------------------------------------------------- global variables ---
+GLuint shader;
 vertex_buffer_t * cube;
+
 
 
 // ------------------------------------------------------------------- init ---
 void init( void )
 {
-    GLfloat ambient[]  = {0.1f, 0.1f, 0.1f, 1.0f};
-    GLfloat diffuse[]  = {1.0f, 1.0f, 1.0f, 1.0f};
-    GLfloat position[] = {0.0f, 1.0f, 2.0f, 1.0f};
-    GLfloat specular[] = {0.0f, 0.0f, 0.0f, 1.0f};
     glPolygonOffset( 1, 1 );
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glEnable( GL_DEPTH_TEST ); 
     glEnable( GL_COLOR_MATERIAL );
     glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_LIGHT0 );
-    glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
-    glLightfv( GL_LIGHT0, GL_AMBIENT, ambient );
-    glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
-    glLightfv( GL_LIGHT0, GL_POSITION, position );
     glEnable( GL_LINE_SMOOTH );
 }
 
@@ -72,6 +67,12 @@ void init( void )
 void display( void )
 {
     static float theta=0, phi=0;
+    static GLuint Color = 0;
+
+    if( !Color )
+    {
+        Color = glGetUniformLocation( shader, "Color" );
+    }
 
     theta += .5; phi += .5;
 
@@ -80,24 +81,21 @@ void display( void )
     glRotatef( theta, 0,0,1 );
     glRotatef( phi,   0,1,0 );
     glDisable( GL_BLEND );
-    glEnable( GL_LIGHTING );
     glEnable( GL_DEPTH_TEST );
-    glColor4f( 1, 1, 1, 1 );
     glEnable( GL_POLYGON_OFFSET_FILL );
-
-    /* Use vertice (v), normal(n) and color (c) */
-    vertex_buffer_render( cube, GL_QUADS, "vnc" );
+    glUseProgram( shader );
+    glUniform4f( Color, 1, 1, 1, 1 );
+    vertex_buffer_render( cube, GL_QUADS );
     glDisable( GL_POLYGON_OFFSET_FILL );
     glEnable( GL_BLEND );
-    glDisable( GL_LIGHTING );
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     glDepthMask( GL_FALSE );
-
-    /* Use vertice (v) only */
-    glColor4f( 0, 0, 0, .5 );
-    vertex_buffer_render( cube, GL_QUADS, "v" );
+    glUniform4f( Color, 0, 0, 0, .5 );
+    vertex_buffer_render( cube, GL_QUADS );
+    glUseProgram( 0 );
     glDepthMask( GL_TRUE );
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
     glPopMatrix();
 
     glutSwapBuffers( );
@@ -134,7 +132,6 @@ void timer( int dt )
     glutTimerFunc( dt, timer, dt );
 }
 
-
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
@@ -148,13 +145,14 @@ int main( int argc, char **argv )
     glutTimerFunc( 1000/60, timer, 1000/60 );
 
     typedef struct { float x,y,z;} xyz;
-    typedef struct { xyz position, normal, color;} vertex;
+    typedef struct { float r,g,b,a;} rgba;
+    typedef struct { xyz position, normal; rgba color;} vertex;
     xyz v[] = { { 1, 1, 1},  {-1, 1, 1},  {-1,-1, 1}, { 1,-1, 1},
                 { 1,-1,-1},  { 1, 1,-1},  {-1, 1,-1}, {-1,-1,-1} };
     xyz n[] = { { 0, 0, 1},  { 1, 0, 0},  { 0, 1, 0} ,
                 {-1, 0, 1},  { 0,-1, 0},  { 0, 0,-1} };
-    xyz c[] = { {1, 1, 1},  {1, 1, 0},  {1, 0, 1},  {0, 1, 1},
-                {1, 0, 0},  {0, 0, 1},  {0, 1, 0},  {0, 0, 0} };
+    rgba c[] = { {1, 1, 1, 1},  {1, 1, 0, 1},  {1, 0, 1, 1},  {0, 1, 1, 1},
+                 {1, 0, 0, 1},  {0, 0, 1, 1},  {0, 1, 0, 1},  {0, 0, 0, 1} };
     vertex vertices[24] =  {
       {v[0],n[0],c[0]}, {v[1],n[0],c[1]}, {v[2],n[0],c[2]}, {v[3],n[0],c[3]},
       {v[0],n[1],c[0]}, {v[3],n[1],c[3]}, {v[4],n[1],c[4]}, {v[5],n[1],c[5]},
@@ -164,8 +162,10 @@ int main( int argc, char **argv )
       {v[4],n[5],c[4]}, {v[7],n[5],c[7]}, {v[6],n[5],c[6]}, {v[5],n[5],c[5]} };
     GLuint indices[24] = { 0, 1, 2, 3,    4, 5, 6, 7,   8, 9,10,11,
                            12,13,14,15,  16,17,18,19,  20,21,22,23 };
-    cube = vertex_buffer_new( "v3f:n3f:c3f" );
+
+    cube = vertex_buffer_new( "vertex:3f,normal:3f,color:4f" );
     vertex_buffer_push_back( cube, vertices, 24, indices, 24 );
+    shader = shader_load("shaders/cube.vert","shaders/cube.frag");
 
     init( );
     glutMainLoop( );

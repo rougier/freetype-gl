@@ -32,38 +32,54 @@
  * ========================================================================= */
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
+#include "shader.h"
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
-    float x, y, z;    // position
-    float s, t;       // texture
-    float r, g, b, a; // color
+    float x, y, z;
+    float u, v;
+    float r, g, b, a;
+    float shift, gamma;
 } vertex_t;
 
 
 // ------------------------------------------------------- global variables ---
+texture_atlas_t *atlas;
 vertex_buffer_t *buffer;
+GLuint shader;
 
 
 // ---------------------------------------------------------------- display ---
 void display( void )
 {
+    static GLuint texture = 0;
+    static GLuint pixel = 0;
+    if( !texture  || !pixel )
+    {
+        texture = glGetUniformLocation( shader, "texture" );
+        pixel = glGetUniformLocation( shader, "pixel" );
+    }
+
     int viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
     glClearColor(1,1,1,1);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    float alpha = 1;
-    glEnable( GL_COLOR_MATERIAL );
-    glBlendFunc( GL_CONSTANT_COLOR_EXT,
-                 GL_ONE_MINUS_SRC_COLOR );
-    glEnable( GL_BLEND );
-    glColor3f( alpha, alpha, alpha );
-    glBlendColor( 1-alpha, 1-alpha, 1-alpha, 1 );
     glEnable( GL_TEXTURE_2D );
+    glEnable( GL_COLOR_MATERIAL );
+    glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+    glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+    glBlendColor( 1.0, 1.0, 1.0, 1.0 );
+    glEnable( GL_BLEND );
+
     glPushMatrix();
     glTranslatef(5, viewport[3], 0);
-    vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
+    glUseProgram( shader );
+    glUniform1i( texture, 0 );
+    glUniform3f( pixel, 1.0/atlas->width, 1.0/atlas->height, atlas->depth );
+    vertex_buffer_render( buffer, GL_TRIANGLES );
+    glUseProgram( 0 );
+
     glPopMatrix();
     glutSwapBuffers( );
 }
@@ -119,10 +135,10 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
             GLuint index = buffer->vertices->size;
             GLuint indices[] = {index, index+1, index+2,
                                 index, index+2, index+3};
-            vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a },
-                                    { x0,y1,0,  s0,t1,  r,g,b,a },
-                                    { x1,y1,0,  s1,t1,  r,g,b,a },
-                                    { x1,y0,0,  s1,t0,  r,g,b,a } };
+            vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a, 0,1 },
+                                    { x0,y1,0,  s0,t1,  r,g,b,a, 0,1 },
+                                    { x1,y1,0,  s1,t1,  r,g,b,a, 0,1 },
+                                    { x1,y0,0,  s1,t0,  r,g,b,a, 0,1 } };
             vertex_buffer_push_back_indices( buffer, indices, 6 );
             vertex_buffer_push_back_vertices( buffer, vertices, 4 );
             pen->x += glyph->advance_x;
@@ -144,12 +160,12 @@ int main( int argc, char **argv )
 
     size_t i;
     texture_font_t *font = 0;
-    texture_atlas_t *atlas = texture_atlas_new( 512, 512, 3 );
+    atlas = texture_atlas_new( 512, 512, 3 );
     const char * filename = "fonts/Vera.ttf";
     wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
-    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f,ashift:1f,agamma:1f" ); 
     vec2 pen = {{0,0}};
-    vec4 color = {{1,1,1,1}};
+    vec4 color = {{0,0,0,1}};
 
     for( i=7; i < 27; ++i)
     {
@@ -160,8 +176,8 @@ int main( int argc, char **argv )
         add_text( buffer, font, text, &color, &pen );
         texture_font_delete( font );
     }
-
     glBindTexture( GL_TEXTURE_2D, atlas->id );
+    shader = shader_load("shaders/text.vert", "shaders/text.frag");
     glutMainLoop( );
 
     return 0;

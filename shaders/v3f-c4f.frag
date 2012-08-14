@@ -1,9 +1,9 @@
-/* ============================================================================
+/* =========================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         http://code.google.com/p/freetype-gl/
- * ----------------------------------------------------------------------------
- * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+ * -------------------------------------------------------------------------
+ * Copyright 2011 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,23 +29,8 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ============================================================================
- */
-uniform sampler2D texture;
-uniform vec3 pixel;
-
-attribute vec3 vertex;
-attribute vec4 color;
-attribute vec2 tex_coord;
-attribute float ashift;
-attribute float agamma;
-varying float vshift;
-varying float vgamma;
+ * ========================================================================= */
 void main()
 {
-    vshift = ashift;
-    vgamma = agamma;
-    gl_FrontColor = color;
-    gl_TexCoord[0].xy = tex_coord.xy;
-    gl_Position = gl_ModelViewProjectionMatrix * vec4(vertex.xyz,1.0);
+    gl_FragColor = gl_Color;
 }

@@ -292,7 +292,7 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    text_buffer = text_buffer_new( LCD_FILTERING_ON );
+    text_buffer = text_buffer_new( LCD_FILTERING_OFF );
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
     markup_t markup = {

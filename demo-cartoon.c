@@ -33,6 +33,7 @@
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
 #include "markup.h"
+#include "shader.h"
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -46,6 +47,8 @@ typedef struct {
 // ------------------------------------------------------- global variables ---
 texture_atlas_t * atlas;
 vertex_buffer_t * buffer;
+GLuint shader;
+
 
 
 // ---------------------------------------------------------------- display ---
@@ -54,12 +57,20 @@ void display( void )
     glClearColor( 0.40, 0.40, 0.45, 1.00 );
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    static GLuint texture = 0;
+    if( !texture )
+    {
+        texture = glGetUniformLocation( shader, "texture" );
+    }
+
     glEnable( GL_BLEND );
-    glEnable( GL_TEXTURE_2D );
-    glEnable( GL_COLOR_MATERIAL );
-    glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
+    glUseProgram( shader );
+    glUniform1i(texture, 0);
+    vertex_buffer_render( buffer, GL_TRIANGLES );
+    glUseProgram( 0 );
+
     glutSwapBuffers( );
 }
 
@@ -137,7 +148,7 @@ int main( int argc, char **argv )
     glutKeyboardFunc( keyboard );
 
     atlas = texture_atlas_new( 1024, 1024, 1 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 
     texture_font_t *font = texture_font_new( atlas, "fonts/ObelixPro.ttf", 128 );
 
     vec2 pen    = {{30, 50}};
@@ -162,6 +173,9 @@ int main( int argc, char **argv )
     font->outline_type = 0;
     font->outline_thickness = 0;
     add_text( buffer, font, L"Cartoon", pen, orange1, orange2 );
+
+    shader = shader_load("shaders/v3f-t2f-c4f.vert",
+                         "shaders/v3f-t2f-c4f.frag");
 
     glutMainLoop( );
     return 0;

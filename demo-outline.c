@@ -34,6 +34,7 @@
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
 #include "markup.h"
+#include "shader.h"
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -47,11 +48,18 @@ typedef struct {
 // ------------------------------------------------------- global variables ---
 texture_atlas_t * atlas;
 vertex_buffer_t * buffer;
+GLuint shader;
 
 
 // ---------------------------------------------------------------- display ---
 void display( void )
 {
+    static GLuint texture = 0;
+    if( !texture )
+    {
+        texture = glGetUniformLocation( shader, "texture" );
+    }
+
     glClearColor( 0.40, 0.40, 0.45, 1.00 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glEnable( GL_BLEND );
@@ -59,7 +67,12 @@ void display( void )
     glEnable( GL_COLOR_MATERIAL );
     glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
+
+    glUseProgram( shader );
+    glUniform1i(texture, 0);
+    vertex_buffer_render( buffer, GL_TRIANGLES );
+    glUseProgram( 0 );
+
     glutSwapBuffers( );
 }
 
@@ -164,7 +177,7 @@ int main( int argc, char **argv )
     glutKeyboardFunc( keyboard );
 
     atlas = texture_atlas_new( 512, 512, 1 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 
 
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
@@ -216,6 +229,8 @@ int main( int argc, char **argv )
         markup.font->outline_thickness = 1*((i+1)/10.0);
         add_text( buffer, &pen, &markup, L"g", NULL );
     }
+    shader = shader_load("shaders/v3f-t2f-c4f.vert",
+                         "shaders/v3f-t2f-c4f.frag");
 
     glutMainLoop( );
     return 0;

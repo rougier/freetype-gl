@@ -33,7 +33,6 @@
  */
 #include <AntTweakBar.h>
 #include "freetype-gl.h"
-
 #include "font-manager.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
@@ -54,25 +53,13 @@ typedef enum {
 
 #define NUM_FONTS 7
 
-typedef struct {
-    float x, y, z;
-    float s, t;
-    float r, g, b, a;
-    float m;
-} vertex_t;
-
 
 // ------------------------------------------------------- global variables ---
 TwBar *bar;
-vertex_buffer_t * buffer;
-texture_atlas_t * atlas_gray, * atlas_rgb, * atlas;
-GLuint program = 0;
-GLuint texture_location;
-GLuint pixel_location;
-GLuint gamma_location;
-GLuint primary_location;
-GLuint secondary_location;
-GLuint tertiary_location;
+
+text_buffer_t * buffer;
+text_buffer_t * buffer_a;
+text_buffer_t * buffer_rgb;
 
 font_family_e p_family;
 float p_size;
@@ -108,81 +95,42 @@ static wchar_t text[] =
     L"\n";
 
 
-
-// -------------------------------------------------------------- add_glyph ---
-void add_glyph( const texture_glyph_t * glyph,
-                vertex_buffer_t * buffer,
-                const markup_t * markup,
-                vec2 *pen, float kerning )
-{
-    if( p_kerning )
-    {
-        pen->x += kerning;
-    }
-    else
-    {
-    }
-
-    float r = markup->foreground_color.r;
-    float g = markup->foreground_color.g;
-    float b = markup->foreground_color.b;
-    float a = markup->foreground_color.a;
-    float x0  = ( pen->x + glyph->offset_x );
-    float y0  = (int)( pen->y + glyph->offset_y );
-    float x1  = ( x0 + glyph->width * p_width );
-    float y1  = (int)( y0 - glyph->height );
-
-    float s0 = glyph->s0;
-    float t0 = glyph->t0;
-    float s1 = glyph->s1;
-    float t1 = glyph->t1;
-    GLuint index = buffer->vertices->size;
-    GLuint indices[] = {index, index+1, index+2,
-                        index, index+2, index+3};
-    float dx = tan(p_faux_italic/180.0 * M_PI) * (glyph->height);
-    vertex_t vertices[] = { { (int)(x0+dx),y0,0,  s0,t0,  r,g,b,a,  x0+dx-((int)(x0+dx)) },
-                            { (int)(x0   ),y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0) },
-                            { (int)(x1   ),y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1) },
-                            { (int)(x1+dx),y0,0,  s1,t0,  r,g,b,a,  x1+dx-((int)(x1+dx)) } };
-    vertex_buffer_push_back_indices( buffer, indices, 6 );
-    vertex_buffer_push_back_vertices( buffer, vertices, 4 );
-    pen->x += glyph->advance_x * (1.0 + p_interval);
-    pen->y += glyph->advance_y;
-}
-
 // ----------------------------------------------------------- build_buffer ---
 void
 build_buffer( void )
 { 
     vec2 pen;
-    size_t i;
     texture_font_t *font;
-    texture_glyph_t *glyph;
-
+    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+    vec4 color = white;
+    if( p_invert )
+    {
+        color = black;
+    }
+
     markup_t markup = {
         .family  = "Arial",
         .size    = 10.0,
         .bold    = 0,
         .italic  = 0,
         .rise    = 0.0,
-        .spacing = 0.0,
-        .gamma   = 2.2,
-        .foreground_color    = white,
+        .spacing = p_interval,
+        .gamma   = p_gamma,
+        .foreground_color    = color,
         .background_color    = none,
         .underline           = 0,
-        .underline_color     = white,
+        .underline_color     = color,
         .overline            = 0,
-        .overline_color      = white,
+        .overline_color      = color,
         .strikethrough       = 0,
-        .strikethrough_color = white,
+        .strikethrough_color = color,
         .font = 0,
     };
 
-
-
-    vertex_buffer_clear( buffer );
+    text_buffer_clear( buffer );
+    texture_atlas_t * atlas = buffer->manager->atlas;
     texture_atlas_clear( atlas );
 
     if( p_family == VERA)
@@ -219,6 +167,7 @@ build_buffer( void )
         return;
     }
 
+    markup.font = font;
     font->hinting = p_hinting;
     font->filtering = 1;
     float norm = 1.0/(p_primary + 2*p_secondary + 2*p_tertiary);
@@ -227,36 +176,39 @@ build_buffer( void )
     font->lcd_weights[2] = (unsigned char)(p_primary*norm*256);
     font->lcd_weights[3] = (unsigned char)(p_secondary*norm*256);
     font->lcd_weights[4] = (unsigned char)(p_tertiary*norm*256);
-
-    texture_font_load_glyphs( font, 
-                              L" !\"#$%&'()*+,-./0123456789:;<=>?"
-                              L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-                              L"`abcdefghijklmnopqrstuvwxyz{|}~" );
     pen.x = 10;
     pen.y = 600 - font->height - 10;
+    text_buffer_printf( buffer, &pen, &markup, text, NULL );
 
-    glyph = texture_font_get_glyph( font, text[0] );
-    add_glyph( glyph, buffer, &markup, &pen, 0 );
-    for( i=1; i<wcslen(text); ++i )
+    // Post-processing for width and orientation
+    vertex_buffer_t * vbuffer = buffer->buffer;
+    size_t i;
+    for( i=0; i < vector_size( vbuffer->items ); ++i )
     {
-        if( text[i] == '\n' )
-        {
-            pen.x  = 10;
-            pen.y -= font->height; // + 0.01*(size - (int)size)*font->height;
-        }
-        else
-        {
-            glyph = texture_font_get_glyph( font, text[i] );
-            float kerning = 0.0;
-            if( p_kerning )
-            {
-                kerning = texture_glyph_get_kerning( glyph, text[i-1] );
-            }
-            add_glyph( glyph, buffer, &markup, &pen, kerning );
-        }
+        ivec4 *item = (ivec4 *) vector_get( vbuffer->items, i);
+        glyph_vertex_t * v0 = /* x0,y0 */
+            (glyph_vertex_t *) vector_get( vbuffer->vertices, item->vstart+0 );
+        //glyph_vertex_t * v1 = /* x0,y1 */
+        //    (glyph_vertex_t *) vector_get( vbuffer->vertices, item->vstart+1 );
+        glyph_vertex_t * v2 = /* x1,y1 */
+            (glyph_vertex_t *) vector_get( vbuffer->vertices, item->vstart+2 );
+        glyph_vertex_t * v3 = /* x1,y0 */
+            (glyph_vertex_t *) vector_get( vbuffer->vertices, item->vstart+3 );
+
+        float x0 = v0->x, y0 = v0->y;
+        float x1 = v2->x, y1 = v2->y;
+        v2->x = v3->x = x0 + (x1-x0)*p_width;
+
+        float dy = abs(y1-y0);
+        float dx = tan(p_faux_italic/180.0 * M_PI) * dy;
+        v0->x += dx;
+        v0->shift = fmod(v0->shift + dx-(int)(dx),1.0); 
+        v3->x += dx;
+        v3->shift = fmod(v3->shift + dx-(int)(dx),1.0); 
     }
 
-    texture_font_delete (font );
+
+    texture_font_delete( font );
 }
 
 
@@ -264,7 +216,7 @@ build_buffer( void )
 // ---------------------------------------------------------------- display ---
 void display(void)
 {
-    if( p_invert )
+    if( !p_invert )
     {
         glClearColor( 0, 0, 0, 1 );
     }
@@ -273,61 +225,7 @@ void display(void)
         glClearColor( 1, 1, 1, 1 );
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    glEnable( GL_TEXTURE_2D );
-    glBindTexture( GL_TEXTURE_2D, atlas->id );
-    if( !p_lcd_filtering )
-    {
-        glEnable( GL_COLOR_MATERIAL );
-        glEnable( GL_BLEND );
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        if( p_invert )
-        {
-            glColor4f(1,1,1,1);
-        }
-        else
-        {
-            glColor4f(0,0,0,1);
-        }
-    }
-    else
-    {
-        glEnable( GL_COLOR_MATERIAL );
-        glBlendFunc( GL_CONSTANT_COLOR_EXT,
-                     GL_ONE_MINUS_SRC_COLOR );
-        glEnable( GL_BLEND );
-        glColor3f( 1,1,1 );
-        if( p_invert )
-        {
-            glBlendColor( 1, 1, 1, 1 );
-        }
-        else
-        {
-            glBlendColor( 0, 0, 0, 1 );
-        }
-    }
-
-    if( !p_lcd_filtering )
-    {
-        vertex_buffer_render( buffer, GL_TRIANGLES, "vt" );
-    }
-    else
-    {
-        glUseProgram( program );
-        glUniform1i( texture_location, 0 );
-        glUniform1f( gamma_location, p_gamma );
-
-        float norm = 1.0/(p_primary+2*p_secondary+2*p_tertiary);
-        glUniform1f( primary_location,   p_primary*norm );
-        glUniform1f( secondary_location, p_secondary*norm );
-        glUniform1f( tertiary_location,  p_tertiary*norm );
-        glUniform2f( pixel_location,
-                     1.0/atlas->width,
-                     1.0/atlas->height );
-        vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
-        glUseProgram( 0 );
-    }
-
+    text_buffer_render( buffer );
     TwDraw( );
     glutSwapBuffers( );
 }
@@ -354,7 +252,7 @@ void reset( void )
     p_kerning   = 1;
     p_hinting   = 1;
     p_lcd_filtering = 1;
-    p_gamma     = 1.0;
+    p_gamma     = 2.2;
     p_interval  = 0.0;
     p_weight    = 0.33;
     p_width     = 1.0;
@@ -371,14 +269,6 @@ void reset( void )
     // p_secondary = 2.0/9.0;
     // p_tertiary  = 1.0/9.0;
 
-    if( !p_lcd_filtering )
-    {
-        atlas = atlas_gray;
-    }
-    else
-    {
-        atlas = atlas_rgb;
-    }
     build_buffer();
 }
 
@@ -404,6 +294,7 @@ void timer( int fps )
 void TW_CALL set_invert( const void *value, void *data )
 {
     p_invert = *(const int *) value;
+    build_buffer();
 }
 void TW_CALL get_invert( void *value, void *data )
 {
@@ -438,11 +329,11 @@ void TW_CALL set_lcd_filtering( const void *value, void *data )
     p_lcd_filtering = *(const int *) value;
     if( p_lcd_filtering )
     {
-        atlas = atlas_rgb;
+        buffer = buffer_rgb;
     }
     else
     {
-        atlas = atlas_gray;
+        buffer = buffer_a;
     }
     build_buffer();
 }
@@ -465,6 +356,7 @@ void TW_CALL get_weight( void *value, void *data )
 void TW_CALL set_gamma( const void *value, void *data )
 {
     p_gamma = *(const float *) value;
+    build_buffer();
 }
 void TW_CALL get_gamma( void *value, void *data )
 {
@@ -721,21 +613,11 @@ int main(int argc, char *argv[])
     TwAddButton(bar, "Quit", (TwButtonCallback) quit, NULL,
                 "help='Quit.'");
 
-    atlas_gray = texture_atlas_new( 512, 256, 1 );
-    atlas_rgb  = texture_atlas_new( 512, 256, 3 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f" ); 
+    buffer_a = text_buffer_new( 1 ); 
+    buffer_rgb = text_buffer_new( 3 ); 
+    buffer = buffer_rgb;
     reset();
 
-    // Create the shader
-    program = shader_load( "shaders/agg.vert",
-                           "shaders/agg.frag" );
-    texture_location = glGetUniformLocation( program, "texture" );
-    pixel_location = glGetUniformLocation( program, "pixel" );
-    gamma_location = glGetUniformLocation( program, "gamma" );
-    primary_location   = glGetUniformLocation( program, "primary" );
-    secondary_location = glGetUniformLocation( program, "secondary" );
-    tertiary_location  = glGetUniformLocation( program, "tertiary" );
-    //glEnable(GL_FRAMEBUFFER_SRGB);
     glutTimerFunc( 1000.0/60.0, timer, 60 );
     glutMainLoop();
     return EXIT_SUCCESS;

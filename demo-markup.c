@@ -196,7 +196,7 @@ int main( int argc, char **argv )
     text_buffer_printf( buffer, &pen,
                         &underline, L"The",
                         &normal,    L" Quick",
-                        &big,       L" brown ",
+                        &big,       L" browng ",
                         &reverse,   L" fox \n",
                         &italic,    L"jumps over ",
                         &bold,      L"the lazy ",
@@ -205,7 +205,8 @@ int main( int argc, char **argv )
                                     L"to come to the aid of the party.\n",
                         &italic,    L"Ég get etið gler án þess að meiða mig.\n",
                         &japanese,  L"私はガラスを食べられます。 それは私を傷つけません\n",
-                        &math,      L"ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ", NULL );
+                        &math,      L"ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ",
+                        NULL );
 
     glutMainLoop( );
     return 0;

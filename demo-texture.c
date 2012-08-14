@@ -36,24 +36,30 @@
  * ============================================================================
  */
 #include "freetype-gl.h"
+#include "shader.h"
+#include "vertex-buffer.h"
 
 
+// ------------------------------------------------------- global variables ---
+GLuint shader;
+vertex_buffer_t * quad;
 
 // ---------------------------------------------------------------- display ---
 void display( void )
 {
-    int viewport[4];
-    glGetIntegerv( GL_VIEWPORT, viewport );
-    GLuint width  = viewport[2];
-    GLuint height = viewport[3];
+    static GLuint texture = 0;
+    if( !texture )
+    {
+        texture = glGetUniformLocation( shader, "texture" );
+    }
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0, 1 ); glVertex2i( 0, 0 );
-    glTexCoord2f( 0, 0 ); glVertex2i( 0, height );
-    glTexCoord2f( 1, 0 ); glVertex2i( width, height );
-    glTexCoord2f( 1, 1 ); glVertex2i( width, 0 );
-    glEnd();
+
+    glUseProgram( shader );
+    glUniform1i(texture, 0);
+    vertex_buffer_render( quad, GL_TRIANGLES );
+    glUseProgram( 0 );
+
     glutSwapBuffers( );
 }
 
@@ -120,8 +126,21 @@ int main( int argc, char **argv )
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glEnable( GL_TEXTURE_2D );
-    glColor4f(0,0,0,1);
     glBindTexture( GL_TEXTURE_2D, atlas->id );
+
+    typedef struct { float x,y,z, u,v, r,g,b,a; } vertex_t;
+    vertex_t vertices[4] =  {
+        {  0, 0, 0, 0,1, 0,0,0,1},
+        {  0,512,0, 0,0, 0,0,0,1},
+        {512,512,0, 1,0, 0,0,0,1},
+        {512,  0,0, 1,1, 0,0,0,1} };
+    GLuint indices[6] = { 0, 1, 2, 0,2,3 };
+    quad = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
+    vertex_buffer_push_back( quad, vertices, 4, indices, 6 );
+
+    shader = shader_load("shaders/v3f-t2f-c4f.vert",
+                         "shaders/v3f-t2f-c4f.frag");
+
     glutMainLoop( );
 
     return 0;

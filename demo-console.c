@@ -33,6 +33,7 @@
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
 #include "markup.h"
+#include "shader.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #  define wcpncpy wcsncpy
@@ -61,11 +62,6 @@ const int MARKUP_FAINT       = 7;
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
-    float x,y;
-    vec4 color;
-} point_t;
-
-typedef struct {
     float x, y, z;
     float s, t;
     float r, g, b, a;
@@ -87,7 +83,7 @@ typedef struct _console_t console_t;
 
 // ------------------------------------------------------- global variables ---
 static console_t * console;
-static vertex_buffer_t *lines_buffer;
+GLuint shader;
 
 
 // ------------------------------------------------------------ console_new ---
@@ -102,7 +98,7 @@ console_new( void )
     self->lines = vector_new( sizeof(wchar_t *) );
     self->prompt = (wchar_t *) wcsdup( L">>> " );
     self->cursor = 0;
-    self->buffer = vertex_buffer_new( "v3f:t2f:c4f" );
+    self->buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
     self->input[0] = L'\0';
     self->killring[0] = L'\0';
     self->handlers[__SIGNAL_ACTIVATE__]     = 0;
@@ -133,26 +129,7 @@ console_new( void )
     normal.overline_color      = white;
     normal.strikethrough       = 0;
     normal.strikethrough_color = white;
-/*
-    markup_t normal = {
-        .family  = "fonts/VeraMono.ttf",
-        .size    = 13.0,
-        .bold    = 0,
-        .italic  = 0,
-        .rise    = 0.0,
-        .spacing = 0.0,
-        .gamma   = 1.0,
-        .foreground_color    = black,
-        .background_color    = none,
-        .underline           = 0,
-        .underline_color     = white,
-        .overline            = 0,
-        .overline_color      = white,
-        .strikethrough       = 0,
-        .strikethrough_color = white,
-        .font = 0,
-    };
-*/
+
     normal.font = texture_font_new( atlas, "fonts/VeraMono.ttf", 13 );
 
     markup_t bold = normal;
@@ -251,6 +228,12 @@ console_add_glyph( console_t *self,
 void
 console_render( console_t *self )
 {
+    static GLuint texture = 0;
+    if( !texture )
+    {
+        texture = glGetUniformLocation( shader, "texture" );
+    }
+
     int viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
 
@@ -316,21 +299,31 @@ console_render( console_t *self )
         }
     }
 
-    // Cursor
-    vertex_buffer_clear( lines_buffer );
-    float x  = cursor_x+1;
-    float y1 = cursor_y+markup.font->descender;
-    float y2 = y1 + markup.font->height - markup.font->linegap;
-    point_t vertices[2] ={ {x, y1, markup.foreground_color},
-                           {x, y2, markup.foreground_color} };
-    GLuint indices[] = {0,1};
-    vertex_buffer_push_back( lines_buffer, vertices, 2, indices, 2 );
-
-    glColor4f(1,1,1,1);
+    // Cursor (we use the black character (-1) as texture )
+    texture_glyph_t *glyph  = texture_font_get_glyph( markup.font, -1 );
+    float r = markup.foreground_color.r;
+    float g = markup.foreground_color.g;
+    float b = markup.foreground_color.b;
+    float a = markup.foreground_color.a;
+    int x0  = cursor_x+1;
+    int y0  = cursor_y + markup.font->descender;
+    int x1  = cursor_x+2;
+    int y1  = y0 + markup.font->height - markup.font->linegap;
+    float s0 = glyph->s0;
+    float t0 = glyph->t0;
+    float s1 = glyph->s1;
+    float t1 = glyph->t1;
+    GLuint indices[] = {0,1,2, 0,2,3};
+    vertex_t vertices[] = { { x0,y0,0,  s0,t0,  r,g,b,a },
+                            { x0,y1,0,  s0,t1,  r,g,b,a },
+                            { x1,y1,0,  s1,t1,  r,g,b,a },
+                            { x1,y0,0,  s1,t0,  r,g,b,a } };
+    vertex_buffer_push_back( self->buffer, vertices, 4, indices, 6 );
     glEnable( GL_TEXTURE_2D );
-    vertex_buffer_render( console->buffer, GL_TRIANGLES, "vtc" );
-    glDisable( GL_TEXTURE_2D );
-    vertex_buffer_render( lines_buffer, GL_LINES, "vc" );
+    glUseProgram( shader );
+    glUniform1i(texture, 0);
+    vertex_buffer_render( console->buffer, GL_TRIANGLES );
+    glUseProgram( 0 );
 }
 
 
@@ -696,7 +689,6 @@ main( int argc, char **argv )
     glutSpecialFunc( on_special_key_press );
     glutReshapeWindow( 600,400 );
 
-    lines_buffer = vertex_buffer_new( "v2f:c4f" ); 
     console = console_new();
     console_print( console,
                    L"OpenGL Freetype console\n"
@@ -712,6 +704,8 @@ main( int argc, char **argv )
     glEnable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );
 
+    shader = shader_load("shaders/v3f-t2f-c4f.vert",
+                         "shaders/v3f-t2f-c4f.frag");
     glutMainLoop();
 
     return 0;

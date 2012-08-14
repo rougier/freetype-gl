@@ -37,6 +37,7 @@
  */
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
+#include "shader.h"
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -48,6 +49,7 @@ typedef struct {
 
 
 // ------------------------------------------------------- global variables ---
+GLuint shader;
 vertex_buffer_t *buffer;
 
 
@@ -57,11 +59,18 @@ void display( void )
     glClearColor( 1, 1, 1, 1 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+    static GLuint texture = 0;
+    if( !texture )
+    {
+        texture = glGetUniformLocation( shader, "texture" );
+    }
+
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_TEXTURE_2D );
-    glColor4f(1,1,0,1);
-    vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
+    glUseProgram( shader );
+    glUniform1i(texture, 0);
+    vertex_buffer_render( buffer, GL_TRIANGLES );
+    glUseProgram( 0 );
     glutSwapBuffers( );
 }
 
@@ -141,7 +150,7 @@ int main( int argc, char **argv )
     texture_atlas_t *atlas = texture_atlas_new( 512, 512, 1 );
     const char * filename = "fonts/Vera.ttf";
     wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
-    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
     vec2 pen = {{5,400}};
     vec4 black = {{0,0,0,1}};
     for( i=7; i < 27; ++i)
@@ -154,6 +163,10 @@ int main( int argc, char **argv )
         texture_font_delete( font );
     }
     glBindTexture( GL_TEXTURE_2D, atlas->id );
+
+    shader = shader_load("shaders/v3f-t2f-c4f.vert",
+                         "shaders/v3f-t2f-c4f.frag");
+
     glutMainLoop( );
     return 0;
 }

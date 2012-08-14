@@ -33,7 +33,7 @@
  */
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
-
+#include "shader.h"
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
@@ -51,7 +51,7 @@ wchar_t *text =
     L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 "
     L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 ";
 int line_count = 42;
-
+GLuint shader;
 
 
 // --------------------------------------------------------------- add_text ---
@@ -99,6 +99,11 @@ void display( void )
 {
     static int frame=0, time, timebase=0;
     static int count = 0;
+    static GLuint texture = 0;
+    if( !texture )
+    {
+        texture = glGetUniformLocation( shader, "texture" );
+    }
 
     if( count == 0 && frame == 0 )
     {
@@ -145,9 +150,11 @@ void display( void )
         }
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glColor4f( 0,0,0,1 );
     glBindTexture( GL_TEXTURE_2D, atlas->id );
-    vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
+    glUseProgram( shader );
+    glUniform1i(texture, 0);
+    vertex_buffer_render( buffer, GL_TRIANGLES );
+    glUseProgram( 0 );
     glutSwapBuffers( );
 }
 
@@ -199,7 +206,7 @@ int main( int argc, char **argv )
 
     atlas  = texture_atlas_new( 512, 512, 1 );
     font = texture_font_new( atlas, "fonts/VeraMono.ttf", 12 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 
 
     pen.y = -font->descender;
     for( i=0; i<line_count; ++i )
@@ -214,6 +221,9 @@ int main( int argc, char **argv )
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glEnable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );
+
+    shader = shader_load("shaders/v3f-t2f-c4f.vert",
+                         "shaders/v3f-t2f-c4f.frag");
     glutMainLoop( );
 
     return EXIT_SUCCESS;

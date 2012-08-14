@@ -39,14 +39,6 @@
 #include "vertex-buffer.h"
 
 
-// If GL_DOUBLE does not exist we define it as GL_FLOAT
-#ifndef GL_DOUBLE
-#define GL_DOUBLE GL_FLOAT
-#else
-#define GL_DOUBLE_ GL_FLOAT
-#endif 
-
-
 // strndup() was only added in OSX lion
 #ifdef __APPLE__
 char *
@@ -101,7 +93,7 @@ vertex_buffer_new( const char *format )
     start = format;
     do
     {
-        end = (char *) (strchr(start+1, ':'));
+        end = (char *) (strchr(start+1, ','));
         char *desc = 0;
         if (end == NULL)
         {
@@ -221,42 +213,8 @@ vertex_buffer_print( vertex_buffer_t * self )
 
     while( self->attributes[i] )
     {
-        if( self->attributes[i]->target > 0 )
-        {
-            switch(self->attributes[i]->target )
-            {
-            case GL_VERTEX_ARRAY:
-                fprintf( stderr, " -> Position: ");
-                break;
-            case GL_NORMAL_ARRAY:
-                fprintf( stderr, " -> Normal: ");
-                break;
-            case GL_COLOR_ARRAY:
-                fprintf( stderr, " -> Color: ");
-                break;
-            case GL_TEXTURE_COORD_ARRAY:
-                fprintf( stderr, " -> Texture coord: ");
-                break;
-            case GL_FOG_COORD_ARRAY:
-                fprintf( stderr, " -> Fog coord: ");
-                break;
-            case GL_SECONDARY_COLOR_ARRAY:
-                fprintf( stderr, " -> Secondary color: ");
-                break;
-            case GL_EDGE_FLAG_ARRAY:
-                fprintf( stderr, " -> Edge flag: ");
-                break;
-            default:
-                fprintf( stderr, " -> Unknown: ");
-                break;
-            }
-        }
-        else
-        {
-            fprintf( stderr, " -> Generic attribute n°%d: ",
-                     self->attributes[i]->index );
-        }
-        fprintf(stderr, "%dx%s (+%ld)\n",
+        fprintf(stderr, "%s : %dx%s (+%ld)\n",
+                self->attributes[i]->name, 
                 self->attributes[i]->size, 
                 GL_TYPE_STRING( self->attributes[i]->type ),
                 (long) self->attributes[i]->pointer);
@@ -333,6 +291,7 @@ vertex_buffer_clear( vertex_buffer_t *self )
     self->state = FROZEN;
     vector_clear( self->indices );
     vector_clear( self->vertices );
+    vector_clear( self->items );
     self->state = DIRTY;
 }
 
@@ -340,8 +299,7 @@ vertex_buffer_clear( vertex_buffer_t *self )
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_render_setup ( vertex_buffer_t *self,
-                             GLenum mode, const char *what )
+vertex_buffer_render_setup ( vertex_buffer_t *self, GLenum mode )
 {
     if( self->state != CLEAN )
     {
@@ -358,20 +316,14 @@ vertex_buffer_render_setup ( vertex_buffer_t *self,
         vertex_attribute_t *attribute = self->attributes[i];
         if ( attribute == 0 )
         {
-            break;
+            continue;
         }
         else
         {
-            if (attribute->ctarget == 'g')
-            {
-                (*(attribute->enable))( attribute );
-            }
-            else if ( strchr(what, attribute->ctarget) )
-            {
-                (*(attribute->enable))( attribute );
-            }
+            vertex_attribute_enable( attribute );
         }
     }
+
     if( self->indices->size )
     {
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
@@ -416,13 +368,12 @@ vertex_buffer_render_item ( vertex_buffer_t *self,
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_render ( vertex_buffer_t *self,
-                       GLenum mode, const char *what )
+vertex_buffer_render ( vertex_buffer_t *self, GLenum mode )
 {
     size_t vcount = self->vertices->size;
     size_t icount = self->indices->size;
 
-    vertex_buffer_render_setup( self, mode, what );
+    vertex_buffer_render_setup( self, mode );
     if( icount )
     {
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
