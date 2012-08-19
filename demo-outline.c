@@ -35,6 +35,15 @@
 #include "vertex-buffer.h"
 #include "markup.h"
 #include "shader.h"
+#include "mat4.h"
+
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -49,6 +58,7 @@ typedef struct {
 texture_atlas_t * atlas;
 vertex_buffer_t * buffer;
 GLuint shader;
+mat4 model, view, projection;
 
 
 // ---------------------------------------------------------------- display ---
@@ -69,9 +79,17 @@ void display( void )
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     glUseProgram( shader );
-    glUniform1i(texture, 0);
-    vertex_buffer_render( buffer, GL_TRIANGLES );
-    glUseProgram( 0 );
+    {
+        glUniform1i( glGetUniformLocation( shader, "texture" ),
+                     0 );
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+        vertex_buffer_render( buffer, GL_TRIANGLES );
+    }
 
     glutSwapBuffers( );
 }
@@ -81,12 +99,7 @@ void display( void )
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glutPostRedisplay();
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 // --------------------------------------------------------------- keyboard ---
@@ -231,6 +244,9 @@ int main( int argc, char **argv )
     }
     shader = shader_load("shaders/v3f-t2f-c4f.vert",
                          "shaders/v3f-t2f-c4f.frag");
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 
     glutMainLoop( );
     return 0;

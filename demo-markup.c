@@ -35,19 +35,28 @@
  *
  * ============================================================================
  */
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 #include <fontconfig/fontconfig.h>
-#include "freetype-gl.h"
 
+#include "freetype-gl.h"
 #include "font-manager.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
 #include "markup.h"
 #include "shader.h"
+#include "mat4.h"
 
 
 
 // ------------------------------------------------------- global variables ---
 text_buffer_t * buffer;
+mat4 model, view, projection;
 
 
 // ------------------------------------------------------ match_description ---
@@ -112,7 +121,18 @@ void display( void )
 {
     glClearColor(0.40,0.40,0.45,1.00);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    text_buffer_render( buffer );
+
+    glUseProgram( buffer->shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
+                            1, 0, projection.data);
+        text_buffer_render( buffer );
+    }
+
     glutSwapBuffers( );
 }
 
@@ -121,11 +141,7 @@ void display( void )
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
@@ -207,6 +223,9 @@ int main( int argc, char **argv )
                         &japanese,  L"私はガラスを食べられます。 それは私を傷つけません\n",
                         &math,      L"ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ",
                         NULL );
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 
     glutMainLoop( );
     return 0;

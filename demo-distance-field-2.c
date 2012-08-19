@@ -30,14 +30,23 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-#include "freetype-gl.h"
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 
+#include "freetype-gl.h"
 #include "edtaa3func.h"
 #include "font-manager.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
 #include "markup.h"
 #include "shader.h"
+#include "mat4.h"
+
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -55,6 +64,7 @@ typedef struct {
 GLuint shader;
 vertex_buffer_t *buffer;
 texture_atlas_t * atlas = 0;
+mat4  model, view, projection;
 
 
 // ---------------------------------------------------------------- display ---
@@ -62,14 +72,6 @@ void display( void )
 {
     glClearColor( 1, 1, 1, 1 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    static GLuint texture = 0;
-    static GLuint Color = 0;
-    if( !texture )
-    {
-        texture = glGetUniformLocation( shader, "texture" );
-        Color = glGetUniformLocation( shader, "Color" );
-    }
 
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -89,16 +91,26 @@ void display( void )
         float x = (.05 + .9*(random()/(float)(RAND_MAX)))*width;
         float y = (-.05 + .9*(random()/(float)(RAND_MAX)))*height;
         float a =  0.1+.8*(pow((1.0-scale/5),2));
-        glPushMatrix();
-        glScalef(scale,scale,1);
-        glTranslatef(x/scale,y/scale,0);
-        glRotatef(angle,0,0,1);
+
+        mat4_set_identity( &model );
+        mat4_rotate( &model, angle,0,0,1);
+        mat4_scale( &model, scale, scale, 1);
+        mat4_translate( &model, x/scale, y/scale, 0);
+
         glUseProgram( shader );
-        glUniform1i(texture, 0);
-        glUniform4f(Color, color.r, color.g, color.b, a);
-        vertex_buffer_render( buffer, GL_TRIANGLES );
-        glUseProgram( 0 );
-        glPopMatrix();
+        {
+            glUniform1i( glGetUniformLocation( shader, "texture" ),
+                         0 );
+            glUniform4f( glGetUniformLocation( shader, "Color" ),
+                         color.r, color.g, color.b, a);
+            glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                                1, 0, model.data);
+            glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                                1, 0, view.data);
+            glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                                1, 0, projection.data);
+            vertex_buffer_render( buffer, GL_TRIANGLES );
+        }
     }
 
     glutSwapBuffers( );
@@ -109,11 +121,7 @@ void display( void )
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
@@ -287,6 +295,9 @@ main( int argc, char **argv )
 
     shader = shader_load( "shaders/distance-field-2.vert",
                           "shaders/distance-field-2.frag" );
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 
     glutMainLoop( );
     return 0;

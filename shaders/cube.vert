@@ -30,11 +30,15 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
 uniform vec4 Color;
 attribute vec3 vertex;
 attribute vec4 color;
 void main()
 {
     gl_FrontColor = color*Color;
-    gl_Position   = gl_ModelViewProjectionMatrix * vec4(vertex,1.);
+    gl_Position = projection*(view*(model*vec4(vertex,1.0)));
 }

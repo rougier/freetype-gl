@@ -99,6 +99,14 @@ extern "C" {
   shader_load( const char * vert_filename,
                const char * frag_filename );
 
+
+/**
+ *
+ */
+  GLuint
+  shader_get( GLuint self,
+              const char * name );
+
 /** @} */
 
 #ifdef __cplusplus

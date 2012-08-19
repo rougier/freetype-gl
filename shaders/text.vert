@@ -33,6 +33,10 @@
  */
 uniform sampler2D texture;
 uniform vec3 pixel;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
 
 attribute vec3 vertex;
 attribute vec4 color;
@@ -47,5 +51,5 @@ void main()
     vgamma = agamma;
     gl_FrontColor = color;
     gl_TexCoord[0].xy = tex_coord.xy;
-    gl_Position = gl_ModelViewProjectionMatrix * vec4(vertex.xyz,1.0);
+    gl_Position = projection*(view*(model*vec4(vertex,1.0)));
 }

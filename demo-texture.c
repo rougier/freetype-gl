@@ -36,29 +36,41 @@
  * ============================================================================
  */
 #include "freetype-gl.h"
+#include "mat4.h"
 #include "shader.h"
 #include "vertex-buffer.h"
 
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 
 // ------------------------------------------------------- global variables ---
 GLuint shader;
-vertex_buffer_t * quad;
+vertex_buffer_t * buffer;
+mat4 model, view, projection;
+
 
 // ---------------------------------------------------------------- display ---
 void display( void )
 {
-    static GLuint texture = 0;
-    if( !texture )
-    {
-        texture = glGetUniformLocation( shader, "texture" );
-    }
-
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glUseProgram( shader );
-    glUniform1i(texture, 0);
-    vertex_buffer_render( quad, GL_TRIANGLES );
-    glUseProgram( 0 );
+    {
+        glUniform1i( glGetUniformLocation( shader, "texture" ),
+                     0 );
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+        vertex_buffer_render( buffer, GL_TRIANGLES );
+    }
 
     glutSwapBuffers( );
 }
@@ -68,11 +80,7 @@ void display( void )
 void reshape( int width, int height )
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
@@ -135,11 +143,14 @@ int main( int argc, char **argv )
         {512,512,0, 1,0, 0,0,0,1},
         {512,  0,0, 1,1, 0,0,0,1} };
     GLuint indices[6] = { 0, 1, 2, 0,2,3 };
-    quad = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
-    vertex_buffer_push_back( quad, vertices, 4, indices, 6 );
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
+    vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
 
     shader = shader_load("shaders/v3f-t2f-c4f.vert",
                          "shaders/v3f-t2f-c4f.frag");
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 
     glutMainLoop( );
 

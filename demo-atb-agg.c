@@ -38,6 +38,15 @@
 #include "text-buffer.h"
 #include "markup.h"
 #include "shader.h"
+#include "mat4.h"
+
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -60,6 +69,8 @@ TwBar *bar;
 text_buffer_t * buffer;
 text_buffer_t * buffer_a;
 text_buffer_t * buffer_rgb;
+
+mat4 model, view, projection;
 
 font_family_e p_family;
 float p_size;
@@ -225,7 +236,18 @@ void display(void)
         glClearColor( 1, 1, 1, 1 );
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    text_buffer_render( buffer );
+
+    glUseProgram( buffer->shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
+                            1, 0, projection.data);
+        text_buffer_render( buffer );
+    }
+
     TwDraw( );
     glutSwapBuffers( );
 }
@@ -235,6 +257,8 @@ void display(void)
 void reshape( int width, int height )
 {
     glViewport(0, 0, width, height);
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, width, 0, height, -1, 1);
@@ -619,6 +643,11 @@ int main(int argc, char *argv[])
     reset();
 
     glutTimerFunc( 1000.0/60.0, timer, 60 );
+
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
+
     glutMainLoop();
     return EXIT_SUCCESS;
 }

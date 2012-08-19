@@ -31,19 +31,26 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-#include "freetype-gl.h"
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 
+#include "freetype-gl.h"
 #include "font-manager.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
 #include "markup.h"
 #include "shader.h"
+#include "mat4.h"
 
 
 // ------------------------------------------------------- global variables ---
-text_buffer_t * text_buffer;
-
-
+text_buffer_t * buffer;
+mat4   model, view, projection;
 
 
 // ---------------------------------------------------------------- display ---
@@ -51,7 +58,18 @@ void display( void )
 {
     glClearColor(1.00,1.00,1.00,1.00);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    text_buffer_render( text_buffer );
+
+    glUseProgram( buffer->shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
+                            1, 0, projection.data);
+        text_buffer_render( buffer );
+    }
+
     glutSwapBuffers( );
 }
 
@@ -60,11 +78,7 @@ void display( void )
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
@@ -274,8 +288,8 @@ print( text_buffer_t * buffer, vec2 * pen,
                 p = text+wcslen(text);
             }                
             ansi_to_markup(seq_start, seq_size, markup );
-            markup->font = font_manager_get_from_markup( text_buffer->manager, markup );
-            text_buffer_add_text( text_buffer, pen, markup, text_start, text_size );
+            markup->font = font_manager_get_from_markup( buffer->manager, markup );
+            text_buffer_add_text( buffer, pen, markup, text_start, text_size );
         }
     }
 }
@@ -292,7 +306,7 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    text_buffer = text_buffer_new( LCD_FILTERING_OFF );
+    buffer = text_buffer_new( LCD_FILTERING_OFF );
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
     markup_t markup = {
@@ -313,10 +327,14 @@ int main( int argc, char **argv )
         wchar_t line[1024];
         while( fgetws ( line, sizeof(line), file ) != NULL )
         {
-            print( text_buffer, &pen, line, &markup );
+            print( buffer, &pen, line, &markup );
         }
         fclose ( file );
     }
+
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 
     glutMainLoop( );
     return 0;

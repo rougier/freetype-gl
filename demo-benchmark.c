@@ -31,9 +31,20 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
+
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
 #include "shader.h"
+#include "mat4.h"
+
+
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
@@ -52,6 +63,7 @@ wchar_t *text =
     L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 ";
 int line_count = 42;
 GLuint shader;
+mat4   model, view, projection;
 
 
 // --------------------------------------------------------------- add_text ---
@@ -99,11 +111,6 @@ void display( void )
 {
     static int frame=0, time, timebase=0;
     static int count = 0;
-    static GLuint texture = 0;
-    if( !texture )
-    {
-        texture = glGetUniformLocation( shader, "texture" );
-    }
 
     if( count == 0 && frame == 0 )
     {
@@ -151,10 +158,20 @@ void display( void )
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glBindTexture( GL_TEXTURE_2D, atlas->id );
+
     glUseProgram( shader );
-    glUniform1i(texture, 0);
-    vertex_buffer_render( buffer, GL_TRIANGLES );
-    glUseProgram( 0 );
+    {
+        glUniform1i( glGetUniformLocation( shader, "texture" ),
+                     0 );
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+        vertex_buffer_render( buffer, GL_TRIANGLES );
+    }
+
     glutSwapBuffers( );
 }
 
@@ -163,11 +180,7 @@ void display( void )
 void reshape( int width, int height )
 {
     glViewport(0, 0, width, height);
-    glMatrixMode( GL_PROJECTION );
-    glLoadIdentity( );
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode( GL_MODELVIEW );
-    glLoadIdentity( );
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
@@ -224,6 +237,10 @@ int main( int argc, char **argv )
 
     shader = shader_load("shaders/v3f-t2f-c4f.vert",
                          "shaders/v3f-t2f-c4f.frag");
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
+
     glutMainLoop( );
 
     return EXIT_SUCCESS;

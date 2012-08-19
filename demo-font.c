@@ -35,9 +35,18 @@
  *
  * ============================================================================
  */
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
+
 #include "freetype-gl.h"
-#include "vertex-buffer.h"
+#include "mat4.h"
 #include "shader.h"
+#include "vertex-buffer.h"
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -51,6 +60,7 @@ typedef struct {
 // ------------------------------------------------------- global variables ---
 GLuint shader;
 vertex_buffer_t *buffer;
+mat4   model, view, projection;
 
 
 // ---------------------------------------------------------------- display ---
@@ -59,18 +69,21 @@ void display( void )
     glClearColor( 1, 1, 1, 1 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    static GLuint texture = 0;
-    if( !texture )
-    {
-        texture = glGetUniformLocation( shader, "texture" );
-    }
-
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
     glUseProgram( shader );
-    glUniform1i(texture, 0);
-    vertex_buffer_render( buffer, GL_TRIANGLES );
-    glUseProgram( 0 );
+    {
+        glUniform1i( glGetUniformLocation( shader, "texture" ),
+                     0 );
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+        vertex_buffer_render( buffer, GL_TRIANGLES );
+    }
     glutSwapBuffers( );
 }
 
@@ -79,11 +92,7 @@ void display( void )
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
@@ -166,6 +175,9 @@ int main( int argc, char **argv )
 
     shader = shader_load("shaders/v3f-t2f-c4f.vert",
                          "shaders/v3f-t2f-c4f.frag");
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 
     glutMainLoop( );
     return 0;
