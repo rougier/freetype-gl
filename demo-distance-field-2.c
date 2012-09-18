@@ -81,10 +81,10 @@ void display( void )
     GLint width  = viewport[2];
     GLint height = viewport[3];
 
-    srandom(7);
+    srandom(4);
     vec4 color = {{0.067,0.333, 0.486, 1.0}};
     size_t i;
-    for( i=0; i<50; ++i)
+    for( i=0; i<40; ++i)
     {
         float scale = .25 + 4.75 * pow(random()/(float)(RAND_MAX),2);
         float angle = 90*(random()%2);
@@ -95,7 +95,7 @@ void display( void )
         mat4_set_identity( &model );
         mat4_rotate( &model, angle,0,0,1);
         mat4_scale( &model, scale, scale, 1);
-        mat4_translate( &model, x/scale, y/scale, 0);
+        mat4_translate( &model, x, y, 0);
 
         glUseProgram( shader );
         {
