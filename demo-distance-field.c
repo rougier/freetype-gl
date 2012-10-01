@@ -186,7 +186,7 @@ make_distance_map( unsigned char *img,
     }
 
     // Compute outside = edtaa3(bitmap); % Transform background (0's)
-    computegradient( data, height, width, gx, gy);
+    computegradient( data, width, height, gx, gy);
     edtaa3(data, gx, gy, height, width, xdist, ydist, outside);
     for( i=0; i<width*height; ++i)
         if( outside[i] < 0 )
@@ -197,7 +197,7 @@ make_distance_map( unsigned char *img,
     memset(gy, 0, sizeof(double)*width*height );
     for( i=0; i<width*height; ++i)
         data[i] = 1 - data[i];
-    computegradient( data, height, width, gx, gy);
+    computegradient( data, width, height, gx, gy);
     edtaa3(data, gx, gy, height, width, xdist, ydist, inside);
     for( i=0; i<width*height; ++i)
         if( inside[i] < 0 )
