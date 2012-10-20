@@ -203,15 +203,6 @@ typedef struct {
   text_buffer_new( size_t depth );
 
 
- /**
-  * Clear text buffer
-  *
-  * @param self a text buffer
-  */
-void
-text_buffer_clear( text_buffer_t * self );
-
-
 /**
  * Render a text buffer.
  *
