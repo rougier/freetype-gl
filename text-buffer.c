@@ -247,7 +247,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     }
     
     float kerning = 0;
-    if( i > 0)
+    if( previous )
     {
         kerning = texture_glyph_get_kerning( glyph, previous );
     }
