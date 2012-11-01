@@ -385,7 +385,17 @@ float
 texture_glyph_get_kerning( const texture_glyph_t * self,
                            const wchar_t charcode );
 
+
+/**
+ * Creates a new empty glyph
+ *
+ * @return a new empty glyph (not valid)
+ */
+texture_glyph_t *
+texture_glyph_new( void );
+
 /** @} */
+
 
 #ifdef __cplusplus
 }
