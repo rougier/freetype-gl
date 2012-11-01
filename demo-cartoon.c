@@ -146,7 +146,7 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
-    size_t width = 600, height = 200;
+    size_t width = 800, height = 200;
 
     glutInit( &argc, argv );
     glutInitWindowSize( width, height );
@@ -160,7 +160,7 @@ int main( int argc, char **argv )
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 
     texture_font_t *font = texture_font_new( atlas, "fonts/ObelixPro.ttf", 128 );
 
-    vec2 pen    = {{30, 50}};
+    vec2 pen    = {{50, 50}};
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     vec4 yellow = {{1.0, 1.0, 0.0, 1.0}};
     vec4 orange1 = {{1.0, 0.9, 0.0, 1.0}};
@@ -169,19 +169,19 @@ int main( int argc, char **argv )
 
     font->outline_type = 2;
     font->outline_thickness = 7;
-    add_text( buffer, font, L"Cartoon", pen, black, black );
+    add_text( buffer, font, L"Freetype GL", pen, black, black );
 
     font->outline_type = 2;
     font->outline_thickness = 5;
-    add_text( buffer, font, L"Cartoon", pen, yellow, yellow );
+    add_text( buffer, font, L"Freetype GL", pen, yellow, yellow );
 
     font->outline_type = 1;
     font->outline_thickness = 3;
-    add_text( buffer, font, L"Cartoon", pen, black, black );
+    add_text( buffer, font, L"Freetype GL", pen, black, black );
 
     font->outline_type = 0;
     font->outline_thickness = 0;
-    add_text( buffer, font, L"Cartoon", pen, orange1, orange2 );
+    add_text( buffer, font, L"Freetype GL", pen, orange1, orange2 );
 
     shader = shader_load("shaders/v3f-t2f-c4f.vert",
                          "shaders/v3f-t2f-c4f.frag");
