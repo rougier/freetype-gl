@@ -180,6 +180,7 @@ build_buffer( void )
 
     markup.font = font;
     font->hinting = p_hinting;
+    font->kerning = p_kerning;
     font->filtering = 1;
     float norm = 1.0/(p_primary + 2*p_secondary + 2*p_tertiary);
     font->lcd_weights[0] = (unsigned char)(p_tertiary*norm*256);

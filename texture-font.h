@@ -257,6 +257,11 @@ typedef struct
     int filtering;
 
     /**
+     * Whether to use kerning if available
+     */
+    int kerning;
+
+    /**
      * LCD filter weights
      */
     unsigned char lcd_weights[5];

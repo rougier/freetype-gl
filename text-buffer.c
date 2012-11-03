@@ -225,7 +225,6 @@ text_buffer_add_wchar( text_buffer_t * self,
         return;
     }
 
-
     if( markup->font->ascender > self->line_ascender )
     {
         float y = pen->y;
@@ -247,7 +246,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     }
     
     float kerning = 0;
-    if( previous )
+    if( previous && markup->font->kerning )
     {
         kerning = texture_glyph_get_kerning( glyph, previous );
     }

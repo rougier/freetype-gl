@@ -256,6 +256,7 @@ texture_font_new( texture_atlas_t * atlas,
     self->outline_type = 0;
     self->outline_thickness = 0.0;
     self->hinting = 1;
+    self->kerning = 1;
     self->filtering = 1;
     // FT_LCD_FILTER_LIGHT   is (0x00, 0x55, 0x56, 0x55, 0x00)
     // FT_LCD_FILTER_DEFAULT is (0x10, 0x40, 0x70, 0x40, 0x10)
