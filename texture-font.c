@@ -395,11 +395,11 @@ texture_font_load_glyphs( texture_font_t * self,
             }
         }
         error = FT_Load_Glyph( face, glyph_index, flags );
-
         if( error )
         {
             fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
                      __LINE__, FT_Errors[error].code, FT_Errors[error].message );
+            FT_Done_Face( face );
             FT_Done_FreeType( library );
             return wcslen(charcodes)-i;
         }
@@ -427,6 +427,9 @@ texture_font_load_glyphs( texture_font_t * self,
             {
                 fprintf(stderr, "FT_Error (0x%02x) : %s\n",
                         FT_Errors[error].code, FT_Errors[error].message);
+                FT_Done_Face( face );
+                FT_Stroker_Done( stroker );
+                FT_Done_FreeType( library );
                 return 0;
             }
             FT_Stroker_Set( stroker,
@@ -439,6 +442,9 @@ texture_font_load_glyphs( texture_font_t * self,
             {
                 fprintf(stderr, "FT_Error (0x%02x) : %s\n",
                         FT_Errors[error].code, FT_Errors[error].message);
+                FT_Done_Face( face );
+                FT_Stroker_Done( stroker );
+                FT_Done_FreeType( library );
                 return 0;
             }
 
@@ -458,6 +464,9 @@ texture_font_load_glyphs( texture_font_t * self,
             {
                 fprintf(stderr, "FT_Error (0x%02x) : %s\n",
                         FT_Errors[error].code, FT_Errors[error].message);
+                FT_Done_Face( face );
+                FT_Stroker_Done( stroker );
+                FT_Done_FreeType( library );
                 return 0;
             }
           
@@ -468,6 +477,9 @@ texture_font_load_glyphs( texture_font_t * self,
                 {
                     fprintf(stderr, "FT_Error (0x%02x) : %s\n",
                             FT_Errors[error].code, FT_Errors[error].message);
+                    FT_Done_Face( face );
+                    FT_Stroker_Done( stroker );
+                    FT_Done_FreeType( library );
                     return 0;
                 }
             }
@@ -478,6 +490,9 @@ texture_font_load_glyphs( texture_font_t * self,
                 {
                     fprintf(stderr, "FT_Error (0x%02x) : %s\n",
                             FT_Errors[error].code, FT_Errors[error].message);
+                    FT_Done_Face( face );
+                    FT_Stroker_Done( stroker );
+                    FT_Done_FreeType( library );
                     return 0;
                 }
             }
