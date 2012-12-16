@@ -221,7 +221,7 @@ int main( int argc, char **argv )
     text_buffer_printf( buffer, &pen,
                         &underline, L"The",
                         &normal,    L" Quick",
-                        &big,       L" browng ",
+                        &big,       L" brown ",
                         &reverse,   L" fox \n",
                         &italic,    L"jumps over ",
                         &bold,      L"the lazy ",
