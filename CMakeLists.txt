@@ -63,26 +63,35 @@ ELSE( WIN32 )
     FIND_PACKAGE( AntTweakBar )
 ENDIF( WIN32 )
 
+# Untested
+if(MSVC)
+  foreach(flag_var
+          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+    set(${flag_var} "${${flag_var}} /TP")
+  endforeach(flag_var)
+endif()
+
 INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIRS}
                      ${OPENGL_INCLUDE_DIRS}
                      ${FREETYPE_INCLUDE_DIRS}
                      ${CMAKE_CURRENT_SOURCE_DIR} )
 
 SET( FREETYPE_GL_LIBRARY freetype-gl )
-SET(FREETYPE_GL_SRC freetype-gl.h
-                    vec234.h
-                    opengl.h
-                    markup.h
-                    mat4.c             mat4.h
-                    texture-atlas.c    texture-atlas.h
-                    texture-font.c     texture-font.h
-                    vertex-buffer.c    vertex-buffer.h
-                    vertex-attribute.c vertex-attribute.h
-                    font-manager.c     font-manager.h
-                    text-buffer.c      text-buffer.h
-                    shader.c           shader.h
-                    vector.c           vector.h
-                    platform.c         platform.h)
+SET( FREETYPE_GL_SRC freetype-gl.h
+                     vec234.h
+                     opengl.h
+                     markup.h
+                     mat4.c             mat4.h
+                     texture-atlas.c    texture-atlas.h
+                     texture-font.c     texture-font.h
+                     vertex-buffer.c    vertex-buffer.h
+                     vertex-attribute.c vertex-attribute.h
+                     font-manager.c     font-manager.h
+                     text-buffer.c      text-buffer.h
+                     shader.c           shader.h
+                     vector.c           vector.h
+                     platform.c         platform.h)
 
 #ADD_LIBRARY( ${FREETYPE_GL_LIBRARY} STATIC ${FREETYPE_GL_SRC} )
 ADD_LIBRARY( freetype-gl STATIC ${FREETYPE_GL_SRC} )
@@ -103,21 +112,21 @@ ENDMACRO( DEMO )
 
 IF (freetype-gl_BUILD_DEMOS)
 
-DEMO( demo-texture        "demo-texture.c" )
-DEMO( demo-font           "demo-font.c" )
-DEMO( demo-benchmark      "demo-benchmark.c" )
-DEMO( demo-console        "demo-console.c" )
-DEMO( demo-cube           "demo-cube.c" )
-DEMO( demo-glyph          "demo-glyph.c" )
-DEMO( demo-cartoon        "demo-cartoon.c" )
-DEMO( demo-outline        "demo-outline.c" )
-DEMO( demo-lcd            "demo-lcd.c" )
-DEMO( demo-gamma          "demo-gamma.c" )
-DEMO( demo-ansi           "demo-ansi.c" )
-DEMO( demo-subpixel       "demo-subpixel.c" )
-DEMO( demo-make           "demo-makefont.c;arial-16.h" )
-DEMO( makefont            "makefont.c" )
-DEMO( demo-distance-field "demo-distance-field.c;edtaa3func.c")
+DEMO( demo-texture          "demo-texture.c" )
+DEMO( demo-font             "demo-font.c" )
+DEMO( demo-benchmark        "demo-benchmark.c" )
+DEMO( demo-console          "demo-console.c" )
+DEMO( demo-cube             "demo-cube.c" )
+DEMO( demo-glyph            "demo-glyph.c" )
+DEMO( demo-cartoon          "demo-cartoon.c" )
+DEMO( demo-outline          "demo-outline.c" )
+DEMO( demo-lcd              "demo-lcd.c" )
+DEMO( demo-gamma            "demo-gamma.c" )
+DEMO( demo-ansi             "demo-ansi.c" )
+DEMO( demo-subpixel         "demo-subpixel.c" )
+DEMO( demo-make             "demo-makefont.c;arial-16.h" )
+DEMO( makefont              "makefont.c" )
+DEMO( demo-distance-field   "demo-distance-field.c;edtaa3func.c")
 DEMO( demo-distance-field-2 "demo-distance-field-2.c;edtaa3func.c")
 
 IF (FONTCONFIG_FOUND)
