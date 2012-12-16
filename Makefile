@@ -42,9 +42,11 @@ endif
 
 DEMOS     := $(patsubst %.c,%,$(wildcard demo-*.c))
 DEMOS_ATB := demo-atb-agg
-DEMOS_MKP := demo-markup
+DEMOS_MKP  := demo-markup
+DEMOS_MKP2 := demo-markup-2
 DEMOS     := $(filter-out $(DEMOS_ATB), $(DEMOS))
 DEMOS     := $(filter-out $(DEMOS_MKP), $(DEMOS))
+DEMOS     := $(filter-out $(DEMOS_MKP2), $(DEMOS))
 
 TESTS     := $(patsubst %.c,%,$(wildcard test-*.c))
 HEADERS   := $(wildcard *.h)
@@ -53,7 +55,7 @@ SOURCES   := $(filter-out makefont.c, $(SOURCES))
 OBJECTS   := $(SOURCES:.c=.o)
 
 .PHONY: all clean distclean
-all: $(DEMOS) makefont demo-atb-agg demo-markup
+all: $(DEMOS) makefont demo-atb-agg demo-markup demo-markup-2
 
 demos: $(DEMOS)
 
@@ -76,6 +78,10 @@ demo-atb-agg: demo-atb-agg.o $(OBJECTS) $(HEADERS) \
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -lAntTweakBar -o $@
 
 demo-markup: demo-markup.o $(OBJECTS) $(HEADERS)
+	@echo "Building $@... "
+	@$(CC) $(OBJECTS) $@.o $(LIBS) -lfontconfig -o $@
+
+demo-markup-2: demo-markup-2.o $(OBJECTS) $(HEADERS)
 	@echo "Building $@... "
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -lfontconfig -o $@
 

@@ -311,41 +311,6 @@ vertex_attribute_delete( vertex_attribute_t * self );
   vertex_attribute_enable( vertex_attribute_t *attr );
 
 
-/**
- * Returns the GL enum type correspond to given character.
- *
- * @param ctype  character type
- * @return       GL enum type
- *
- * @private
- */
-  GLenum
-  GL_TYPE( char ctype );
-
-
-/**
- * Returns the size of a given GL enum type.
- *
- * @param  gtype a GL enum type
- * @return       the size of the given type
- *
- * @private
- */
-  GLuint
-  GL_TYPE_SIZE( GLenum gtype );
-
-
-/**
- * Returns the literal string of given GL enum type.
- *
- * @param  gtype a GL enum type
- * @return       the literal string describing the type
- *
- * @private
- */
-  const char *
-  GL_TYPE_STRING( GLenum gtype );
-
 /** @} */
 
 #ifdef __cplusplus

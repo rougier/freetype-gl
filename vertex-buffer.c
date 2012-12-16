@@ -107,8 +107,22 @@ vertex_buffer_new( const char *format )
         start = end+1;
         free(desc);
         attribute->pointer = pointer;
-        stride  += attribute->size*GL_TYPE_SIZE( attribute->type );
-        pointer += attribute->size*GL_TYPE_SIZE( attribute->type );
+
+        GLuint attribute_size = 0;
+        switch( attribute->type )
+        {
+        case GL_BOOL:           attribute_size = sizeof(GLboolean); break;
+        case GL_BYTE:           attribute_size = sizeof(GLbyte); break;
+        case GL_UNSIGNED_BYTE:  attribute_size = sizeof(GLubyte); break;
+        case GL_SHORT:          attribute_size = sizeof(GLshort); break;
+        case GL_UNSIGNED_SHORT: attribute_size = sizeof(GLushort); break;
+        case GL_INT:            attribute_size = sizeof(GLint); break;
+        case GL_UNSIGNED_INT:   attribute_size = sizeof(GLuint); break;
+        case GL_FLOAT:          attribute_size = sizeof(GLfloat); break;
+        default:                attribute_size = 0;
+        }
+        stride  += attribute->size*attribute_size;
+        pointer += attribute->size*attribute_size;
         self->attributes[index] = attribute;
         index++;
     } while ( end && (index < MAX_VERTEX_ATTRIBUTE) );
@@ -207,16 +221,39 @@ vertex_buffer_print( vertex_buffer_t * self )
     assert(self);
 
     int i = 0;
+    static char *gltypes[9] = {
+        "GL_BOOL",
+        "GL_BYTE",
+        "GL_UNSIGNED_BYTE",
+        "GL_SHORT",
+        "GL_UNSIGNED_SHORT",
+        "GL_INT",
+        "GL_UNSIGNED_INT",
+        "GL_FLOAT",
+        "GL_VOID"
+    };
 
     fprintf( stderr, "%ld vertices, %ld indices\n",
              vector_size( self->vertices ), vector_size( self->indices ) );
-
     while( self->attributes[i] )
     {
+        int j = 8;
+        switch( self->attributes[i]->type )
+        {
+        case GL_BOOL:           j=0; break;
+        case GL_BYTE:           j=1; break;
+        case GL_UNSIGNED_BYTE:  j=2; break;
+        case GL_SHORT:          j=3; break;
+        case GL_UNSIGNED_SHORT: j=4; break;
+        case GL_INT:            j=5; break;
+        case GL_UNSIGNED_INT:   j=6; break;
+        case GL_FLOAT:          j=7; break;
+        default:                j=8; break;
+        }
         fprintf(stderr, "%s : %dx%s (+%ld)\n",
                 self->attributes[i]->name, 
                 self->attributes[i]->size, 
-                GL_TYPE_STRING( self->attributes[i]->type ),
+                gltypes[j],
                 (long) self->attributes[i]->pointer);
 
         i += 1;

@@ -117,6 +117,7 @@ DEMO( demo-subpixel       "demo-subpixel.c" )
 DEMO( demo-make           "demo-makefont.c;arial-16.h" )
 DEMO( makefont            "makefont.c" )
 DEMO( demo-distance-field "demo-distance-field.c;edtaa3func.c")
+DEMO( demo-distance-field-2 "demo-distance-field-2.c;edtaa3func.c")
 
 IF (FONTCONFIG_FOUND)
    INCLUDE_DIRECTORIES( ${FONTCONFIG_INCLUDE_DIR} )

@@ -121,7 +121,20 @@ vertex_attribute_parse( char *format )
         return 0;
     }
 
-    GLenum type = GL_TYPE( ctype );
+    GLenum type = 0;
+    switch( ctype )
+    {
+    case 'b': type = GL_BYTE;           break;
+    case 'B': type = GL_UNSIGNED_BYTE;  break;
+    case 's': type = GL_SHORT;          break;
+    case 'S': type = GL_UNSIGNED_SHORT; break;
+    case 'i': type = GL_INT;            break;
+    case 'I': type = GL_UNSIGNED_INT;   break;
+    case 'f': type = GL_FLOAT;          break;
+    default:  type = 0;                 break;
+    }
+
+
     vertex_attribute_t *attr = vertex_attribute_new( name, size, type, normalized, 0, 0 );
     free( name );
     return attr;
@@ -150,63 +163,4 @@ vertex_attribute_enable( vertex_attribute_t *attr )
     glEnableVertexAttribArray( attr->index );
     glVertexAttribPointer( attr->index, attr->size, attr->type,
                            attr->normalized, attr->stride, attr->pointer );
-}
-
-
-
-// ----------------------------------------------------------------------------
-GLenum
-GL_TYPE( char ctype )
-{
-    switch( ctype )
-    {
-    case 'b': return GL_BYTE;
-    case 'B': return GL_UNSIGNED_BYTE;
-    case 's': return GL_SHORT;
-    case 'S': return GL_UNSIGNED_SHORT;
-    case 'i': return GL_INT;
-    case 'I': return GL_UNSIGNED_INT;
-    case 'f': return GL_FLOAT;
-    default:  return 0;
-    }
-}
-
-
-
-// ----------------------------------------------------------------------------
-GLuint 
-GL_TYPE_SIZE( GLenum gtype )
-{
-    switch( gtype )
-    {
-    case GL_BOOL:           return sizeof(GLboolean);
-    case GL_BYTE:           return sizeof(GLbyte);
-    case GL_UNSIGNED_BYTE:  return sizeof(GLubyte);
-    case GL_SHORT:          return sizeof(GLshort);
-    case GL_UNSIGNED_SHORT: return sizeof(GLushort);
-    case GL_INT:            return sizeof(GLint);
-    case GL_UNSIGNED_INT:   return sizeof(GLuint);
-    case GL_FLOAT:          return sizeof(GLfloat);
-    default:                return 0;
-    }
-}
-
-
-
-// ----------------------------------------------------------------------------
-const char *
-GL_TYPE_STRING( GLenum gtype )
-{
-    switch( gtype )
-    {
-    case GL_BOOL:           return "GL_BOOL";
-    case GL_BYTE:           return "GL_BYTE";
-    case GL_UNSIGNED_BYTE:  return "GL_UNSIGNED_BYTE";
-    case GL_SHORT:          return "GL_SHORT";
-    case GL_UNSIGNED_SHORT: return "GL_UNSIGNED_SHORT";
-    case GL_INT:            return "GL_INT";
-    case GL_UNSIGNED_INT:   return "GL_UNSIGNED_INT";
-    case GL_FLOAT:          return "GL_FLOAT";
-    default:                return "GL_VOID";
-    }
 }

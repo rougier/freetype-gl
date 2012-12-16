@@ -202,7 +202,6 @@ text_buffer_add_wchar( text_buffer_t * self,
     size_t vcount = 0;
     size_t icount = 0;
     vertex_buffer_t * buffer = self->buffer;
-    size_t i = 0;
     texture_font_t * font = markup->font;
     float gamma = markup->gamma;
 
