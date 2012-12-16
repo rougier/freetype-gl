@@ -30,14 +30,6 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#elif defined(_WIN32) || defined(_WIN64)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-
 #include "freetype-gl.h"
 #include "edtaa3func.h"
 #include "font-manager.h"
@@ -46,6 +38,15 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
+
 
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
@@ -263,6 +264,15 @@ main( int argc, char **argv )
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 
     texture_font_t *font = 0;
     texture_atlas_t *atlas = texture_atlas_new( 512, 512, 1 );

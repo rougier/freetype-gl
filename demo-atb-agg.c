@@ -500,6 +500,15 @@ int main(int argc, char *argv[])
     glutCreateWindow( "Font rendering advanced tweaking" );
     glutCreateMenu( NULL );
 
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
+
 
     glutDisplayFunc( display );
     glutReshapeFunc( reshape );

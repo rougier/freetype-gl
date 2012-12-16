@@ -30,6 +30,12 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
+#include "freetype-gl.h"
+#include "vertex-buffer.h"
+#include "markup.h"
+#include "shader.h"
+#include "mat4.h"
+
 #if defined(__APPLE__)
     #include <Glut/glut.h>
 #elif defined(_WIN32) || defined(_WIN64)
@@ -38,11 +44,6 @@
     #include <GL/glut.h>
 #endif
 
-#include "freetype-gl.h"
-#include "vertex-buffer.h"
-#include "markup.h"
-#include "shader.h"
-#include "mat4.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #  define wcpncpy wcsncpy
@@ -700,6 +701,15 @@ main( int argc, char **argv )
     glutKeyboardFunc( on_key_press );
     glutSpecialFunc( on_special_key_press );
     glutReshapeWindow( 600,400 );
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 
     console = console_new();
     console_print( console,

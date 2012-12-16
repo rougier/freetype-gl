@@ -31,7 +31,6 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
 #include "freetype-gl.h"
-
 #include "edtaa3func.h"
 #include "font-manager.h"
 #include "vertex-buffer.h"
@@ -249,6 +248,15 @@ main( int argc, char **argv )
     glutMotionFunc( mouse_drag );
     glutPassiveMotionFunc( mouse_motion );
     glutKeyboardFunc( keyboard );
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 
 
     unsigned char *map;

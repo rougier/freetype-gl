@@ -35,6 +35,11 @@
  *
  * ============================================================================
  */
+
+#include "freetype-gl.h"
+#include "mat4.h"
+#include "shader.h"
+#include "vertex-buffer.h"
 #if defined(__APPLE__)
     #include <Glut/glut.h>
 #elif defined(_WIN32) || defined(_WIN64)
@@ -42,11 +47,6 @@
 #else
     #include <GL/glut.h>
 #endif
-
-#include "freetype-gl.h"
-#include "mat4.h"
-#include "shader.h"
-#include "vertex-buffer.h"
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -153,6 +153,15 @@ int main( int argc, char **argv )
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 
     size_t i;
     texture_font_t *font = 0;

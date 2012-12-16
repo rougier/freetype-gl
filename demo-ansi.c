@@ -31,14 +31,6 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#elif defined(_WIN32) || defined(_WIN64)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-
 #include "freetype-gl.h"
 #include "font-manager.h"
 #include "vertex-buffer.h"
@@ -46,6 +38,14 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 
 
 // ------------------------------------------------------- global variables ---
@@ -305,6 +305,15 @@ int main( int argc, char **argv )
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 
     buffer = text_buffer_new( LCD_FILTERING_OFF );
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};

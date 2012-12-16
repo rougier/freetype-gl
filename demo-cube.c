@@ -31,6 +31,11 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include "freetype-gl.h"
+#include "shader.h"
+#include "vertex-buffer.h"
+#include <stdlib.h>
+
 #if defined(__APPLE__)
 #    include <OpenGL/gl.h>
 #    include <Glut/glut.h>
@@ -38,10 +43,8 @@
     #include <GL/gl.h>
     #include <GL/glut.h>
 #endif
-#include <stdlib.h>
 
-#include "shader.h"
-#include "vertex-buffer.h"
+
 
 
 // ------------------------------------------------------- global variables ---
@@ -143,6 +146,16 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
     glutTimerFunc( 1000/60, timer, 1000/60 );
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
+
 
     typedef struct { float x,y,z;} xyz;
     typedef struct { float r,g,b,a;} rgba;

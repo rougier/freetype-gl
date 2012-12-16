@@ -33,10 +33,10 @@
 PLATFORM		= $(shell uname)
 CC				= gcc
 CFLAGS			= -Wall `freetype-config --cflags` -I/usr/X11/include -g -O0
-LIBS			= -lGL -lglut -lGLU -lm \
+LIBS			= -lGLEW -lGL -lglut -lGLU -lm \
 	              `freetype-config --libs`
 ifeq ($(PLATFORM), Darwin)
-	LIBS		= -framework OpenGL -framework GLUT -lm \
+	LIBS		= -framework OpenGL -framework GLUT -lGLEW -lm \
 	               `freetype-config --libs` -L /usr/X11/lib
 endif
 

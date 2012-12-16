@@ -36,7 +36,6 @@
  * ============================================================================
  */
 #include "freetype-gl.h"
-
 #include "font-manager.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
@@ -125,6 +124,15 @@ int main( int argc, char **argv )
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 
     buffer = text_buffer_new( LCD_FILTERING_ON );
     vec4 white = {{1.0, 1.0, 1.0, 1.0}};

@@ -31,6 +31,11 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include "freetype-gl.h"
+#include "vertex-buffer.h"
+#include "shader.h"
+#include "mat4.h"
+
 #if defined(__APPLE__)
     #include <Glut/glut.h>
 #elif defined(_WIN32) || defined(_WIN64)
@@ -38,12 +43,6 @@
 #else
     #include <GL/glut.h>
 #endif
-
-#include "freetype-gl.h"
-#include "vertex-buffer.h"
-#include "shader.h"
-#include "mat4.h"
-
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -216,6 +215,15 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
     glutIdleFunc( idle );
+
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 
     atlas  = texture_atlas_new( 512, 512, 1 );
     font = texture_font_new( atlas, "fonts/VeraMono.ttf", 12 );

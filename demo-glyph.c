@@ -183,6 +183,15 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
+
     vec4 blue  = {{0,0,1,1}};
     vec4 black = {{0,0,0,1}};
 

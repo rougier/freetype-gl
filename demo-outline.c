@@ -189,6 +189,15 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
+
     atlas = texture_atlas_new( 512, 512, 1 );
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 
 
