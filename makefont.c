@@ -155,6 +155,9 @@ int main( int argc, char **argv )
     // ----------------------
     fwprintf( file,
         L"#include <stddef.h>\n"
+        L"#ifdef __cplusplus\n"
+        L"extern \"C\" {\n"
+        L"#endif\n"
         L"\n"
         L"typedef struct\n"
         L"{\n"
@@ -314,6 +317,11 @@ int main( int argc, char **argv )
         fwprintf( file, L"} },\n" );
     }
     fwprintf( file, L" }\n};\n" );
+
+    fwprintf( file,
+        L"#ifdef __cplusplus\n"
+        L"}\n"
+        L"#endif\n" );
 
     return 0;
 }
