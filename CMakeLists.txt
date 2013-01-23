@@ -163,7 +163,7 @@ IF (ANT_TWEAK_BAR_FOUND)
 ENDIF (ANT_TWEAK_BAR_FOUND)
 
 # Copy font and shaders into build directory for in-place testing
-FILE(GLOB Fonts   "fonts/*.ttf")
+FILE(GLOB fonts   "fonts/*.ttf")
 file(COPY ${Fonts}   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Fonts)
 FILE(GLOB Shaders "shaders/*.vert" "shaders/*.frag")
 file(COPY ${Shaders} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/shaders)
