@@ -34,6 +34,8 @@
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
 
+#include <stdlib.h>
+
 //-------------------------------------------------
 // stdint.h is not available on VS2008 or lower
 //-------------------------------------------------
@@ -46,24 +48,22 @@ typedef unsigned __int64 uint64_t;
 #include <stdint.h>
 #endif // _MSC_VER
 
-#if defined(_WIN32) || defined(_WIN64)
-
-//-------------------------------------------------
-// Functions not supported by VS
-//-------------------------------------------------
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-float round (float v);
+#ifdef __APPLE__
+    /* strndup() was only added in OSX lion */
+    char * strndup( const char *s1, size_t n);
+#elif defined(_WIN32) || defined(_WIN64) 
+    /* does not exist on windows */
+    char * strndup( const char *s1, size_t n);
+    float round (float v);
+#    pragma warning (disable: 4244) // suspend warnings
+#endif // _WIN32 || _WIN64
 
 #ifdef __cplusplus
 }
 #endif // __cplusplus
-
-// suspend warnings
-#pragma warning (disable: 4244)
-
-#endif // _WIN32 || _WIN64
 
 #endif /* __PLATFORM_H__ */

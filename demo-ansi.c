@@ -48,12 +48,12 @@
 #endif
 
 
-// ------------------------------------------------------- global variables ---
+/* ------------------------------------------------------ global variables - */
 text_buffer_t * buffer;
 mat4   model, view, projection;
 
 
-// ---------------------------------------------------------------- display ---
+/* --------------------------------------------------------------- display - */
 void display( void )
 {
     glClearColor(1.00,1.00,1.00,1.00);
@@ -74,7 +74,7 @@ void display( void )
 }
 
 
-// --------------------------------------------------------------- reshape ---
+/* -------------------------------------------------------------- reshape - */
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -82,7 +82,7 @@ void reshape(int width, int height)
 }
 
 
-// --------------------------------------------------------------- keyboard ---
+/* -------------------------------------------------------------- keyboard - */
 void keyboard( unsigned char key, int x, int y )
 {
     if ( key == 27 )
@@ -92,7 +92,7 @@ void keyboard( unsigned char key, int x, int y )
 }
 
 
-// ------------------------------------------------------------ init_colors ---
+/* ----------------------------------------------------------- init_colors - */
 void
 init_colors( vec4 *colors )
 {
@@ -116,18 +116,18 @@ init_colors( vec4 *colors )
             {{238/256.0f, 238/256.0f, 236/256.0f, 1.0f}}
         };
     size_t i = 0;
-    // Default 16 colors
+    /* Default 16 colors */
     for( i=0; i< 16; ++i )
     {
         colors[i] = defaults[i];
     }
-    // Color cube
+    /* Color cube */
     for( i=0; i<6*6*6; i++ )
     {
         vec4 color = {{ (i/6/6)/5.0f, ((i/6)%6)/5.0f, (i%6)/5.0f, 1.0f}};
         colors[i+16] = color;
     }
-    // Grascale ramp (24 tones)
+    /* Grascale ramp (24 tones) */
     for( i=0; i<24; i++ )
     {
         vec4 color ={{i/24.0f, i/24.0f, i/24.0f, 1.0f}};
@@ -136,7 +136,7 @@ init_colors( vec4 *colors )
 }
 
 
-// --------------------------------------------------------- ansi_to_markup ---
+/* -------------------------------------------------------- ansi_to_markup - */
 void
 ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
 {
@@ -198,12 +198,12 @@ ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
                 set_bg = 1;
                 code = 0;
             }
-            // Set fg color (30 + x, where x is the index of the color)
+            /* Set fg color (30 + x, where x is the index of the color) */
             else if( (code >= 30) && (code < 38 ) )
             {
                 markup->foreground_color = colors[code-30];
             }
-            // Set bg color (40 + x, where x is the index of the color)
+            /* Set bg color (40 + x, where x is the index of the color) */
             else if( (code >= 40) && (code < 48 ) )
             {
                 markup->background_color = colors[code-40];
@@ -251,7 +251,7 @@ ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
     markup->outline_color = markup->foreground_color;
 }
 
-// ------------------------------------------------------------------ print ---
+/* ----------------------------------------------------------------- print - */
 void
 print( text_buffer_t * buffer, vec2 * pen,
        wchar_t *text, markup_t *markup )
@@ -295,7 +295,7 @@ print( text_buffer_t * buffer, vec2 * pen,
 }
 
 
-// ------------------------------------------------------------------- main ---
+/* ------------------------------------------------------------------ main - */
 int main( int argc, char **argv )
 {
     glutInit( &argc, argv );
