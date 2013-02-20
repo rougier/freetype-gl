@@ -72,11 +72,12 @@ mat4_set_identity( mat4 *self )
 void
 mat4_multiply( mat4 *self, mat4 *other )
 {
+    mat4 m;
+    size_t i;
+
     assert( self );
     assert( other );
 
-    mat4 m;
-    size_t i;
     for( i=0; i<4; ++i )
     {
         m.data[i*4+0] =
@@ -135,11 +136,14 @@ mat4_set_perspective( mat4 *self,
                       float fovy,  float aspect,
                       float znear, float zfar)
 {
+    float h, w;
+   
     assert( self );
     assert( znear != zfar );
 
-    float h = tan(fovy / 360.0 * M_PI) * znear;
-    float w = h * aspect;
+    h = tan(fovy / 360.0 * M_PI) * znear;
+    w = h * aspect;
+ 
     mat4_set_frustum( self, -w, w, -h, h, znear, zfar );
 }
 
@@ -174,11 +178,14 @@ mat4_set_rotation( mat4 *self,
                    float angle,
                    float x, float y, float z)
 {
+    float c, s, norm;
+  
     assert( self );
 
-    float c = cos( M_PI*angle/180.0 );
-    float s = sin( M_PI*angle/180.0 );
-    float norm = sqrt(x*x+y*y+z*z);
+    c = cos( M_PI*angle/180.0 );
+    s = sin( M_PI*angle/180.0 );
+    norm = sqrt(x*x+y*y+z*z);
+
     x /= norm; y /= norm; z /= norm;
 
     mat4_set_identity( self );
@@ -225,9 +232,10 @@ mat4_rotate( mat4 *self,
              float angle,
              float x, float y, float z)
 {
+    mat4 m;
+    
     assert( self );
 
-    mat4 m;
     mat4_set_rotation( &m, angle, x, y, z);
     mat4_multiply( self, &m );
 }
@@ -236,9 +244,9 @@ void
 mat4_translate( mat4 *self,
                 float x, float y, float z)
 {
+    mat4 m;
     assert( self );
 
-    mat4 m;
     mat4_set_translation( &m, x, y, z);
     mat4_multiply( self, &m );
 }
@@ -247,9 +255,9 @@ void
 mat4_scale( mat4 *self,
             float x, float y, float z)
 {
+    mat4 m;
     assert( self );
 
-    mat4 m;
     mat4_set_scaling( &m, x, y, z);
     mat4_multiply( self, &m );
 }

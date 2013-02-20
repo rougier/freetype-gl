@@ -280,7 +280,7 @@ int main( int argc, char **argv )
             fwprintf( file, L"  {L'\\%lc', ", glyph->charcode );
             //wprintf( L"  {L'\\%lc', ", glyph->charcode );
         }
-        else if( (glyph->charcode == (wchar_t)(-1) ) )
+        else if( glyph->charcode == (wchar_t)(-1) )
         {
             fwprintf( file, L"  {L'\\0', " );
             //wprintf( L"  {L'\\0', " );

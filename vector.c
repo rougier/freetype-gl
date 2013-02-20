@@ -42,9 +42,9 @@
 vector_t *
 vector_new( size_t item_size )
 {
+    vector_t *self = (vector_t *) malloc( sizeof(vector_t) );
     assert( item_size );
 
-    vector_t *self = (vector_t *) malloc( sizeof(vector_t) );
     if( !self )
     {
         fprintf( stderr,
@@ -114,9 +114,9 @@ vector_contains( const vector_t *self,
                  const void *item,
                  int (*cmp)(const void *, const void *) )
 {
+    size_t i;
     assert( self );
 
-    size_t i;
     for( i=0; i<self->size; ++i )
     {
         if( (*cmp)(item, vector_get(self,i) ) == 0 )

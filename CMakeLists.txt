@@ -38,7 +38,9 @@ OPTION(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
 
 # Get required and optional library
 FIND_PACKAGE( OpenGL REQUIRED )
-IF( WIN32 )
+IF( WIN32 OR WIN64 )
+	SET( WINDOWS_DIR
+         ${CMAKE_CURRENT_SOURCE_DIR}/windows )
 	SET( GLUT_INCLUDE_DIR
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut )
 	SET( GLUT_GLUT_LIBRARY
@@ -54,14 +56,15 @@ IF( WIN32 )
 	SET( ANT_TWEAK_BAR_LIBRARY
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/AntTweakBar/lib/AntTweakBar.lib )
     SET( ANT_TWEAK_BAR_FOUND "YES" )
-ELSE( WIN32 )
+ELSE( WIN32 OR WIN64 )
     FIND_PACKAGE( GLUT REQUIRED )
     FIND_PACKAGE( Freetype REQUIRED )
+    FIND_PACKAGE( GLEW REQUIRED )
     FIND_PACKAGE( FontConfig )
     FIND_LIBRARY( MATH_LIBRARY m )
     #FIND_LIBRARY( STDC_LIBRARY stdc++) #Buggy Cmake can't find libstdc++
     FIND_PACKAGE( AntTweakBar )
-ENDIF( WIN32 )
+ENDIF( WIN32 OR WIN64 )
 
 # Untested
 if(MSVC)
@@ -75,6 +78,7 @@ endif()
 INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIRS}
                      ${OPENGL_INCLUDE_DIRS}
                      ${FREETYPE_INCLUDE_DIRS}
+                     ${GLEW_INCLUDE_DIRS}
                      ${CMAKE_CURRENT_SOURCE_DIR} )
 
 SET( FREETYPE_GL_LIBRARY freetype-gl )
@@ -100,8 +104,10 @@ LINK_DIRECTORIES(${PROJECT_SOURCE_DIR})
 
 MACRO( DEMO _target _sources)
      add_executable(${_target} ${_sources})
+	 include_directories(${WINDOWS_DIR} ${GLUT_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
      target_link_libraries(${_target} ${FREETYPE_GL_LIBRARY})
      target_link_libraries(${_target} ${OPENGL_LIBRARY})
+     target_link_libraries(${_target} ${GLEW_LIBRARY})
      target_link_libraries(${_target} freetype-gl)
      target_link_libraries(${_target} ${GLUT_LIBRARY})
      target_link_libraries(${_target} ${FREETYPE_LIBRARY})
@@ -148,6 +154,7 @@ IF (ANT_TWEAK_BAR_FOUND)
       add_executable(demo-atb-agg  demo-atb-agg.c) 
       target_link_libraries( demo-atb-agg ${FREETYPE_GL_LIBRARY})
       target_link_libraries( demo-atb-agg ${GLUT_LIBRARY})
+      target_link_libraries( demo-atb-agg ${GLEW_LIBRARY})
       target_link_libraries( demo-atb-agg ${FREETYPE_LIBRARY})
       target_link_libraries( demo-atb-agg ${ANT_TWEAK_BAR_LIBRARY})
       # target_link_libraries( demo-atb-agg ${STDC_LIBRARY}) # Buggy Cmake can't find libstdc++
@@ -162,9 +169,18 @@ IF (ANT_TWEAK_BAR_FOUND)
   endif()
 ENDIF (ANT_TWEAK_BAR_FOUND)
 
+
 # Copy font and shaders into build directory for in-place testing
-FILE(GLOB fonts   "fonts/*.ttf")
-file(COPY ${Fonts}   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Fonts)
+FILE(GLOB Fonts   "fonts/Vera.ttf"
+                  "fonts/VeraMoBI.ttf"
+                  "fonts/VeraMoBd.ttf"
+                  "fonts/VeraMoIt.ttf"
+                  "fonts/VeraMono.ttf")
+file(COPY ${Fonts}   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/fonts)
+
+FILE(GLOB Data   "data/256colors.txt")
+file(COPY ${Data}   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
+
 FILE(GLOB Shaders "shaders/*.vert" "shaders/*.frag")
 file(COPY ${Shaders} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/shaders)
 

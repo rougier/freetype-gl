@@ -50,10 +50,10 @@ vertex_attribute_new( GLchar * name,
                       GLsizei stride,
                       GLvoid *pointer )
 {
-    assert( size > 0 );
-
     vertex_attribute_t *attribute =
         (vertex_attribute_t *) malloc (sizeof(vertex_attribute_t));
+
+    assert( size > 0 );
 
     attribute->name       = (GLchar *) strdup( name );
     attribute->index      = -1;
@@ -83,10 +83,12 @@ vertex_attribute_delete( vertex_attribute_t * self )
 vertex_attribute_t *
 vertex_attribute_parse( char *format )
 {
+    GLenum type = 0;
     int size;
     int normalized = 0;
     char ctype;
     char *name;
+    vertex_attribute_t *attr;
     char *p = strchr(format, ':');
     if( p != NULL)
     {
@@ -122,7 +124,6 @@ vertex_attribute_parse( char *format )
         return 0;
     }
 
-    GLenum type = 0;
     switch( ctype )
     {
     case 'b': type = GL_BYTE;           break;
@@ -136,7 +137,7 @@ vertex_attribute_parse( char *format )
     }
 
 
-    vertex_attribute_t *attr = vertex_attribute_new( name, size, type, normalized, 0, 0 );
+    attr = vertex_attribute_new( name, size, type, normalized, 0, 0 );
     free( name );
     return attr;
 }
