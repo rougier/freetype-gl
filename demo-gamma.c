@@ -36,23 +36,32 @@
  * ============================================================================
  */
 #include "freetype-gl.h"
-
 #include "font-manager.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
 #include "markup.h"
 #include "shader.h"
+#include "mat4.h"
 
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
     float x, y, z;
-    float r, g, b;
+    float r, g, b, a;
 } vertex_t;
 
 // ------------------------------------------------------- global variables ---
-text_buffer_t *text_buffer;
-vertex_buffer_t *buffer;
+text_buffer_t *buffer;
+vertex_buffer_t *background;
+GLuint shader;
+mat4 model, view, projection;
 
 
 // ---------------------------------------------------------------- display ---
@@ -60,9 +69,29 @@ void display( void )
 {
     glClearColor( 1.0,1.0,1.0,1.0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glDisable( GL_TEXTURE_2D );
-    vertex_buffer_render( buffer, GL_TRIANGLES, "vc" );
-    text_buffer_render( text_buffer );
+
+    glUseProgram( shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+        vertex_buffer_render( background, GL_TRIANGLES );
+    }
+
+    glUseProgram( buffer->shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
+                            1, 0, projection.data);
+        text_buffer_render( buffer );
+    }
+
     glutSwapBuffers( );
 }
 
@@ -71,11 +100,7 @@ void display( void )
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
@@ -100,16 +125,16 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    buffer = vertex_buffer_new( "v3f:c3f" );
-    vertex_t vertices[4*2] = { {  0,  0,0, 1,1,1}, {  0,256,0, 1,1,1},
-                               {512,256,0, 1,1,1}, {512,  0,0, 1,1,1},
-                               {0,  256,0, 0,0,0}, {  0,512,0, 0,0,0},
-                               {512,512,0, 0,0,0}, {512,256,0, 0,0,0} };
-    GLuint indices[4*3] = { 0,1,2, 0,2,3, 4,5,6, 4,6,7 };
-    vertex_buffer_push_back( buffer, vertices, 8, indices, 12 );
-    
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 
-    text_buffer = text_buffer_new( LCD_FILTERING_ON );
+    buffer = text_buffer_new( LCD_FILTERING_ON );
     vec4 white = {{1.0, 1.0, 1.0, 1.0}};
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
@@ -125,20 +150,34 @@ int main( int argc, char **argv )
     };
 
     size_t i;
-    vec2 pen = {{32, 500}};
+    vec2 pen = {{32, 508}};
     wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789\n";
     for( i=0; i < 14; ++i )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
-        text_buffer_add_text( text_buffer, &pen, &markup, text, wcslen(text) );
+        text_buffer_add_text( buffer, &pen, &markup, text, wcslen(text) );
     }
-    pen = (vec2) {{32, 234}};
+    pen = (vec2) {{32, 252}};
     markup.foreground_color = black;
     for( i=0; i < 14; ++i )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
-        text_buffer_add_text( text_buffer, &pen, &markup, text, wcslen(text) );
+        text_buffer_add_text( buffer, &pen, &markup, text, wcslen(text) );
     }
+
+    background = vertex_buffer_new( "vertex:3f,color:4f" );
+    vertex_t vertices[4*2] = { {  0,  0,0, 1,1,1,1}, {  0,256,0, 1,1,1,1},
+                               {512,256,0, 1,1,1,1}, {512,  0,0, 1,1,1,1},
+                               {0,  256,0, 0,0,0,1}, {  0,512,0, 0,0,0,1},
+                               {512,512,0, 0,0,0,1}, {512,256,0, 0,0,0,1} };
+    GLuint indices[4*3] = { 0,1,2, 0,2,3, 4,5,6, 4,6,7 };
+    vertex_buffer_push_back( background, vertices, 8, indices, 12 );
+    shader = shader_load("shaders/v3f-c4f.vert",
+                         "shaders/v3f-c4f.frag");
+
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 
     glutMainLoop( );
     return 0;

@@ -37,6 +37,7 @@
 #include "text-buffer.h"
 #include "markup.h"
 #include "shader.h"
+#include "mat4.h"
 
 #if defined(__APPLE__)
     #include <Glut/glut.h>
@@ -46,97 +47,74 @@
     #include <GL/glut.h>
 #endif
 
+
+
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
-    float x, y, zoom;
-} viewport_t;
+    float x, y, z;    // position
+    float s, t;       // texture
+    float r, g, b, a; // color
+} vertex_t;
+
 
 // ------------------------------------------------------- global variables ---
+GLuint shader;
+vertex_buffer_t *buffer;
 texture_atlas_t * atlas = 0;
-viewport_t viewport = {0,0,1};
-GLuint program = 0;
+mat4  model, view, projection;
 
 
 // ---------------------------------------------------------------- display ---
-void
-display( void )
+void display( void )
 {
-    int v[4];
-    glGetIntegerv( GL_VIEWPORT, v );
-    GLuint width  = v[2];
-    GLuint height = v[3];
-    glClearColor(0.5,0.5,0.5,1.00);
+    glClearColor( 1, 1, 1, 1 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, atlas->id);
-    glEnable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    GLuint handle;
-    handle = glGetUniformLocation( program, "texture" );
-    glUniform1i( handle, 0);
+    GLint viewport[4];
+    glGetIntegerv( GL_VIEWPORT, viewport );
+    GLint width  = viewport[2];
+    GLint height = viewport[3];
 
-    int x = viewport.x;
-    int y = viewport.y;
-    width *= viewport.zoom;
-    height *= viewport.zoom;
+    srandom(4);
+    vec4 color = {{0.067,0.333, 0.486, 1.0}};
+    size_t i;
+    for( i=0; i<40; ++i)
+    {
+        float scale = .25 + 4.75 * pow(random()/(float)(RAND_MAX),2);
+        float angle = 90*(random()%2);
+        float x = (.05 + .9*(random()/(float)(RAND_MAX)))*width;
+        float y = (-.05 + .9*(random()/(float)(RAND_MAX)))*height;
+        float a =  0.1+.8*(pow((1.0-scale/5),2));
 
-    glColor4f( 1.0, 1.0, 1.0, 1.0 );
-    glPushMatrix();
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0, 1 ); glVertex2i( x, y );
-    glTexCoord2f( 0, 0 ); glVertex2i( x, y+height );
-    glTexCoord2f( 1, 0 ); glVertex2i( x+width, y+height );
-    glTexCoord2f( 1, 1 ); glVertex2i( x+width, y );
-    glEnd();
+        mat4_set_identity( &model );
+        mat4_rotate( &model, angle,0,0,1);
+        mat4_scale( &model, scale, scale, 1);
+        mat4_translate( &model, x, y, 0);
 
-    glPopMatrix();
+        glUseProgram( shader );
+        {
+            glUniform1i( glGetUniformLocation( shader, "texture" ),
+                         0 );
+            glUniform4f( glGetUniformLocation( shader, "Color" ),
+                         color.r, color.g, color.b, a);
+            glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                                1, 0, model.data);
+            glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                                1, 0, view.data);
+            glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                                1, 0, projection.data);
+            vertex_buffer_render( buffer, GL_TRIANGLES );
+        }
+    }
+
     glutSwapBuffers( );
-}
-
-
-// ----------------------------------------------------------- mouse_motion ---
-void
-mouse_motion( int x, int y )
-{
-    int v[4];
-    glGetIntegerv( GL_VIEWPORT, v );
-    GLfloat width = v[2], height = v[3];
-    float nx = min( max( x/width, 0.0), 1.0 );
-    float ny = 1-min( max( y/height, 0.0), 1.0 );
-    viewport.x = nx*width*(1-viewport.zoom);
-    viewport.y = ny*height*(1-viewport.zoom);
-    glutPostRedisplay();
-}
-
-
-// ------------------------------------------------------------- mouse_drag ---
-void
-mouse_drag( int x, int y )
-{
-    static int _x=-1, _y=-1;
-    if( (_x == -1) && (_y == -1) )
-    {
-        _x = x; _y = y;
-        return;
-    }
-    int dy = y - _y;
-    if (dy < 0)
-    {
-        viewport.zoom *= 1.05;
-    }
-    else
-    {
-        viewport.zoom /= 1.05;
-    }
-    _x = x; _y = y;
-    mouse_motion(x,y);
 }
 
 
@@ -144,22 +122,62 @@ mouse_drag( int x, int y )
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
 // --------------------------------------------------------------- keyboard ---
-void
-keyboard( unsigned char key, int x, int y )
+void keyboard( unsigned char key, int x, int y )
 {
     if ( key == 27 )
     {
         exit( 1 );
     }
+}
+
+
+// --------------------------------------------------------------- add_text ---
+vec4
+add_text( vertex_buffer_t * buffer, texture_font_t * font,
+          wchar_t * text, vec4 * color, vec2 * pen )
+{
+    vec4 bbox = {{0,0,0,0}};
+    size_t i;
+    float r = color->red, g = color->green, b = color->blue, a = color->alpha;
+    for( i=0; i<wcslen(text); ++i )
+    {
+        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
+        if( glyph != NULL )
+        {
+            int kerning = 0;
+            if( i > 0)
+            {
+                kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+            }
+            pen->x += kerning;
+            int x0  = (int)( pen->x + glyph->offset_x );
+            int y0  = (int)( pen->y + glyph->offset_y );
+            int x1  = (int)( x0 + glyph->width );
+            int y1  = (int)( y0 - glyph->height );
+            float s0 = glyph->s0;
+            float t0 = glyph->t0;
+            float s1 = glyph->s1;
+            float t1 = glyph->t1;
+            GLuint indices[6] = {0,1,2, 0,2,3};
+            vertex_t vertices[4] = { { x0,y0,0,  s0,t0,  r,g,b,a },
+                                     { x0,y1,0,  s0,t1,  r,g,b,a },
+                                     { x1,y1,0,  s1,t1,  r,g,b,a },
+                                     { x1,y0,0,  s1,t0,  r,g,b,a } };
+            vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
+            pen->x += glyph->advance_x;
+
+            if  (x0 < bbox.x)                bbox.x = x0;
+            if  (y1 < bbox.y)                bbox.y = y1;
+            if ((x1 - bbox.x) > bbox.width)  bbox.width  = x1-bbox.x;
+            if ((y0 - bbox.y) > bbox.height) bbox.height = y0-bbox.y;
+        }
+    }
+    return bbox;
 }
 
 
@@ -193,7 +211,7 @@ make_distance_map( unsigned char *img,
     }
 
     // Compute outside = edtaa3(bitmap); % Transform background (0's)
-    computegradient( data, width, height, gx, gy);
+    computegradient( data, height, width, gx, gy);
     edtaa3(data, gx, gy, height, width, xdist, ydist, outside);
     for( i=0; i<width*height; ++i)
         if( outside[i] < 0 )
@@ -204,7 +222,7 @@ make_distance_map( unsigned char *img,
     memset(gy, 0, sizeof(double)*width*height );
     for( i=0; i<width*height; ++i)
         data[i] = 1 - data[i];
-    computegradient( data, width, height, gx, gy);
+    computegradient( data, height, width, gx, gy);
     edtaa3(data, gx, gy, height, width, xdist, ydist, inside);
     for( i=0; i<width*height; ++i)
         if( inside[i] < 0 )
@@ -240,13 +258,11 @@ int
 main( int argc, char **argv )
 {
     glutInit( &argc, argv );
-    glutInitWindowSize( 512, 512 );
+    glutInitWindowSize( 800, 600 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Freetype OpenGL width shaders" );
+    glutCreateWindow( "Signed Distance Field" );
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
-    glutMotionFunc( mouse_drag );
-    glutPassiveMotionFunc( mouse_motion );
     glutKeyboardFunc( keyboard );
 
     GLenum err = glewInit();
@@ -258,31 +274,40 @@ main( int argc, char **argv )
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 
+    texture_font_t *font = 0;
+    texture_atlas_t *atlas = texture_atlas_new( 512, 512, 1 );
+    const char * filename = "fonts/Vera.ttf";
+    wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
+    vec2 pen = {{0,0}};
+    vec4 black = {{1,1,1,1}};
+    font = texture_font_new( atlas, filename, 48 );
+    vec4 bbox = add_text( buffer, font, text, &black, &pen );
+    size_t i;
+    vector_t * vertices = buffer->vertices;
+    for( i=0; i< vector_size(vertices); ++i )
+    {
+        vertex_t * vertex = (vertex_t *) vector_get(vertices,i);
+        vertex->x -= (int)(bbox.x + bbox.width/2);
+        vertex->y -= (int)(bbox.y + bbox.height/2);
+    }
 
-    unsigned char *map;
-    texture_font_t * font;
-    const char *filename = "fonts/Vera.ttf";
-    const wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
-                           L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-                           L"`abcdefghijklmnopqrstuvwxyz{|}~";
 
-    atlas = texture_atlas_new( 512, 512, 1 );
-    font = texture_font_new( atlas, filename, 72 );
-    texture_font_load_glyphs( font, cache );
-    texture_font_delete( font );
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
 
     fprintf( stderr, "Generating distance map...\n" );
-    map = make_distance_map(atlas->data, atlas->width, atlas->height);
+    unsigned char *map = make_distance_map(atlas->data, atlas->width, atlas->height);
     fprintf( stderr, "done !\n");
 
     memcpy( atlas->data, map, atlas->width*atlas->height*sizeof(unsigned char) );
     free(map);
     texture_atlas_upload( atlas );
 
-    // Create the GLSL program
-    program = shader_load( "shaders/distance-field.vert",
-                           "shaders/distance-field.frag" );
-    glUseProgram( program );
+    shader = shader_load( "shaders/distance-field-2.vert",
+                          "shaders/distance-field-2.frag" );
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 
     glutMainLoop( );
     return 0;

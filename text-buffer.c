@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <assert.h>
 #include "opengl.h"
 #include "text-buffer.h"
 
@@ -53,10 +54,11 @@ text_buffer_new( size_t depth )
 {
     
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
-    self->buffer = vertex_buffer_new( "v3f:t2f:c4f:1g1f:2g1f" ); 
+    self->buffer = vertex_buffer_new(
+        "vertex:3f,tex_coord:2f,color:4f,ashift:1f,agamma:1f" );
     self->manager = font_manager_new( 512, 512, depth );
-        self->shader = shader_load("shaders/text.vert",
-                                   "shaders/text.frag");
+    self->shader = shader_load("shaders/text.vert",
+                               "shaders/text.frag");
     self->shader_texture = glGetUniformLocation(self->shader, "texture");
     self->shader_pixel = glGetUniformLocation(self->shader, "pixel");
     self->line_start = 0;
@@ -67,17 +69,27 @@ text_buffer_new( size_t depth )
 
 // ----------------------------------------------------------------------------
 void
+text_buffer_clear( text_buffer_t * self )
+{    
+    assert( self );
+
+    vertex_buffer_clear( self->buffer );
+    self->line_start = 0;
+    self->line_ascender = 0;
+    self->line_descender = 0;
+}
+
+
+// ----------------------------------------------------------------------------
+void
 text_buffer_render( text_buffer_t * self )
 {
     glEnable( GL_BLEND );
     glEnable( GL_TEXTURE_2D );
-    glColor4f( 1.0, 1.0, 1.0, 1.0);
-
     if( self->manager->atlas->depth == 1 )
     {
         glDisable( GL_COLOR_MATERIAL );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        vertex_buffer_render( self->buffer, GL_TRIANGLES, "vtc" );
     }
     else
     {
@@ -85,15 +97,16 @@ text_buffer_render( text_buffer_t * self )
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
         glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
         glBlendColor( 1.0, 1.0, 1.0, 1.0 );
-        glUseProgram( self->shader );
-        glUniform1i( self->shader_texture, 0 );
-        glUniform3f( self->shader_pixel,
-                     1.0/self->manager->atlas->width,
-                     1.0/self->manager->atlas->height,
-                 self->manager->atlas->depth );
-        vertex_buffer_render( self->buffer, GL_TRIANGLES, "vtc" );
-        glUseProgram( 0 );
     }
+
+    glUseProgram( self->shader );
+    glUniform1i( self->shader_texture, 0 );
+    glUniform3f( self->shader_pixel,
+                 1.0/self->manager->atlas->width,
+                 1.0/self->manager->atlas->height,
+                 self->manager->atlas->depth );
+    vertex_buffer_render( self->buffer, GL_TRIANGLES );
+    glUseProgram( 0 );
 }
 
 // ----------------------------------------------------------------------------
@@ -102,13 +115,13 @@ text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
 {
     markup_t *markup;
     wchar_t *text;
+    va_list args;
 
     if( vertex_buffer_size( self->buffer ) == 0 )
     {
         self->origin = *pen;
     }
 
-    va_list args;
     va_start ( args, pen ); 
     do {
         markup = va_arg( args, markup_t * );
@@ -124,12 +137,30 @@ text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
 
 // ----------------------------------------------------------------------------
 void
+text_buffer_move_last_line( text_buffer_t * self, float dy )
+{
+    size_t i, j;
+    for( i=self->line_start; i < vector_size( self->buffer->items ); ++i )
+    {
+        ivec4 *item = (ivec4 *) vector_get( self->buffer->items, i);
+        for( j=item->vstart; j<item->vstart+item->vcount; ++j)
+        {
+            glyph_vertex_t * vertex =
+                (glyph_vertex_t *)  vector_get( self->buffer->vertices, j );
+            vertex->y -= dy;
+        }
+    }
+}
+
+
+// ----------------------------------------------------------------------------
+void
 text_buffer_add_text( text_buffer_t * self,
                       vec2 * pen, markup_t * markup,
                       wchar_t * text, size_t length )
 {
-    vertex_buffer_t * buffer = self->buffer;
     font_manager_t * manager = self->manager;
+    size_t i;
 
     if( markup == NULL )
     {
@@ -150,37 +181,12 @@ text_buffer_add_text( text_buffer_t * self,
     {
         length = wcslen(text);
     }
-
     if( vertex_buffer_size( self->buffer ) == 0 )
     {
         self->origin = *pen;
     }
 
-    if( markup->font->ascender > self->line_ascender )
-    {
-        size_t i, j;
-        float dy = (int)(markup->font->ascender - self->line_ascender);
-        for( i=self->line_start; i < vector_size( buffer->items ); ++i )
-        {
-            ivec4 *item = (ivec4 *) vector_get( buffer->items, i);
-            for( j=item->vstart; j<item->vstart+item->vcount; ++j)
-            {
-                glyph_vertex_t * vertex =
-                    (glyph_vertex_t *)  vector_get( buffer->vertices, j );
-                vertex->y -= dy;
-            }
-        }
-        self->line_ascender = markup->font->ascender;
-        pen->y -= dy;
-    }
-    if( markup->font->descender < self->line_descender )
-    {
-        self->line_descender = markup->font->descender;
-    }
-
     text_buffer_add_wchar( self, pen, markup, text[0], 0 );
-
-    size_t i;
     for( i=1; i<length; ++i )
     {
         text_buffer_add_wchar( self, pen, markup, text[i], text[i-1] );
@@ -196,7 +202,6 @@ text_buffer_add_wchar( text_buffer_t * self,
     size_t vcount = 0;
     size_t icount = 0;
     vertex_buffer_t * buffer = self->buffer;
-    size_t i = 0;
     texture_font_t * font = markup->font;
     float gamma = markup->gamma;
 
@@ -208,27 +213,41 @@ text_buffer_add_wchar( text_buffer_t * self,
     //  - 2 triangles for glyph
     glyph_vertex_t vertices[4*5];
     GLuint indices[6*5];
-    
+    texture_glyph_t *glyph;
+    texture_glyph_t *black;
+    float kerning = 0;
+   
     if( current == L'\n' )
     {
         pen->x = self->origin.x;
-        pen->y += (int)(self->line_descender);
+        pen->y += self->line_descender;
         self->line_descender = 0;
         self->line_ascender = 0;
         self->line_start = vector_size( self->buffer->items );
         return;
     }
-        
-    texture_glyph_t *glyph = texture_font_get_glyph( font, current );
-    texture_glyph_t *black = texture_font_get_glyph( font, -1 );
+
+    if( markup->font->ascender > self->line_ascender )
+    {
+        float y = pen->y;
+        pen->y -= (markup->font->ascender - self->line_ascender);
+        text_buffer_move_last_line( self, (int)(y-pen->y) );
+        self->line_ascender = markup->font->ascender;
+    }
+    if( markup->font->descender < self->line_descender )
+    {
+        self->line_descender = markup->font->descender;
+    }
+
+    glyph = texture_font_get_glyph( font, current );
+    black = texture_font_get_glyph( font, -1 );
         
     if( glyph == NULL )
     {
         return;
     }
     
-    float kerning = 0;
-    if( i > 0)
+    if( previous && markup->font->kerning )
     {
         kerning = texture_glyph_get_kerning( glyph, previous );
     }
@@ -258,16 +277,6 @@ text_buffer_add_wchar( text_buffer_t * self,
                          (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
         SET_GLYPH_VERTEX(vertices[vcount+3],
                          (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
-/*
-        vertices[vcount+0] =
-            (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+1] =
-            (glyph_vertex_t) { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+2] =
-            (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
-        vertices[vcount+3] =
-            (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
-*/
         indices[icount + 0] = vcount+0;
         indices[icount + 1] = vcount+1;
         indices[icount + 2] = vcount+2;
@@ -302,16 +311,6 @@ text_buffer_add_wchar( text_buffer_t * self,
                          (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
         SET_GLYPH_VERTEX(vertices[vcount+3],
                          (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
-/*
-        vertices[vcount+0] =
-            (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+1] =
-            (glyph_vertex_t) { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+2] =
-            (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
-        vertices[vcount+3] =
-            (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
-*/
         indices[icount + 0] = vcount+0;
         indices[icount + 1] = vcount+1;
         indices[icount + 2] = vcount+2;
@@ -345,16 +344,6 @@ text_buffer_add_wchar( text_buffer_t * self,
                          (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
         SET_GLYPH_VERTEX(vertices[vcount+3],
                          (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
-/*
-        vertices[vcount+0] =
-            (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+1] =
-            (glyph_vertex_t) { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+2] =
-            (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
-        vertices[vcount+3] =
-            (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
-*/
         indices[icount + 0] = vcount+0;
         indices[icount + 1] = vcount+1;
         indices[icount + 2] = vcount+2;
@@ -388,16 +377,6 @@ text_buffer_add_wchar( text_buffer_t * self,
                          (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
         SET_GLYPH_VERTEX(vertices[vcount+3],
                          (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
-/*
-        vertices[vcount+0] =
-            (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+1] =
-            (glyph_vertex_t) { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma };
-        vertices[vcount+2] =
-            (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
-        vertices[vcount+3] =
-            (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
-*/
         indices[icount + 0] = vcount+0;
         indices[icount + 1] = vcount+1;
         indices[icount + 2] = vcount+2;
@@ -407,48 +386,39 @@ text_buffer_add_wchar( text_buffer_t * self,
         vcount += 4;
         icount += 6;
     }
+    {
+        // Actual glyph
+        float r = markup->foreground_color.red;
+        float g = markup->foreground_color.green;
+        float b = markup->foreground_color.blue;
+        float a = markup->foreground_color.alpha;
+        float x0 = ( pen->x + glyph->offset_x );
+        float y0 = (int)( pen->y + glyph->offset_y );
+        float x1 = ( x0 + glyph->width );
+        float y1 = (int)( y0 - glyph->height );
+        float s0 = glyph->s0;
+        float t0 = glyph->t0;
+        float s1 = glyph->s1;
+        float t1 = glyph->t1;
 
-    // Actual glyph
-    float r = markup->foreground_color.red;
-    float g = markup->foreground_color.green;
-    float b = markup->foreground_color.blue;
-    float a = markup->foreground_color.alpha;
-    float x0 = ( pen->x + glyph->offset_x );
-    float y0 = (int)( pen->y + glyph->offset_y );
-    float x1 = ( x0 + glyph->width );
-    float y1 = (int)( y0 - glyph->height );
-    float s0 = glyph->s0;
-    float t0 = glyph->t0;
-    float s1 = glyph->s1;
-    float t1 = glyph->t1;
-
-    SET_GLYPH_VERTEX(vertices[vcount+0],
-                     (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
-    SET_GLYPH_VERTEX(vertices[vcount+1],
-                     (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
-    SET_GLYPH_VERTEX(vertices[vcount+2],
-                     (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
-    SET_GLYPH_VERTEX(vertices[vcount+3],
-                     (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
-/*
-    vertices[vcount+0] =
-        (glyph_vertex_t) { (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma };
-    vertices[vcount+1] =
-        (glyph_vertex_t) { (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma };
-    vertices[vcount+2] =
-        (glyph_vertex_t) { (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma };
-    vertices[vcount+3] =
-        (glyph_vertex_t) { (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma };
-*/
-    indices[icount + 0] = vcount+0;
-    indices[icount + 1] = vcount+1;
-    indices[icount + 2] = vcount+2;
-    indices[icount + 3] = vcount+0;
-    indices[icount + 4] = vcount+2;
-    indices[icount + 5] = vcount+3;
-    vcount += 4;
-    icount += 6;
+        SET_GLYPH_VERTEX(vertices[vcount+0],
+                         (int)x0,y0,0,  s0,t0,  r,g,b,a,  x0-((int)x0), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+1],
+                         (int)x0,y1,0,  s0,t1,  r,g,b,a,  x0-((int)x0), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+2],
+                         (int)x1,y1,0,  s1,t1,  r,g,b,a,  x1-((int)x1), gamma );
+        SET_GLYPH_VERTEX(vertices[vcount+3],
+                         (int)x1,y0,0,  s1,t0,  r,g,b,a,  x1-((int)x1), gamma );
+        indices[icount + 0] = vcount+0;
+        indices[icount + 1] = vcount+1;
+        indices[icount + 2] = vcount+2;
+        indices[icount + 3] = vcount+0;
+        indices[icount + 4] = vcount+2;
+        indices[icount + 5] = vcount+3;
+        vcount += 4;
+        icount += 6;
     
-    vertex_buffer_push_back( buffer, vertices, vcount, indices, icount );
-    pen->x += glyph->advance_x;
+        vertex_buffer_push_back( buffer, vertices, vcount, indices, icount );
+        pen->x += glyph->advance_x * (1.0 + markup->spacing);
+    }
 }

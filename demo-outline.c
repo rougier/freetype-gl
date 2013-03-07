@@ -34,6 +34,16 @@
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
 #include "markup.h"
+#include "shader.h"
+#include "mat4.h"
+
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -47,11 +57,19 @@ typedef struct {
 // ------------------------------------------------------- global variables ---
 texture_atlas_t * atlas;
 vertex_buffer_t * buffer;
+GLuint shader;
+mat4 model, view, projection;
 
 
 // ---------------------------------------------------------------- display ---
 void display( void )
 {
+    static GLuint texture = 0;
+    if( !texture )
+    {
+        texture = glGetUniformLocation( shader, "texture" );
+    }
+
     glClearColor( 0.40, 0.40, 0.45, 1.00 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glEnable( GL_BLEND );
@@ -59,7 +77,20 @@ void display( void )
     glEnable( GL_COLOR_MATERIAL );
     glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    vertex_buffer_render( buffer, GL_TRIANGLES, "vtc" );
+
+    glUseProgram( shader );
+    {
+        glUniform1i( glGetUniformLocation( shader, "texture" ),
+                     0 );
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+        vertex_buffer_render( buffer, GL_TRIANGLES );
+    }
+
     glutSwapBuffers( );
 }
 
@@ -68,12 +99,7 @@ void display( void )
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glutPostRedisplay();
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 // --------------------------------------------------------------- keyboard ---
@@ -163,8 +189,17 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
+
     atlas = texture_atlas_new( 512, 512, 1 );
-    buffer = vertex_buffer_new( "v3f:t2f:c4f" ); 
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 
 
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
@@ -216,6 +251,11 @@ int main( int argc, char **argv )
         markup.font->outline_thickness = 1*((i+1)/10.0);
         add_text( buffer, &pen, &markup, L"g", NULL );
     }
+    shader = shader_load("shaders/v3f-t2f-c4f.vert",
+                         "shaders/v3f-t2f-c4f.frag");
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 
     glutMainLoop( );
     return 0;

@@ -32,43 +32,57 @@
  * ============================================================================
  */
 #include "freetype-gl.h"
-
 #include "font-manager.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
 #include "markup.h"
 #include "shader.h"
+#include "mat4.h"
+
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 
 
-// ------------------------------------------------------- global variables ---
-text_buffer_t * text_buffer;
+/* ------------------------------------------------------ global variables - */
+text_buffer_t * buffer;
+mat4   model, view, projection;
 
 
-
-
-// ---------------------------------------------------------------- display ---
+/* --------------------------------------------------------------- display - */
 void display( void )
 {
     glClearColor(1.00,1.00,1.00,1.00);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    text_buffer_render( text_buffer );
+
+    glUseProgram( buffer->shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
+                            1, 0, projection.data);
+        text_buffer_render( buffer );
+    }
+
     glutSwapBuffers( );
 }
 
 
-// --------------------------------------------------------------- reshape ---
+/* -------------------------------------------------------------- reshape - */
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
-// --------------------------------------------------------------- keyboard ---
+/* -------------------------------------------------------------- keyboard - */
 void keyboard( unsigned char key, int x, int y )
 {
     if ( key == 27 )
@@ -78,7 +92,7 @@ void keyboard( unsigned char key, int x, int y )
 }
 
 
-// ------------------------------------------------------------ init_colors ---
+/* ----------------------------------------------------------- init_colors - */
 void
 init_colors( vec4 *colors )
 {
@@ -102,18 +116,18 @@ init_colors( vec4 *colors )
             {{238/256.0f, 238/256.0f, 236/256.0f, 1.0f}}
         };
     size_t i = 0;
-    // Default 16 colors
+    /* Default 16 colors */
     for( i=0; i< 16; ++i )
     {
         colors[i] = defaults[i];
     }
-    // Color cube
+    /* Color cube */
     for( i=0; i<6*6*6; i++ )
     {
         vec4 color = {{ (i/6/6)/5.0f, ((i/6)%6)/5.0f, (i%6)/5.0f, 1.0f}};
         colors[i+16] = color;
     }
-    // Grascale ramp (24 tones)
+    /* Grascale ramp (24 tones) */
     for( i=0; i<24; i++ )
     {
         vec4 color ={{i/24.0f, i/24.0f, i/24.0f, 1.0f}};
@@ -122,7 +136,7 @@ init_colors( vec4 *colors )
 }
 
 
-// --------------------------------------------------------- ansi_to_markup ---
+/* -------------------------------------------------------- ansi_to_markup - */
 void
 ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
 {
@@ -184,12 +198,12 @@ ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
                 set_bg = 1;
                 code = 0;
             }
-            // Set fg color (30 + x, where x is the index of the color)
+            /* Set fg color (30 + x, where x is the index of the color) */
             else if( (code >= 30) && (code < 38 ) )
             {
                 markup->foreground_color = colors[code-30];
             }
-            // Set bg color (40 + x, where x is the index of the color)
+            /* Set bg color (40 + x, where x is the index of the color) */
             else if( (code >= 40) && (code < 48 ) )
             {
                 markup->background_color = colors[code-40];
@@ -237,7 +251,7 @@ ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
     markup->outline_color = markup->foreground_color;
 }
 
-// ------------------------------------------------------------------ print ---
+/* ----------------------------------------------------------------- print - */
 void
 print( text_buffer_t * buffer, vec2 * pen,
        wchar_t *text, markup_t *markup )
@@ -274,14 +288,14 @@ print( text_buffer_t * buffer, vec2 * pen,
                 p = text+wcslen(text);
             }                
             ansi_to_markup(seq_start, seq_size, markup );
-            markup->font = font_manager_get_from_markup( text_buffer->manager, markup );
-            text_buffer_add_text( text_buffer, pen, markup, text_start, text_size );
+            markup->font = font_manager_get_from_markup( buffer->manager, markup );
+            text_buffer_add_text( buffer, pen, markup, text_start, text_size );
         }
     }
 }
 
 
-// ------------------------------------------------------------------- main ---
+/* ------------------------------------------------------------------ main - */
 int main( int argc, char **argv )
 {
     glutInit( &argc, argv );
@@ -292,7 +306,16 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    text_buffer = text_buffer_new( LCD_FILTERING_ON );
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
+
+    buffer = text_buffer_new( LCD_FILTERING_OFF );
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
     markup_t markup = {
@@ -313,10 +336,14 @@ int main( int argc, char **argv )
         wchar_t line[1024];
         while( fgetws ( line, sizeof(line), file ) != NULL )
         {
-            print( text_buffer, &pen, line, &markup );
+            print( buffer, &pen, line, &markup );
         }
         fclose ( file );
     }
+
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 
     glutMainLoop( );
     return 0;

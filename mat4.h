@@ -31,25 +31,87 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-uniform sampler2D texture;
-uniform vec3 pixel;
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+#ifndef __MAT4_H__
+#define __MAT4_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
-attribute vec3 vertex;
-attribute vec4 color;
-attribute vec2 tex_coord;
-attribute float ashift;
-attribute float agamma;
-varying float vshift;
-varying float vgamma;
-void main()
+/**
+ *
+ */
+typedef union
 {
-    vshift = ashift;
-    vgamma = agamma;
-    gl_FrontColor = color;
-    gl_TexCoord[0].xy = tex_coord.xy;
-    gl_Position = projection*(view*(model*vec4(vertex,1.0)));
+	float data[16];    /**< All compoments at once     */
+	struct {
+        float m00, m01, m02, m03;
+        float m10, m11, m12, m13;
+        float m20, m21, m22, m23;
+        float m30, m31, m32, m33;
+    };
+} mat4;
+
+
+mat4 *
+mat4_new( void );
+
+void
+mat4_set_identity( mat4 *self );
+
+void
+mat4_set_zero( mat4 *self );
+
+void
+mat4_multiply( mat4 *self, mat4 *other );
+
+void
+mat4_set_orthographic( mat4 *self,
+                       float left,   float right,
+                       float bottom, float top,
+                       float znear,  float zfar );
+
+void
+mat4_set_perspective( mat4 *self,
+                      float fovy,  float aspect,
+                      float zNear, float zFar);
+
+void
+mat4_set_frustum( mat4 *self,
+                  float left,   float right,
+                  float bottom, float top,
+                  float znear,  float zfar );
+
+void
+mat4_set_rotation( mat4 *self,
+                   float angle,
+                   float x, float y, float z);
+
+void
+mat4_set_translation( mat4 *self,
+                      float x, float y, float z);
+
+void
+mat4_set_scaling( mat4 *self,
+                  float x, float y, float z);
+
+void
+mat4_rotate( mat4 *self,
+             float angle,
+             float x, float y, float z);
+
+void
+mat4_translate( mat4 *self,
+                float x, float y, float z);
+
+void
+mat4_scale( mat4 *self,
+            float x, float y, float z);
+
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __MAT4_H__ */

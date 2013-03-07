@@ -38,7 +38,9 @@ OPTION(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
 
 # Get required and optional library
 FIND_PACKAGE( OpenGL REQUIRED )
-IF( WIN32 )
+IF( WIN32 OR WIN64 )
+	SET( WINDOWS_DIR
+         ${CMAKE_CURRENT_SOURCE_DIR}/windows )
 	SET( GLUT_INCLUDE_DIR
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut )
 	SET( GLUT_GLUT_LIBRARY
@@ -54,34 +56,46 @@ IF( WIN32 )
 	SET( ANT_TWEAK_BAR_LIBRARY
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/AntTweakBar/lib/AntTweakBar.lib )
     SET( ANT_TWEAK_BAR_FOUND "YES" )
-ELSE( WIN32 )
+ELSE( WIN32 OR WIN64 )
     FIND_PACKAGE( GLUT REQUIRED )
     FIND_PACKAGE( Freetype REQUIRED )
+    FIND_PACKAGE( GLEW REQUIRED )
     FIND_PACKAGE( FontConfig )
     FIND_LIBRARY( MATH_LIBRARY m )
     #FIND_LIBRARY( STDC_LIBRARY stdc++) #Buggy Cmake can't find libstdc++
     FIND_PACKAGE( AntTweakBar )
-ENDIF( WIN32 )
+ENDIF( WIN32 OR WIN64 )
+
+# Untested
+if(MSVC)
+  foreach(flag_var
+          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+    set(${flag_var} "${${flag_var}} /TP")
+  endforeach(flag_var)
+endif()
 
 INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIRS}
                      ${OPENGL_INCLUDE_DIRS}
                      ${FREETYPE_INCLUDE_DIRS}
+                     ${GLEW_INCLUDE_DIRS}
                      ${CMAKE_CURRENT_SOURCE_DIR} )
 
 SET( FREETYPE_GL_LIBRARY freetype-gl )
-SET(FREETYPE_GL_SRC freetype-gl.h
-                    vec234.h
-                    opengl.h
-                    markup.h
-                    texture-atlas.c    texture-atlas.h
-                    texture-font.c     texture-font.h
-                    vertex-buffer.c    vertex-buffer.h
-                    vertex-attribute.c vertex-attribute.h
-                    font-manager.c     font-manager.h
-                    text-buffer.c      text-buffer.h
-                    shader.c           shader.h
-                    vector.c           vector.h
-                    platform.c         platform.h)
+SET( FREETYPE_GL_SRC freetype-gl.h
+                     vec234.h
+                     opengl.h
+                     markup.h
+                     mat4.c             mat4.h
+                     texture-atlas.c    texture-atlas.h
+                     texture-font.c     texture-font.h
+                     vertex-buffer.c    vertex-buffer.h
+                     vertex-attribute.c vertex-attribute.h
+                     font-manager.c     font-manager.h
+                     text-buffer.c      text-buffer.h
+                     shader.c           shader.h
+                     vector.c           vector.h
+                     platform.c         platform.h)
 
 #ADD_LIBRARY( ${FREETYPE_GL_LIBRARY} STATIC ${FREETYPE_GL_SRC} )
 ADD_LIBRARY( freetype-gl STATIC ${FREETYPE_GL_SRC} )
@@ -90,8 +104,10 @@ LINK_DIRECTORIES(${PROJECT_SOURCE_DIR})
 
 MACRO( DEMO _target _sources)
      add_executable(${_target} ${_sources})
+	 include_directories(${WINDOWS_DIR} ${GLUT_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
      target_link_libraries(${_target} ${FREETYPE_GL_LIBRARY})
      target_link_libraries(${_target} ${OPENGL_LIBRARY})
+     target_link_libraries(${_target} ${GLEW_LIBRARY})
      target_link_libraries(${_target} freetype-gl)
      target_link_libraries(${_target} ${GLUT_LIBRARY})
      target_link_libraries(${_target} ${FREETYPE_LIBRARY})
@@ -102,23 +118,23 @@ ENDMACRO( DEMO )
 
 IF (freetype-gl_BUILD_DEMOS)
 
-DEMO( demo-texture        "demo-texture.c" )
-DEMO( demo-font           "demo-font.c" )
-DEMO( demo-benchmark      "demo-benchmark.c" )
-DEMO( demo-console        "demo-console.c" )
-DEMO( demo-cube           "demo-cube.c" )
-DEMO( demo-glyph          "demo-glyph.c" )
-DEMO( demo-cartoon        "demo-cartoon.c" )
-DEMO( demo-outline        "demo-outline.c" )
-DEMO( demo-display-list   "demo-display-list.c" )
-DEMO( demo-lcd            "demo-lcd.c" )
-DEMO( demo-gamma          "demo-gamma.c" )
-DEMO( demo-ansi           "demo-ansi.c" )
-DEMO( demo-line-aa        "demo-line-aa.c" )
-DEMO( demo-subpixel       "demo-subpixel.c" )
-DEMO( demo-make           "demo-makefont.c;arial-16.h" )
-DEMO( makefont            "makefont.c" )
-DEMO( demo-distance-field "demo-distance-field.c;edtaa3func.c")
+DEMO( demo-texture          "demo-texture.c" )
+DEMO( demo-font             "demo-font.c" )
+DEMO( demo-benchmark        "demo-benchmark.c" )
+DEMO( demo-console          "demo-console.c" )
+DEMO( demo-cube             "demo-cube.c" )
+DEMO( demo-glyph            "demo-glyph.c" )
+DEMO( demo-cartoon          "demo-cartoon.c" )
+DEMO( demo-outline          "demo-outline.c" )
+DEMO( demo-lcd              "demo-lcd.c" )
+DEMO( demo-gamma            "demo-gamma.c" )
+DEMO( demo-ansi             "demo-ansi.c" )
+DEMO( demo-subpixel         "demo-subpixel.c" )
+DEMO( demo-make             "demo-makefont.c;arial-16.h" )
+DEMO( makefont              "makefont.c" )
+DEMO( demo-distance-field   "demo-distance-field.c;edtaa3func.c")
+DEMO( demo-distance-field-2 "demo-distance-field-2.c;edtaa3func.c")
+DEMO( demo-distance-field-3 "demo-distance-field-3.c;edtaa3func.c")
 
 IF (FONTCONFIG_FOUND)
    INCLUDE_DIRECTORIES( ${FONTCONFIG_INCLUDE_DIR} )
@@ -127,7 +143,7 @@ IF (FONTCONFIG_FOUND)
 ENDIF (FONTCONFIG_FOUND)
 
 IF (ANT_TWEAK_BAR_FOUND)  
- #DEMO( demo-atb-agg     "demo-atb-agg.c;markup.h;shaders/agg.vert;shaders/agg.frag")
+ #DEMO( demo-atb-agg     "demo-atb-agg.c;markup.h;")
  FILE(WRITE ${CMAKE_SOURCE_DIR}/stdc_test.c
   "int main(void){return 0;}\n")
   EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -lstdc++ OUTPUT_VARIABLE out_res ERROR_VARIABLE err_res)
@@ -135,9 +151,10 @@ IF (ANT_TWEAK_BAR_FOUND)
   if(${substr_index} STRGREATER "0")
       message (STATUS "Found Libstdc++ needed by demo-atb-agg.c ." )
 
-      add_executable(demo-atb-agg  demo-atb-agg.c shaders/agg.vert shaders/agg.frag) 
+      add_executable(demo-atb-agg  demo-atb-agg.c) 
       target_link_libraries( demo-atb-agg ${FREETYPE_GL_LIBRARY})
       target_link_libraries( demo-atb-agg ${GLUT_LIBRARY})
+      target_link_libraries( demo-atb-agg ${GLEW_LIBRARY})
       target_link_libraries( demo-atb-agg ${FREETYPE_LIBRARY})
       target_link_libraries( demo-atb-agg ${ANT_TWEAK_BAR_LIBRARY})
       # target_link_libraries( demo-atb-agg ${STDC_LIBRARY}) # Buggy Cmake can't find libstdc++
@@ -152,9 +169,18 @@ IF (ANT_TWEAK_BAR_FOUND)
   endif()
 ENDIF (ANT_TWEAK_BAR_FOUND)
 
+
 # Copy font and shaders into build directory for in-place testing
-FILE(GLOB Fonts   "fonts/*.ttf")
-file(COPY ${Fonts}   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Fonts)
+FILE(GLOB Fonts   "fonts/Vera.ttf"
+                  "fonts/VeraMoBI.ttf"
+                  "fonts/VeraMoBd.ttf"
+                  "fonts/VeraMoIt.ttf"
+                  "fonts/VeraMono.ttf")
+file(COPY ${Fonts}   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/fonts)
+
+FILE(GLOB Data   "data/256colors.txt")
+file(COPY ${Data}   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
+
 FILE(GLOB Shaders "shaders/*.vert" "shaders/*.frag")
 file(COPY ${Shaders} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/shaders)
 

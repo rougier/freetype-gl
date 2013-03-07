@@ -3,7 +3,7 @@
 # Platform:    Any
 # WWW:         http://code.google.com/p/freetype-gl/
 # -------------------------------------------------------------------------
-# Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+# Copyright 2011,2012,2013 Nicolas P. Rougier. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -33,18 +33,20 @@
 PLATFORM		= $(shell uname)
 CC				= gcc
 CFLAGS			= -Wall `freetype-config --cflags` -I/usr/X11/include -g -O0
-LIBS			= -lGL -lglut -lGLU -lm \
+LIBS			= -lGLEW -lGL -lglut -lGLU -lm \
 	              `freetype-config --libs`
 ifeq ($(PLATFORM), Darwin)
-	LIBS		= -framework OpenGL -framework GLUT -lm \
+	LIBS		= -framework OpenGL -framework GLUT -lGLEW -lm \
 	               `freetype-config --libs` -L /usr/X11/lib
 endif
 
 DEMOS     := $(patsubst %.c,%,$(wildcard demo-*.c))
 DEMOS_ATB := demo-atb-agg
-DEMOS_MKP := demo-markup
+DEMOS_MKP  := demo-markup
+DEMOS_MKP2 := demo-markup-2
 DEMOS     := $(filter-out $(DEMOS_ATB), $(DEMOS))
 DEMOS     := $(filter-out $(DEMOS_MKP), $(DEMOS))
+DEMOS     := $(filter-out $(DEMOS_MKP2), $(DEMOS))
 
 TESTS     := $(patsubst %.c,%,$(wildcard test-*.c))
 HEADERS   := $(wildcard *.h)
@@ -53,7 +55,7 @@ SOURCES   := $(filter-out makefont.c, $(SOURCES))
 OBJECTS   := $(SOURCES:.c=.o)
 
 .PHONY: all clean distclean
-all: $(DEMOS) makefont demo-atb-agg demo-markup
+all: $(DEMOS) makefont demo-atb-agg demo-markup demo-markup-2
 
 demos: $(DEMOS)
 
@@ -76,6 +78,10 @@ demo-atb-agg: demo-atb-agg.o $(OBJECTS) $(HEADERS) \
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -lAntTweakBar -o $@
 
 demo-markup: demo-markup.o $(OBJECTS) $(HEADERS)
+	@echo "Building $@... "
+	@$(CC) $(OBJECTS) $@.o $(LIBS) -lfontconfig -o $@
+
+demo-markup-2: demo-markup-2.o $(OBJECTS) $(HEADERS)
 	@echo "Building $@... "
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -lfontconfig -o $@
 

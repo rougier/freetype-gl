@@ -43,7 +43,6 @@ extern "C" {
 #include "vertex-attribute.h"
 
 
-
 /**
  * @file   vertex-buffer.h
  * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
@@ -148,11 +147,10 @@ typedef struct
  *
  * @param  self  a vertex buffer
  * @param  mode  render mode
- * @param  what  attributes to be rendered
  */
   void
   vertex_buffer_render_setup ( vertex_buffer_t *self,
-                               GLenum mode, const char *what );
+                               GLenum mode );
 
 
 /**
@@ -169,11 +167,10 @@ typedef struct
  *
  * @param  self  a vertex buffer
  * @param  mode  render mode
- * @param  what  attributes to be rendered
  */
   void
   vertex_buffer_render ( vertex_buffer_t *self,
-                         GLenum mode, const char *what );
+                         GLenum mode );
 
 
 /**

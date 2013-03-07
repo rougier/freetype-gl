@@ -57,4 +57,12 @@ Contributors:
 * Andrei Petrovici (Code review)
 * Kim Jacobsen (Bug report & fix)
 * bsoddd (Bug report & fix)
+<<<<<<< .working
 * Greg Douglas (Bug report & fix)
+=======
+* Jim Teeuwen (Bug report & fix)
+* quarnster (Bug report & fix)
+* Per Inge Mathisen (Bug report & fix)
+* Wojciech Mamrak (Code review, bug report & fix)
+* Wael Eloraiby (Put code to the C89 norm and fix CMakefile)
+>>>>>>> .merge-right.r192

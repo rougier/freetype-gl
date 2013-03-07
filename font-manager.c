@@ -93,10 +93,10 @@ font_manager_new( size_t width, size_t height, size_t depth )
 void
 font_manager_delete( font_manager_t * self )
 {
-    assert( self );
-
     size_t i;
     texture_font_t *font;
+    assert( self );
+
     for( i=0; i<vector_size( self->fonts ); ++i)
     {
         font = *(texture_font_t **) vector_get( self->fonts, i );
@@ -119,10 +119,11 @@ font_manager_delete_font( font_manager_t * self,
                           texture_font_t * font)
 {
     size_t i;
+    texture_font_t *other;
+
     assert( self );
     assert( font );
     
-    texture_font_t *other;
     for( i=0; i<self->fonts->size;++i )
     {
         other = (texture_font_t *) vector_get( self->fonts, i );
@@ -176,11 +177,10 @@ font_manager_get_from_description( font_manager_t *self,
                                    const int bold,
                                    const int italic )
 {
-    assert( self );
-
-
     texture_font_t *font;
     char *filename = 0;
+
+    assert( self );
 
     if( file_exists( family ) )
     {

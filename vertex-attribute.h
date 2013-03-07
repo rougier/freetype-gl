@@ -199,14 +199,9 @@ extern "C" {
 typedef struct 
 {
     /**
-     *  a client-side capability.
+     *  atribute name
      */
-    GLenum target;
-
-    /**
-     *  a translated client-side capability.
-     */
-    GLchar ctarget;
+    GLchar * name;
 
     /**
      * index of the generic vertex attribute to be modified.
@@ -262,8 +257,6 @@ typedef struct
 /**
  * Create an attribute from the given parameters.
  *
- * @param target     client-side capability
- * @param index      index of the generic vertex attribute to be modified.
  * @param size       number of component
  * @param type       data type
  * @param normalized Whether fixed-point data values should be normalized
@@ -277,8 +270,7 @@ typedef struct
  * @private
  */
 vertex_attribute_t *
-vertex_attribute_new( GLenum target,
-                      GLuint index,
+vertex_attribute_new( GLchar * name,
                       GLint size,
                       GLenum type,
                       GLboolean normalized,
@@ -308,141 +300,16 @@ vertex_attribute_delete( vertex_attribute_t * self );
   vertex_attribute_t *
   vertex_attribute_parse( char *format );
 
-
 /**
- * Enable the position vertex attribute.
- *
- * @param  attr a vertex attribute
- *
- * @private
- */
-  void
-  vertex_attribute_position_enable( vertex_attribute_t *attr );
-
-
-/**
- * Enable the normal vertex attribute.
- *
- * @param  attr a vertex attribute
- *
- * @private
- */
-  void
-  vertex_attribute_normal_enable( vertex_attribute_t *attr );
-
-
-/**
- * Enable the color vertex attribute.
+ * Enable a vertex attribute.
  *
  * @param attr  a vertex attribute
  *
  * @private
  */
   void
-  vertex_attribute_color_enable( vertex_attribute_t *attr );
+  vertex_attribute_enable( vertex_attribute_t *attr );
 
-
-/**
- * Enable the texture vertex attribute.
- *
- * @param attr  a vertex attribute
- *
- * @private
- */
-  void
-  vertex_attribute_tex_coord_enable( vertex_attribute_t *attr );
-
-
-/**
- * Enable the fog vertex attribute.
- *
- * @param attr  a vertex attribute
- *
- * @private
- */
-  void
-  vertex_attribute_fog_coord_enable( vertex_attribute_t *attr );
-
-
-/**
- * Enable the edge flag vertex attribute.
- *
- * @param attr  a vertex attribute
- *
- * @private
- */
-  void
-  vertex_attribute_edge_flag_enable( vertex_attribute_t *attr );
-
-
-/**
- * Enable the secondary color vertex attribute.
- *
- * @param attr  a vertex attribute
- *
- * @private
- */
-  void
-  vertex_attribute_secondary_color_enable( vertex_attribute_t *attr );
-
-
-/**
- * Enable a generic vertex attribute.
- *
- * @param attr  a vertex attribute
- *
- * @private
- */
-  void
-  vertex_attribute_generic_attribute_enable( vertex_attribute_t *attr );
-
-
-/**
- * Returns the GL enum type correspond to given character.
- *
- * @param ctype  character type
- * @return       GL enum type
- *
- * @private
- */
-  GLenum
-  GL_TYPE( char ctype );
-
-
-/**
- * Get the GL name of the given target.
- *
- * @param  ctarget  a char describing target ( one of v,c,e,f,n,s,t)
- * @return          the associated GL target
- *
- * @private
- */
-  GLenum
-  GL_VERTEX_ATTRIBUTE_TARGET( char ctarget );
-
-
-/**
- * Returns the size of a given GL enum type.
- *
- * @param  gtype a GL enum type
- * @return       the size of the given type
- *
- * @private
- */
-  GLuint
-  GL_TYPE_SIZE( GLenum gtype );
-
-
-/**
- * Returns the literal string of given GL enum type.
- *
- * @param  gtype a GL enum type
- * @return       the literal string describing the type
- *
- * @private
- */
-  const char *
-  GL_TYPE_STRING( GLenum gtype );
 
 /** @} */
 

@@ -30,11 +30,10 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
- *
- * Example showing regular font usage
- *
- * ============================================================================
  */
+#include <ft2build.h>
+#include FT_CONFIG_OPTIONS_H
+
 #include "freetype-gl.h"
 
 #include "font-manager.h"
@@ -42,16 +41,29 @@
 #include "text-buffer.h"
 #include "markup.h"
 #include "shader.h"
+#include "mat4.h"
+
+#if defined(__APPLE__)
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
+
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
     float x, y, z;
-    float r, g, b;
+    float r, g, b, a;
 } vertex_t;
+
 
 // ------------------------------------------------------- global variables ---
 text_buffer_t *text_buffer;
 vertex_buffer_t *buffer;
+GLuint shader;
+mat4 model, view, projection;
 
 
 // ---------------------------------------------------------------- display ---
@@ -60,10 +72,27 @@ void display( void )
     glClearColor( 1.0,1.0,1.0,1.0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    glDisable( GL_TEXTURE_2D );
-    vertex_buffer_render( buffer, GL_LINES, "vc" );
+    glUseProgram( text_buffer->shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( text_buffer->shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( text_buffer->shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( text_buffer->shader, "projection" ),
+                            1, 0, projection.data);
+        text_buffer_render( text_buffer );
+    }
 
-    text_buffer_render( text_buffer );
+    glUseProgram( shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+        vertex_buffer_render( buffer, GL_LINES );
+    }
 
     glutSwapBuffers( );
 }
@@ -73,11 +102,7 @@ void display( void )
 void reshape(int width, int height)
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
@@ -94,6 +119,14 @@ void keyboard( unsigned char key, int x, int y )
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
+
+#ifndef FT_CONFIG_OPTION_SUBPIXEL_RENDERING
+    fprintf(stderr,
+            "This demo requires freetype to be compiled "
+            "with subpixel rendering.\n");
+    exit( EXIT_FAILURE) ;
+#endif
+
     glutInit( &argc, argv );
     glutInitWindowSize( 260, 330 );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
@@ -102,11 +135,20 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
-    buffer = vertex_buffer_new( "v3f:c3f" );
-    vertex_t vertices[4*2] = { { 15,  0,0, 0,0,0},
-                               { 15,330,0, 0,0,0},
-                               {245,  0,0, 0,0,0},
-                               {245,330,0, 0,0,0} };
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
+
+    buffer = vertex_buffer_new( "vertex:3f,color:4f" );
+    vertex_t vertices[4*2] = { { 15,  0,0, 0,0,0,1},
+                               { 15,330,0, 0,0,0,1},
+                               {245,  0,0, 0,0,0,1},
+                               {245,330,0, 0,0,0,1} };
     GLuint indices[4*3] = { 0,1, 2,3, };
     vertex_buffer_push_back( buffer, vertices, 4, indices, 4 );
 
@@ -132,6 +174,12 @@ int main( int argc, char **argv )
         text_buffer_add_text( text_buffer, &pen, &markup, text, wcslen(text) );
         pen.x += i*0.1;
     }
+
+    shader = shader_load("shaders/v3f-c4f.vert",
+                         "shaders/v3f-c4f.frag");
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 
     glutMainLoop( );
     return 0;

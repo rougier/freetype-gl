@@ -36,37 +36,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "vec234.h"
+#include "platform.h"
 #include "vertex-buffer.h"
-
-
-// If GL_DOUBLE does not exist we define it as GL_FLOAT
-#ifndef GL_DOUBLE
-#define GL_DOUBLE GL_FLOAT
-#else
-#define GL_DOUBLE_ GL_FLOAT
-#endif 
-
-
-// strndup() was only added in OSX lion
-#ifdef __APPLE__
-char *
-strndup( const char *s1, size_t n)
-{
-    char *copy = calloc( n+1, sizeof(char) );
-    memcpy( copy, s1, n );
-    return copy;
-};
-#elif defined(_WIN32) || defined(_WIN64) 
-	// strndup() is not available on Windows, too
-char *
-strndup( const char *s1, size_t n)
-{
-	char *copy= (char*)malloc( n+1 );
-	memcpy( copy, s1, n );
-	copy[n] = 0;
-	return copy;
-};
-#endif
 
 
 /**
@@ -101,8 +72,11 @@ vertex_buffer_new( const char *format )
     start = format;
     do
     {
-        end = (char *) (strchr(start+1, ':'));
         char *desc = 0;
+        vertex_attribute_t *attribute;
+        GLuint attribute_size = 0;
+        end = (char *) (strchr(start+1, ','));
+
         if (end == NULL)
         {
             desc = strdup( start );
@@ -111,12 +85,25 @@ vertex_buffer_new( const char *format )
         {
             desc = strndup( start, end-start );
         }
-        vertex_attribute_t *attribute = vertex_attribute_parse( desc );
+        attribute = vertex_attribute_parse( desc );
         start = end+1;
         free(desc);
         attribute->pointer = pointer;
-        stride  += attribute->size*GL_TYPE_SIZE( attribute->type );
-        pointer += attribute->size*GL_TYPE_SIZE( attribute->type );
+
+        switch( attribute->type )
+        {
+        case GL_BOOL:           attribute_size = sizeof(GLboolean); break;
+        case GL_BYTE:           attribute_size = sizeof(GLbyte); break;
+        case GL_UNSIGNED_BYTE:  attribute_size = sizeof(GLubyte); break;
+        case GL_SHORT:          attribute_size = sizeof(GLshort); break;
+        case GL_UNSIGNED_SHORT: attribute_size = sizeof(GLushort); break;
+        case GL_INT:            attribute_size = sizeof(GLint); break;
+        case GL_UNSIGNED_INT:   attribute_size = sizeof(GLuint); break;
+        case GL_FLOAT:          attribute_size = sizeof(GLfloat); break;
+        default:                attribute_size = 0;
+        }
+        stride  += attribute->size*attribute_size;
+        pointer += attribute->size*attribute_size;
         self->attributes[index] = attribute;
         index++;
     } while ( end && (index < MAX_VERTEX_ATTRIBUTE) );
@@ -146,9 +133,9 @@ vertex_buffer_new( const char *format )
 void
 vertex_buffer_delete( vertex_buffer_t *self )
 {
-    assert( self );
-
     size_t i;
+
+    assert( self );
 
 
     for( i=0; i<MAX_VERTEX_ATTRIBUTE; ++i )
@@ -212,53 +199,42 @@ vertex_buffer_size( const vertex_buffer_t *self )
 void
 vertex_buffer_print( vertex_buffer_t * self )
 {
-    assert(self);
-
     int i = 0;
+    static char *gltypes[9] = {
+        "GL_BOOL",
+        "GL_BYTE",
+        "GL_UNSIGNED_BYTE",
+        "GL_SHORT",
+        "GL_UNSIGNED_SHORT",
+        "GL_INT",
+        "GL_UNSIGNED_INT",
+        "GL_FLOAT",
+        "GL_VOID"
+    };
+
+    assert(self);
 
     fprintf( stderr, "%ld vertices, %ld indices\n",
              vector_size( self->vertices ), vector_size( self->indices ) );
-
     while( self->attributes[i] )
     {
-        if( self->attributes[i]->target > 0 )
+        int j = 8;
+        switch( self->attributes[i]->type )
         {
-            switch(self->attributes[i]->target )
-            {
-            case GL_VERTEX_ARRAY:
-                fprintf( stderr, " -> Position: ");
-                break;
-            case GL_NORMAL_ARRAY:
-                fprintf( stderr, " -> Normal: ");
-                break;
-            case GL_COLOR_ARRAY:
-                fprintf( stderr, " -> Color: ");
-                break;
-            case GL_TEXTURE_COORD_ARRAY:
-                fprintf( stderr, " -> Texture coord: ");
-                break;
-            case GL_FOG_COORD_ARRAY:
-                fprintf( stderr, " -> Fog coord: ");
-                break;
-            case GL_SECONDARY_COLOR_ARRAY:
-                fprintf( stderr, " -> Secondary color: ");
-                break;
-            case GL_EDGE_FLAG_ARRAY:
-                fprintf( stderr, " -> Edge flag: ");
-                break;
-            default:
-                fprintf( stderr, " -> Unknown: ");
-                break;
-            }
+        case GL_BOOL:           j=0; break;
+        case GL_BYTE:           j=1; break;
+        case GL_UNSIGNED_BYTE:  j=2; break;
+        case GL_SHORT:          j=3; break;
+        case GL_UNSIGNED_SHORT: j=4; break;
+        case GL_INT:            j=5; break;
+        case GL_UNSIGNED_INT:   j=6; break;
+        case GL_FLOAT:          j=7; break;
+        default:                j=8; break;
         }
-        else
-        {
-            fprintf( stderr, " -> Generic attribute n°%d: ",
-                     self->attributes[i]->index );
-        }
-        fprintf(stderr, "%dx%s (+%ld)\n",
+        fprintf(stderr, "%s : %dx%s (+%ld)\n",
+                self->attributes[i]->name, 
                 self->attributes[i]->size, 
-                GL_TYPE_STRING( self->attributes[i]->type ),
+                gltypes[j],
                 (long) self->attributes[i]->pointer);
 
         i += 1;
@@ -270,6 +246,8 @@ vertex_buffer_print( vertex_buffer_t * self )
 void
 vertex_buffer_upload ( vertex_buffer_t *self )
 {
+    size_t vsize, isize;
+
     if( self->state == FROZEN )
     {
         return;
@@ -284,8 +262,8 @@ vertex_buffer_upload ( vertex_buffer_t *self )
         glGenBuffers( 1, &self->indices_id );
     }
 
-    size_t vsize = self->vertices->size*self->vertices->item_size;
-    size_t isize = self->indices->size*self->indices->item_size;
+    vsize = self->vertices->size*self->vertices->item_size;
+    isize = self->indices->size*self->indices->item_size;
 
 
     // Always upload vertices first such that indices do not point to non
@@ -333,6 +311,7 @@ vertex_buffer_clear( vertex_buffer_t *self )
     self->state = FROZEN;
     vector_clear( self->indices );
     vector_clear( self->vertices );
+    vector_clear( self->items );
     self->state = DIRTY;
 }
 
@@ -340,9 +319,10 @@ vertex_buffer_clear( vertex_buffer_t *self )
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_render_setup ( vertex_buffer_t *self,
-                             GLenum mode, const char *what )
+vertex_buffer_render_setup ( vertex_buffer_t *self, GLenum mode )
 {
+    size_t i;
+
     if( self->state != CLEAN )
     {
         vertex_buffer_upload( self );
@@ -352,26 +332,19 @@ vertex_buffer_render_setup ( vertex_buffer_t *self,
     glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
     glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
 
-    size_t i;
     for( i=0; i<MAX_VERTEX_ATTRIBUTE; ++i )
     {
         vertex_attribute_t *attribute = self->attributes[i];
         if ( attribute == 0 )
         {
-            break;
+            continue;
         }
         else
         {
-            if (attribute->ctarget == 'g')
-            {
-                (*(attribute->enable))( attribute );
-            }
-            else if ( strchr(what, attribute->ctarget) )
-            {
-                (*(attribute->enable))( attribute );
-            }
+            vertex_attribute_enable( attribute );
         }
     }
+
     if( self->indices->size )
     {
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
@@ -394,11 +367,11 @@ void
 vertex_buffer_render_item ( vertex_buffer_t *self,
                             size_t index )
 { 
+    ivec4 * item = (ivec4 *) vector_get( self->items, index );
     assert( self );
     assert( index < vector_size( self->items ) );
 
-    ivec4 * item = (ivec4 *) vector_get( self->items, index );
-
+ 
     if( self->indices->size )
     {
         size_t start = item->istart;
@@ -416,13 +389,12 @@ vertex_buffer_render_item ( vertex_buffer_t *self,
 
 // ----------------------------------------------------------------------------
 void
-vertex_buffer_render ( vertex_buffer_t *self,
-                       GLenum mode, const char *what )
+vertex_buffer_render ( vertex_buffer_t *self, GLenum mode )
 {
     size_t vcount = self->vertices->size;
     size_t icount = self->indices->size;
 
-    vertex_buffer_render_setup( self, mode, what );
+    vertex_buffer_render_setup( self, mode );
     if( icount )
     {
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
@@ -489,14 +461,14 @@ vertex_buffer_insert_vertices( vertex_buffer_t *self,
                                void *vertices,
                                size_t vcount )
 {
+    size_t i;
     assert( self );
     assert( self->vertices );
     assert( index < self->vertices->size+1 );
 
     self->state |= DIRTY;
 
-    size_t i;
-    for( i=0; i<self->indices->size; ++i )
+     for( i=0; i<self->indices->size; ++i )
     {
         if( *(GLuint *)(vector_get( self->indices, i )) > index )
         {
@@ -532,6 +504,7 @@ vertex_buffer_erase_vertices( vertex_buffer_t *self,
                               size_t first,
                               size_t last )
 {
+    size_t i;
     assert( self );
     assert( self->vertices );
     assert( first < self->vertices->size );
@@ -539,7 +512,6 @@ vertex_buffer_erase_vertices( vertex_buffer_t *self,
     assert( last > first );
 
     self->state |= DIRTY;
-    size_t i;
     for( i=0; i<self->indices->size; ++i )
     {
         if( *(GLuint *)(vector_get( self->indices, i )) > first )
@@ -568,6 +540,8 @@ vertex_buffer_insert( vertex_buffer_t * self, size_t index,
                       void * vertices, size_t vcount,  
                       GLuint * indices, size_t icount )
 {
+    size_t vstart, istart, i;
+    ivec4 item;
     assert( self );
     assert( vertices );
     assert( indices );
@@ -575,22 +549,24 @@ vertex_buffer_insert( vertex_buffer_t * self, size_t index,
     self->state = FROZEN;
 
     // Push back vertices
-    size_t vstart = vector_size( self->vertices );
+    vstart = vector_size( self->vertices );
     vertex_buffer_push_back_vertices( self, vertices, vcount );
 
     // Push back indices
-    size_t istart = vector_size( self->indices );
+    istart = vector_size( self->indices );
     vertex_buffer_push_back_indices( self, indices, icount );
 
     // Update indices within the vertex buffer
-    size_t i;
     for( i=0; i<icount; ++i )
     {
         *(GLuint *)(vector_get( self->indices, istart+i )) += vstart;
     }
     
     // Insert item
-    ivec4 item = {{ vstart, vcount, istart, icount }};
+    item.x = vstart;
+    item.y = vcount;
+    item.z = istart;
+    item.w = icount;
     vector_insert( self->items, index, &item );
 
     self->state = DIRTY;
@@ -602,17 +578,19 @@ void
 vertex_buffer_erase( vertex_buffer_t * self,
                      size_t index )
 {
+    ivec4 * item;
+    size_t vstart, vcount, istart, icount, i;
+    
     assert( self );
     assert( index < vector_size( self->items ) );
 
-    ivec4 * item = (ivec4 *) vector_get( self->items, index );
-    size_t vstart = item->vstart;
-    size_t vcount = item->vcount;
-    size_t istart = item->istart;
-    size_t icount = item->icount;
+    item = (ivec4 *) vector_get( self->items, index );
+    vstart = item->vstart;
+    vcount = item->vcount;
+    istart = item->istart;
+    icount = item->icount;
 
     // Update items
-    size_t i;
     for( i=0; i<vector_size(self->items); ++i )
     {
         ivec4 * item = (ivec4 *) vector_get( self->items, i );

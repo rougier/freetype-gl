@@ -257,6 +257,11 @@ typedef struct
     int filtering;
 
     /**
+     * Whether to use kerning if available
+     */
+    int kerning;
+
+    /**
      * LCD filter weights
      */
     unsigned char lcd_weights[5];
@@ -385,7 +390,17 @@ float
 texture_glyph_get_kerning( const texture_glyph_t * self,
                            const wchar_t charcode );
 
+
+/**
+ * Creates a new empty glyph
+ *
+ * @return a new empty glyph (not valid)
+ */
+texture_glyph_t *
+texture_glyph_new( void );
+
 /** @} */
+
 
 #ifdef __cplusplus
 }
