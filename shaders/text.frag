@@ -30,6 +30,55 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
+
+
+vec3
+energy_distribution( vec4 previous, vec4 current, vec4 next )
+{
+    float primary   = 1.0/3.0;
+    float secondary = 1.0/3.0;
+    float tertiary  = 0.0;
+
+    // Energy distribution as explained on:
+    // http://www.grc.com/freeandclear.htm
+    //
+    //  .. v..
+    // RGB RGB RGB
+    // previous.g + previous.b + current.r + current.g + current.b
+    //
+    //   . .v. .
+    // RGB RGB RGB
+    // previous.b + current.r + current.g + current.b + next.r
+    //
+    //     ..v ..
+    // RGB RGB RGB
+    // current.r + current.g + current.b + next.r + next.g
+
+    float r =
+        tertiary  * previous.g +
+        secondary * previous.b +
+        primary   * current.r  +
+        secondary * current.g  +
+        tertiary  * current.b;
+
+    float g =
+        tertiary  * previous.b +
+        secondary * current.r +
+        primary   * current.g  +
+        secondary * current.b  +
+        tertiary  * next.r;
+
+    float b =
+        tertiary  * current.r +
+        secondary * current.g +
+        primary   * current.b +
+        secondary * next.r    +
+        tertiary  * next.g;
+
+    return vec3(r,g,b);
+}
+
+
 uniform sampler2D texture;
 uniform vec3 pixel;
 varying float vgamma;
@@ -78,6 +127,10 @@ void main()
         b = mix(current.r,  previous.b, z);
     }
 
+    /*
+    vec3 color = energy_distribution(previous, vec4(r,g,b,1), next);
+    color = pow( color, vec3(1.0/vgamma));
+    */
     vec3 color = pow( vec3(r,g,b), vec3(1.0/vgamma));
     gl_FragColor.rgb = color*gl_Color.rgb;
     gl_FragColor.a = (color.r+color.g+color.b)/3.0 * gl_Color.a;
