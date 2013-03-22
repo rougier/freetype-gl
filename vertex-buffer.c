@@ -357,7 +357,6 @@ vertex_buffer_render_finish ( vertex_buffer_t *self )
 {
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-    glPopClientAttrib( );
 }
 
 
