@@ -329,7 +329,6 @@ vertex_buffer_render_setup ( vertex_buffer_t *self, GLenum mode )
         self->state = CLEAN;
     }
     
-    glPushClientAttrib( GL_CLIENT_VERTEX_ARRAY_BIT );
     glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
 
     for( i=0; i<MAX_VERTEX_ATTRIBUTE; ++i )
