@@ -155,16 +155,23 @@ int main( int argc, char **argv )
     text_buffer = text_buffer_new( LCD_FILTERING_ON );
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
-    markup_t markup = {
-        .family  = "fonts/Vera.ttf",
-        .size    = 9.0, .bold    = 0,   .italic  = 0,
-        .rise    = 0.0,  .spacing = 0.0, .gamma   = 1.0,
-        .foreground_color    = black, .background_color    = none,
-        .underline           = 0,     .underline_color     = black,
-        .overline            = 0,     .overline_color      = black,
-        .strikethrough       = 0,     .strikethrough_color = black,
-        .font = 0,
-    };
+ 	markup_t markup;
+    markup.family  = "fonts/Vera.ttf";
+    markup.size    = 9.0;
+    markup.bold    = 0;
+    markup.italic  = 0;
+    markup.rise    = 0.0;
+    markup.spacing = 0.0;
+    markup.gamma   = 1.0;
+    markup.foreground_color    = black;
+    markup.background_color    = none;
+    markup.underline           = 0;   
+    markup.underline_color     = black;
+    markup.overline            = 0;  
+    markup.overline_color      = black;
+    markup.strikethrough       = 0;   
+    markup.strikethrough_color = black;
+    markup.font = 0;
 
     size_t i;
     vec2 pen = {{20, 320}};

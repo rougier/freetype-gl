@@ -82,15 +82,15 @@ void display( void )
     GLint width  = viewport[2];
     GLint height = viewport[3];
 
-    srandom(4);
+    srand(4);
     vec4 color = {{0.067,0.333, 0.486, 1.0}};
     size_t i;
     for( i=0; i<40; ++i)
     {
-        float scale = .25 + 4.75 * pow(random()/(float)(RAND_MAX),2);
-        float angle = 90*(random()%2);
-        float x = (.05 + .9*(random()/(float)(RAND_MAX)))*width;
-        float y = (-.05 + .9*(random()/(float)(RAND_MAX)))*height;
+        float scale = .25 + 4.75 * pow(rand()/(float)(RAND_MAX),2);
+        float angle = 90*(rand()%2);
+        float x = (.05 + .9*(rand()/(float)(RAND_MAX)))*width;
+        float y = (-.05 + .9*(rand()/(float)(RAND_MAX)))*height;
         float a =  0.1+.8*(pow((1.0-scale/5),2));
 
         mat4_set_identity( &model );

@@ -42,7 +42,6 @@
 #    include <OpenGL/gl.h>
 #  endif
 #elif defined(_WIN32) || defined(_WIN64)
-#  include <Windows.h>
 #  include <GL/glew.h>
 #  include <GL/wglew.h>
 #else

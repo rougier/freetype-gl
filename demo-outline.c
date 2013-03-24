@@ -203,24 +203,25 @@ int main( int argc, char **argv )
 
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
-    markup_t markup = {
-        .family  = "fonts/Vera.ttf",
-        .size    = 80,
-        .bold    = 0,
-        .italic  = 0,
-        .rise    = 0.0,
-        .spacing = 0.0,
-        .gamma   = 1.5,
-        .foreground_color    = white,
-        .background_color    = none,
-        .underline           = 0,
-        .underline_color     = white,
-        .overline            = 0,
-        .overline_color      = white,
-        .strikethrough       = 0,
-        .strikethrough_color = white,
-        .font = 0,
-    };
+
+	markup_t markup;
+    markup.family  = "fonts/Vera.ttf";
+    markup.size    = 80.0;
+    markup.bold    = 0;
+    markup.italic  = 0;
+    markup.rise    = 0.0;
+    markup.spacing = 0.0;
+    markup.gamma   = 1.5;
+    markup.foreground_color    = white;
+    markup.background_color    = none;
+    markup.underline           = 0;   
+    markup.underline_color     = white;
+    markup.overline            = 0;  
+    markup.overline_color      = white;
+    markup.strikethrough       = 0;   
+    markup.strikethrough_color = white;
+    markup.font = 0;
+
     markup.font = texture_font_new( atlas, "fonts/Vera.ttf", markup.size );
 
     markup.font->outline_type = 1;

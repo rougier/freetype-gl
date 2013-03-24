@@ -43,8 +43,12 @@ IF( WIN32 OR WIN64 )
          ${CMAKE_CURRENT_SOURCE_DIR}/windows )
 	SET( GLUT_INCLUDE_DIR
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut )
-	SET( GLUT_GLUT_LIBRARY
+	SET( GLUT_LIBRARY
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut/glut32.lib )
+  SET( GLEW_INCLUDE_DIR
+         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew-1.9.0/include )
+  SET( GLEW_LIBRARY
+         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew-1.9.0/lib/glew32.lib )
 	SET( FREETYPE_INCLUDE_DIR_ft2build
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype )
 	SET( FREETYPE_INCLUDE_DIR_freetype2
@@ -65,15 +69,6 @@ ELSE( WIN32 OR WIN64 )
     #FIND_LIBRARY( STDC_LIBRARY stdc++) #Buggy Cmake can't find libstdc++
     FIND_PACKAGE( AntTweakBar )
 ENDIF( WIN32 OR WIN64 )
-
-# Untested
-if(MSVC)
-  foreach(flag_var
-          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    set(${flag_var} "${${flag_var}} /TP")
-  endforeach(flag_var)
-endif()
 
 INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIRS}
                      ${OPENGL_INCLUDE_DIRS}
@@ -104,16 +99,21 @@ LINK_DIRECTORIES(${PROJECT_SOURCE_DIR})
 
 MACRO( DEMO _target _sources)
      add_executable(${_target} ${_sources})
-	 include_directories(${WINDOWS_DIR} ${GLUT_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
+	 include_directories(${WINDOWS_DIR} ${GLUT_INCLUDE_DIR} ${GLEW_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
      target_link_libraries(${_target} ${FREETYPE_GL_LIBRARY})
      target_link_libraries(${_target} ${OPENGL_LIBRARY})
      target_link_libraries(${_target} ${GLEW_LIBRARY})
      target_link_libraries(${_target} freetype-gl)
      target_link_libraries(${_target} ${GLUT_LIBRARY})
+     target_link_libraries(${_target} ${GLEW_LIBRARY})
      target_link_libraries(${_target} ${FREETYPE_LIBRARY})
      IF( MATH_LIBRARY )
          target_link_libraries(${_target} ${MATH_LIBRARY})
      ENDIF( MATH_LIBRARY )
+    if(MSVC)
+      # Compile demos as C++
+      set_source_files_properties(${_sources} PROPERTIES LANGUAGE CXX)
+    endif()
 ENDMACRO( DEMO )
 
 IF (freetype-gl_BUILD_DEMOS)
@@ -142,7 +142,7 @@ IF (FONTCONFIG_FOUND)
    target_link_libraries(demo-markup ${FONTCONFIG_LIBRARY})
 ENDIF (FONTCONFIG_FOUND)
 
-IF (ANT_TWEAK_BAR_FOUND)  
+IF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )  
  #DEMO( demo-atb-agg     "demo-atb-agg.c;markup.h;")
  FILE(WRITE ${CMAKE_SOURCE_DIR}/stdc_test.c
   "int main(void){return 0;}\n")
@@ -167,15 +167,15 @@ IF (ANT_TWEAK_BAR_FOUND)
   else()
       message (STATUS "NOT FOUND: Libstdc++ is not installed. It is needed by demo-atb-agg.c" )
   endif()
-ENDIF (ANT_TWEAK_BAR_FOUND)
-
+ENDIF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )  
 
 # Copy font and shaders into build directory for in-place testing
 FILE(GLOB Fonts   "fonts/Vera.ttf"
                   "fonts/VeraMoBI.ttf"
                   "fonts/VeraMoBd.ttf"
                   "fonts/VeraMoIt.ttf"
-                  "fonts/VeraMono.ttf")
+                  "fonts/VeraMono.ttf"
+                  "fonts/ObelixPro.ttf")
 file(COPY ${Fonts}   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/fonts)
 
 FILE(GLOB Data   "data/256colors.txt")

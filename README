@@ -63,4 +63,5 @@ Contributors:
 * Per Inge Mathisen (Bug report & fix)
 * Wojciech Mamrak (Code review, bug report & fix)
 * Wael Eloraiby (Put code to the C89 norm and fix CMakefile)
-
+* Christian Forfang (Code review, fix & patch for 3.2 core profile)
+* Lukas Murmann (Code review & fix for 3.2 core profile)

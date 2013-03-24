@@ -138,16 +138,23 @@ int main( int argc, char **argv )
     vec4 white = {{1.0, 1.0, 1.0, 1.0}};
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
-    markup_t markup = {
-        .family  = "fonts/Vera.ttf",
-        .size    = 15.0, .bold    = 0,   .italic  = 0,
-        .rise    = 0.0,  .spacing = 0.0, .gamma   = 1.0,
-        .foreground_color    = white, .background_color    = none,
-        .underline           = 0,     .underline_color     = none,
-        .overline            = 0,     .overline_color      = none,
-        .strikethrough       = 0,     .strikethrough_color = none,
-        .font = 0,
-    };
+    markup_t markup;
+    markup.family  = "fonts/Vera.ttf";
+    markup.size    = 15.0;
+    markup.bold    = 0;
+    markup.italic  = 0;
+    markup.rise    = 0.0;
+    markup.spacing = 0.0;
+    markup.gamma   = 1.0;
+    markup.foreground_color    = white;
+    markup.background_color    = none;
+    markup.underline           = 0;   
+    markup.underline_color     = none;
+    markup.overline            = 0;  
+    markup.overline_color      = none;
+    markup.strikethrough       = 0;   
+    markup.strikethrough_color = none;
+    markup.font = 0;
 
     size_t i;
     vec2 pen = {{32, 508}};
