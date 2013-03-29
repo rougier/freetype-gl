@@ -45,10 +45,10 @@ IF( WIN32 OR WIN64 )
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut )
 	SET( GLUT_LIBRARY
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut/glut32.lib )
-  SET( GLEW_INCLUDE_DIR
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew-1.9.0/include )
-  SET( GLEW_LIBRARY
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew-1.9.0/lib/glew32.lib )
+    SET( GLEW_INCLUDE_DIR
+         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/include )
+    SET( GLEW_LIBRARY
+         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/lib/glew32.lib )
 	SET( FREETYPE_INCLUDE_DIR_ft2build
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype )
 	SET( FREETYPE_INCLUDE_DIR_freetype2
@@ -59,6 +59,8 @@ IF( WIN32 OR WIN64 )
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/AntTweakBar/include )
 	SET( ANT_TWEAK_BAR_LIBRARY
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/AntTweakBar/lib/AntTweakBar.lib )
+    SET( VS789FIX_INCLUDE_DIR
+         ${CMAKE_CURRENT_SOURCE_DIR}/windows/include )
     SET( ANT_TWEAK_BAR_FOUND "YES" )
 ELSE( WIN32 OR WIN64 )
     FIND_PACKAGE( GLUT REQUIRED )
@@ -74,7 +76,8 @@ INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIRS}
                      ${OPENGL_INCLUDE_DIRS}
                      ${FREETYPE_INCLUDE_DIRS}
                      ${GLEW_INCLUDE_DIRS}
-                     ${CMAKE_CURRENT_SOURCE_DIR} )
+                     ${CMAKE_CURRENT_SOURCE_DIR}
+                     ${VS789FIX_INCLUDE_DIR} )
 
 SET( FREETYPE_GL_LIBRARY freetype-gl )
 SET( FREETYPE_GL_SRC freetype-gl.h
