@@ -167,7 +167,8 @@ int main( int argc, char **argv )
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
         text_buffer_add_text( buffer, &pen, &markup, text, wcslen(text) );
     }
-    pen = (vec2) {{32, 252}};
+    pen.x = 32;
+    pex.y = 252;
     markup.foreground_color = black;
     for( i=0; i < 14; ++i )
     {
