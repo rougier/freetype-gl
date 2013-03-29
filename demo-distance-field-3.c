@@ -448,7 +448,7 @@ main( int argc, char **argv )
     // Generate the glyp at 512 points, compute distance field and scale it
     // back to 32 points
     // Just load another glyph if you want to see difference (draw render a '@')
-    glyph = load_glyph( "fonts/Vera.ttf", L'@', 512, 32, 0.05);
+    glyph = load_glyph( "fonts/Vera.ttf", L'@', 512, 64, 0.1);
     vector_push_back( font->glyphs, &glyph );
 
     texture_atlas_upload( atlas );
