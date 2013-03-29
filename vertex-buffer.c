@@ -231,11 +231,11 @@ vertex_buffer_print( vertex_buffer_t * self )
         case GL_FLOAT:          j=7; break;
         default:                j=8; break;
         }
-        fprintf(stderr, "%s : %dx%s (+%ld)\n",
+        fprintf(stderr, "%s : %dx%s (+%p)\n",
                 self->attributes[i]->name, 
                 self->attributes[i]->size, 
                 gltypes[j],
-                (long) self->attributes[i]->pointer);
+                self->attributes[i]->pointer);
 
         i += 1;
     }

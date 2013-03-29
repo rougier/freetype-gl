@@ -157,7 +157,10 @@ int main( int argc, char **argv )
     markup.font = 0;
 
     size_t i;
-    vec2 pen = {{32, 508}};
+    vec2 pen;
+    pen.x = 32;
+    pen.y = 508;
+
     wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789\n";
     for( i=0; i < 14; ++i )
     {
