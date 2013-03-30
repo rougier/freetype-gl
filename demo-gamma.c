@@ -168,7 +168,7 @@ int main( int argc, char **argv )
         text_buffer_add_text( buffer, &pen, &markup, text, wcslen(text) );
     }
     pen.x = 32;
-    pex.y = 252;
+    pen.y = 252;
     markup.foreground_color = black;
     for( i=0; i < 14; ++i )
     {
