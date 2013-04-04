@@ -37,13 +37,12 @@
 #include <stdlib.h>
 
 #if defined(__APPLE__)
-#    include <OpenGL/gl.h>
-#    include <Glut/glut.h>
+    #include <Glut/glut.h>
+#elif defined(_WIN32) || defined(_WIN64)
+    #include <GLUT/glut.h>
 #else
-    #include <GL/gl.h>
     #include <GL/glut.h>
 #endif
-
 
 
 

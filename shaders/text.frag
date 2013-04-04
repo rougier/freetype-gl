@@ -101,6 +101,9 @@ void main()
     vec4 previous= texture2D(texture, uv+vec2(-1.,0.)*pixel.xy);
     vec4 next    = texture2D(texture, uv+vec2(+1.,0.)*pixel.xy);
 
+    current = pow(current, vec4(1.0/vgamma));
+    previous= pow(previous, vec4(1.0/vgamma));
+
     float r = current.r;
     float g = current.g;
     float b = current.b;
@@ -127,11 +130,23 @@ void main()
         b = mix(current.r,  previous.b, z);
     }
 
+   float t = max(max(r,g),b);
+   vec4 color = vec4(gl_Color.rgb, (r+g+b)/3.0);
+   color = t*color + (1.0-t)*vec4(r,g,b, min(min(r,g),b));
+   gl_FragColor = vec4( color.rgb, gl_Color.a*color.a);
+
+
+//    gl_FragColor = vec4(pow(vec3(r,g,b),vec3(1.0/vgamma)),a);
+
     /*
     vec3 color = energy_distribution(previous, vec4(r,g,b,1), next);
     color = pow( color, vec3(1.0/vgamma));
-    */
-    vec3 color = pow( vec3(r,g,b), vec3(1.0/vgamma));
-    gl_FragColor.rgb = color*gl_Color.rgb;
+
+    vec3 color = vec3(r,g,b); //pow( vec3(r,g,b), vec3(1.0/vgamma));
+    gl_FragColor.rgb = color; //*gl_Color.rgb;
     gl_FragColor.a = (color.r+color.g+color.b)/3.0 * gl_Color.a;
+    */
+
+//    gl_FragColor = vec4(pow(vec3(r,g,b),vec3(1.0/vgamma)),a);
+    //gl_FragColor = vec4(r,g,b,a);
 }

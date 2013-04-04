@@ -69,7 +69,7 @@ mat4 model, view, projection;
 // ---------------------------------------------------------------- display ---
 void display( void )
 {
-    glClearColor( 1.0,1.0,1.0,1.0 );
+    glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glUseProgram( text_buffer->shader );
@@ -82,7 +82,8 @@ void display( void )
                             1, 0, projection.data);
         text_buffer_render( text_buffer );
     }
-
+    glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+    glBlendColor( 1.0, 1.0, 1.0, 1.0 );
     glUseProgram( shader );
     {
         glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
@@ -149,11 +150,13 @@ int main( int argc, char **argv )
                                { 15,330,0, 0,0,0,1},
                                {245,  0,0, 0,0,0,1},
                                {245,330,0, 0,0,0,1} };
-    GLuint indices[4*3] = { 0,1, 2,3, };
+    GLuint indices[4*3] = { 0,1,2,3, };
     vertex_buffer_push_back( buffer, vertices, 4, indices, 4 );
 
     text_buffer = text_buffer_new( LCD_FILTERING_ON );
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
+    text_buffer->base_color = black;
+
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
  	markup_t markup;
     markup.family  = "fonts/Vera.ttf";

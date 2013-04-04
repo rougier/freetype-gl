@@ -59,6 +59,7 @@ void display( void )
     glClearColor(1.00,1.00,1.00,1.00);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+    glColor4f(1.00,1.00,1.00,1.00);
     glUseProgram( buffer->shader );
     {
         glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),

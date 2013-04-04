@@ -63,6 +63,10 @@ text_buffer_new( size_t depth )
     self->shader_pixel = glGetUniformLocation(self->shader, "pixel");
     self->line_start = 0;
     self->line_ascender = 0;
+    self->base_color.r = 0.0;
+    self->base_color.g = 0.0;
+    self->base_color.b = 0.0;
+    self->base_color.a = 1.0;
     self->line_descender = 0;
     return self;
 }
@@ -89,15 +93,23 @@ text_buffer_render( text_buffer_t * self )
     glBindTexture( GL_TEXTURE_2D, self->manager->atlas->id );
     if( self->manager->atlas->depth == 1 )
     {
-        glDisable( GL_COLOR_MATERIAL );
+        //glDisable( GL_COLOR_MATERIAL );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glBlendColor( 1, 1, 1, 1 );
     }
     else
     {
-        glEnable( GL_COLOR_MATERIAL );
-        glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-        glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-        glBlendColor( 1.0, 1.0, 1.0, 1.0 );
+        //glEnable( GL_COLOR_MATERIAL );
+        //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+        //glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+        //glBlendColor( 1.0, 1.0, 1.0, 1.0 );
+        //glBlendFunc( GL_CONSTANT_COLOR_EXT,  GL_ONE_MINUS_SRC_COLOR );
+        //glBlendColor( self->base_color.r,
+        //self->base_color.g,
+        //self->base_color.b,
+        //self->base_color.a );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glBlendColor( 1, 1, 1, 1 );
     }
 
     glUseProgram( self->shader );

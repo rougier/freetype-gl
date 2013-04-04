@@ -38,7 +38,7 @@
 
 #include <math.h>
 
-float round (float v)
+double round (float v)
 {
 	return floor(v+0.5f);
 }

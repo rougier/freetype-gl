@@ -90,6 +90,12 @@ typedef struct {
     font_manager_t *manager;
 
     /**
+     * Base color for text
+     */
+    vec4 base_color;
+
+
+    /**
      * Pen origin
      */
     vec2 origin;

@@ -122,6 +122,7 @@ void display( void )
     glClearColor(0.40,0.40,0.45,1.00);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+    glColor4f(1.00,1.00,1.00,1.00);
     glUseProgram( buffer->shader );
     {
         glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
@@ -193,7 +194,7 @@ int main( int argc, char **argv )
     markup_t normal = {
         .family  = f_normal,
         .size    = 24.0, .bold    = 0,   .italic  = 0,
-        .rise    = 0.0,  .spacing = 0.0, .gamma   = 1.5,
+        .rise    = 0.0,  .spacing = 0.0, .gamma   = 2.,
         .foreground_color    = white, .background_color    = none,
         .underline           = 0,     .underline_color     = white,
         .overline            = 0,     .overline_color      = white,
