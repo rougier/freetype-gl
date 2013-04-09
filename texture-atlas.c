@@ -91,7 +91,7 @@ texture_atlas_delete( texture_atlas_t *self )
     {
         free( self->data );
     }
-    if( !self->id )
+    if( self->id )
     {
         glDeleteTextures( 1, &self->id );
     }
