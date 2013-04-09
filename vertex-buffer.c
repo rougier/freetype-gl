@@ -410,8 +410,8 @@ vertex_buffer_render ( vertex_buffer_t *self, GLenum mode )
 // ----------------------------------------------------------------------------
 void
 vertex_buffer_push_back_indices ( vertex_buffer_t * self,
-                                  GLuint * indices,
-                                  size_t icount )
+                                  const GLuint * indices,
+                                  const size_t icount )
 {
     assert( self );
 
@@ -424,8 +424,8 @@ vertex_buffer_push_back_indices ( vertex_buffer_t * self,
 // ----------------------------------------------------------------------------
 void
 vertex_buffer_push_back_vertices ( vertex_buffer_t * self,
-                                   void * vertices,
-                                   size_t vcount )
+                                   const void * vertices,
+                                   const size_t vcount )
 {
     assert( self );
 
@@ -438,9 +438,9 @@ vertex_buffer_push_back_vertices ( vertex_buffer_t * self,
 // ----------------------------------------------------------------------------
 void
 vertex_buffer_insert_indices ( vertex_buffer_t *self,
-                               size_t index,
-                               GLuint *indices,
-                               size_t count )
+                               const size_t index,
+                               const GLuint *indices,
+                               const size_t count )
 {
     assert( self );
     assert( self->indices );
@@ -455,9 +455,9 @@ vertex_buffer_insert_indices ( vertex_buffer_t *self,
 // ----------------------------------------------------------------------------
 void
 vertex_buffer_insert_vertices( vertex_buffer_t *self,
-                               size_t index,
-                               void *vertices,
-                               size_t vcount )
+                               const size_t index,
+                               const void *vertices,
+                               const size_t vcount )
 {
     size_t i;
     assert( self );
@@ -482,8 +482,8 @@ vertex_buffer_insert_vertices( vertex_buffer_t *self,
 // ----------------------------------------------------------------------------
 void
 vertex_buffer_erase_indices( vertex_buffer_t *self,
-                             size_t first,
-                             size_t last )
+                             const size_t first,
+                             const size_t last )
 {
     assert( self );
     assert( self->indices );
@@ -499,8 +499,8 @@ vertex_buffer_erase_indices( vertex_buffer_t *self,
 // ----------------------------------------------------------------------------
 void
 vertex_buffer_erase_vertices( vertex_buffer_t *self,
-                              size_t first,
-                              size_t last )
+                              const size_t first,
+                              const size_t last )
 {
     size_t i;
     assert( self );
@@ -525,8 +525,8 @@ vertex_buffer_erase_vertices( vertex_buffer_t *self,
 // ----------------------------------------------------------------------------
 size_t
 vertex_buffer_push_back( vertex_buffer_t * self,
-                         void * vertices, size_t vcount,  
-                         GLuint * indices, size_t icount )
+                         const void * vertices, const size_t vcount,  
+                         const GLuint * indices, const size_t icount )
 {
     return vertex_buffer_insert( self, vector_size( self->items ),
                                  vertices, vcount, indices, icount );
@@ -534,9 +534,9 @@ vertex_buffer_push_back( vertex_buffer_t * self,
 
 // ----------------------------------------------------------------------------
 size_t
-vertex_buffer_insert( vertex_buffer_t * self, size_t index,
-                      void * vertices, size_t vcount,  
-                      GLuint * indices, size_t icount )
+vertex_buffer_insert( vertex_buffer_t * self, const size_t index,
+                      const void * vertices, const size_t vcount,  
+                      const GLuint * indices, const size_t icount )
 {
     size_t vstart, istart, i;
     ivec4 item;
@@ -574,7 +574,7 @@ vertex_buffer_insert( vertex_buffer_t * self, size_t index,
 // ----------------------------------------------------------------------------
 void
 vertex_buffer_erase( vertex_buffer_t * self,
-                     size_t index )
+                     const size_t index )
 {
     ivec4 * item;
     size_t vstart, vcount, istart, icount, i;
