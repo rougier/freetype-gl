@@ -55,7 +55,7 @@ SOURCES   := $(filter-out makefont.c, $(SOURCES))
 OBJECTS   := $(SOURCES:.c=.o)
 
 .PHONY: all clean distclean
-all: $(DEMOS) makefont demo-atb-agg demo-markup demo-markup-2
+all: $(DEMOS) makefont demo-atb-agg demo-markup
 
 demos: $(DEMOS)
 
@@ -78,10 +78,6 @@ demo-atb-agg: demo-atb-agg.o $(OBJECTS) $(HEADERS) \
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -lAntTweakBar -o $@
 
 demo-markup: demo-markup.o $(OBJECTS) $(HEADERS)
-	@echo "Building $@... "
-	@$(CC) $(OBJECTS) $@.o $(LIBS) -lfontconfig -o $@
-
-demo-markup-2: demo-markup-2.o $(OBJECTS) $(HEADERS)
 	@echo "Building $@... "
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -lfontconfig -o $@
 
