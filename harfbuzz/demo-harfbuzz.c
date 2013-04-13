@@ -168,10 +168,12 @@ int main( int argc, char **argv )
         for (j = 0; j < glyph_count; ++j)
         {
             int codepoint = glyph_info[j].codepoint;
+            // because of vhinting trick we need the extra 64 (hres)
             float x_advance = glyph_pos[j].x_advance/(64.*64.);
+            float x_offset = glyph_pos[j].x_offset/(64.*64.);
             texture_glyph_t *glyph = texture_font_get_glyph(fonts[i], codepoint);
             if( i < (glyph_count-1) )
-                width += x_advance;
+                width += x_advance + x_offset;
             else
                 width += glyph->offset_x + glyph->width;
         }
@@ -180,16 +182,19 @@ int main( int argc, char **argv )
         for (j = 0; j < glyph_count; ++j)
         {
             int codepoint = glyph_info[j].codepoint;
-            float x_advance = glyph_pos[j].x_advance/(64.*64.); // because of vhinting trick
+            // because of vhinting trick we need the extra 64 (hres)
+            float x_advance = glyph_pos[j].x_advance/(64.*64.);
+            float x_offset = glyph_pos[j].x_offset/(64.*64.);
             float y_advance = glyph_pos[j].y_advance/(64.);
+            float y_offset = glyph_pos[j].y_offset/(64.);
             texture_glyph_t *glyph = texture_font_get_glyph(fonts[i], codepoint);
 
             float r = 0.0;
             float g = 0.0;
             float b = 0.0;
             float a = 1.0;
-            float x0 = x + glyph->offset_x;
-            float y0 = y + glyph->offset_y;
+            float x0 = x + x_offset + glyph->offset_x;
+            float y0 = y + y_offset + glyph->offset_y;
             float x1 = x0 + glyph->width;
             float y1 = y0 - glyph->height;
             float s0 = glyph->s0;

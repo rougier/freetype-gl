@@ -170,7 +170,6 @@ texture_font_new( texture_atlas_t *    atlas,
             }
         }
     }
-    self->hb_ft_font = hb_ft_font_create( self->ft_face, NULL );
 
     /* Set char size */
     error = FT_Set_Char_Size( self->ft_face, (int)(size*64), 0, hdpi*hres, vdpi );
@@ -183,6 +182,8 @@ texture_font_new( texture_atlas_t *    atlas,
     }
     /* Set transform matrix */
     FT_Set_Transform( self->ft_face, &matrix, NULL );
+
+    self->hb_ft_font = hb_ft_font_create( self->ft_face, NULL );
 
     return self;
  }
