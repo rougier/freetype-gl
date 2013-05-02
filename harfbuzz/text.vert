@@ -55,7 +55,7 @@ varying float v_gamma;
 varying float v_shift;
 void main()
 {
-    vec2 position = vec2( floor(a_vertex.x), floor(a_vertex.y));
+    vec2 position = vec2( floor(a_vertex.x), a_vertex.y);
     v_shift = a_vertex.x - position.x;
     v_gamma = a_gamma;
     v_color = a_color;

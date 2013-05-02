@@ -31,6 +31,8 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include <math.h>
+#include <stdio.h>
 #include <AntTweakBar.h>
 #include "freetype-gl.h"
 #include "font-manager.h"

@@ -34,6 +34,9 @@
 #include <ft2build.h>
 #include FT_CONFIG_OPTIONS_H
 
+#include <stdio.h>
+#include <wchar.h>
+
 #include "freetype-gl.h"
 
 #include "font-manager.h"

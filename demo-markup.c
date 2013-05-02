@@ -35,6 +35,10 @@
  *
  * ============================================================================
  */
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <fontconfig/fontconfig.h>
 #include "freetype-gl.h"
 #include "font-manager.h"
 #include "vertex-buffer.h"
@@ -50,8 +54,6 @@
 #else
     #include <GL/glut.h>
 #endif
-#include <fontconfig/fontconfig.h>
-
 
 
 // ------------------------------------------------------- global variables ---

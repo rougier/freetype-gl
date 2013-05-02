@@ -35,6 +35,10 @@
  *
  * ============================================================================
  */
+#include <stdarg.h>
+#include <stdio.h>
+#include <wchar.h>
+
 #include "freetype-gl.h"
 #include "font-manager.h"
 #include "vertex-buffer.h"

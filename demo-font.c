@@ -35,6 +35,8 @@
  *
  * ============================================================================
  */
+#include <stdio.h>
+#include <wchar.h>
 
 #include "freetype-gl.h"
 #include "mat4.h"

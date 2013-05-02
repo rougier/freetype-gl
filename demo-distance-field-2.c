@@ -30,6 +30,10 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
+#include <stdio.h>
+#include <string.h>
+#include <wchar.h>
+
 #include "freetype-gl.h"
 #include "edtaa3func.h"
 #include "font-manager.h"

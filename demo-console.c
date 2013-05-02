@@ -30,6 +30,9 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
+#include <wchar.h>
+#include <string.h>
+#include <stdio.h>
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
 #include "markup.h"

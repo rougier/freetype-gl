@@ -44,6 +44,8 @@
 #ifndef __TEXTURE_ATLAS_H__
 #define __TEXTURE_ATLAS_H__
 
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

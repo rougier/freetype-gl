@@ -31,6 +31,8 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include <stdio.h>
+#include <wchar.h>
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
 #include "shader.h"

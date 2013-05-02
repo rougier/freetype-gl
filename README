@@ -68,3 +68,5 @@ Contributors:
 * Jérémie Roy (Code review, fix and new ideas)
 * dsewtz (Bug report & fix)
 * jcgamestoy (Bug report & fix)
+* Behdad Esfahbod (Bug fix on harfbuzz demo)
+* Adrian Broher (Code analysis & fix)

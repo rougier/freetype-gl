@@ -107,6 +107,7 @@ texture_font_new( texture_atlas_t *    atlas,
     self->descender = 0;
     self->filename = strdup( filename );
     self->size = size;
+    self->hres = 100;
     self->ft_face = 0;
     self->hb_ft_font = 0;
 
@@ -128,17 +129,16 @@ texture_font_new( texture_atlas_t *    atlas,
         return 0;
     }
 
-    size_t hres = 64;
     size_t hdpi = 72;
     size_t vdpi = 72;
     FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
-    FT_Matrix matrix = { (int)((1.0/hres) * 0x10000L),
+    FT_Matrix matrix = { (int)((1.0/self->hres) * 0x10000L),
                          (int)((0.0)      * 0x10000L),
                          (int)((0.0)      * 0x10000L),
                          (int)((1.0)      * 0x10000L) };
 
-    /* Get harfbuzz font structs */
-    FT_Set_Char_Size( self->ft_face, 0, (int)(size*64), hdpi*hres, vdpi );
+    /* Set char size */
+    FT_Set_Char_Size( self->ft_face, 0, (int)(size*64),(int)(hdpi*self->hres), vdpi );
     if( error )
     {
         //fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
@@ -170,19 +170,10 @@ texture_font_new( texture_atlas_t *    atlas,
             }
         }
     }
-
-    /* Set char size */
-    error = FT_Set_Char_Size( self->ft_face, (int)(size*64), 0, hdpi*hres, vdpi );
-    if( error )
-    {
-        //fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-        //         __LINE__, FT_Errors[error].code, FT_Errors[error].message );
-        FT_Done_Face( self->ft_face );
-        return 0;
-    }
     /* Set transform matrix */
     FT_Set_Transform( self->ft_face, &matrix, NULL );
-
+    
+    /* Set harfbuzz font */
     self->hb_ft_font = hb_ft_font_create( self->ft_face, NULL );
 
     return self;

@@ -34,15 +34,6 @@
 #ifndef __FREETYPE_GL_H__
 #define __FREETYPE_GL_H__
 
-#include <math.h>
-#include <wchar.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <limits.h>
-#include <assert.h>
-
 /* Mandatory */
 #include "opengl.h"
 #include "vec234.h"

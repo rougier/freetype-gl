@@ -34,6 +34,8 @@
 #ifndef __TEXTURE_FONT_H__
 #define __TEXTURE_FONT_H__
 
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

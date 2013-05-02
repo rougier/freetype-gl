@@ -147,7 +147,11 @@ typedef struct
      * Font size
      */
     float size;
-    
+
+    /**
+     * Font hres (vertical hinting trick
+     */
+    float hres;
 
     /**
      * Freetype face

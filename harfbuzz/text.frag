@@ -46,14 +46,9 @@ varying float v_shift;
 void main()
 {
     vec4 current = texture2D(texture, v_texcoord);
-    vec4 previous= texture2D(texture, v_texcoord+vec2(-1.,0.)*pixel);
-
-    //gl_FragColor = current;
-    //return;
-
     current = pow(current, vec4(1.0/v_gamma));
+    vec4 previous= texture2D(texture, v_texcoord+vec2(-1.,0.)*pixel);
     previous= pow(previous, vec4(1.0/v_gamma));
-
     float r = current.r;
     float g = current.g;
     float b = current.b;

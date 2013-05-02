@@ -31,10 +31,10 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include <stdio.h>
 #include "freetype-gl.h"
 #include "shader.h"
 #include "vertex-buffer.h"
-#include <stdlib.h>
 
 #if defined(__APPLE__)
     #include <Glut/glut.h>

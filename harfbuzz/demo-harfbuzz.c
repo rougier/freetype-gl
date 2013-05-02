@@ -62,10 +62,10 @@ vertex_buffer_t * vbuffer;
 mat4 model, view, projection;
 
 const char *text = "صِف خَلقَ خَودِ كَمِثلِ الشَمسِ إِذ بَزَغَت — يَحظى الضَجيعُ بِها نَجلاءَ مِعطارِ";
+const char *font_filename      = "./amiri-regular.ttf";
 const hb_direction_t direction = HB_DIRECTION_RTL;
-const char *language = "ar";
-const hb_script_t script = HB_SCRIPT_ARABIC;
-
+const hb_script_t script       = HB_SCRIPT_ARABIC;
+const char *language           = "ar";
 
 // ---------------------------------------------------------------- display ---
 void display( void )
@@ -131,7 +131,7 @@ int main( int argc, char **argv )
     texture_font_t *fonts[20];
     for ( i=0; i< 20; ++i )
     {
-        fonts[i] =  texture_font_new(atlas, "./amiri-regular.ttf", 12+i),
+        fonts[i] =  texture_font_new(atlas, font_filename, 12+i),
         texture_font_load_glyphs(fonts[i], text, direction, language, script );
     }
 
@@ -165,12 +165,12 @@ int main( int argc, char **argv )
         float x = 0;
         float y = 600 - i * (10+i) - 15;
         float width = 0.0;
+        float hres = fonts[i]->hres;
         for (j = 0; j < glyph_count; ++j)
         {
             int codepoint = glyph_info[j].codepoint;
-            // because of vhinting trick we need the extra 64 (hres)
-            float x_advance = glyph_pos[j].x_advance/(64.*64.);
-            float x_offset = glyph_pos[j].x_offset/(64.*64.);
+            float x_advance = glyph_pos[j].x_advance/(float)(hres*64);
+            float x_offset = glyph_pos[j].x_offset/(float)(hres*64);
             texture_glyph_t *glyph = texture_font_get_glyph(fonts[i], codepoint);
             if( i < (glyph_count-1) )
                 width += x_advance + x_offset;
@@ -183,10 +183,10 @@ int main( int argc, char **argv )
         {
             int codepoint = glyph_info[j].codepoint;
             // because of vhinting trick we need the extra 64 (hres)
-            float x_advance = glyph_pos[j].x_advance/(64.*64.);
-            float x_offset = glyph_pos[j].x_offset/(64.*64.);
-            float y_advance = glyph_pos[j].y_advance/(64.);
-            float y_offset = glyph_pos[j].y_offset/(64.);
+            float x_advance = glyph_pos[j].x_advance/(float)(hres*64);
+            float x_offset = glyph_pos[j].x_offset/(float)(hres*64);
+            float y_advance = glyph_pos[j].y_advance/(float)(64);
+            float y_offset = glyph_pos[j].y_offset/(float)(64);
             texture_glyph_t *glyph = texture_font_get_glyph(fonts[i], codepoint);
 
             float r = 0.0;
@@ -194,9 +194,9 @@ int main( int argc, char **argv )
             float b = 0.0;
             float a = 1.0;
             float x0 = x + x_offset + glyph->offset_x;
-            float y0 = y + y_offset + glyph->offset_y;
             float x1 = x0 + glyph->width;
-            float y1 = y0 - glyph->height;
+            float y0 = floor(y + y_offset + glyph->offset_y);
+            float y1 = floor(y0 - glyph->height);
             float s0 = glyph->s0;
             float t0 = glyph->t0;
             float s1 = glyph->s1;
@@ -214,8 +214,6 @@ int main( int argc, char **argv )
         /* clean up the buffer, but don't kill it just yet */
         hb_buffer_reset(buffer);
     }
-
-
 
     glClearColor(1,1,1,1);
     glEnable( GL_BLEND );
