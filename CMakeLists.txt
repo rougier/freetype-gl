@@ -79,7 +79,6 @@ INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIRS}
                      ${CMAKE_CURRENT_SOURCE_DIR}
                      ${VS789FIX_INCLUDE_DIR} )
 
-SET( FREETYPE_GL_LIBRARY freetype-gl )
 SET( FREETYPE_GL_SRC freetype-gl.h
                      vec234.h
                      opengl.h
@@ -95,15 +94,13 @@ SET( FREETYPE_GL_SRC freetype-gl.h
                      vector.c           vector.h
                      platform.c         platform.h)
 
-#ADD_LIBRARY( ${FREETYPE_GL_LIBRARY} STATIC ${FREETYPE_GL_SRC} )
 ADD_LIBRARY( freetype-gl STATIC ${FREETYPE_GL_SRC} )
 
 LINK_DIRECTORIES(${PROJECT_SOURCE_DIR})
 
 MACRO( DEMO _target _sources)
      add_executable(${_target} ${_sources})
-	 include_directories(${WINDOWS_DIR} ${GLUT_INCLUDE_DIR} ${GLEW_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
-     target_link_libraries(${_target} ${FREETYPE_GL_LIBRARY})
+     include_directories(${WINDOWS_DIR} ${GLUT_INCLUDE_DIR} ${GLEW_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
      target_link_libraries(${_target} ${OPENGL_LIBRARY})
      target_link_libraries(${_target} ${GLEW_LIBRARY})
      target_link_libraries(${_target} freetype-gl)
@@ -155,7 +152,7 @@ IF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )
       message (STATUS "Found Libstdc++ needed by demo-atb-agg.c ." )
 
       add_executable(demo-atb-agg  demo-atb-agg.c) 
-      target_link_libraries( demo-atb-agg ${FREETYPE_GL_LIBRARY})
+      target_link_libraries( demo-atb-agg freetype-gl)
       target_link_libraries( demo-atb-agg ${GLUT_LIBRARY})
       target_link_libraries( demo-atb-agg ${GLEW_LIBRARY})
       target_link_libraries( demo-atb-agg ${FREETYPE_LIBRARY})
