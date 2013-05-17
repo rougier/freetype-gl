@@ -40,5 +40,6 @@ attribute vec4 color;
 void main()
 {
     gl_FrontColor = color*Color;
-    gl_Position = projection*(view*(model*vec4(vertex,1.0)));
+    gl_Position = gl_ModelViewProjectionMatrix * vec4(vertex,1.0);
+    //gl_Position = projection*(view*(model*vec4(vertex,1.0)));
 }
