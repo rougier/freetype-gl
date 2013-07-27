@@ -33,7 +33,9 @@
  */
 #include "freetype-gl.h"
 
+#include <errno.h>
 #include <stdio.h>
+#include <string.h>
 #include <wchar.h>
 
 #if defined(__APPLE__)
@@ -56,24 +58,178 @@ void reshape(int width, int height)
 void keyboard( unsigned char key, int x, int y )
 {}
 
+// ------------------------------------------------------------- print help ---
+void print_help()
+{
+    fprintf( stderr, "Usage: makefont [--help] --font <font file> "
+             "--header <header file> --size <font size> --variable <variable name>\n" );
+}
 
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
+    FILE* test;
     size_t i, j;
+    int arg;
 
     wchar_t * font_cache = 
         L" !\"#$%&'()*+,-./0123456789:;<=>?"
         L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
         L"`abcdefghijklmnopqrstuvwxyz{|}~";
 
-    float  font_size   = 16.0;
-    char * font_filename   = "fonts/Arial.ttf";
-    char * header_filename = "arial-16.h";
+    float  font_size   = 0.0;
+    const char * font_filename   = NULL;
+    const char * header_filename = NULL;
+    const char * variable_name   = "font";
+    int show_help = 0;
+
+    for ( arg = 1; arg < argc; ++arg )
+    {
+        if ( 0 == strcmp( "--font", argv[arg] ) || 0 == strcmp( "-f", argv[arg] ) )
+        {
+            ++arg;
+
+            if ( font_filename )
+            {
+                fprintf( stderr, "Multiple --font parameters.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            if ( arg >= argc )
+            {
+                fprintf( stderr, "No font file given.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            font_filename = argv[arg];
+            continue;
+        }
+
+        if ( 0 == strcmp( "--header", argv[arg] ) || 0 == strcmp( "-o", argv[arg] )  )
+        {
+            ++arg;
+
+            if ( header_filename )
+            {
+                fprintf( stderr, "Multiple --header parameters.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            if ( arg >= argc )
+            {
+                fprintf( stderr, "No header file given.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            header_filename = argv[arg];
+            continue;
+        }
+
+        if ( 0 == strcmp( "--help", argv[arg] ) || 0 == strcmp( "-h", argv[arg] ) )
+        {
+            show_help = 1;
+            break;
+        }
+
+        if ( 0 == strcmp( "--size", argv[arg] ) || 0 == strcmp( "-s", argv[arg] ) )
+        {
+            ++arg;
+
+            if ( 0.0 != font_size )
+            {
+                fprintf( stderr, "Multiple --size parameters.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            if ( arg >= argc )
+            {
+                fprintf( stderr, "No font size given.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            errno = 0;
+
+            font_size = atof( argv[arg] );
+
+            if ( errno )
+            {
+                fprintf( stderr, "No valid font size given.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            continue;
+        }
+
+        if ( 0 == strcmp( "--variable", argv[arg] ) || 0 == strcmp( "-arg", argv[arg] )  )
+        {
+            ++arg;
+
+            if ( 0 != strcmp( "font", variable_name ) )
+            {
+                fprintf( stderr, "Multiple --variable parameters.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            if ( arg >= argc )
+            {
+                fprintf( stderr, "No variable name given.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            variable_name = argv[arg];
+            continue;
+        }
+
+        fprintf( stderr, "Unknown parameter %s\n", argv[arg] );
+        print_help();
+        exit( 1 );
+    }
+
+    if ( show_help )
+    {
+        print_help();
+        exit( 1 );
+    }
+
+    if ( !font_filename )
+    {
+        fprintf( stderr, "No font file given.\n" );
+        print_help();
+        exit( 1 );
+    }
+
+    if ( !( test = fopen( font_filename, "r" ) ) )
+    {
+        fprintf( stderr, "Font file \"%s\" does not exist.\n", font_filename );
+    }
+
+    fclose( test );
+
+    if ( 4.0 > font_size )
+    {
+        fprintf( stderr, "Font size too small, expected at least 4 pt.\n" );
+        print_help();
+        exit( 1 );
+    }
+
+    if ( !header_filename )
+    {
+        fprintf( stderr, "No header file given.\n" );
+        print_help();
+        exit( 1 );
+    }
 
     texture_atlas_t * atlas = texture_atlas_new( 128, 128, 1 );
     texture_font_t  * font  = texture_font_new( atlas, font_filename, font_size );
-    
 
     glutInit( &argc, argv );
     glutInitWindowSize( atlas->width, atlas->height );
@@ -95,6 +251,7 @@ int main( int argc, char **argv )
             100.0*atlas->used/(float)(atlas->width*atlas->height) );
     wprintf( L"\n" );
     wprintf( L"Header filename            : %s\n", header_filename );
+    wprintf( L"Variable name              : %s\n", variable_name );
 
 
     size_t texture_size = atlas->width * atlas->height *atlas->depth;
@@ -198,7 +355,7 @@ int main( int argc, char **argv )
 
 
     
-    fwprintf( file, L"texture_font_t font = {\n" );
+    fwprintf( file, L"texture_font_t %s = {\n", variable_name );
 
 
     // ------------
