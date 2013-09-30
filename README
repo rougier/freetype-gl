@@ -70,3 +70,4 @@ Contributors:
 * jcgamestoy (Bug report & fix)
 * Behdad Esfahbod (Bug fix on harfbuzz demo)
 * Adrian Broher (Code analysis & fix)
+* PJ Halloran (svn to git migration)
