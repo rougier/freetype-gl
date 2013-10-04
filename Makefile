@@ -43,10 +43,8 @@ endif
 DEMOS     := $(patsubst %.c,%,$(wildcard demo-*.c))
 DEMOS_ATB := demo-atb-agg
 DEMOS_MKP  := demo-markup
-DEMOS_MKP2 := demo-markup-2
 DEMOS     := $(filter-out $(DEMOS_ATB), $(DEMOS))
 DEMOS     := $(filter-out $(DEMOS_MKP), $(DEMOS))
-DEMOS     := $(filter-out $(DEMOS_MKP2), $(DEMOS))
 
 TESTS     := $(patsubst %.c,%,$(wildcard test-*.c))
 HEADERS   := $(wildcard *.h)
