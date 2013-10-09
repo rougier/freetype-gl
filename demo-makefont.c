@@ -31,6 +31,10 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include "opengl.h"
+#include "vec234.h"
+#include "vector.h"
+
 #include <stdlib.h>
 #if defined(__APPLE__)
     #include <Glut/glut.h>

@@ -31,6 +31,9 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include "opengl.h"
+#include "vec234.h"
+#include "vector.h"
 #include "freetype-gl.h"
 
 #include <errno.h>
