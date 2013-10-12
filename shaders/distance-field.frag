@@ -40,7 +40,7 @@ const float glow_center    = 1.25;
 void main(void)
 {
     vec4  color = texture2D(texture, gl_TexCoord[0].st);
-    float dist  = color.a;
+    float dist  = color.r;
     float width = fwidth(dist);
     float alpha = smoothstep(glyph_center-width, glyph_center+width, dist);
 
