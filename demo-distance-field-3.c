@@ -42,10 +42,7 @@
     #include <Glut/glut.h>
 #elif defined(_WIN32) || defined(_WIN64)
     #include <GLUT/glut.h>
-	// Round and INFINITY only defined in C99
-	double round(double r) {
-		return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
-	}
+	// INFINITY only defined in C99
 	#define INFINITY 99999999999
 #else
     #include <GL/glut.h>
