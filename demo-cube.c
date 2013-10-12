@@ -32,6 +32,7 @@
  * ============================================================================
  */
 #include <stdio.h>
+#include <time.h>
 #include "freetype-gl.h"
 #include "shader.h"
 #include "vertex-buffer.h"
@@ -70,13 +71,15 @@ void display( void )
 {
     static float theta=0, phi=0;
     static GLuint Color = 0;
+    float seconds_elapsed = (float)clock() / CLOCKS_PER_SEC;
 
     if( !Color )
     {
         Color = glGetUniformLocation( shader, "Color" );
     }
 
-    theta += .5; phi += .5;
+    theta = .5f * seconds_elapsed / 0.016f;
+    phi = .5f * seconds_elapsed / 0.016f;
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glPushMatrix();
@@ -144,7 +147,8 @@ int main( int argc, char **argv )
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
-    glutTimerFunc( 1000/60, timer, 1000/60 );
+    //glutTimerFunc( 1000/60, timer, 1000/60 ); // not working on some systems (bug in GLUT)
+    glutIdleFunc(display);
 
     GLenum err = glewInit();
     if (GLEW_OK != err)

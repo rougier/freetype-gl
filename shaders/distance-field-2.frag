@@ -34,7 +34,7 @@ uniform sampler2D texture;
 void main(void)
 {
     vec4  color = texture2D(texture, gl_TexCoord[0].st);
-    float dist  = color.a;
+    float dist  = color.r;
     float width = fwidth(dist);
     float alpha = smoothstep(0.5-width, 0.5+width, dist);
     gl_FragColor = vec4(gl_Color.rgb, alpha*gl_Color.a);
