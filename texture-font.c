@@ -370,9 +370,6 @@ texture_font_load_glyphs( texture_font_t * self,
     for( i=0; i<wcslen(charcodes); ++i )
     {
         FT_Int32 flags = 0;
-        int ft_bitmap_width = 0;
-        int ft_bitmap_rows = 0;
-        int ft_bitmap_pitch = 0;
         int ft_glyph_top = 0;
         int ft_glyph_left = 0;
         glyph_index = FT_Get_Char_Index( face, charcodes[i] );
@@ -422,9 +419,6 @@ texture_font_load_glyphs( texture_font_t * self,
         {
             slot            = face->glyph;
             ft_bitmap       = slot->bitmap;
-            ft_bitmap_width = slot->bitmap.width;
-            ft_bitmap_rows  = slot->bitmap.rows;
-            ft_bitmap_pitch = slot->bitmap.pitch;
             ft_glyph_top    = slot->bitmap_top;
             ft_glyph_left   = slot->bitmap_left;
         }
@@ -508,9 +502,6 @@ texture_font_load_glyphs( texture_font_t * self,
             }
             ft_bitmap_glyph = (FT_BitmapGlyph) ft_glyph;
             ft_bitmap       = ft_bitmap_glyph->bitmap;
-            ft_bitmap_width = ft_bitmap.width;
-            ft_bitmap_rows  = ft_bitmap.rows;
-            ft_bitmap_pitch = ft_bitmap.pitch;
             ft_glyph_top    = ft_bitmap_glyph->top;
             ft_glyph_left   = ft_bitmap_glyph->left;
             FT_Stroker_Done(stroker);
@@ -519,8 +510,8 @@ texture_font_load_glyphs( texture_font_t * self,
 
         // We want each glyph to be separated by at least one black pixel
         // (for example for shader used in demo-subpixel.c)
-        w = ft_bitmap_width/depth + 1;
-        h = ft_bitmap_rows + 1;
+        w = ft_bitmap.width/depth + 1;
+        h = ft_bitmap.rows + 1;
         region = texture_atlas_get_region( self->atlas, w, h );
         if ( region.x < 0 )
         {

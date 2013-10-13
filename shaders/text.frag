@@ -91,7 +91,7 @@ void main()
     // LCD Off
     if( pixel.z == 1.0)
     {
-        float a = texture2D(texture, uv).a;
+        float a = texture2D(texture, uv).r;
         gl_FragColor = gl_Color * pow( a, 1.0/vgamma );
         return;
     }
