@@ -167,6 +167,7 @@ IF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )
   else()
       message (STATUS "NOT FOUND: Libstdc++ is not installed. It is needed by demo-atb-agg.c" )
   endif()
+  FILE(REMOVE ${CMAKE_SOURCE_DIR}/stdc_test.c)
 ENDIF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )  
 
 # Copy font and shaders into build directory for in-place testing
