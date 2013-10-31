@@ -285,7 +285,7 @@ main( int argc, char **argv )
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
     vec2 pen = {{0,0}};
     vec4 black = {{1,1,1,1}};
-    font = texture_font_new( atlas, filename, 48 );
+    font = texture_font_new_from_file( atlas, 48, filename );
     vec4 bbox = add_text( buffer, font, text, &black, &pen );
     size_t i;
     vector_t * vertices = buffer->vertices;

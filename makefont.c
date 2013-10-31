@@ -232,7 +232,7 @@ int main( int argc, char **argv )
     }
 
     texture_atlas_t * atlas = texture_atlas_new( 128, 128, 1 );
-    texture_font_t  * font  = texture_font_new( atlas, font_filename, font_size );
+    texture_font_t  * font  = texture_font_new_from_file( atlas, font_size, font_filename );
 
     glutInit( &argc, argv );
     glutInitWindowSize( atlas->width, atlas->height );

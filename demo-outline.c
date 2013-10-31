@@ -225,7 +225,7 @@ int main( int argc, char **argv )
     markup.strikethrough_color = white;
     markup.font = 0;
 
-    markup.font = texture_font_new( atlas, "fonts/Vera.ttf", markup.size );
+    markup.font = texture_font_new_from_file( atlas, markup.size, "fonts/Vera.ttf" );
 
     markup.font->outline_type = 1;
 

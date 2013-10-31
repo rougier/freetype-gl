@@ -126,7 +126,7 @@ int main( int argc, char **argv )
 
     for( i=minsize; i < maxsize; ++i )
     {
-        texture_font_t * font = texture_font_new( atlas, filename, i );
+        texture_font_t * font = texture_font_new_from_file( atlas, i, filename );
         missed += texture_font_load_glyphs( font, cache );
         texture_font_delete( font );
     }

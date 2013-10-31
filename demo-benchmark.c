@@ -228,7 +228,7 @@ int main( int argc, char **argv )
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 
     atlas  = texture_atlas_new( 512, 512, 1 );
-    font = texture_font_new( atlas, "fonts/VeraMono.ttf", 12 );
+    font = texture_font_new_from_file( atlas, 12, "fonts/VeraMono.ttf" );
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 
 
     pen.y = -font->descender;
