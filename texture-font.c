@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include <wchar.h>
 #include "texture-font.h"
 
 #define HRES  64
