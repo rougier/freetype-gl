@@ -28,6 +28,6 @@ fonts/Tahoma.ttf
 fonts/Times.ttf
 fonts/Verdana.ttf
 
-Makefile
 CMakeFiles
 CMakeCache.txt
+*.o
