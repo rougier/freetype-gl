@@ -148,37 +148,40 @@ build_buffer( void )
 
     if( p_family == VERA)
     {
-        font = texture_font_new( atlas, "fonts/Vera.ttf", p_size );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/Vera.ttf" );
     }
     else if( p_family == VERA_MONO)
     {
-        font = texture_font_new( atlas, "fonts/VeraMono.ttf", p_size );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/VeraMono.ttf" );
     }
     else if( p_family == GEORGIA)
     {
-        font = texture_font_new( atlas, "fonts/Georgia.ttf", p_size );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/Georgia.ttf" );
     }
     else if( p_family == TIMES )
     {
-        font = texture_font_new( atlas, "fonts/Times.ttf", p_size );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/Times.ttf" );
     }
     else if( p_family == TAHOMA )
     {
-        font = texture_font_new( atlas, "fonts/Tahoma.ttf", p_size );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/Tahoma.ttf" );
     }
     else if( p_family == ARIAL )
     {
-        font = texture_font_new( atlas, "fonts/Arial.ttf", p_size );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/Arial.ttf" );
     }
     else if( p_family == VERDANA )
     {
-        font = texture_font_new( atlas, "fonts/Verdana.ttf", p_size );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/Verdana.ttf" );
     }
     else
     {
         fprintf( stderr, "Error : Unknown family type\n" );
         return;
     }
+
+	if (!font)
+		return;
 
     markup.font = font;
     font->hinting = p_hinting;

@@ -229,9 +229,27 @@ typedef struct
     texture_atlas_t * atlas;
     
     /**
-     * Font filename
+     * font location
      */
-    char * filename;
+    enum {
+        TEXTURE_FONT_FILE = 0,
+        TEXTURE_FONT_MEMORY,
+    } location;
+
+    union {
+        /**
+         * Font filename, for when location == TEXTURE_FONT_FILE
+         */
+        char *filename;
+
+        /**
+         * Font memory address, for when location == TEXTURE_FONT_MEMORY
+         */
+        struct {
+            const void *base;
+            size_t size;
+        } memory;
+    };
 
     /**
      * Font size
@@ -329,17 +347,38 @@ typedef struct
  * freetype implementation).
  *
  * @param atlas     A texture atlas
+ * @param pt_size   Size of font to be created (in points)
  * @param filename  A font filename
- * @param size      Size of font to be created (in points)
  *
  * @return A new empty font (no glyph inside yet)
  *
  */
   texture_font_t *
-  texture_font_new( texture_atlas_t * atlas,
-                    const char * filename,
-                    const float size );
+  texture_font_new_from_file( texture_atlas_t * atlas,
+                              const float pt_size,
+                              const char * filename );
 
+
+/**
+ * This function creates a new texture font from a memory location and size.
+ * The texture atlas is used to store glyph on demand. Note the depth of the
+ * atlas will determine if the font is rendered as alpha channel only
+ * (depth = 1) or RGB (depth = 3) that correspond to subpixel rendering (if
+ * available on your freetype implementation).
+ *
+ * @param atlas       A texture atlas
+ * @param pt_size     Size of font to be created (in points)
+ * @param memory_base Start of the font file in memory
+ * @param memory_size Size of the font file memory region, in bytes
+ *
+ * @return A new empty font (no glyph inside yet)
+ *
+ */
+  texture_font_t *
+  texture_font_new_from_memory( texture_atlas_t *atlas,
+                                float pt_size,
+                                const void *memory_base,
+                                size_t memory_size );
 
 /**
  * Delete a texture font. Note that this does not delete the glyph from the

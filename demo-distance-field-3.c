@@ -438,7 +438,7 @@ main( int argc, char **argv )
                            "shaders/distance-field-3.frag" );
     glUseProgram( program );
     atlas = texture_atlas_new( 512, 512, 1 );
-    font = texture_font_new( atlas, "fonts/Vera.ttf", 32 );
+    font = texture_font_new_from_file( atlas, 32, "fonts/Vera.ttf" );
 
     texture_glyph_t *glyph;
 

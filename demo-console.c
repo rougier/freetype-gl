@@ -145,20 +145,20 @@ console_new( void )
     normal.strikethrough       = 0;
     normal.strikethrough_color = white;
 
-    normal.font = texture_font_new( atlas, "fonts/VeraMono.ttf", 13 );
+    normal.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMono.ttf" );
 
     markup_t bold = normal;
     bold.bold = 1;
-    bold.font = texture_font_new( atlas, "fonts/VeraMoBd.ttf", 13 );
+    bold.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMoBd.ttf" );
 
     markup_t italic = normal;
     italic.italic = 1;
-    bold.font = texture_font_new( atlas, "fonts/VeraMoIt.ttf", 13 );
+    bold.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMoIt.ttf" );
 
     markup_t bold_italic = normal;
     bold.bold = 1;
     italic.italic = 1;
-    italic.font = texture_font_new( atlas, "fonts/VeraMoBI.ttf", 13 );
+    italic.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMoBI.ttf" );
 
     markup_t faint = normal;
     faint.foreground_color.r = 0.35;

@@ -175,7 +175,7 @@ int main( int argc, char **argv )
     vec4 black = {{0,0,0,1}};
     for( i=7; i < 27; ++i)
     {
-        font = texture_font_new( atlas, filename, i );
+        font = texture_font_new_from_file( atlas, i, filename );
         pen.x = 5;
         pen.y -= font->height;
         texture_font_load_glyphs( font, text );

@@ -269,7 +269,7 @@ main( int argc, char **argv )
                            L"`abcdefghijklmnopqrstuvwxyz{|}~";
 
     atlas = texture_atlas_new( 512, 512, 1 );
-    font = texture_font_new( atlas, filename, 72 );
+    font = texture_font_new_from_file( atlas, 72, filename );
     texture_font_load_glyphs( font, cache );
     texture_font_delete( font );
 

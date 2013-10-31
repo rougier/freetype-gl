@@ -193,7 +193,7 @@ int main( int argc, char **argv )
 
     for( i=7; i < 27; ++i)
     {
-        font = texture_font_new( atlas, filename, i );
+        font = texture_font_new_from_file( atlas, i, filename );
         pen.x = 0;
         pen.y -= font->height;
         texture_font_load_glyphs( font, text );
