@@ -32,12 +32,13 @@
 # =========================================================================
 PLATFORM		= $(shell uname)
 CC				= gcc
-CFLAGS			= -Wall `freetype-config --cflags` -I/usr/X11/include -g -O0
+CFLAGS			= -Wno-deprecated-declarations -Wall `freetype-config --cflags` \
+	              -I/usr/X11/include -O3 -I/opt/X11/include
 LIBS			= -lGLEW -lGL -lglut -lGLU -lm \
 	              `freetype-config --libs`
 ifeq ($(PLATFORM), Darwin)
 	LIBS		= -framework OpenGL -framework GLUT -lGLEW -lm \
-	               `freetype-config --libs` -L /usr/X11/lib
+	               `freetype-config --libs` -L/usr/X11/lib -L/opt/X11/lib
 endif
 
 DEMOS     := $(patsubst %.c,%,$(wildcard demo-*.c))
