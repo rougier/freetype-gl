@@ -65,6 +65,9 @@ typedef struct
     /** Vector of vertices. */
     vector_t * vertices;
 
+    /** GL identity of the Vertex Array Object */
+    GLuint VAO_id;
+
     /** GL identity of the vertices buffer. */
     GLuint vertices_id;
 
