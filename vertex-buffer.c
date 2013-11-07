@@ -152,6 +152,7 @@ vertex_buffer_delete( vertex_buffer_t *self )
     {
         glDeleteVertexArrays( 1, &self->VAO_id );
     }
+    self->VAO_id = 0;
 
     vector_delete( self->vertices );
     self->vertices = 0;
