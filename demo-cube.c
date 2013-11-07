@@ -150,6 +150,7 @@ int main( int argc, char **argv )
     //glutTimerFunc( 1000/60, timer, 1000/60 ); // not working on some systems (bug in GLUT)
     glutIdleFunc(display);
 
+    glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {

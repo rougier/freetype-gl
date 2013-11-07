@@ -705,6 +705,7 @@ main( int argc, char **argv )
     glutSpecialFunc( on_special_key_press );
     glutReshapeWindow( 600,400 );
 
+    glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {

@@ -256,6 +256,7 @@ main( int argc, char **argv )
     glutPassiveMotionFunc( mouse_motion );
     glutKeyboardFunc( keyboard );
 
+    glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {

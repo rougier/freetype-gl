@@ -431,6 +431,7 @@ main( int argc, char **argv )
     glutKeyboardFunc( keyboard );
     glutTimerFunc( 1000.0/60, timer, 60 );
 
+    glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
