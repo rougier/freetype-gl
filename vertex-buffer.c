@@ -330,6 +330,10 @@ vertex_buffer_render_setup ( vertex_buffer_t *self, GLenum mode )
 {
     size_t i;
 
+    // Unbind so no existing VAO-state is overwritten,
+    // (e.g. the GL_ELEMENT_ARRAY_BUFFER-binding).
+    glBindVertexArray( 0 ); 
+
     if( self->state != CLEAN )
     {
         vertex_buffer_upload( self );
@@ -338,6 +342,8 @@ vertex_buffer_render_setup ( vertex_buffer_t *self, GLenum mode )
 
     if( self->VAO_id == 0 )
     {
+        // Generate and set up VAO
+
         glGenVertexArrays( 1, &self->VAO_id );
         glBindVertexArray( self->VAO_id );
 
@@ -363,10 +369,9 @@ vertex_buffer_render_setup ( vertex_buffer_t *self, GLenum mode )
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
         }
     }
-    else
-    {
-        glBindVertexArray( self->VAO_id );
-    }
+
+    // Bind VAO for drawing
+    glBindVertexArray( self->VAO_id );
 
     self->mode = mode;
 }
