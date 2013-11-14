@@ -208,6 +208,14 @@ typedef struct {
   text_buffer_t *
   text_buffer_new( size_t depth );
 
+  /**
+  * Deletes texture buffer and its associated shader and vertex buffer.
+  *
+  * @param  self  texture buffer to delete
+  *
+  */
+void
+text_buffer_delete( text_buffer_t * self );
 
 /**
  * Render a text buffer.

@@ -73,6 +73,15 @@ text_buffer_new( size_t depth )
 
 // ----------------------------------------------------------------------------
 void
+text_buffer_delete( text_buffer_t * self )
+{
+    vertex_buffer_delete( self->buffer );
+    glDeleteProgram( self->shader );
+    free( self );
+}
+
+// ----------------------------------------------------------------------------
+void
 text_buffer_clear( text_buffer_t * self )
 {    
     assert( self );
