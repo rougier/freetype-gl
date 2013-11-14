@@ -98,8 +98,10 @@ void
 text_buffer_render( text_buffer_t * self )
 {
     glEnable( GL_BLEND );
-    glEnable( GL_TEXTURE_2D );
+
+    glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_2D, self->manager->atlas->id );
+
     if( self->manager->atlas->depth == 1 )
     {
         //glDisable( GL_COLOR_MATERIAL );
