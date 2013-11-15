@@ -57,17 +57,6 @@ file_exists( const char * filename )
     return 0;
 }
 
-// ----------------------------------------------------------------- wcsdup ---
-wchar_t *
-wcsdup( const wchar_t *string )
-{
-    wchar_t * result;
-    assert( string );
-    result = (wchar_t *) malloc( (wcslen(string) + 1) * sizeof(wchar_t) );
-    wcscpy( result, string );
-    return result;
-}
-
 
 // ------------------------------------------------------- font_manager_new ---
 font_manager_t *
