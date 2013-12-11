@@ -49,6 +49,8 @@ IF( WIN32 OR WIN64 )
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/include )
     SET( GLEW_LIBRARY
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/lib/glew32.lib )
+	SET( FREETYPE_INCLUDE_DIRS
+         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype )
 	SET( FREETYPE_INCLUDE_DIR_ft2build
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype )
 	SET( FREETYPE_INCLUDE_DIR_freetype2
@@ -72,12 +74,17 @@ ELSE( WIN32 OR WIN64 )
     FIND_PACKAGE( AntTweakBar )
 ENDIF( WIN32 OR WIN64 )
 
-INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIRS}
+INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIR}
                      ${OPENGL_INCLUDE_DIRS}
                      ${FREETYPE_INCLUDE_DIRS}
                      ${GLEW_INCLUDE_DIRS}
                      ${CMAKE_CURRENT_SOURCE_DIR}
-                     ${VS789FIX_INCLUDE_DIR} )
+                     ${VS789FIX_INCLUDE_DIR}
+                     ${GLEW_INCLUDE_DIR})
+					 
+IF(MSVC)
+	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
+ENDIF(MSVC)
 
 SET( FREETYPE_GL_SRC freetype-gl.h
                      vec234.h
