@@ -5,6 +5,9 @@ This code intends to show how to display fonts efficiently using regular C,
 Freetype and OpenGL. The idea is to use a single texture and a single vertex
 buffer. The code is fairly simple and organized as follow:
 
+![Screenshot](http://raw.github.com/rougier/freetype-gl/master/doc/images/markup.png)
+
+
 Mandatory
 ---------
 
