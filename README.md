@@ -72,3 +72,4 @@ Contributors:
 * Marcel Metz (Bug report & fix, CMmake no demo option, makefont parameters)
 * PJ O'Halloran (svn to git migration)
 * William Light (Face creation from memory)
+* Jan Niklas Hasse (Bug report & fix + README.md)
