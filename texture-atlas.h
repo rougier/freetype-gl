@@ -95,7 +95,7 @@ extern "C" {
 /**
  * A texture atlas is used to pack several small regions into a single texture.
  */
-typedef struct
+typedef struct texture_atlas_t
 {
     /**
      * Allocated nodes

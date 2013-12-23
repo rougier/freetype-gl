@@ -78,7 +78,7 @@ extern "C" {
 /**
  * Text buffer structure
  */
-typedef struct {
+typedef struct  text_buffer_t {
     /**
      * Vertex buffer 
      */
@@ -137,7 +137,7 @@ typedef struct {
 /**
  * Glyph vertex structure
  */
-typedef struct {
+typedef struct glyph_vertex_t {
     /**
      * Vertex x coordinates
      */

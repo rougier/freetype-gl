@@ -57,7 +57,7 @@ extern "C" {
 /**
  * Generic vertex buffer.
  */
-typedef struct
+typedef struct vertex_buffer_t
 {
     /** Format of the vertex buffer. */
     char * format;
