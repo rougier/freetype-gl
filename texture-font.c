@@ -433,19 +433,18 @@ texture_font_load_glyphs( texture_font_t * self,
         return wcslen(charcodes);
 
     /* Load each glyph */
-    for( i=0; i<wcslen(charcodes); ++i )
-    {
-      pass = 0;
+    for( i=0; i<wcslen(charcodes); ++i ) {
+        pass = 0;
         /* Check if charcode has been already loaded */
-        for(j = 0; j < self->glyphs->size; ++j )
-        {
+        for(j = 0; j < self->glyphs->size; ++j ) {
             glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
             // If charcode is -1, we don't care about outline type or thickness
-            if( (glyph->charcode == charcodes[i]))
-            {
+            if( (glyph->charcode == charcodes[i])) {
               pass = 1;
+              break;
             }
         }
+
         if(pass)
           continue; // don't add the item
 
