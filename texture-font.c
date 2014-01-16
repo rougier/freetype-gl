@@ -406,7 +406,7 @@ size_t
 texture_font_load_glyphs( texture_font_t * self,
                           const wchar_t * charcodes )
 {
-    size_t i, x, y, width, height, depth, w, h;
+    size_t i, j, x, y, width, height, depth, w, h;
     FT_Library library;
     FT_Error error;
     FT_Face face;
@@ -427,12 +427,27 @@ texture_font_load_glyphs( texture_font_t * self,
     height = self->atlas->height;
     depth  = self->atlas->depth;
 
+    char pass;
+
     if (!texture_font_get_face(self, &library, &face))
         return wcslen(charcodes);
 
     /* Load each glyph */
-    for( i=0; i<wcslen(charcodes); ++i )
-    {
+    for( i=0; i<wcslen(charcodes); ++i ) {
+        pass = 0;
+        /* Check if charcode has been already loaded */
+        for(j = 0; j < self->glyphs->size; ++j ) {
+            glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
+            // If charcode is -1, we don't care about outline type or thickness
+            if( (glyph->charcode == charcodes[i])) {
+              pass = 1;
+              break;
+            }
+        }
+
+        if(pass)
+          continue; // don't add the item
+
         FT_Int32 flags = 0;
         int ft_glyph_top = 0;
         int ft_glyph_left = 0;
