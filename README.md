@@ -1,7 +1,7 @@
 Freetype GL - A C OpenGL Freetype engine
 ========================================
 
-[![Build Status](https://travis-ci.org/crakouille/freetype-gl.png?branch=master)](https://travis-ci.org/crakouille/freetype-gl)
+[![Build Status](https://travis-ci.org/rougier/freetype-gl.png?branch=master)](https://travis-ci.org/rougier/freetype-gl)
 
 This code intends to show how to display fonts efficiently using regular C,
 Freetype and OpenGL. The idea is to use a single texture and a single vertex

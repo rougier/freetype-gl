@@ -26,7 +26,7 @@ install:
   - cd ~/
   - rm -rf AntTweakBar_116.zip
   - rm -rf AntTweakBar
-  - cd build/crakouille/freetype-gl
+  - cd build/rougier/freetype-gl
 
 script:
   - make
