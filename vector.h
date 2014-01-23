@@ -78,7 +78,7 @@ extern "C" {
  *
  * @memberof vector
  */
-typedef struct
+typedef struct vector_t
  {
      /** Pointer to dynamically allocated items. */
      void * items;

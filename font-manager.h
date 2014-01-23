@@ -71,7 +71,7 @@ extern "C" {
 /**
  * Structure in charge of caching fonts.
  */
-typedef struct {
+typedef struct font_manager_t {
     /**
      * Texture atlas to hold font glyphs.
      */

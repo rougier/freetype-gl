@@ -196,7 +196,7 @@ extern "C" {
 /**
  *  Generic vertex attribute.
  */
-typedef struct 
+typedef struct vertex_attribute_t
 {
     /**
      *  atribute name

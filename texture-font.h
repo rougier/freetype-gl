@@ -72,7 +72,7 @@ extern "C" {
  * This structure cannot be used alone since the (necessary) right charcode is
  * implicitely held by the owner of this structure.
  */
-typedef struct
+typedef struct kerning_t
 {
     /**
      * Left character code in the kern pair.
@@ -125,7 +125,7 @@ typedef struct
 /**
  * A structure that describe a glyph.
  */
-typedef struct
+typedef struct texture_glyph_t
 {
     /**
      * Wide character this glyph represents
@@ -216,7 +216,7 @@ typedef struct
 /**
  *  Texture font structure.
  */
-typedef struct
+typedef struct texture_font_t
 {
     /**
      * Vector of glyphs contained in this font.
