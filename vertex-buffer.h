@@ -323,7 +323,7 @@ typedef struct vertex_buffer_t
  */
   size_t
   vertex_buffer_insert( vertex_buffer_t * self,
-                        size_t index,
+                        const size_t index,
                         const void * vertices, const size_t vcount,  
                         const GLuint * indices, const size_t icount );
 
