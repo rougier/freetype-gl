@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>297AFF12-679C-4DDD-AC17-F0F1E9C8FF99</string>
+	<key>IDESourceControlProjectName</key>
+	<string>FreeType-GL_OSX_Demos</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>2F51B7D6-2857-4162-BD75-906B280D7A19</key>
+		<string>https://github.com/rougier/freetype-gl</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>osx/FreeType-GL_OSX_Demos.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>2F51B7D6-2857-4162-BD75-906B280D7A19</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/rougier/freetype-gl</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>2F51B7D6-2857-4162-BD75-906B280D7A19</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>2F51B7D6-2857-4162-BD75-906B280D7A19</string>
+			<key>IDESourceControlWCCName</key>
+			<string>freetype-gl</string>
+		</dict>
+	</array>
+</dict>
+</plist>

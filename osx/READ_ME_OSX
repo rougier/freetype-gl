@@ -1,0 +1,18 @@
+OSX Xcode Configuration
+
+To configure a new project for OSX with Xcode. You can setup it by the steps as follows:
+
+1. Add header search paths
+Project -> Targets -> Build Settings -> Header Search Paths -> add [your ft2build.h path] ("/opt/local/include" for example)
+Project -> Targets -> Build Settings -> Header Search Paths -> add [your freetype path] ("/opt/local/include/freetype2" for example)
+
+2. Add libraries
+Project -> Targets -> Build Phases -> Link Binary With Libraries -> add GLUT.framework
+Project -> Targets -> Build Phases -> Link Binary With Libraries -> add OpenGL.framework
+Project -> Targets -> Build Phases -> Link Binary With Libraries -> add libfreetype.a ("/opt/local/lib/freetype2" for example)
+
+3. Add source files
+
+4. You can build it and run
+
+
