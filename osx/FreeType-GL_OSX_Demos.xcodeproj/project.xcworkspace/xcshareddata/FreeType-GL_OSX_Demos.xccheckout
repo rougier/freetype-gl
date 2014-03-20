@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>2CFD80E7-E552-40AB-993A-E0F97EB92B5C</string>
+	<key>IDESourceControlProjectName</key>
+	<string>FreeType-GL_OSX_Demos</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>4DF6D9DF-4D6C-4484-9B2E-A0740F74D794</key>
+		<string>https://github.com/xinchang/freetype-gl</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>osx/FreeType-GL_OSX_Demos.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>4DF6D9DF-4D6C-4484-9B2E-A0740F74D794</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/xinchang/freetype-gl</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>4DF6D9DF-4D6C-4484-9B2E-A0740F74D794</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>4DF6D9DF-4D6C-4484-9B2E-A0740F74D794</string>
+			<key>IDESourceControlWCCName</key>
+			<string>freetype-gl</string>
+		</dict>
+	</array>
+</dict>
+</plist>
