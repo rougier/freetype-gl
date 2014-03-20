@@ -43,6 +43,7 @@
 #include <math.h>
 #include <wchar.h>
 #include "texture-font.h"
+#include "platform.h"
 
 #define HRES  64
 #define HRESf 64.f
@@ -318,7 +319,7 @@ texture_font_init(texture_font_t *self)
 
 // --------------------------------------------- texture_font_new_from_file ---
 texture_font_t *
-texture_font_new_from_file(texture_atlas_t *atlas, float pt_size,
+texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
         const char *filename)
 {
     texture_font_t *self;
@@ -416,8 +417,13 @@ texture_font_load_glyphs( texture_font_t * self,
 
     FT_UInt glyph_index;
     texture_glyph_t *glyph;
+    FT_Int32 flags = 0;
+    int ft_glyph_top = 0;
+    int ft_glyph_left = 0;
+
     ivec4 region;
     size_t missed = 0;
+    char pass;
 
     assert( self );
     assert( charcodes );
@@ -426,8 +432,6 @@ texture_font_load_glyphs( texture_font_t * self,
     width  = self->atlas->width;
     height = self->atlas->height;
     depth  = self->atlas->depth;
-
-    char pass;
 
     if (!texture_font_get_face(self, &library, &face))
         return wcslen(charcodes);
@@ -448,9 +452,9 @@ texture_font_load_glyphs( texture_font_t * self,
         if(pass)
           continue; // don't add the item
 
-        FT_Int32 flags = 0;
-        int ft_glyph_top = 0;
-        int ft_glyph_left = 0;
+        flags = 0;
+        ft_glyph_top = 0;
+        ft_glyph_left = 0;
         glyph_index = FT_Get_Char_Index( face, charcodes[i] );
         // WARNING: We use texture-atlas depth to guess if user wants
         //          LCD subpixel rendering
