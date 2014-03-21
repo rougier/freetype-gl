@@ -218,6 +218,7 @@ int main( int argc, char **argv )
     glutKeyboardFunc( keyboard );
     glutIdleFunc( idle );
 
+    glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {

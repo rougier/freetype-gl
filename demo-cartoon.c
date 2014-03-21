@@ -32,7 +32,9 @@
  * ========================================================================= */
 #include <stdio.h>
 #include <wchar.h>
+
 #include "freetype-gl.h"
+
 #include "vertex-buffer.h"
 #include "markup.h"
 #include "shader.h"
