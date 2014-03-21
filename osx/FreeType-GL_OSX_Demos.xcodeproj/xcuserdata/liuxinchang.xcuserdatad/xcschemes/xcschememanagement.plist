@@ -4,7 +4,42 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>FreeType-GL_OSX_Demos.xcscheme</key>
+		<key>demo-ansi.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+		<key>demo-console.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>demo-cube.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>7</integer>
+		</dict>
+		<key>demo-distance-field-3.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
+		<key>demo-glyph.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
+		</dict>
+		<key>demo-makefont.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
+		</dict>
+		<key>demo-texture.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
+		<key>domo-cartoon.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
@@ -12,6 +47,46 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>4A58837F18DCE7740051C228</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4A58838C18DCE7B40051C228</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4A5883BB18DCE9460051C228</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4A58841018DCEC6C0051C228</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4A58844418DCEDB90051C228</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4A58847418DCEE900051C228</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4A5884A618DCEF340051C228</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4A5884D318DCEFE50051C228</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>4AAEBD0818DB842E00E42FDE</key>
 		<dict>
 			<key>primary</key>

@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4AAEBD0818DB842E00E42FDE"
-               BuildableName = "FreeType-GL_OSX_Demos"
-               BlueprintName = "FreeType-GL_OSX_Demos"
+               BlueprintIdentifier = "4A5883BB18DCE9460051C228"
+               BuildableName = "demo-console"
+               BlueprintName = "demo-console"
                ReferencedContainer = "container:FreeType-GL_OSX_Demos.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4AAEBD0818DB842E00E42FDE"
-            BuildableName = "FreeType-GL_OSX_Demos"
-            BlueprintName = "FreeType-GL_OSX_Demos"
+            BlueprintIdentifier = "4A5883BB18DCE9460051C228"
+            BuildableName = "demo-console"
+            BlueprintName = "demo-console"
             ReferencedContainer = "container:FreeType-GL_OSX_Demos.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -51,9 +51,9 @@
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4AAEBD0818DB842E00E42FDE"
-            BuildableName = "FreeType-GL_OSX_Demos"
-            BlueprintName = "FreeType-GL_OSX_Demos"
+            BlueprintIdentifier = "4A5883BB18DCE9460051C228"
+            BuildableName = "demo-console"
+            BlueprintName = "demo-console"
             ReferencedContainer = "container:FreeType-GL_OSX_Demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -69,9 +69,9 @@
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4AAEBD0818DB842E00E42FDE"
-            BuildableName = "FreeType-GL_OSX_Demos"
-            BlueprintName = "FreeType-GL_OSX_Demos"
+            BlueprintIdentifier = "4A5883BB18DCE9460051C228"
+            BuildableName = "demo-console"
+            BlueprintName = "demo-console"
             ReferencedContainer = "container:FreeType-GL_OSX_Demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

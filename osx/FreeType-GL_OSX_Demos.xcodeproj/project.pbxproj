@@ -7,75 +7,551 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4AAEBD0F18DB842E00E42FDE /* FreeType_GL_OSX_Demos.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD0E18DB842E00E42FDE /* FreeType_GL_OSX_Demos.1 */; };
-		4AAEBD3F18DB84C700E42FDE /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD3E18DB84C700E42FDE /* GLUT.framework */; };
-		4AAEBD7318DB85C700E42FDE /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5818DB85C700E42FDE /* edtaa3func.c */; };
-		4AAEBD7418DB85C700E42FDE /* font-manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5A18DB85C700E42FDE /* font-manager.c */; };
-		4AAEBD7618DB85C700E42FDE /* mat4.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5F18DB85C700E42FDE /* mat4.c */; };
-		4AAEBD7718DB85C700E42FDE /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6218DB85C700E42FDE /* platform.c */; };
-		4AAEBD7818DB85C700E42FDE /* shader.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6418DB85C700E42FDE /* shader.c */; };
-		4AAEBD7918DB85C700E42FDE /* text-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6618DB85C700E42FDE /* text-buffer.c */; };
-		4AAEBD7A18DB85C700E42FDE /* texture-atlas.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6818DB85C700E42FDE /* texture-atlas.c */; };
-		4AAEBD7B18DB85C700E42FDE /* texture-font.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6A18DB85C700E42FDE /* texture-font.c */; };
-		4AAEBD7C18DB85C700E42FDE /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6D18DB85C700E42FDE /* vector.c */; };
-		4AAEBD7D18DB85C700E42FDE /* vertex-attribute.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6F18DB85C700E42FDE /* vertex-attribute.c */; };
-		4AAEBD7E18DB85C700E42FDE /* vertex-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7118DB85C700E42FDE /* vertex-buffer.c */; };
-		4AAEBD9818DB883F00E42FDE /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD9718DB883F00E42FDE /* OpenGL.framework */; };
-		4AAEBD9A18DB88FA00E42FDE /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD9918DB88FA00E42FDE /* libfreetype.a */; };
-		4AAEBD9C18DB896500E42FDE /* demo-ansi.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD9B18DB896500E42FDE /* demo-ansi.c */; };
-		4AAEBDAB18DB909D00E42FDE /* 256colors.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8018DB85E300E42FDE /* 256colors.txt */; };
-		4AAEBDAD18DB90C700E42FDE /* text.frag in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBDA018DB8A3600E42FDE /* text.frag */; };
-		4AAEBDAE18DB90C700E42FDE /* text.vert in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9218DB85E300E42FDE /* text.vert */; };
-		4AAEBDB018DB912D00E42FDE /* VeraMono.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8818DB85E300E42FDE /* VeraMono.ttf */; };
+		4A58839618DCE7EE0051C228 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD9718DB883F00E42FDE /* OpenGL.framework */; };
+		4A58839818DCE8220051C228 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A58839718DCE8220051C228 /* libfreetype.a */; };
+		4A58839918DCE82D0051C228 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD3E18DB84C700E42FDE /* GLUT.framework */; };
+		4A58839A18DCE8560051C228 /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5818DB85C700E42FDE /* edtaa3func.c */; };
+		4A58839B18DCE8560051C228 /* edtaa3func.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5918DB85C700E42FDE /* edtaa3func.h */; };
+		4A58839C18DCE8560051C228 /* font-manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5A18DB85C700E42FDE /* font-manager.c */; };
+		4A58839D18DCE8560051C228 /* font-manager.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5B18DB85C700E42FDE /* font-manager.h */; };
+		4A58839E18DCE8560051C228 /* freetype-gl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5C18DB85C700E42FDE /* freetype-gl.h */; };
+		4A58839F18DCE8560051C228 /* markup.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5E18DB85C700E42FDE /* markup.h */; };
+		4A5883A018DCE8560051C228 /* mat4.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5F18DB85C700E42FDE /* mat4.c */; };
+		4A5883A118DCE8560051C228 /* mat4.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6018DB85C700E42FDE /* mat4.h */; };
+		4A5883A218DCE8560051C228 /* opengl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6118DB85C700E42FDE /* opengl.h */; };
+		4A5883A318DCE8560051C228 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6218DB85C700E42FDE /* platform.c */; };
+		4A5883A418DCE8560051C228 /* platform.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6318DB85C700E42FDE /* platform.h */; };
+		4A5883A518DCE8560051C228 /* shader.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6418DB85C700E42FDE /* shader.c */; };
+		4A5883A618DCE8560051C228 /* shader.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6518DB85C700E42FDE /* shader.h */; };
+		4A5883A718DCE8560051C228 /* text-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6618DB85C700E42FDE /* text-buffer.c */; };
+		4A5883A818DCE8560051C228 /* text-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6718DB85C700E42FDE /* text-buffer.h */; };
+		4A5883A918DCE8560051C228 /* texture-atlas.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6818DB85C700E42FDE /* texture-atlas.c */; };
+		4A5883AA18DCE8560051C228 /* texture-atlas.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6918DB85C700E42FDE /* texture-atlas.h */; };
+		4A5883AB18DCE8560051C228 /* texture-font.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6A18DB85C700E42FDE /* texture-font.c */; };
+		4A5883AC18DCE8560051C228 /* texture-font.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6B18DB85C700E42FDE /* texture-font.h */; };
+		4A5883AD18DCE8560051C228 /* vec234.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6C18DB85C700E42FDE /* vec234.h */; };
+		4A5883AE18DCE8560051C228 /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6D18DB85C700E42FDE /* vector.c */; };
+		4A5883AF18DCE8560051C228 /* vector.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6E18DB85C700E42FDE /* vector.h */; };
+		4A5883B018DCE8560051C228 /* vertex-attribute.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6F18DB85C700E42FDE /* vertex-attribute.c */; };
+		4A5883B118DCE8560051C228 /* vertex-attribute.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7018DB85C700E42FDE /* vertex-attribute.h */; };
+		4A5883B218DCE8560051C228 /* vertex-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7118DB85C700E42FDE /* vertex-buffer.c */; };
+		4A5883B318DCE8560051C228 /* vertex-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7218DB85C700E42FDE /* vertex-buffer.h */; };
+		4A5883B418DCE8840051C228 /* 256colors.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8018DB85E300E42FDE /* 256colors.txt */; };
+		4A5883B518DCE8900051C228 /* demo-ansi.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD9B18DB896500E42FDE /* demo-ansi.c */; };
+		4A5883B718DCE8E30051C228 /* VeraMono.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8818DB85E300E42FDE /* VeraMono.ttf */; };
+		4A5883B918DCE8F90051C228 /* text.frag in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBDA018DB8A3600E42FDE /* text.frag */; };
+		4A5883BA18DCE8F90051C228 /* text.vert in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9218DB85E300E42FDE /* text.vert */; };
+		4A5883BE18DCE9460051C228 /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5818DB85C700E42FDE /* edtaa3func.c */; };
+		4A5883BF18DCE9460051C228 /* edtaa3func.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5918DB85C700E42FDE /* edtaa3func.h */; };
+		4A5883C018DCE9460051C228 /* font-manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5A18DB85C700E42FDE /* font-manager.c */; };
+		4A5883C118DCE9460051C228 /* font-manager.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5B18DB85C700E42FDE /* font-manager.h */; };
+		4A5883C218DCE9460051C228 /* freetype-gl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5C18DB85C700E42FDE /* freetype-gl.h */; };
+		4A5883C318DCE9460051C228 /* markup.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5E18DB85C700E42FDE /* markup.h */; };
+		4A5883C418DCE9460051C228 /* mat4.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5F18DB85C700E42FDE /* mat4.c */; };
+		4A5883C518DCE9460051C228 /* mat4.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6018DB85C700E42FDE /* mat4.h */; };
+		4A5883C618DCE9460051C228 /* opengl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6118DB85C700E42FDE /* opengl.h */; };
+		4A5883C718DCE9460051C228 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6218DB85C700E42FDE /* platform.c */; };
+		4A5883C818DCE9460051C228 /* platform.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6318DB85C700E42FDE /* platform.h */; };
+		4A5883C918DCE9460051C228 /* shader.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6418DB85C700E42FDE /* shader.c */; };
+		4A5883CA18DCE9460051C228 /* shader.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6518DB85C700E42FDE /* shader.h */; };
+		4A5883CB18DCE9460051C228 /* text-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6618DB85C700E42FDE /* text-buffer.c */; };
+		4A5883CC18DCE9460051C228 /* text-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6718DB85C700E42FDE /* text-buffer.h */; };
+		4A5883CD18DCE9460051C228 /* texture-atlas.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6818DB85C700E42FDE /* texture-atlas.c */; };
+		4A5883CE18DCE9460051C228 /* texture-atlas.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6918DB85C700E42FDE /* texture-atlas.h */; };
+		4A5883CF18DCE9460051C228 /* texture-font.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6A18DB85C700E42FDE /* texture-font.c */; };
+		4A5883D018DCE9460051C228 /* texture-font.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6B18DB85C700E42FDE /* texture-font.h */; };
+		4A5883D118DCE9460051C228 /* vec234.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6C18DB85C700E42FDE /* vec234.h */; };
+		4A5883D218DCE9460051C228 /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6D18DB85C700E42FDE /* vector.c */; };
+		4A5883D318DCE9460051C228 /* vector.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6E18DB85C700E42FDE /* vector.h */; };
+		4A5883D418DCE9460051C228 /* vertex-attribute.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6F18DB85C700E42FDE /* vertex-attribute.c */; };
+		4A5883D518DCE9460051C228 /* vertex-attribute.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7018DB85C700E42FDE /* vertex-attribute.h */; };
+		4A5883D618DCE9460051C228 /* vertex-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7118DB85C700E42FDE /* vertex-buffer.c */; };
+		4A5883D718DCE9460051C228 /* vertex-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7218DB85C700E42FDE /* vertex-buffer.h */; };
+		4A5883D918DCE9460051C228 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD3E18DB84C700E42FDE /* GLUT.framework */; };
+		4A5883DA18DCE9460051C228 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A58839718DCE8220051C228 /* libfreetype.a */; };
+		4A5883DB18DCE9460051C228 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD9718DB883F00E42FDE /* OpenGL.framework */; };
+		4A5883DD18DCE9460051C228 /* 256colors.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8018DB85E300E42FDE /* 256colors.txt */; };
+		4A5883DF18DCE9460051C228 /* VeraMono.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8818DB85E300E42FDE /* VeraMono.ttf */; };
+		4A5883E118DCE9460051C228 /* text.frag in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBDA018DB8A3600E42FDE /* text.frag */; };
+		4A5883E218DCE9460051C228 /* text.vert in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9218DB85E300E42FDE /* text.vert */; };
+		4A5883E718DCE9960051C228 /* demo-console.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A58837A18DCE72F0051C228 /* demo-console.c */; };
+		4A5883E818DCE9E70051C228 /* v3f-t2f-c4f.frag in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9518DB85E300E42FDE /* v3f-t2f-c4f.frag */; };
+		4A5883E918DCE9E70051C228 /* v3f-t2f-c4f.vert in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9618DB85E300E42FDE /* v3f-t2f-c4f.vert */; };
+		4A5883EA18DCEAAB0051C228 /* VeraMoBd.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8518DB85E300E42FDE /* VeraMoBd.ttf */; };
+		4A5883EB18DCEAAB0051C228 /* VeraMoBI.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8618DB85E300E42FDE /* VeraMoBI.ttf */; };
+		4A5883EC18DCEAAB0051C228 /* VeraMoIt.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8718DB85E300E42FDE /* VeraMoIt.ttf */; };
+		4A5883ED18DCEB020051C228 /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5818DB85C700E42FDE /* edtaa3func.c */; };
+		4A5883EE18DCEB020051C228 /* edtaa3func.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5918DB85C700E42FDE /* edtaa3func.h */; };
+		4A5883EF18DCEB020051C228 /* font-manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5A18DB85C700E42FDE /* font-manager.c */; };
+		4A5883F018DCEB020051C228 /* font-manager.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5B18DB85C700E42FDE /* font-manager.h */; };
+		4A5883F118DCEB020051C228 /* freetype-gl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5C18DB85C700E42FDE /* freetype-gl.h */; };
+		4A5883F218DCEB020051C228 /* markup.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5E18DB85C700E42FDE /* markup.h */; };
+		4A5883F318DCEB020051C228 /* mat4.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5F18DB85C700E42FDE /* mat4.c */; };
+		4A5883F418DCEB020051C228 /* mat4.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6018DB85C700E42FDE /* mat4.h */; };
+		4A5883F518DCEB020051C228 /* opengl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6118DB85C700E42FDE /* opengl.h */; };
+		4A5883F618DCEB020051C228 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6218DB85C700E42FDE /* platform.c */; };
+		4A5883F718DCEB020051C228 /* platform.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6318DB85C700E42FDE /* platform.h */; };
+		4A5883F818DCEB020051C228 /* shader.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6418DB85C700E42FDE /* shader.c */; };
+		4A5883F918DCEB020051C228 /* shader.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6518DB85C700E42FDE /* shader.h */; };
+		4A5883FA18DCEB020051C228 /* text-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6618DB85C700E42FDE /* text-buffer.c */; };
+		4A5883FB18DCEB020051C228 /* text-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6718DB85C700E42FDE /* text-buffer.h */; };
+		4A5883FC18DCEB020051C228 /* texture-atlas.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6818DB85C700E42FDE /* texture-atlas.c */; };
+		4A5883FD18DCEB020051C228 /* texture-atlas.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6918DB85C700E42FDE /* texture-atlas.h */; };
+		4A5883FE18DCEB020051C228 /* texture-font.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6A18DB85C700E42FDE /* texture-font.c */; };
+		4A5883FF18DCEB020051C228 /* texture-font.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6B18DB85C700E42FDE /* texture-font.h */; };
+		4A58840018DCEB020051C228 /* vec234.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6C18DB85C700E42FDE /* vec234.h */; };
+		4A58840118DCEB020051C228 /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6D18DB85C700E42FDE /* vector.c */; };
+		4A58840218DCEB020051C228 /* vector.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6E18DB85C700E42FDE /* vector.h */; };
+		4A58840318DCEB020051C228 /* vertex-attribute.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6F18DB85C700E42FDE /* vertex-attribute.c */; };
+		4A58840418DCEB020051C228 /* vertex-attribute.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7018DB85C700E42FDE /* vertex-attribute.h */; };
+		4A58840518DCEB020051C228 /* vertex-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7118DB85C700E42FDE /* vertex-buffer.c */; };
+		4A58840618DCEB020051C228 /* vertex-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7218DB85C700E42FDE /* vertex-buffer.h */; };
+		4A58840718DCEB0A0051C228 /* demo-cartoon.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A58837918DCE72F0051C228 /* demo-cartoon.c */; };
+		4A58840818DCEB210051C228 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A58839718DCE8220051C228 /* libfreetype.a */; };
+		4A58840918DCEB280051C228 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD3E18DB84C700E42FDE /* GLUT.framework */; };
+		4A58840A18DCEB280051C228 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD9718DB883F00E42FDE /* OpenGL.framework */; };
+		4A58840C18DCEBCB0051C228 /* v3f-t2f-c4f.frag in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9518DB85E300E42FDE /* v3f-t2f-c4f.frag */; };
+		4A58840D18DCEBCB0051C228 /* v3f-t2f-c4f.vert in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9618DB85E300E42FDE /* v3f-t2f-c4f.vert */; };
+		4A58840F18DCEBE40051C228 /* ObelixPro.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8218DB85E300E42FDE /* ObelixPro.ttf */; };
+		4A58841318DCEC6C0051C228 /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5818DB85C700E42FDE /* edtaa3func.c */; };
+		4A58841418DCEC6C0051C228 /* edtaa3func.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5918DB85C700E42FDE /* edtaa3func.h */; };
+		4A58841518DCEC6C0051C228 /* font-manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5A18DB85C700E42FDE /* font-manager.c */; };
+		4A58841618DCEC6C0051C228 /* font-manager.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5B18DB85C700E42FDE /* font-manager.h */; };
+		4A58841718DCEC6C0051C228 /* freetype-gl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5C18DB85C700E42FDE /* freetype-gl.h */; };
+		4A58841818DCEC6C0051C228 /* markup.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5E18DB85C700E42FDE /* markup.h */; };
+		4A58841918DCEC6C0051C228 /* mat4.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5F18DB85C700E42FDE /* mat4.c */; };
+		4A58841A18DCEC6C0051C228 /* mat4.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6018DB85C700E42FDE /* mat4.h */; };
+		4A58841B18DCEC6C0051C228 /* opengl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6118DB85C700E42FDE /* opengl.h */; };
+		4A58841C18DCEC6C0051C228 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6218DB85C700E42FDE /* platform.c */; };
+		4A58841D18DCEC6C0051C228 /* platform.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6318DB85C700E42FDE /* platform.h */; };
+		4A58841E18DCEC6C0051C228 /* shader.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6418DB85C700E42FDE /* shader.c */; };
+		4A58841F18DCEC6C0051C228 /* shader.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6518DB85C700E42FDE /* shader.h */; };
+		4A58842018DCEC6C0051C228 /* text-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6618DB85C700E42FDE /* text-buffer.c */; };
+		4A58842118DCEC6C0051C228 /* text-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6718DB85C700E42FDE /* text-buffer.h */; };
+		4A58842218DCEC6C0051C228 /* texture-atlas.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6818DB85C700E42FDE /* texture-atlas.c */; };
+		4A58842318DCEC6C0051C228 /* texture-atlas.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6918DB85C700E42FDE /* texture-atlas.h */; };
+		4A58842418DCEC6C0051C228 /* texture-font.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6A18DB85C700E42FDE /* texture-font.c */; };
+		4A58842518DCEC6C0051C228 /* texture-font.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6B18DB85C700E42FDE /* texture-font.h */; };
+		4A58842618DCEC6C0051C228 /* vec234.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6C18DB85C700E42FDE /* vec234.h */; };
+		4A58842718DCEC6C0051C228 /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6D18DB85C700E42FDE /* vector.c */; };
+		4A58842818DCEC6C0051C228 /* vector.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6E18DB85C700E42FDE /* vector.h */; };
+		4A58842918DCEC6C0051C228 /* vertex-attribute.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6F18DB85C700E42FDE /* vertex-attribute.c */; };
+		4A58842A18DCEC6C0051C228 /* vertex-attribute.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7018DB85C700E42FDE /* vertex-attribute.h */; };
+		4A58842B18DCEC6C0051C228 /* vertex-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7118DB85C700E42FDE /* vertex-buffer.c */; };
+		4A58842C18DCEC6C0051C228 /* vertex-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7218DB85C700E42FDE /* vertex-buffer.h */; };
+		4A58842E18DCEC6C0051C228 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD3E18DB84C700E42FDE /* GLUT.framework */; };
+		4A58842F18DCEC6C0051C228 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A58839718DCE8220051C228 /* libfreetype.a */; };
+		4A58843018DCEC6C0051C228 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD9718DB883F00E42FDE /* OpenGL.framework */; };
+		4A58843218DCEC6C0051C228 /* 256colors.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8018DB85E300E42FDE /* 256colors.txt */; };
+		4A58843C18DCED010051C228 /* v3f-t2f-c4f.frag in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9518DB85E300E42FDE /* v3f-t2f-c4f.frag */; };
+		4A58843D18DCED010051C228 /* v3f-t2f-c4f.vert in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9618DB85E300E42FDE /* v3f-t2f-c4f.vert */; };
+		4A58843E18DCED1B0051C228 /* demo-texture.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A58837B18DCE72F0051C228 /* demo-texture.c */; };
+		4A58843F18DCED590051C228 /* Vera.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8418DB85E300E42FDE /* Vera.ttf */; };
+		4A58844718DCEDB90051C228 /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5818DB85C700E42FDE /* edtaa3func.c */; };
+		4A58844818DCEDB90051C228 /* edtaa3func.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5918DB85C700E42FDE /* edtaa3func.h */; };
+		4A58844918DCEDB90051C228 /* font-manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5A18DB85C700E42FDE /* font-manager.c */; };
+		4A58844A18DCEDB90051C228 /* font-manager.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5B18DB85C700E42FDE /* font-manager.h */; };
+		4A58844B18DCEDB90051C228 /* freetype-gl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5C18DB85C700E42FDE /* freetype-gl.h */; };
+		4A58844C18DCEDB90051C228 /* markup.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5E18DB85C700E42FDE /* markup.h */; };
+		4A58844D18DCEDB90051C228 /* mat4.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5F18DB85C700E42FDE /* mat4.c */; };
+		4A58844E18DCEDB90051C228 /* mat4.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6018DB85C700E42FDE /* mat4.h */; };
+		4A58844F18DCEDB90051C228 /* opengl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6118DB85C700E42FDE /* opengl.h */; };
+		4A58845018DCEDB90051C228 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6218DB85C700E42FDE /* platform.c */; };
+		4A58845118DCEDB90051C228 /* platform.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6318DB85C700E42FDE /* platform.h */; };
+		4A58845218DCEDB90051C228 /* shader.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6418DB85C700E42FDE /* shader.c */; };
+		4A58845318DCEDB90051C228 /* shader.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6518DB85C700E42FDE /* shader.h */; };
+		4A58845418DCEDB90051C228 /* text-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6618DB85C700E42FDE /* text-buffer.c */; };
+		4A58845518DCEDB90051C228 /* text-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6718DB85C700E42FDE /* text-buffer.h */; };
+		4A58845618DCEDB90051C228 /* texture-atlas.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6818DB85C700E42FDE /* texture-atlas.c */; };
+		4A58845718DCEDB90051C228 /* texture-atlas.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6918DB85C700E42FDE /* texture-atlas.h */; };
+		4A58845818DCEDB90051C228 /* texture-font.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6A18DB85C700E42FDE /* texture-font.c */; };
+		4A58845918DCEDB90051C228 /* texture-font.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6B18DB85C700E42FDE /* texture-font.h */; };
+		4A58845A18DCEDB90051C228 /* vec234.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6C18DB85C700E42FDE /* vec234.h */; };
+		4A58845B18DCEDB90051C228 /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6D18DB85C700E42FDE /* vector.c */; };
+		4A58845C18DCEDB90051C228 /* vector.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6E18DB85C700E42FDE /* vector.h */; };
+		4A58845D18DCEDB90051C228 /* vertex-attribute.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6F18DB85C700E42FDE /* vertex-attribute.c */; };
+		4A58845E18DCEDB90051C228 /* vertex-attribute.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7018DB85C700E42FDE /* vertex-attribute.h */; };
+		4A58845F18DCEDB90051C228 /* vertex-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7118DB85C700E42FDE /* vertex-buffer.c */; };
+		4A58846018DCEDB90051C228 /* vertex-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7218DB85C700E42FDE /* vertex-buffer.h */; };
+		4A58846218DCEDB90051C228 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD3E18DB84C700E42FDE /* GLUT.framework */; };
+		4A58846318DCEDB90051C228 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A58839718DCE8220051C228 /* libfreetype.a */; };
+		4A58846418DCEDB90051C228 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD9718DB883F00E42FDE /* OpenGL.framework */; };
+		4A58846618DCEDB90051C228 /* 256colors.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8018DB85E300E42FDE /* 256colors.txt */; };
+		4A58847018DCEDD60051C228 /* demo-distance-field-3.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A58844018DCED8C0051C228 /* demo-distance-field-3.c */; };
+		4A58847118DCEE4E0051C228 /* Vera.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8418DB85E300E42FDE /* Vera.ttf */; };
+		4A58847218DCEE710051C228 /* distance-field-3.frag in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8E18DB85E300E42FDE /* distance-field-3.frag */; };
+		4A58847318DCEE710051C228 /* distance-field.vert in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9018DB85E300E42FDE /* distance-field.vert */; };
+		4A58847718DCEE900051C228 /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5818DB85C700E42FDE /* edtaa3func.c */; };
+		4A58847818DCEE900051C228 /* edtaa3func.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5918DB85C700E42FDE /* edtaa3func.h */; };
+		4A58847918DCEE900051C228 /* font-manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5A18DB85C700E42FDE /* font-manager.c */; };
+		4A58847A18DCEE900051C228 /* font-manager.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5B18DB85C700E42FDE /* font-manager.h */; };
+		4A58847B18DCEE900051C228 /* freetype-gl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5C18DB85C700E42FDE /* freetype-gl.h */; };
+		4A58847C18DCEE900051C228 /* markup.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5E18DB85C700E42FDE /* markup.h */; };
+		4A58847D18DCEE900051C228 /* mat4.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5F18DB85C700E42FDE /* mat4.c */; };
+		4A58847E18DCEE900051C228 /* mat4.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6018DB85C700E42FDE /* mat4.h */; };
+		4A58847F18DCEE900051C228 /* opengl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6118DB85C700E42FDE /* opengl.h */; };
+		4A58848018DCEE900051C228 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6218DB85C700E42FDE /* platform.c */; };
+		4A58848118DCEE900051C228 /* platform.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6318DB85C700E42FDE /* platform.h */; };
+		4A58848218DCEE900051C228 /* shader.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6418DB85C700E42FDE /* shader.c */; };
+		4A58848318DCEE900051C228 /* shader.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6518DB85C700E42FDE /* shader.h */; };
+		4A58848418DCEE900051C228 /* text-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6618DB85C700E42FDE /* text-buffer.c */; };
+		4A58848518DCEE900051C228 /* text-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6718DB85C700E42FDE /* text-buffer.h */; };
+		4A58848618DCEE900051C228 /* texture-atlas.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6818DB85C700E42FDE /* texture-atlas.c */; };
+		4A58848718DCEE900051C228 /* texture-atlas.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6918DB85C700E42FDE /* texture-atlas.h */; };
+		4A58848818DCEE900051C228 /* texture-font.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6A18DB85C700E42FDE /* texture-font.c */; };
+		4A58848918DCEE900051C228 /* texture-font.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6B18DB85C700E42FDE /* texture-font.h */; };
+		4A58848A18DCEE900051C228 /* vec234.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6C18DB85C700E42FDE /* vec234.h */; };
+		4A58848B18DCEE900051C228 /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6D18DB85C700E42FDE /* vector.c */; };
+		4A58848C18DCEE900051C228 /* vector.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6E18DB85C700E42FDE /* vector.h */; };
+		4A58848D18DCEE900051C228 /* vertex-attribute.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6F18DB85C700E42FDE /* vertex-attribute.c */; };
+		4A58848E18DCEE900051C228 /* vertex-attribute.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7018DB85C700E42FDE /* vertex-attribute.h */; };
+		4A58848F18DCEE900051C228 /* vertex-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7118DB85C700E42FDE /* vertex-buffer.c */; };
+		4A58849018DCEE900051C228 /* vertex-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7218DB85C700E42FDE /* vertex-buffer.h */; };
+		4A58849218DCEE900051C228 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD3E18DB84C700E42FDE /* GLUT.framework */; };
+		4A58849318DCEE900051C228 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A58839718DCE8220051C228 /* libfreetype.a */; };
+		4A58849418DCEE900051C228 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD9718DB883F00E42FDE /* OpenGL.framework */; };
+		4A58849618DCEE900051C228 /* 256colors.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8018DB85E300E42FDE /* 256colors.txt */; };
+		4A5884A018DCEECF0051C228 /* demo-glyph.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A58844118DCED970051C228 /* demo-glyph.c */; };
+		4A5884A118DCEF070051C228 /* Vera.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8418DB85E300E42FDE /* Vera.ttf */; };
+		4A5884A218DCEF140051C228 /* v3f-c4f.frag in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9318DB85E300E42FDE /* v3f-c4f.frag */; };
+		4A5884A318DCEF140051C228 /* v3f-c4f.vert in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9418DB85E300E42FDE /* v3f-c4f.vert */; };
+		4A5884A418DCEF140051C228 /* v3f-t2f-c4f.frag in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9518DB85E300E42FDE /* v3f-t2f-c4f.frag */; };
+		4A5884A518DCEF140051C228 /* v3f-t2f-c4f.vert in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9618DB85E300E42FDE /* v3f-t2f-c4f.vert */; };
+		4A5884A918DCEF340051C228 /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5818DB85C700E42FDE /* edtaa3func.c */; };
+		4A5884AA18DCEF340051C228 /* edtaa3func.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5918DB85C700E42FDE /* edtaa3func.h */; };
+		4A5884AB18DCEF340051C228 /* font-manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5A18DB85C700E42FDE /* font-manager.c */; };
+		4A5884AC18DCEF340051C228 /* font-manager.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5B18DB85C700E42FDE /* font-manager.h */; };
+		4A5884AD18DCEF340051C228 /* freetype-gl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5C18DB85C700E42FDE /* freetype-gl.h */; };
+		4A5884AE18DCEF340051C228 /* markup.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5E18DB85C700E42FDE /* markup.h */; };
+		4A5884AF18DCEF340051C228 /* mat4.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5F18DB85C700E42FDE /* mat4.c */; };
+		4A5884B018DCEF340051C228 /* mat4.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6018DB85C700E42FDE /* mat4.h */; };
+		4A5884B118DCEF340051C228 /* opengl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6118DB85C700E42FDE /* opengl.h */; };
+		4A5884B218DCEF340051C228 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6218DB85C700E42FDE /* platform.c */; };
+		4A5884B318DCEF340051C228 /* platform.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6318DB85C700E42FDE /* platform.h */; };
+		4A5884B418DCEF340051C228 /* shader.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6418DB85C700E42FDE /* shader.c */; };
+		4A5884B518DCEF340051C228 /* shader.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6518DB85C700E42FDE /* shader.h */; };
+		4A5884B618DCEF340051C228 /* text-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6618DB85C700E42FDE /* text-buffer.c */; };
+		4A5884B718DCEF340051C228 /* text-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6718DB85C700E42FDE /* text-buffer.h */; };
+		4A5884B818DCEF340051C228 /* texture-atlas.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6818DB85C700E42FDE /* texture-atlas.c */; };
+		4A5884B918DCEF340051C228 /* texture-atlas.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6918DB85C700E42FDE /* texture-atlas.h */; };
+		4A5884BA18DCEF340051C228 /* texture-font.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6A18DB85C700E42FDE /* texture-font.c */; };
+		4A5884BB18DCEF340051C228 /* texture-font.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6B18DB85C700E42FDE /* texture-font.h */; };
+		4A5884BC18DCEF340051C228 /* vec234.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6C18DB85C700E42FDE /* vec234.h */; };
+		4A5884BD18DCEF340051C228 /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6D18DB85C700E42FDE /* vector.c */; };
+		4A5884BE18DCEF340051C228 /* vector.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6E18DB85C700E42FDE /* vector.h */; };
+		4A5884BF18DCEF340051C228 /* vertex-attribute.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6F18DB85C700E42FDE /* vertex-attribute.c */; };
+		4A5884C018DCEF340051C228 /* vertex-attribute.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7018DB85C700E42FDE /* vertex-attribute.h */; };
+		4A5884C118DCEF340051C228 /* vertex-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7118DB85C700E42FDE /* vertex-buffer.c */; };
+		4A5884C218DCEF340051C228 /* vertex-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7218DB85C700E42FDE /* vertex-buffer.h */; };
+		4A5884C418DCEF340051C228 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD3E18DB84C700E42FDE /* GLUT.framework */; };
+		4A5884C518DCEF340051C228 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A58839718DCE8220051C228 /* libfreetype.a */; };
+		4A5884C618DCEF340051C228 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD9718DB883F00E42FDE /* OpenGL.framework */; };
+		4A5884C818DCEF340051C228 /* 256colors.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8018DB85E300E42FDE /* 256colors.txt */; };
+		4A5884CA18DCEF340051C228 /* VeraMono.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8818DB85E300E42FDE /* VeraMono.ttf */; };
+		4A5884CC18DCEF340051C228 /* text.frag in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBDA018DB8A3600E42FDE /* text.frag */; };
+		4A5884CD18DCEF340051C228 /* text.vert in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD9218DB85E300E42FDE /* text.vert */; };
+		4A5884D218DCEF420051C228 /* demo-makefont.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A58844218DCEDA20051C228 /* demo-makefont.c */; };
+		4A5884D618DCEFE50051C228 /* edtaa3func.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5818DB85C700E42FDE /* edtaa3func.c */; };
+		4A5884D718DCEFE50051C228 /* edtaa3func.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5918DB85C700E42FDE /* edtaa3func.h */; };
+		4A5884D818DCEFE50051C228 /* font-manager.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5A18DB85C700E42FDE /* font-manager.c */; };
+		4A5884D918DCEFE50051C228 /* font-manager.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5B18DB85C700E42FDE /* font-manager.h */; };
+		4A5884DA18DCEFE50051C228 /* freetype-gl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5C18DB85C700E42FDE /* freetype-gl.h */; };
+		4A5884DB18DCEFE50051C228 /* markup.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5E18DB85C700E42FDE /* markup.h */; };
+		4A5884DC18DCEFE50051C228 /* mat4.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD5F18DB85C700E42FDE /* mat4.c */; };
+		4A5884DD18DCEFE50051C228 /* mat4.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6018DB85C700E42FDE /* mat4.h */; };
+		4A5884DE18DCEFE50051C228 /* opengl.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6118DB85C700E42FDE /* opengl.h */; };
+		4A5884DF18DCEFE50051C228 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6218DB85C700E42FDE /* platform.c */; };
+		4A5884E018DCEFE50051C228 /* platform.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6318DB85C700E42FDE /* platform.h */; };
+		4A5884E118DCEFE50051C228 /* shader.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6418DB85C700E42FDE /* shader.c */; };
+		4A5884E218DCEFE50051C228 /* shader.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6518DB85C700E42FDE /* shader.h */; };
+		4A5884E318DCEFE50051C228 /* text-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6618DB85C700E42FDE /* text-buffer.c */; };
+		4A5884E418DCEFE50051C228 /* text-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6718DB85C700E42FDE /* text-buffer.h */; };
+		4A5884E518DCEFE50051C228 /* texture-atlas.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6818DB85C700E42FDE /* texture-atlas.c */; };
+		4A5884E618DCEFE50051C228 /* texture-atlas.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6918DB85C700E42FDE /* texture-atlas.h */; };
+		4A5884E718DCEFE50051C228 /* texture-font.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6A18DB85C700E42FDE /* texture-font.c */; };
+		4A5884E818DCEFE50051C228 /* texture-font.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6B18DB85C700E42FDE /* texture-font.h */; };
+		4A5884E918DCEFE50051C228 /* vec234.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6C18DB85C700E42FDE /* vec234.h */; };
+		4A5884EA18DCEFE50051C228 /* vector.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6D18DB85C700E42FDE /* vector.c */; };
+		4A5884EB18DCEFE50051C228 /* vector.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6E18DB85C700E42FDE /* vector.h */; };
+		4A5884EC18DCEFE50051C228 /* vertex-attribute.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD6F18DB85C700E42FDE /* vertex-attribute.c */; };
+		4A5884ED18DCEFE50051C228 /* vertex-attribute.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7018DB85C700E42FDE /* vertex-attribute.h */; };
+		4A5884EE18DCEFE50051C228 /* vertex-buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7118DB85C700E42FDE /* vertex-buffer.c */; };
+		4A5884EF18DCEFE50051C228 /* vertex-buffer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4AAEBD7218DB85C700E42FDE /* vertex-buffer.h */; };
+		4A5884F118DCEFE50051C228 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD3E18DB84C700E42FDE /* GLUT.framework */; };
+		4A5884F218DCEFE50051C228 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A58839718DCE8220051C228 /* libfreetype.a */; };
+		4A5884F318DCEFE50051C228 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AAEBD9718DB883F00E42FDE /* OpenGL.framework */; };
+		4A5884F518DCEFE50051C228 /* 256colors.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8018DB85E300E42FDE /* 256colors.txt */; };
+		4A5884F718DCEFE50051C228 /* VeraMono.ttf in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8818DB85E300E42FDE /* VeraMono.ttf */; };
+		4A5884FF18DCF0030051C228 /* demo-cube.c in Sources */ = {isa = PBXBuildFile; fileRef = 4A58844318DCEDAF0051C228 /* demo-cube.c */; };
+		4A58850018DCF0390051C228 /* cube.frag in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8A18DB85E300E42FDE /* cube.frag */; };
+		4A58850118DCF0390051C228 /* cube.vert in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4AAEBD8B18DB85E300E42FDE /* cube.vert */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		4AAEBD0718DB842E00E42FDE /* CopyFiles */ = {
+		4A58837E18DCE7740051C228 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1;
-			dstSubfolderSpec = 0;
+			buildActionMask = 12;
+			dstPath = shaders;
+			dstSubfolderSpec = 7;
 			files = (
-				4AAEBD0F18DB842E00E42FDE /* FreeType_GL_OSX_Demos.1 in CopyFiles */,
+				4A58840C18DCEBCB0051C228 /* v3f-t2f-c4f.frag in CopyFiles */,
+				4A58840D18DCEBCB0051C228 /* v3f-t2f-c4f.vert in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4AAEBDAA18DB908E00E42FDE /* CopyFiles */ = {
+		4A58838B18DCE7B40051C228 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 12;
 			dstPath = data;
 			dstSubfolderSpec = 7;
 			files = (
-				4AAEBDAB18DB909D00E42FDE /* 256colors.txt in CopyFiles */,
+				4A5883B418DCE8840051C228 /* 256colors.txt in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4AAEBDAC18DB90AF00E42FDE /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = shaders;
-			dstSubfolderSpec = 7;
-			files = (
-				4AAEBDAD18DB90C700E42FDE /* text.frag in CopyFiles */,
-				4AAEBDAE18DB90C700E42FDE /* text.vert in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4AAEBDAF18DB912200E42FDE /* CopyFiles */ = {
+		4A5883B618DCE8D50051C228 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = fonts;
 			dstSubfolderSpec = 7;
 			files = (
-				4AAEBDB018DB912D00E42FDE /* VeraMono.ttf in CopyFiles */,
+				4A5883B718DCE8E30051C228 /* VeraMono.ttf in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5883B818DCE8EA0051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = shaders;
+			dstSubfolderSpec = 7;
+			files = (
+				4A5883B918DCE8F90051C228 /* text.frag in CopyFiles */,
+				4A5883BA18DCE8F90051C228 /* text.vert in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5883DC18DCE9460051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = data;
+			dstSubfolderSpec = 7;
+			files = (
+				4A5883DD18DCE9460051C228 /* 256colors.txt in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5883DE18DCE9460051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = fonts;
+			dstSubfolderSpec = 7;
+			files = (
+				4A5883EA18DCEAAB0051C228 /* VeraMoBd.ttf in CopyFiles */,
+				4A5883EB18DCEAAB0051C228 /* VeraMoBI.ttf in CopyFiles */,
+				4A5883EC18DCEAAB0051C228 /* VeraMoIt.ttf in CopyFiles */,
+				4A5883DF18DCE9460051C228 /* VeraMono.ttf in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5883E018DCE9460051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = shaders;
+			dstSubfolderSpec = 7;
+			files = (
+				4A5883E818DCE9E70051C228 /* v3f-t2f-c4f.frag in CopyFiles */,
+				4A5883E918DCE9E70051C228 /* v3f-t2f-c4f.vert in CopyFiles */,
+				4A5883E118DCE9460051C228 /* text.frag in CopyFiles */,
+				4A5883E218DCE9460051C228 /* text.vert in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58840E18DCEBDA0051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = fonts;
+			dstSubfolderSpec = 7;
+			files = (
+				4A58840F18DCEBE40051C228 /* ObelixPro.ttf in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58843118DCEC6C0051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = data;
+			dstSubfolderSpec = 7;
+			files = (
+				4A58843218DCEC6C0051C228 /* 256colors.txt in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58843318DCEC6C0051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = fonts;
+			dstSubfolderSpec = 7;
+			files = (
+				4A58843F18DCED590051C228 /* Vera.ttf in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58843518DCEC6C0051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = shaders;
+			dstSubfolderSpec = 7;
+			files = (
+				4A58843C18DCED010051C228 /* v3f-t2f-c4f.frag in CopyFiles */,
+				4A58843D18DCED010051C228 /* v3f-t2f-c4f.vert in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58846518DCEDB90051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = data;
+			dstSubfolderSpec = 7;
+			files = (
+				4A58846618DCEDB90051C228 /* 256colors.txt in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58846718DCEDB90051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = fonts;
+			dstSubfolderSpec = 7;
+			files = (
+				4A58847118DCEE4E0051C228 /* Vera.ttf in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58846918DCEDB90051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = shaders;
+			dstSubfolderSpec = 7;
+			files = (
+				4A58847218DCEE710051C228 /* distance-field-3.frag in CopyFiles */,
+				4A58847318DCEE710051C228 /* distance-field.vert in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58849518DCEE900051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = data;
+			dstSubfolderSpec = 7;
+			files = (
+				4A58849618DCEE900051C228 /* 256colors.txt in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58849718DCEE900051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = fonts;
+			dstSubfolderSpec = 7;
+			files = (
+				4A5884A118DCEF070051C228 /* Vera.ttf in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58849918DCEE900051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = shaders;
+			dstSubfolderSpec = 7;
+			files = (
+				4A5884A218DCEF140051C228 /* v3f-c4f.frag in CopyFiles */,
+				4A5884A318DCEF140051C228 /* v3f-c4f.vert in CopyFiles */,
+				4A5884A418DCEF140051C228 /* v3f-t2f-c4f.frag in CopyFiles */,
+				4A5884A518DCEF140051C228 /* v3f-t2f-c4f.vert in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5884C718DCEF340051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = data;
+			dstSubfolderSpec = 7;
+			files = (
+				4A5884C818DCEF340051C228 /* 256colors.txt in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5884C918DCEF340051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = fonts;
+			dstSubfolderSpec = 7;
+			files = (
+				4A5884CA18DCEF340051C228 /* VeraMono.ttf in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5884CB18DCEF340051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = shaders;
+			dstSubfolderSpec = 7;
+			files = (
+				4A5884CC18DCEF340051C228 /* text.frag in CopyFiles */,
+				4A5884CD18DCEF340051C228 /* text.vert in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5884F418DCEFE50051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = data;
+			dstSubfolderSpec = 7;
+			files = (
+				4A5884F518DCEFE50051C228 /* 256colors.txt in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5884F618DCEFE50051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = fonts;
+			dstSubfolderSpec = 7;
+			files = (
+				4A5884F718DCEFE50051C228 /* VeraMono.ttf in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5884F818DCEFE50051C228 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = shaders;
+			dstSubfolderSpec = 7;
+			files = (
+				4A58850018DCF0390051C228 /* cube.frag in CopyFiles */,
+				4A58850118DCF0390051C228 /* cube.vert in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4AAEBD0918DB842E00E42FDE /* FreeType-GL_OSX_Demos */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "FreeType-GL_OSX_Demos"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4AAEBD0E18DB842E00E42FDE /* FreeType_GL_OSX_Demos.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = FreeType_GL_OSX_Demos.1; sourceTree = "<group>"; };
+		4A58837918DCE72F0051C228 /* demo-cartoon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "demo-cartoon.c"; path = "../../demo-cartoon.c"; sourceTree = "<group>"; };
+		4A58837A18DCE72F0051C228 /* demo-console.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "demo-console.c"; path = "../../demo-console.c"; sourceTree = "<group>"; };
+		4A58837B18DCE72F0051C228 /* demo-texture.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "demo-texture.c"; path = "../../demo-texture.c"; sourceTree = "<group>"; };
+		4A58838018DCE7740051C228 /* domo-cartoon */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "domo-cartoon"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A58838D18DCE7B40051C228 /* demo-ansi */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "demo-ansi"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A58839718DCE8220051C228 /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = ../../../../../../../../opt/local/lib/libfreetype.a; sourceTree = "<group>"; };
+		4A5883E618DCE9460051C228 /* demo-console */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "demo-console"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A58843B18DCEC6C0051C228 /* demo-texture */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "demo-texture"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A58844018DCED8C0051C228 /* demo-distance-field-3.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "demo-distance-field-3.c"; path = "../../demo-distance-field-3.c"; sourceTree = "<group>"; };
+		4A58844118DCED970051C228 /* demo-glyph.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "demo-glyph.c"; path = "../../demo-glyph.c"; sourceTree = "<group>"; };
+		4A58844218DCEDA20051C228 /* demo-makefont.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "demo-makefont.c"; path = "../../demo-makefont.c"; sourceTree = "<group>"; };
+		4A58844318DCEDAF0051C228 /* demo-cube.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "demo-cube.c"; path = "../../demo-cube.c"; sourceTree = "<group>"; };
+		4A58846F18DCEDB90051C228 /* demo-distance-field-3 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "demo-distance-field-3"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A58849F18DCEE900051C228 /* demo-glyph */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "demo-glyph"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A5884D118DCEF340051C228 /* demo-makefont */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "demo-makefont"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A5884FE18DCEFE50051C228 /* demo-cube */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "demo-cube"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4AAEBD3E18DB84C700E42FDE /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 		4AAEBD5818DB85C700E42FDE /* edtaa3func.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = edtaa3func.c; path = ../../edtaa3func.c; sourceTree = "<group>"; };
 		4AAEBD5918DB85C700E42FDE /* edtaa3func.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = edtaa3func.h; path = ../../edtaa3func.h; sourceTree = "<group>"; };
@@ -124,29 +600,113 @@
 		4AAEBD9518DB85E300E42FDE /* v3f-t2f-c4f.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = "v3f-t2f-c4f.frag"; sourceTree = "<group>"; };
 		4AAEBD9618DB85E300E42FDE /* v3f-t2f-c4f.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = "v3f-t2f-c4f.vert"; sourceTree = "<group>"; };
 		4AAEBD9718DB883F00E42FDE /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		4AAEBD9918DB88FA00E42FDE /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = ../../../../../../../opt/local/lib/libfreetype.a; sourceTree = "<group>"; };
 		4AAEBD9B18DB896500E42FDE /* demo-ansi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "demo-ansi.c"; path = "../../demo-ansi.c"; sourceTree = "<group>"; };
 		4AAEBDA018DB8A3600E42FDE /* text.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text.frag; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		4AAEBD0618DB842E00E42FDE /* Frameworks */ = {
+		4A58837D18DCE7740051C228 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4AAEBD9A18DB88FA00E42FDE /* libfreetype.a in Frameworks */,
-				4AAEBD9818DB883F00E42FDE /* OpenGL.framework in Frameworks */,
-				4AAEBD3F18DB84C700E42FDE /* GLUT.framework in Frameworks */,
+				4A58840918DCEB280051C228 /* GLUT.framework in Frameworks */,
+				4A58840A18DCEB280051C228 /* OpenGL.framework in Frameworks */,
+				4A58840818DCEB210051C228 /* libfreetype.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58838A18DCE7B40051C228 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A58839918DCE82D0051C228 /* GLUT.framework in Frameworks */,
+				4A58839818DCE8220051C228 /* libfreetype.a in Frameworks */,
+				4A58839618DCE7EE0051C228 /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5883D818DCE9460051C228 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A5883D918DCE9460051C228 /* GLUT.framework in Frameworks */,
+				4A5883DA18DCE9460051C228 /* libfreetype.a in Frameworks */,
+				4A5883DB18DCE9460051C228 /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58842D18DCEC6C0051C228 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A58842E18DCEC6C0051C228 /* GLUT.framework in Frameworks */,
+				4A58842F18DCEC6C0051C228 /* libfreetype.a in Frameworks */,
+				4A58843018DCEC6C0051C228 /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58846118DCEDB90051C228 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A58846218DCEDB90051C228 /* GLUT.framework in Frameworks */,
+				4A58846318DCEDB90051C228 /* libfreetype.a in Frameworks */,
+				4A58846418DCEDB90051C228 /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58849118DCEE900051C228 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A58849218DCEE900051C228 /* GLUT.framework in Frameworks */,
+				4A58849318DCEE900051C228 /* libfreetype.a in Frameworks */,
+				4A58849418DCEE900051C228 /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5884C318DCEF340051C228 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A5884C418DCEF340051C228 /* GLUT.framework in Frameworks */,
+				4A5884C518DCEF340051C228 /* libfreetype.a in Frameworks */,
+				4A5884C618DCEF340051C228 /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5884F018DCEFE50051C228 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A5884F118DCEFE50051C228 /* GLUT.framework in Frameworks */,
+				4A5884F218DCEFE50051C228 /* libfreetype.a in Frameworks */,
+				4A5884F318DCEFE50051C228 /* OpenGL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4A58837818DCE6F70051C228 /* demos */ = {
+			isa = PBXGroup;
+			children = (
+				4AAEBD9B18DB896500E42FDE /* demo-ansi.c */,
+				4A58837918DCE72F0051C228 /* demo-cartoon.c */,
+				4A58837A18DCE72F0051C228 /* demo-console.c */,
+				4A58837B18DCE72F0051C228 /* demo-texture.c */,
+				4A58844018DCED8C0051C228 /* demo-distance-field-3.c */,
+				4A58844118DCED970051C228 /* demo-glyph.c */,
+				4A58844218DCEDA20051C228 /* demo-makefont.c */,
+				4A58844318DCEDAF0051C228 /* demo-cube.c */,
+			);
+			name = demos;
+			sourceTree = "<group>";
+		};
 		4AAEBD0018DB842E00E42FDE = {
 			isa = PBXGroup;
 			children = (
-				4AAEBD9918DB88FA00E42FDE /* libfreetype.a */,
+				4A58839718DCE8220051C228 /* libfreetype.a */,
 				4AAEBD9718DB883F00E42FDE /* OpenGL.framework */,
 				4AAEBD3E18DB84C700E42FDE /* GLUT.framework */,
 				4AAEBD0B18DB842E00E42FDE /* FreeType-GL_OSX_Demos */,
@@ -157,7 +717,14 @@
 		4AAEBD0A18DB842E00E42FDE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4AAEBD0918DB842E00E42FDE /* FreeType-GL_OSX_Demos */,
+				4A58838018DCE7740051C228 /* domo-cartoon */,
+				4A58838D18DCE7B40051C228 /* demo-ansi */,
+				4A5883E618DCE9460051C228 /* demo-console */,
+				4A58843B18DCEC6C0051C228 /* demo-texture */,
+				4A58846F18DCEDB90051C228 /* demo-distance-field-3 */,
+				4A58849F18DCEE900051C228 /* demo-glyph */,
+				4A5884D118DCEF340051C228 /* demo-makefont */,
+				4A5884FE18DCEFE50051C228 /* demo-cube */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -168,7 +735,7 @@
 				4AAEBD7F18DB85E300E42FDE /* data */,
 				4AAEBD8118DB85E300E42FDE /* fonts */,
 				4AAEBD8918DB85E300E42FDE /* shaders */,
-				4AAEBD9B18DB896500E42FDE /* demo-ansi.c */,
+				4A58837818DCE6F70051C228 /* demos */,
 				4AAEBD5818DB85C700E42FDE /* edtaa3func.c */,
 				4AAEBD5918DB85C700E42FDE /* edtaa3func.h */,
 				4AAEBD5A18DB85C700E42FDE /* font-manager.c */,
@@ -195,7 +762,6 @@
 				4AAEBD7018DB85C700E42FDE /* vertex-attribute.h */,
 				4AAEBD7118DB85C700E42FDE /* vertex-buffer.c */,
 				4AAEBD7218DB85C700E42FDE /* vertex-buffer.h */,
-				4AAEBD0E18DB842E00E42FDE /* FreeType_GL_OSX_Demos.1 */,
 			);
 			path = "FreeType-GL_OSX_Demos";
 			sourceTree = "<group>";
@@ -248,24 +814,155 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4AAEBD0818DB842E00E42FDE /* FreeType-GL_OSX_Demos */ = {
+		4A58837F18DCE7740051C228 /* domo-cartoon */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4AAEBD1218DB842E00E42FDE /* Build configuration list for PBXNativeTarget "FreeType-GL_OSX_Demos" */;
+			buildConfigurationList = 4A58838618DCE7740051C228 /* Build configuration list for PBXNativeTarget "domo-cartoon" */;
 			buildPhases = (
-				4AAEBD0518DB842E00E42FDE /* Sources */,
-				4AAEBD0618DB842E00E42FDE /* Frameworks */,
-				4AAEBD0718DB842E00E42FDE /* CopyFiles */,
-				4AAEBDAA18DB908E00E42FDE /* CopyFiles */,
-				4AAEBDAC18DB90AF00E42FDE /* CopyFiles */,
-				4AAEBDAF18DB912200E42FDE /* CopyFiles */,
+				4A58837C18DCE7740051C228 /* Sources */,
+				4A58837D18DCE7740051C228 /* Frameworks */,
+				4A58837E18DCE7740051C228 /* CopyFiles */,
+				4A58840E18DCEBDA0051C228 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = "FreeType-GL_OSX_Demos";
-			productName = "FreeType-GL_OSX_Demos";
-			productReference = 4AAEBD0918DB842E00E42FDE /* FreeType-GL_OSX_Demos */;
+			name = "domo-cartoon";
+			productName = "domo-cartoon";
+			productReference = 4A58838018DCE7740051C228 /* domo-cartoon */;
+			productType = "com.apple.product-type.tool";
+		};
+		4A58838C18DCE7B40051C228 /* demo-ansi */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A58839318DCE7B40051C228 /* Build configuration list for PBXNativeTarget "demo-ansi" */;
+			buildPhases = (
+				4A58838918DCE7B40051C228 /* Sources */,
+				4A58838A18DCE7B40051C228 /* Frameworks */,
+				4A58838B18DCE7B40051C228 /* CopyFiles */,
+				4A5883B618DCE8D50051C228 /* CopyFiles */,
+				4A5883B818DCE8EA0051C228 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "demo-ansi";
+			productName = "demo-ansi";
+			productReference = 4A58838D18DCE7B40051C228 /* demo-ansi */;
+			productType = "com.apple.product-type.tool";
+		};
+		4A5883BB18DCE9460051C228 /* demo-console */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A5883E318DCE9460051C228 /* Build configuration list for PBXNativeTarget "demo-console" */;
+			buildPhases = (
+				4A5883BC18DCE9460051C228 /* Sources */,
+				4A5883D818DCE9460051C228 /* Frameworks */,
+				4A5883DC18DCE9460051C228 /* CopyFiles */,
+				4A5883DE18DCE9460051C228 /* CopyFiles */,
+				4A5883E018DCE9460051C228 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "demo-console";
+			productName = "demo-ansi";
+			productReference = 4A5883E618DCE9460051C228 /* demo-console */;
+			productType = "com.apple.product-type.tool";
+		};
+		4A58841018DCEC6C0051C228 /* demo-texture */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A58843818DCEC6C0051C228 /* Build configuration list for PBXNativeTarget "demo-texture" */;
+			buildPhases = (
+				4A58841118DCEC6C0051C228 /* Sources */,
+				4A58842D18DCEC6C0051C228 /* Frameworks */,
+				4A58843118DCEC6C0051C228 /* CopyFiles */,
+				4A58843318DCEC6C0051C228 /* CopyFiles */,
+				4A58843518DCEC6C0051C228 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "demo-texture";
+			productName = "demo-ansi";
+			productReference = 4A58843B18DCEC6C0051C228 /* demo-texture */;
+			productType = "com.apple.product-type.tool";
+		};
+		4A58844418DCEDB90051C228 /* demo-distance-field-3 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A58846C18DCEDB90051C228 /* Build configuration list for PBXNativeTarget "demo-distance-field-3" */;
+			buildPhases = (
+				4A58844518DCEDB90051C228 /* Sources */,
+				4A58846118DCEDB90051C228 /* Frameworks */,
+				4A58846518DCEDB90051C228 /* CopyFiles */,
+				4A58846718DCEDB90051C228 /* CopyFiles */,
+				4A58846918DCEDB90051C228 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "demo-distance-field-3";
+			productName = "demo-ansi";
+			productReference = 4A58846F18DCEDB90051C228 /* demo-distance-field-3 */;
+			productType = "com.apple.product-type.tool";
+		};
+		4A58847418DCEE900051C228 /* demo-glyph */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A58849C18DCEE900051C228 /* Build configuration list for PBXNativeTarget "demo-glyph" */;
+			buildPhases = (
+				4A58847518DCEE900051C228 /* Sources */,
+				4A58849118DCEE900051C228 /* Frameworks */,
+				4A58849518DCEE900051C228 /* CopyFiles */,
+				4A58849718DCEE900051C228 /* CopyFiles */,
+				4A58849918DCEE900051C228 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "demo-glyph";
+			productName = "demo-ansi";
+			productReference = 4A58849F18DCEE900051C228 /* demo-glyph */;
+			productType = "com.apple.product-type.tool";
+		};
+		4A5884A618DCEF340051C228 /* demo-makefont */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A5884CE18DCEF340051C228 /* Build configuration list for PBXNativeTarget "demo-makefont" */;
+			buildPhases = (
+				4A5884A718DCEF340051C228 /* Sources */,
+				4A5884C318DCEF340051C228 /* Frameworks */,
+				4A5884C718DCEF340051C228 /* CopyFiles */,
+				4A5884C918DCEF340051C228 /* CopyFiles */,
+				4A5884CB18DCEF340051C228 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "demo-makefont";
+			productName = "demo-ansi";
+			productReference = 4A5884D118DCEF340051C228 /* demo-makefont */;
+			productType = "com.apple.product-type.tool";
+		};
+		4A5884D318DCEFE50051C228 /* demo-cube */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A5884FB18DCEFE50051C228 /* Build configuration list for PBXNativeTarget "demo-cube" */;
+			buildPhases = (
+				4A5884D418DCEFE50051C228 /* Sources */,
+				4A5884F018DCEFE50051C228 /* Frameworks */,
+				4A5884F418DCEFE50051C228 /* CopyFiles */,
+				4A5884F618DCEFE50051C228 /* CopyFiles */,
+				4A5884F818DCEFE50051C228 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "demo-cube";
+			productName = "demo-ansi";
+			productReference = 4A5884FE18DCEFE50051C228 /* demo-cube */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -289,34 +986,502 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4AAEBD0818DB842E00E42FDE /* FreeType-GL_OSX_Demos */,
+				4A58837F18DCE7740051C228 /* domo-cartoon */,
+				4A58838C18DCE7B40051C228 /* demo-ansi */,
+				4A5883BB18DCE9460051C228 /* demo-console */,
+				4A58841018DCEC6C0051C228 /* demo-texture */,
+				4A58844418DCEDB90051C228 /* demo-distance-field-3 */,
+				4A58847418DCEE900051C228 /* demo-glyph */,
+				4A5884A618DCEF340051C228 /* demo-makefont */,
+				4A5884D318DCEFE50051C228 /* demo-cube */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		4AAEBD0518DB842E00E42FDE /* Sources */ = {
+		4A58837C18DCE7740051C228 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4AAEBD7E18DB85C700E42FDE /* vertex-buffer.c in Sources */,
-				4AAEBD7718DB85C700E42FDE /* platform.c in Sources */,
-				4AAEBD7918DB85C700E42FDE /* text-buffer.c in Sources */,
-				4AAEBD7A18DB85C700E42FDE /* texture-atlas.c in Sources */,
-				4AAEBD7618DB85C700E42FDE /* mat4.c in Sources */,
-				4AAEBD7B18DB85C700E42FDE /* texture-font.c in Sources */,
-				4AAEBD7418DB85C700E42FDE /* font-manager.c in Sources */,
-				4AAEBD7D18DB85C700E42FDE /* vertex-attribute.c in Sources */,
-				4AAEBD7818DB85C700E42FDE /* shader.c in Sources */,
-				4AAEBD7C18DB85C700E42FDE /* vector.c in Sources */,
-				4AAEBD7318DB85C700E42FDE /* edtaa3func.c in Sources */,
-				4AAEBD9C18DB896500E42FDE /* demo-ansi.c in Sources */,
+				4A58840718DCEB0A0051C228 /* demo-cartoon.c in Sources */,
+				4A5883ED18DCEB020051C228 /* edtaa3func.c in Sources */,
+				4A5883EE18DCEB020051C228 /* edtaa3func.h in Sources */,
+				4A5883EF18DCEB020051C228 /* font-manager.c in Sources */,
+				4A5883F018DCEB020051C228 /* font-manager.h in Sources */,
+				4A5883F118DCEB020051C228 /* freetype-gl.h in Sources */,
+				4A5883F218DCEB020051C228 /* markup.h in Sources */,
+				4A5883F318DCEB020051C228 /* mat4.c in Sources */,
+				4A5883F418DCEB020051C228 /* mat4.h in Sources */,
+				4A5883F518DCEB020051C228 /* opengl.h in Sources */,
+				4A5883F618DCEB020051C228 /* platform.c in Sources */,
+				4A5883F718DCEB020051C228 /* platform.h in Sources */,
+				4A5883F818DCEB020051C228 /* shader.c in Sources */,
+				4A5883F918DCEB020051C228 /* shader.h in Sources */,
+				4A5883FA18DCEB020051C228 /* text-buffer.c in Sources */,
+				4A5883FB18DCEB020051C228 /* text-buffer.h in Sources */,
+				4A5883FC18DCEB020051C228 /* texture-atlas.c in Sources */,
+				4A5883FD18DCEB020051C228 /* texture-atlas.h in Sources */,
+				4A5883FE18DCEB020051C228 /* texture-font.c in Sources */,
+				4A5883FF18DCEB020051C228 /* texture-font.h in Sources */,
+				4A58840018DCEB020051C228 /* vec234.h in Sources */,
+				4A58840118DCEB020051C228 /* vector.c in Sources */,
+				4A58840218DCEB020051C228 /* vector.h in Sources */,
+				4A58840318DCEB020051C228 /* vertex-attribute.c in Sources */,
+				4A58840418DCEB020051C228 /* vertex-attribute.h in Sources */,
+				4A58840518DCEB020051C228 /* vertex-buffer.c in Sources */,
+				4A58840618DCEB020051C228 /* vertex-buffer.h in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58838918DCE7B40051C228 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A5883B518DCE8900051C228 /* demo-ansi.c in Sources */,
+				4A58839A18DCE8560051C228 /* edtaa3func.c in Sources */,
+				4A58839B18DCE8560051C228 /* edtaa3func.h in Sources */,
+				4A58839C18DCE8560051C228 /* font-manager.c in Sources */,
+				4A58839D18DCE8560051C228 /* font-manager.h in Sources */,
+				4A58839E18DCE8560051C228 /* freetype-gl.h in Sources */,
+				4A58839F18DCE8560051C228 /* markup.h in Sources */,
+				4A5883A018DCE8560051C228 /* mat4.c in Sources */,
+				4A5883A118DCE8560051C228 /* mat4.h in Sources */,
+				4A5883A218DCE8560051C228 /* opengl.h in Sources */,
+				4A5883A318DCE8560051C228 /* platform.c in Sources */,
+				4A5883A418DCE8560051C228 /* platform.h in Sources */,
+				4A5883A518DCE8560051C228 /* shader.c in Sources */,
+				4A5883A618DCE8560051C228 /* shader.h in Sources */,
+				4A5883A718DCE8560051C228 /* text-buffer.c in Sources */,
+				4A5883A818DCE8560051C228 /* text-buffer.h in Sources */,
+				4A5883A918DCE8560051C228 /* texture-atlas.c in Sources */,
+				4A5883AA18DCE8560051C228 /* texture-atlas.h in Sources */,
+				4A5883AB18DCE8560051C228 /* texture-font.c in Sources */,
+				4A5883AC18DCE8560051C228 /* texture-font.h in Sources */,
+				4A5883AD18DCE8560051C228 /* vec234.h in Sources */,
+				4A5883AE18DCE8560051C228 /* vector.c in Sources */,
+				4A5883AF18DCE8560051C228 /* vector.h in Sources */,
+				4A5883B018DCE8560051C228 /* vertex-attribute.c in Sources */,
+				4A5883B118DCE8560051C228 /* vertex-attribute.h in Sources */,
+				4A5883B218DCE8560051C228 /* vertex-buffer.c in Sources */,
+				4A5883B318DCE8560051C228 /* vertex-buffer.h in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5883BC18DCE9460051C228 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A5883E718DCE9960051C228 /* demo-console.c in Sources */,
+				4A5883BE18DCE9460051C228 /* edtaa3func.c in Sources */,
+				4A5883BF18DCE9460051C228 /* edtaa3func.h in Sources */,
+				4A5883C018DCE9460051C228 /* font-manager.c in Sources */,
+				4A5883C118DCE9460051C228 /* font-manager.h in Sources */,
+				4A5883C218DCE9460051C228 /* freetype-gl.h in Sources */,
+				4A5883C318DCE9460051C228 /* markup.h in Sources */,
+				4A5883C418DCE9460051C228 /* mat4.c in Sources */,
+				4A5883C518DCE9460051C228 /* mat4.h in Sources */,
+				4A5883C618DCE9460051C228 /* opengl.h in Sources */,
+				4A5883C718DCE9460051C228 /* platform.c in Sources */,
+				4A5883C818DCE9460051C228 /* platform.h in Sources */,
+				4A5883C918DCE9460051C228 /* shader.c in Sources */,
+				4A5883CA18DCE9460051C228 /* shader.h in Sources */,
+				4A5883CB18DCE9460051C228 /* text-buffer.c in Sources */,
+				4A5883CC18DCE9460051C228 /* text-buffer.h in Sources */,
+				4A5883CD18DCE9460051C228 /* texture-atlas.c in Sources */,
+				4A5883CE18DCE9460051C228 /* texture-atlas.h in Sources */,
+				4A5883CF18DCE9460051C228 /* texture-font.c in Sources */,
+				4A5883D018DCE9460051C228 /* texture-font.h in Sources */,
+				4A5883D118DCE9460051C228 /* vec234.h in Sources */,
+				4A5883D218DCE9460051C228 /* vector.c in Sources */,
+				4A5883D318DCE9460051C228 /* vector.h in Sources */,
+				4A5883D418DCE9460051C228 /* vertex-attribute.c in Sources */,
+				4A5883D518DCE9460051C228 /* vertex-attribute.h in Sources */,
+				4A5883D618DCE9460051C228 /* vertex-buffer.c in Sources */,
+				4A5883D718DCE9460051C228 /* vertex-buffer.h in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58841118DCEC6C0051C228 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A58843E18DCED1B0051C228 /* demo-texture.c in Sources */,
+				4A58841318DCEC6C0051C228 /* edtaa3func.c in Sources */,
+				4A58841418DCEC6C0051C228 /* edtaa3func.h in Sources */,
+				4A58841518DCEC6C0051C228 /* font-manager.c in Sources */,
+				4A58841618DCEC6C0051C228 /* font-manager.h in Sources */,
+				4A58841718DCEC6C0051C228 /* freetype-gl.h in Sources */,
+				4A58841818DCEC6C0051C228 /* markup.h in Sources */,
+				4A58841918DCEC6C0051C228 /* mat4.c in Sources */,
+				4A58841A18DCEC6C0051C228 /* mat4.h in Sources */,
+				4A58841B18DCEC6C0051C228 /* opengl.h in Sources */,
+				4A58841C18DCEC6C0051C228 /* platform.c in Sources */,
+				4A58841D18DCEC6C0051C228 /* platform.h in Sources */,
+				4A58841E18DCEC6C0051C228 /* shader.c in Sources */,
+				4A58841F18DCEC6C0051C228 /* shader.h in Sources */,
+				4A58842018DCEC6C0051C228 /* text-buffer.c in Sources */,
+				4A58842118DCEC6C0051C228 /* text-buffer.h in Sources */,
+				4A58842218DCEC6C0051C228 /* texture-atlas.c in Sources */,
+				4A58842318DCEC6C0051C228 /* texture-atlas.h in Sources */,
+				4A58842418DCEC6C0051C228 /* texture-font.c in Sources */,
+				4A58842518DCEC6C0051C228 /* texture-font.h in Sources */,
+				4A58842618DCEC6C0051C228 /* vec234.h in Sources */,
+				4A58842718DCEC6C0051C228 /* vector.c in Sources */,
+				4A58842818DCEC6C0051C228 /* vector.h in Sources */,
+				4A58842918DCEC6C0051C228 /* vertex-attribute.c in Sources */,
+				4A58842A18DCEC6C0051C228 /* vertex-attribute.h in Sources */,
+				4A58842B18DCEC6C0051C228 /* vertex-buffer.c in Sources */,
+				4A58842C18DCEC6C0051C228 /* vertex-buffer.h in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58844518DCEDB90051C228 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A58847018DCEDD60051C228 /* demo-distance-field-3.c in Sources */,
+				4A58844718DCEDB90051C228 /* edtaa3func.c in Sources */,
+				4A58844818DCEDB90051C228 /* edtaa3func.h in Sources */,
+				4A58844918DCEDB90051C228 /* font-manager.c in Sources */,
+				4A58844A18DCEDB90051C228 /* font-manager.h in Sources */,
+				4A58844B18DCEDB90051C228 /* freetype-gl.h in Sources */,
+				4A58844C18DCEDB90051C228 /* markup.h in Sources */,
+				4A58844D18DCEDB90051C228 /* mat4.c in Sources */,
+				4A58844E18DCEDB90051C228 /* mat4.h in Sources */,
+				4A58844F18DCEDB90051C228 /* opengl.h in Sources */,
+				4A58845018DCEDB90051C228 /* platform.c in Sources */,
+				4A58845118DCEDB90051C228 /* platform.h in Sources */,
+				4A58845218DCEDB90051C228 /* shader.c in Sources */,
+				4A58845318DCEDB90051C228 /* shader.h in Sources */,
+				4A58845418DCEDB90051C228 /* text-buffer.c in Sources */,
+				4A58845518DCEDB90051C228 /* text-buffer.h in Sources */,
+				4A58845618DCEDB90051C228 /* texture-atlas.c in Sources */,
+				4A58845718DCEDB90051C228 /* texture-atlas.h in Sources */,
+				4A58845818DCEDB90051C228 /* texture-font.c in Sources */,
+				4A58845918DCEDB90051C228 /* texture-font.h in Sources */,
+				4A58845A18DCEDB90051C228 /* vec234.h in Sources */,
+				4A58845B18DCEDB90051C228 /* vector.c in Sources */,
+				4A58845C18DCEDB90051C228 /* vector.h in Sources */,
+				4A58845D18DCEDB90051C228 /* vertex-attribute.c in Sources */,
+				4A58845E18DCEDB90051C228 /* vertex-attribute.h in Sources */,
+				4A58845F18DCEDB90051C228 /* vertex-buffer.c in Sources */,
+				4A58846018DCEDB90051C228 /* vertex-buffer.h in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A58847518DCEE900051C228 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A5884A018DCEECF0051C228 /* demo-glyph.c in Sources */,
+				4A58847718DCEE900051C228 /* edtaa3func.c in Sources */,
+				4A58847818DCEE900051C228 /* edtaa3func.h in Sources */,
+				4A58847918DCEE900051C228 /* font-manager.c in Sources */,
+				4A58847A18DCEE900051C228 /* font-manager.h in Sources */,
+				4A58847B18DCEE900051C228 /* freetype-gl.h in Sources */,
+				4A58847C18DCEE900051C228 /* markup.h in Sources */,
+				4A58847D18DCEE900051C228 /* mat4.c in Sources */,
+				4A58847E18DCEE900051C228 /* mat4.h in Sources */,
+				4A58847F18DCEE900051C228 /* opengl.h in Sources */,
+				4A58848018DCEE900051C228 /* platform.c in Sources */,
+				4A58848118DCEE900051C228 /* platform.h in Sources */,
+				4A58848218DCEE900051C228 /* shader.c in Sources */,
+				4A58848318DCEE900051C228 /* shader.h in Sources */,
+				4A58848418DCEE900051C228 /* text-buffer.c in Sources */,
+				4A58848518DCEE900051C228 /* text-buffer.h in Sources */,
+				4A58848618DCEE900051C228 /* texture-atlas.c in Sources */,
+				4A58848718DCEE900051C228 /* texture-atlas.h in Sources */,
+				4A58848818DCEE900051C228 /* texture-font.c in Sources */,
+				4A58848918DCEE900051C228 /* texture-font.h in Sources */,
+				4A58848A18DCEE900051C228 /* vec234.h in Sources */,
+				4A58848B18DCEE900051C228 /* vector.c in Sources */,
+				4A58848C18DCEE900051C228 /* vector.h in Sources */,
+				4A58848D18DCEE900051C228 /* vertex-attribute.c in Sources */,
+				4A58848E18DCEE900051C228 /* vertex-attribute.h in Sources */,
+				4A58848F18DCEE900051C228 /* vertex-buffer.c in Sources */,
+				4A58849018DCEE900051C228 /* vertex-buffer.h in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5884A718DCEF340051C228 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A5884D218DCEF420051C228 /* demo-makefont.c in Sources */,
+				4A5884A918DCEF340051C228 /* edtaa3func.c in Sources */,
+				4A5884AA18DCEF340051C228 /* edtaa3func.h in Sources */,
+				4A5884AB18DCEF340051C228 /* font-manager.c in Sources */,
+				4A5884AC18DCEF340051C228 /* font-manager.h in Sources */,
+				4A5884AD18DCEF340051C228 /* freetype-gl.h in Sources */,
+				4A5884AE18DCEF340051C228 /* markup.h in Sources */,
+				4A5884AF18DCEF340051C228 /* mat4.c in Sources */,
+				4A5884B018DCEF340051C228 /* mat4.h in Sources */,
+				4A5884B118DCEF340051C228 /* opengl.h in Sources */,
+				4A5884B218DCEF340051C228 /* platform.c in Sources */,
+				4A5884B318DCEF340051C228 /* platform.h in Sources */,
+				4A5884B418DCEF340051C228 /* shader.c in Sources */,
+				4A5884B518DCEF340051C228 /* shader.h in Sources */,
+				4A5884B618DCEF340051C228 /* text-buffer.c in Sources */,
+				4A5884B718DCEF340051C228 /* text-buffer.h in Sources */,
+				4A5884B818DCEF340051C228 /* texture-atlas.c in Sources */,
+				4A5884B918DCEF340051C228 /* texture-atlas.h in Sources */,
+				4A5884BA18DCEF340051C228 /* texture-font.c in Sources */,
+				4A5884BB18DCEF340051C228 /* texture-font.h in Sources */,
+				4A5884BC18DCEF340051C228 /* vec234.h in Sources */,
+				4A5884BD18DCEF340051C228 /* vector.c in Sources */,
+				4A5884BE18DCEF340051C228 /* vector.h in Sources */,
+				4A5884BF18DCEF340051C228 /* vertex-attribute.c in Sources */,
+				4A5884C018DCEF340051C228 /* vertex-attribute.h in Sources */,
+				4A5884C118DCEF340051C228 /* vertex-buffer.c in Sources */,
+				4A5884C218DCEF340051C228 /* vertex-buffer.h in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A5884D418DCEFE50051C228 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A5884FF18DCF0030051C228 /* demo-cube.c in Sources */,
+				4A5884D618DCEFE50051C228 /* edtaa3func.c in Sources */,
+				4A5884D718DCEFE50051C228 /* edtaa3func.h in Sources */,
+				4A5884D818DCEFE50051C228 /* font-manager.c in Sources */,
+				4A5884D918DCEFE50051C228 /* font-manager.h in Sources */,
+				4A5884DA18DCEFE50051C228 /* freetype-gl.h in Sources */,
+				4A5884DB18DCEFE50051C228 /* markup.h in Sources */,
+				4A5884DC18DCEFE50051C228 /* mat4.c in Sources */,
+				4A5884DD18DCEFE50051C228 /* mat4.h in Sources */,
+				4A5884DE18DCEFE50051C228 /* opengl.h in Sources */,
+				4A5884DF18DCEFE50051C228 /* platform.c in Sources */,
+				4A5884E018DCEFE50051C228 /* platform.h in Sources */,
+				4A5884E118DCEFE50051C228 /* shader.c in Sources */,
+				4A5884E218DCEFE50051C228 /* shader.h in Sources */,
+				4A5884E318DCEFE50051C228 /* text-buffer.c in Sources */,
+				4A5884E418DCEFE50051C228 /* text-buffer.h in Sources */,
+				4A5884E518DCEFE50051C228 /* texture-atlas.c in Sources */,
+				4A5884E618DCEFE50051C228 /* texture-atlas.h in Sources */,
+				4A5884E718DCEFE50051C228 /* texture-font.c in Sources */,
+				4A5884E818DCEFE50051C228 /* texture-font.h in Sources */,
+				4A5884E918DCEFE50051C228 /* vec234.h in Sources */,
+				4A5884EA18DCEFE50051C228 /* vector.c in Sources */,
+				4A5884EB18DCEFE50051C228 /* vector.h in Sources */,
+				4A5884EC18DCEFE50051C228 /* vertex-attribute.c in Sources */,
+				4A5884ED18DCEFE50051C228 /* vertex-attribute.h in Sources */,
+				4A5884EE18DCEFE50051C228 /* vertex-buffer.c in Sources */,
+				4A5884EF18DCEFE50051C228 /* vertex-buffer.h in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		4A58838718DCE7740051C228 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		4A58838818DCE7740051C228 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		4A58839418DCE7B40051C228 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		4A58839518DCE7B40051C228 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		4A5883E418DCE9460051C228 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-console";
+			};
+			name = Debug;
+		};
+		4A5883E518DCE9460051C228 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-console";
+			};
+			name = Release;
+		};
+		4A58843918DCEC6C0051C228 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-texture";
+			};
+			name = Debug;
+		};
+		4A58843A18DCEC6C0051C228 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-texture";
+			};
+			name = Release;
+		};
+		4A58846D18DCEDB90051C228 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-distance-field-3";
+			};
+			name = Debug;
+		};
+		4A58846E18DCEDB90051C228 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-distance-field-3";
+			};
+			name = Release;
+		};
+		4A58849D18DCEE900051C228 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-glyph";
+			};
+			name = Debug;
+		};
+		4A58849E18DCEE900051C228 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-glyph";
+			};
+			name = Release;
+		};
+		4A5884CF18DCEF340051C228 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-makefont";
+			};
+			name = Debug;
+		};
+		4A5884D018DCEF340051C228 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-makefont";
+			};
+			name = Release;
+		};
+		4A5884FC18DCEFE50051C228 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-cube";
+			};
+			name = Debug;
+		};
+		4A5884FD18DCEFE50051C228 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				PRODUCT_NAME = "demo-cube";
+			};
+			name = Release;
+		};
 		4AAEBD1018DB842E00E42FDE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -399,45 +1564,84 @@
 			};
 			name = Release;
 		};
-		4AAEBD1318DB842E00E42FDE /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					/opt/local/lib,
-				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		4AAEBD1418DB842E00E42FDE /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					/opt/local/lib,
-				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4A58838618DCE7740051C228 /* Build configuration list for PBXNativeTarget "domo-cartoon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A58838718DCE7740051C228 /* Debug */,
+				4A58838818DCE7740051C228 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		4A58839318DCE7B40051C228 /* Build configuration list for PBXNativeTarget "demo-ansi" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A58839418DCE7B40051C228 /* Debug */,
+				4A58839518DCE7B40051C228 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		4A5883E318DCE9460051C228 /* Build configuration list for PBXNativeTarget "demo-console" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A5883E418DCE9460051C228 /* Debug */,
+				4A5883E518DCE9460051C228 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4A58843818DCEC6C0051C228 /* Build configuration list for PBXNativeTarget "demo-texture" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A58843918DCEC6C0051C228 /* Debug */,
+				4A58843A18DCEC6C0051C228 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4A58846C18DCEDB90051C228 /* Build configuration list for PBXNativeTarget "demo-distance-field-3" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A58846D18DCEDB90051C228 /* Debug */,
+				4A58846E18DCEDB90051C228 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4A58849C18DCEE900051C228 /* Build configuration list for PBXNativeTarget "demo-glyph" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A58849D18DCEE900051C228 /* Debug */,
+				4A58849E18DCEE900051C228 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4A5884CE18DCEF340051C228 /* Build configuration list for PBXNativeTarget "demo-makefont" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A5884CF18DCEF340051C228 /* Debug */,
+				4A5884D018DCEF340051C228 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4A5884FB18DCEFE50051C228 /* Build configuration list for PBXNativeTarget "demo-cube" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A5884FC18DCEFE50051C228 /* Debug */,
+				4A5884FD18DCEFE50051C228 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4AAEBD0418DB842E00E42FDE /* Build configuration list for PBXProject "FreeType-GL_OSX_Demos" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4AAEBD1018DB842E00E42FDE /* Debug */,
 				4AAEBD1118DB842E00E42FDE /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		4AAEBD1218DB842E00E42FDE /* Build configuration list for PBXNativeTarget "FreeType-GL_OSX_Demos" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4AAEBD1318DB842E00E42FDE /* Debug */,
-				4AAEBD1418DB842E00E42FDE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
