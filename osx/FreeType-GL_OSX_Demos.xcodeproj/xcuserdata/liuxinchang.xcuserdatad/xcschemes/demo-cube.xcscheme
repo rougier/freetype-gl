@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4A5884D318DCEFE50051C228"
-               BuildableName = "demo-ansi copy"
+               BuildableName = "demo-cube"
                BlueprintName = "demo-cube"
                ReferencedContainer = "container:FreeType-GL_OSX_Demos.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A5884D318DCEFE50051C228"
-            BuildableName = "demo-ansi copy"
+            BuildableName = "demo-cube"
             BlueprintName = "demo-cube"
             ReferencedContainer = "container:FreeType-GL_OSX_Demos.xcodeproj">
          </BuildableReference>
@@ -52,7 +52,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A5884D318DCEFE50051C228"
-            BuildableName = "demo-ansi copy"
+            BuildableName = "demo-cube"
             BlueprintName = "demo-cube"
             ReferencedContainer = "container:FreeType-GL_OSX_Demos.xcodeproj">
          </BuildableReference>
@@ -70,7 +70,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4A5884D318DCEFE50051C228"
-            BuildableName = "demo-ansi copy"
+            BuildableName = "demo-cube"
             BlueprintName = "demo-cube"
             ReferencedContainer = "container:FreeType-GL_OSX_Demos.xcodeproj">
          </BuildableReference>
