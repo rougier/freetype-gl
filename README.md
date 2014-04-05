@@ -77,4 +77,4 @@ Contributors:
 * William Light (Face creation from memory)
 * Jan Niklas Hasse (Bug report & fix + README.md)
 * Pierre-Emmnauel Lallemant (Bug report & fix)
-* rconde01 (Bug report & fix)
+* Robert Conde (Bug report & fix)
