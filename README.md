@@ -78,3 +78,4 @@ Contributors:
 * Jan Niklas Hasse (Bug report & fix + README.md)
 * Pierre-Emmnauel Lallemant (Bug report & fix)
 * Robert Conde (Bug report & fix)
+* Mikołaj Siedlarek (Build system bug fix)
