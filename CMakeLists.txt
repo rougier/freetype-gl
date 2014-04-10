@@ -45,7 +45,7 @@ IF( WIN32 OR WIN64 )
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut )
 	SET( GLUT_LIBRARY
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut/glut32.lib )
-    SET( GLEW_INCLUDE_DIR
+    SET( GLEW_INCLUDE_PATH
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/include )
     SET( GLEW_LIBRARY
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/lib/glew32.lib )
@@ -78,10 +78,10 @@ ENDIF( WIN32 OR WIN64 )
 INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIR}
                      ${OPENGL_INCLUDE_DIRS}
                      ${FREETYPE_INCLUDE_DIRS}
-                     ${GLEW_INCLUDE_DIRS}
+                     ${GLEW_INCLUDE_PATHS}
                      ${CMAKE_CURRENT_SOURCE_DIR}
                      ${VS789FIX_INCLUDE_DIR}
-                     ${GLEW_INCLUDE_DIR})
+                     ${GLEW_INCLUDE_PATH})
 					 
 IF(MSVC)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
@@ -108,7 +108,7 @@ LINK_DIRECTORIES(${PROJECT_SOURCE_DIR})
 
 MACRO( DEMO _target _sources)
      add_executable(${_target} ${_sources})
-     include_directories(${WINDOWS_DIR} ${GLUT_INCLUDE_DIR} ${GLEW_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
+     include_directories(${WINDOWS_DIR} ${GLUT_INCLUDE_DIR} ${GLEW_INCLUDE_PATH} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
      target_link_libraries(${_target} ${GLEW_LIBRARY})
      target_link_libraries(${_target} freetype-gl)
      target_link_libraries(${_target} ${OPENGL_LIBRARY})
