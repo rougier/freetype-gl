@@ -77,7 +77,7 @@ distance_map( double *data, unsigned int width, unsigned int height )
     int i;
 
     // Compute outside = edtaa3(bitmap); % Transform background (0's)
-    computegradient( data, height, width, gx, gy);
+    computegradient( data, width, height, gx, gy);
     edtaa3(data, gx, gy, width, height, xdist, ydist, outside);
     for( i=0; i<width*height; ++i)
     {
@@ -92,7 +92,7 @@ distance_map( double *data, unsigned int width, unsigned int height )
     memset( gy, 0, sizeof(double)*width*height );
     for( i=0; i<width*height; ++i)
         data[i] = 1 - data[i];
-    computegradient( data, height, width, gx, gy );
+    computegradient( data, width, height, gx, gy );
     edtaa3( data, gx, gy, width, height, xdist, ydist, inside );
     for( i=0; i<width*height; ++i )
     {
