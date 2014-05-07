@@ -79,3 +79,4 @@ Contributors:
 * Pierre-Emmnauel Lallemant (Bug report & fix)
 * Robert Conde (Bug report & fix)
 * Mikołaj Siedlarek (Build system bug fix)
+* Preet Desai (Bug report & fix)
