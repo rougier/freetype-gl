@@ -239,7 +239,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     GLuint indices[6*5];
     texture_glyph_t *glyph;
     texture_glyph_t *black;
-    float kerning = 0;
+    float kerning = 0.0f;
    
     if( current == L'\n' )
     {

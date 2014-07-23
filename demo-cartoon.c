@@ -117,7 +117,7 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
     for( i=0; i<wcslen(text); ++i )
     {
         texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
-        float kerning = 0;
+        float kerning = 0.0f;
         if( i > 0)
         {
             kerning = texture_glyph_get_kerning( glyph, text[i-1] );
