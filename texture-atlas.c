@@ -338,7 +338,7 @@ texture_atlas_upload( texture_atlas_t * self )
     }
     else
     {
-#ifdef GL_ALPHA
+#if !defined(GL_RED) || defined(FREETYPEGL_USE_GL_ALPHA)
         glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->width, self->height,
                       0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
 #else
