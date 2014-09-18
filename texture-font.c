@@ -65,11 +65,6 @@ texture_font_load_face(texture_font_t *self, float size,
         FT_Library *library, FT_Face *face)
 {
     FT_Error error;
-    FT_Matrix matrix = {
-        (int)((1.0/HRES) * 0x10000L),
-        (int)((0.0)      * 0x10000L),
-        (int)((0.0)      * 0x10000L),
-        (int)((1.0)      * 0x10000L)};
 
     assert(library);
     assert(size);
@@ -112,7 +107,7 @@ texture_font_load_face(texture_font_t *self, float size,
     }
 
     /* Set char size */
-    error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI * HRES, DPI);
+    error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI, DPI);
 
     if(error) {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
@@ -122,8 +117,8 @@ texture_font_load_face(texture_font_t *self, float size,
         return 0;
     }
 
-    /* Set transform matrix */
-    FT_Set_Transform(*face, &matrix, NULL);
+    /* Set transform matrix to identity */
+    FT_Set_Transform(*face, NULL, NULL);
 
     return 1;
 }
