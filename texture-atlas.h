@@ -164,6 +164,9 @@ typedef struct texture_atlas_t
 /**
  *  Upload atlas to video memory.
  *
+ *  Defines: GL_UNSIGNED_INT_8_8_8_8_REV: uploads a texture in this format if depth = 4
+ *           GL_ALPHA: uses GL_ALPHA instead of GL_RED mode for depth == 1 rendering, needed for OpenGL < 3
+ *
  *  @param self a texture atlas structure
  *
  */
