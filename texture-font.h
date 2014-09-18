@@ -277,6 +277,14 @@ typedef struct texture_font_t
     int filtering;
 
     /**
+     * Whether to discard horizontal hinting for better display at lower
+     * resolutions.
+     * See http://www.antigrain.com/research/font_rasterization/
+     * and http://jcgt.org/published/0002/01/04/
+     */
+    int no_horizontal_hint;
+
+    /**
      * Whether to use kerning if available
      */
     int kerning;

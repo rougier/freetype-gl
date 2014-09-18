@@ -48,6 +48,7 @@
 #define HRES  64
 #define HRESf 64.f
 #define DPI   72
+#define HHINT_SCALE 64
 
 #undef __FTERRORS_H__
 #define FT_ERRORDEF( e, v, s )  { e, s },
@@ -65,6 +66,7 @@ texture_font_load_face(texture_font_t *self, float size,
         FT_Library *library, FT_Face *face)
 {
     FT_Error error;
+    FT_Matrix matrix_nohint = {(int)((1.0/HHINT_SCALE) * 0x10000L), 0, 0, 0x10000L};
 
     assert(library);
     assert(size);
@@ -107,7 +109,11 @@ texture_font_load_face(texture_font_t *self, float size,
     }
 
     /* Set char size */
-    error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI, DPI);
+    if(self->no_horizontal_hint) {
+      error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI * HHINT_SCALE, DPI);
+    } else {
+      error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI, DPI);
+    }
 
     if(error) {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
@@ -117,8 +123,13 @@ texture_font_load_face(texture_font_t *self, float size,
         return 0;
     }
 
-    /* Set transform matrix to identity */
-    FT_Set_Transform(*face, NULL, NULL);
+    if(self->no_horizontal_hint) {
+      /* Set transform matrix to use the horizontally stretched one */
+      FT_Set_Transform(*face, &matrix_nohint, NULL);
+    } else {
+      /* Set transform matrix to identity */
+      FT_Set_Transform(*face, NULL, NULL);
+    }
 
     return 1;
 }
@@ -264,6 +275,7 @@ texture_font_init(texture_font_t *self)
     self->hinting = 1;
     self->kerning = 1;
     self->filtering = 1;
+    self->no_horizontal_hint = 0;
 
     // FT_LCD_FILTER_LIGHT   is (0x00, 0x55, 0x56, 0x55, 0x00)
     // FT_LCD_FILTER_DEFAULT is (0x10, 0x40, 0x70, 0x40, 0x10)
