@@ -35,7 +35,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "vector.h"
-
+#include "platform.h"
 
 
 // ------------------------------------------------------------- vector_new ---
@@ -47,8 +47,7 @@ vector_new( size_t item_size )
 
     if( !self )
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
+        LOGE( "line %d: No more memory for allocating data\n", __LINE__ );
         exit( EXIT_FAILURE );
     }
     self->item_size = item_size;

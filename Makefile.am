@@ -13,9 +13,9 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 ## obtained from pkg-config via PKG_CHECK_MODULES in configure.ac.  These
 ## flags are passed to the compiler for both C and C++, in addition to the
 ## language-specific options.
-AM_CPPFLAGS = $(EXAMPLE_CFLAGS) -I/usr/include/freetype2 -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include/ -I/home/bernd/proj/freetype2-android/include
+AM_CPPFLAGS = $(EXAMPLE_CFLAGS) @FTINC@
 
 lib_LTLIBRARIES = libfreetype-gl.la
 libfreetype_gl_la_SOURCES = texture-atlas.c texture-font.c vector.c
 include_HEADERS = freetype-gl.h
-libfreetype_gl_la_LIBADD = -lm -l@LIBGL@ -L. -lfreetype -lz -lglib-2.0 @LIBADD@
+libfreetype_gl_la_LIBADD = -lm -l@LIBGL@ -lfreetype -lz @LIBADD@

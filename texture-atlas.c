@@ -39,6 +39,15 @@
 #include "opengl.h"
 #include "texture-atlas.h"
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#define  LOG_TAG    "freetype-gl-demo-android"
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
+#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#else
+#define LOGI(...)  fprintf(stderr, __VA_ARGS__)
+#define LOGE(...)  fprintf(stderr, __VA_ARGS__)
+#endif
 
 // ------------------------------------------------------ texture_atlas_new ---
 texture_atlas_t *
@@ -55,8 +64,7 @@ texture_atlas_new( const size_t width,
     assert( (depth == 1) || (depth == 3) || (depth == 4) );
     if( self == NULL)
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
+        LOGE( "line %d: No more memory for allocating data\n", __LINE__ );
         exit( EXIT_FAILURE );
     }
     self->nodes = vector_new( sizeof(ivec3) );
@@ -72,8 +80,7 @@ texture_atlas_new( const size_t width,
 
     if( self->data == NULL)
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
+        LOGE( "line %d: No more memory for allocating data\n", __LINE__ );
         exit( EXIT_FAILURE );
     }
 
@@ -243,8 +250,7 @@ texture_atlas_get_region( texture_atlas_t * self,
     node = (ivec3 *) malloc( sizeof(ivec3) );
     if( node == NULL)
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
+        LOGE( "line %d: No more memory for allocating data\n", __LINE__ );
         exit( EXIT_FAILURE );
     }
     node->x = region.x;
@@ -338,8 +344,8 @@ texture_atlas_upload( texture_atlas_t * self )
     }
     else
     {
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, self->width, self->height,
-                      0, GL_RED, GL_UNSIGNED_BYTE, self->data );
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->width, self->height,
+                      0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
     }
 }
 

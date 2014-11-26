@@ -12,13 +12,19 @@ LT_INIT
 
 case $CC in
      *android*)
-	LIBADD="-llog -lglib-android-1.0"
+	LIBADD="-llog"
 	LIBGL=GLESv2
 	;;
      *)
 	LIBGL=GL
 	;;
 esac
+
+>conftest.$ac_ext
+FTINC=`eval $ac_compiler -E -Wp,-v conftest.$ac_ext 2>&1 | grep '^ ' | while read i; do test -f $i/freetype2/ft2build.h && echo -I$i/freetype2; done`
+rm conftest.$ac_ext
+
+AC_SUBST(FTINC)
 AC_SUBST(LIBADD)
 AC_SUBST(LIBGL)
 LIBTOOL=${CC%gcc}libtool

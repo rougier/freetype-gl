@@ -77,7 +77,7 @@ texture_font_load_face(texture_font_t *self, float size,
     /* Initialize library */
     error = FT_Init_FreeType(library);
     if(error) {
-        fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+        LOGE( "FT_Error (0x%02x) : %s\n",
                 FT_Errors[error].code, FT_Errors[error].message);
         return 0;
     }
@@ -95,7 +95,7 @@ texture_font_load_face(texture_font_t *self, float size,
     }
 
     if(error) {
-        fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+        LOGE( "FT_Error (line %d, code 0x%02x) : %s\n",
                 __LINE__, FT_Errors[error].code, FT_Errors[error].message);
         FT_Done_FreeType(*library);
         return 0;
@@ -104,7 +104,7 @@ texture_font_load_face(texture_font_t *self, float size,
     /* Select charmap */
     error = FT_Select_Charmap(*face, FT_ENCODING_UNICODE);
     if(error) {
-        fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+        LOGE( "FT_Error (line %d, code 0x%02x) : %s\n",
                 __LINE__, FT_Errors[error].code, FT_Errors[error].message);
         FT_Done_Face(*face);
         FT_Done_FreeType(*library);
@@ -115,7 +115,7 @@ texture_font_load_face(texture_font_t *self, float size,
     error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI * HRES, DPI);
 
     if(error) {
-        fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+        LOGE( "FT_Error (line %d, code 0x%02x) : %s\n",
                 __LINE__, FT_Errors[error].code, FT_Errors[error].message);
         FT_Done_Face(*face);
         FT_Done_FreeType(*library);
@@ -156,8 +156,7 @@ texture_glyph_new(void)
 {
     texture_glyph_t *self = (texture_glyph_t *) malloc( sizeof(texture_glyph_t) );
     if(self == NULL) {
-        fprintf( stderr,
-                "line %d: No more memory for allocating data\n", __LINE__);
+        LOGE( "line %d: No more memory for allocating data\n", __LINE__);
         return NULL;
     }
 
@@ -328,8 +327,7 @@ texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
 
     self = calloc(1, sizeof(*self));
     if (!self) {
-        fprintf(stderr,
-                "line %d: No more memory for allocating data\n", __LINE__);
+        LOGE( "line %d: No more memory for allocating data\n", __LINE__);
         return NULL;
     }
 
@@ -359,8 +357,7 @@ texture_font_new_from_memory(texture_atlas_t *atlas, float pt_size,
 
     self = calloc(1, sizeof(*self));
     if (!self) {
-        fprintf(stderr,
-                "line %d: No more memory for allocating data\n", __LINE__);
+        LOGE( "line %d: No more memory for allocating data\n", __LINE__);
         return NULL;
     }
 
@@ -495,7 +492,7 @@ texture_font_load_glyphs( texture_font_t * self,
         error = FT_Load_Glyph( face, glyph_index, flags );
         if( error )
         {
-            fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+            LOGE(  "FT_Error (line %d, code 0x%02x) : %s\n",
                      __LINE__, FT_Errors[error].code, FT_Errors[error].message );
             FT_Done_Face( face );
             FT_Done_FreeType( library );
@@ -517,7 +514,7 @@ texture_font_load_glyphs( texture_font_t * self,
             error = FT_Stroker_New( library, &stroker );
             if( error )
             {
-                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                LOGE( "FT_Error (0x%02x) : %s\n",
                         FT_Errors[error].code, FT_Errors[error].message);
                 FT_Done_Face( face );
                 FT_Stroker_Done( stroker );
@@ -532,7 +529,7 @@ texture_font_load_glyphs( texture_font_t * self,
             error = FT_Get_Glyph( face->glyph, &ft_glyph);
             if( error )
             {
-                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                LOGE( "FT_Error (0x%02x) : %s\n",
                         FT_Errors[error].code, FT_Errors[error].message);
                 FT_Done_Face( face );
                 FT_Stroker_Done( stroker );
@@ -554,7 +551,7 @@ texture_font_load_glyphs( texture_font_t * self,
             }
             if( error )
             {
-                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                LOGE( "FT_Error (0x%02x) : %s\n",
                         FT_Errors[error].code, FT_Errors[error].message);
                 FT_Done_Face( face );
                 FT_Stroker_Done( stroker );
@@ -567,7 +564,7 @@ texture_font_load_glyphs( texture_font_t * self,
                 error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_NORMAL, 0, 1);
                 if( error )
                 {
-                    fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                    LOGE( "FT_Error (0x%02x) : %s\n",
                             FT_Errors[error].code, FT_Errors[error].message);
                     FT_Done_Face( face );
                     FT_Stroker_Done( stroker );
@@ -580,7 +577,7 @@ texture_font_load_glyphs( texture_font_t * self,
                 error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_LCD, 0, 1);
                 if( error )
                 {
-                    fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                    LOGE( "FT_Error (0x%02x) : %s\n",
                             FT_Errors[error].code, FT_Errors[error].message);
                     FT_Done_Face( face );
                     FT_Stroker_Done( stroker );
@@ -604,7 +601,7 @@ texture_font_load_glyphs( texture_font_t * self,
         if ( region.x < 0 )
         {
             missed++;
-            fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
+            LOGE(  "Texture atlas is full (line %d)\n",  __LINE__ );
             continue;
         }
         w = w - 1;
@@ -692,7 +689,7 @@ texture_font_get_glyph( texture_font_t * self,
                                             -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
         if ( region.x < 0 )
         {
-            fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
+            LOGE(  "Texture atlas is full (line %d)\n",  __LINE__ );
             return NULL;
         }
         texture_atlas_set_region( self->atlas, region.x, region.y, 4, 4, data, 0 );
