@@ -35,6 +35,7 @@ SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules"
                        "${CMAKE_MODULE_PATH}" )
 
 OPTION(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
+OPTION(freetype-gl_LIBS_SUPPLIED "Required libraries are supplied as part of parent build" OFF)
 
 # Get required and optional library
 FIND_PACKAGE( OpenGL REQUIRED )
@@ -65,9 +66,16 @@ IF( WIN32 OR WIN64 )
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/include )
     SET( ANT_TWEAK_BAR_FOUND "YES" )
 ELSE( WIN32 OR WIN64 )
-    FIND_PACKAGE( GLUT REQUIRED )
-    FIND_PACKAGE( Freetype REQUIRED )
-    FIND_PACKAGE( GLEW REQUIRED )
+    IF ( freetype-gl_LIBS_SUPPLIED )
+        FIND_PACKAGE( GLUT )
+        FIND_PACKAGE( Freetype )
+        FIND_PACKAGE( GLEW )
+    ELSE ( freetype-gl_LIBS_SUPPLIED )
+        FIND_PACKAGE( GLUT REQUIRED )
+        FIND_PACKAGE( Freetype REQUIRED )
+        FIND_PACKAGE( GLEW REQUIRED )
+    ENDIF ( freetype-gl_LIBS_SUPPLIED )
+
     FIND_PACKAGE( FontConfig )
     FIND_LIBRARY( MATH_LIBRARY m )
     #FIND_LIBRARY( STDC_LIBRARY stdc++) #Buggy Cmake can't find libstdc++
