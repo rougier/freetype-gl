@@ -43,6 +43,10 @@ extern "C" {
 #include "texture-font.h"
 #include "texture-atlas.h"
 
+#ifdef __cplusplus
+namespace ftgl {
+#endif
+
 /**
  * @file   font-manager.h
  * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
@@ -199,7 +203,7 @@ typedef struct font_manager_t {
 
 #ifdef __cplusplus
 }
+}
 #endif // ifdef __cplusplus
 
 #endif /* __FONT_MANAGER_H__ */
-

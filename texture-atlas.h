@@ -53,6 +53,10 @@ extern "C" {
 #include "vector.h"
 #include "vec234.h"
 
+#ifdef __cplusplus
+namespace ftgl {
+#endif
+
 /**
  * @file   texture-atlas.h
  * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
@@ -219,6 +223,7 @@ typedef struct texture_atlas_t
 /** @} */
 
 #ifdef __cplusplus
+}
 }
 #endif
 
