@@ -80,3 +80,4 @@ Contributors:
 * Robert Conde (Bug report & fix)
 * Mikołaj Siedlarek (Build system bug fix)
 * Preet Desai (Bug report & fix)
+* Andy Staton (CMake fix and added namespace safeguard (avoiding glm collisions))
