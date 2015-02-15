@@ -31,3 +31,6 @@ fonts/Verdana.ttf
 CMakeFiles
 CMakeCache.txt
 *.o
+libfreetype-gl.a
+demo-make
+cmake_install.cmake

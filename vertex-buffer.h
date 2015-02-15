@@ -42,6 +42,10 @@ extern "C" {
 #include "vector.h"
 #include "vertex-attribute.h"
 
+#ifdef __cplusplus
+namespace ftgl {
+#endif
+
 /**
  * @file   vertex-buffer.h
  * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
@@ -181,7 +185,7 @@ typedef struct vertex_buffer_t
  * Render a specified item from the vertex buffer.
  *
  * @param  self   a vertex buffer
- * @param  index index of the item to be rendered 
+ * @param  index index of the item to be rendered
  */
   void
   vertex_buffer_render_item ( vertex_buffer_t *self,
@@ -311,7 +315,7 @@ typedef struct vertex_buffer_t
  */
   size_t
   vertex_buffer_push_back( vertex_buffer_t * self,
-                           const void * vertices, const size_t vcount,  
+                           const void * vertices, const size_t vcount,
                            const GLuint * indices, const size_t icount );
 
 
@@ -328,7 +332,7 @@ typedef struct vertex_buffer_t
   size_t
   vertex_buffer_insert( vertex_buffer_t * self,
                         const size_t index,
-                        const void * vertices, const size_t vcount,  
+                        const void * vertices, const size_t vcount,
                         const GLuint * indices, const size_t icount );
 
 /**
@@ -344,6 +348,7 @@ typedef struct vertex_buffer_t
 /** @} */
 
 #ifdef __cplusplus
+}
 }
 #endif
 

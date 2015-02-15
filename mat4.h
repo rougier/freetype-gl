@@ -36,6 +36,7 @@
 
 #ifdef __cplusplus
 extern "C" {
+namespace ftgl {
 #endif
 
 
@@ -111,6 +112,7 @@ mat4_scale( mat4 *self,
 
 
 #ifdef __cplusplus
+}
 }
 #endif
 

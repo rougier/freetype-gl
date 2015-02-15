@@ -43,6 +43,9 @@ extern "C" {
 #include "markup.h"
 #include "shader.h"
 
+#ifdef __cplusplus
+namespace ftgl {
+#endif
 
 /**
  * Use LCD filtering
@@ -80,12 +83,12 @@ extern "C" {
  */
 typedef struct  text_buffer_t {
     /**
-     * Vertex buffer 
+     * Vertex buffer
      */
     vertex_buffer_t *buffer;
 
     /**
-     * Font manager 
+     * Font manager
      */
     font_manager_t *manager;
 
@@ -279,6 +282,7 @@ text_buffer_delete( text_buffer_t * self );
 /** @} */
 
 #ifdef __cplusplus
+}
 }
 #endif
 

@@ -36,6 +36,7 @@
 
 #ifdef __cplusplus
 extern "C" {
+namespace ftgl {
 #endif
 
 
@@ -231,6 +232,7 @@ typedef union
 
 
 #ifdef __cplusplus
+}
 }
 #endif
 
