@@ -430,7 +430,7 @@ main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
     glutTimerFunc( 1000.0/60, timer, 60 );
-
+#ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -440,7 +440,7 @@ main( int argc, char **argv )
         exit( EXIT_FAILURE );
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-
+#endif
     program = shader_load( "shaders/distance-field.vert",
                            "shaders/distance-field-3.frag" );
     glUseProgram( program );

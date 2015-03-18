@@ -159,7 +159,7 @@ int main( int argc, char **argv )
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
-
+#ifndef __APPLE__
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
@@ -168,7 +168,7 @@ int main( int argc, char **argv )
         exit( EXIT_FAILURE );
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-
+#endif
     atlas = texture_atlas_new( 1024, 1024, 1 );
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 
     texture_font_t *font =

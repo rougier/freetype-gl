@@ -185,7 +185,7 @@ int main( int argc, char **argv )
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
-
+#ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -195,7 +195,7 @@ int main( int argc, char **argv )
         exit( EXIT_FAILURE );
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-
+#endif
     vec4 blue  = {{0,0,1,1}};
     vec4 black = {{0,0,0,1}};
 
