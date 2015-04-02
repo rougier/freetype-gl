@@ -150,7 +150,7 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
-    size_t width = 800, height = 200;
+    size_t width = 1000, height = 200;
 
     glutInit( &argc, argv );
     glutInitWindowSize( width, height );
