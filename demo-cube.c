@@ -149,7 +149,7 @@ int main( int argc, char **argv )
     glutKeyboardFunc( keyboard );
     //glutTimerFunc( 1000/60, timer, 1000/60 ); // not working on some systems (bug in GLUT)
     glutIdleFunc(display);
-
+#ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -159,7 +159,7 @@ int main( int argc, char **argv )
         exit( EXIT_FAILURE );
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-
+#endif
 
     typedef struct { float x,y,z;} xyz;
     typedef struct { float r,g,b,a;} rgba;

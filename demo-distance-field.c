@@ -255,7 +255,7 @@ main( int argc, char **argv )
     glutMotionFunc( mouse_drag );
     glutPassiveMotionFunc( mouse_motion );
     glutKeyboardFunc( keyboard );
-
+#ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -265,7 +265,7 @@ main( int argc, char **argv )
         exit( EXIT_FAILURE );
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-
+#endif
 
     unsigned char *map;
     texture_font_t * font;

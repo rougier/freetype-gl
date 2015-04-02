@@ -704,7 +704,7 @@ main( int argc, char **argv )
     glutKeyboardFunc( on_key_press );
     glutSpecialFunc( on_special_key_press );
     glutReshapeWindow( 600,400 );
-
+#ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -714,7 +714,7 @@ main( int argc, char **argv )
         exit( EXIT_FAILURE );
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-
+#endif
     console = console_new();
     console_print( console,
                    L"OpenGL Freetype console\n"
