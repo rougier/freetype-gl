@@ -71,8 +71,7 @@ $(foreach demo,$(DEMOS),$(eval $(call DEMO_template,$(demo))))
 	@echo "Building $@... "
 	@$(CC) -c $(CFLAGS) $< -o $@ 
 
-demo-atb-agg: demo-atb-agg.o $(OBJECTS) $(HEADERS) \
-	          fonts/Arial.ttf fonts/Tahoma.ttf fonts/Verdana.ttf fonts/Times.ttf fonts/Georgia.ttf
+demo-atb-agg: demo-atb-agg.o $(OBJECTS) $(HEADERS)
 	@echo "Building $@... "
 	@$(CC) $(OBJECTS) $@.o $(LIBS) -lAntTweakBar -o $@
 
