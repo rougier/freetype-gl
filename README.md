@@ -81,3 +81,4 @@ Contributors:
 * Mikołaj Siedlarek (Build system bug fix)
 * Preet Desai (Bug report & fix)
 * Andy Staton (CMake fix and added namespace safeguard (avoiding glm collisions))
+* Daniel Burke (Removed GLEW dependency and fix problems with font licences)
