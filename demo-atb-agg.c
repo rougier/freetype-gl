@@ -55,11 +55,11 @@
 typedef enum {
     VERA = 1,
     VERA_MONO,
-    GEORGIA,
-    TIMES,
-    VERDANA,
-    TAHOMA,
-    ARIAL,
+    LUCKIEST_GUY,
+    SOURCE_SANS,
+    SOURCE_CODE,
+    OLD_STANDARD,
+    LOBSTER,
 } font_family_e;
 
 #define NUM_FONTS 7
@@ -124,7 +124,7 @@ build_buffer( void )
     }
 
     markup_t markup = {
-        .family  = "Arial",
+        .family  = "Source Sans Pro",
         .size    = 10.0,
         .bold    = 0,
         .italic  = 0,
@@ -154,25 +154,25 @@ build_buffer( void )
     {
         font = texture_font_new_from_file( atlas, p_size, "fonts/VeraMono.ttf" );
     }
-    else if( p_family == GEORGIA)
+    else if( p_family == LUCKIEST_GUY)
     {
-        font = texture_font_new_from_file( atlas, p_size, "fonts/Georgia.ttf" );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/LuckiestGuy.ttf" );
     }
-    else if( p_family == TIMES )
+    else if( p_family == SOURCE_SANS )
     {
-        font = texture_font_new_from_file( atlas, p_size, "fonts/Times.ttf" );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/SourceSansPro-Regular.ttf" );
     }
-    else if( p_family == TAHOMA )
+    else if( p_family == SOURCE_CODE )
     {
-        font = texture_font_new_from_file( atlas, p_size, "fonts/Tahoma.ttf" );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/SourceCodePro-Regular.ttf" );
     }
-    else if( p_family == ARIAL )
+    else if( p_family == OLD_STANDARD )
     {
-        font = texture_font_new_from_file( atlas, p_size, "fonts/Arial.ttf" );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/OldStandard-Regular.ttf" );
     }
-    else if( p_family == VERDANA )
+    else if( p_family == LOBSTER )
     {
-        font = texture_font_new_from_file( atlas, p_size, "fonts/Verdana.ttf" );
+        font = texture_font_new_from_file( atlas, p_size, "fonts/Lobster-Regular.ttf" );
     }
     else
     {
@@ -549,13 +549,13 @@ int main(int argc, char *argv[])
 
     {
         TwEnumVal familyEV[NUM_FONTS] = {
-            {VERA,      "Vera"},
-            {VERA_MONO, "Vera Mono"},
-            {GEORGIA,   "Georgia"},
-            {TIMES,     "Times"},
-            {VERDANA,   "Verdana"},
-            {TAHOMA,    "Tahoma"},
-            {ARIAL,     "Arial"} };
+            {VERA,         "Vera"},
+            {VERA_MONO,    "Vera Mono"},
+            {LUCKIEST_GUY, "Luckiest Guy"},
+            {SOURCE_SANS,  "Source Sans Pro"},
+            {SOURCE_CODE,  "Source Code Pro"},
+            {OLD_STANDARD, "Old Standard TT"},
+            {LOBSTER,      "Lobster"} };
         TwType family_type = TwDefineEnum("Family", familyEV, NUM_FONTS);
         TwAddVarCB(bar, "Family", family_type, set_family, get_family, NULL, 
                    "label = 'Family'      "

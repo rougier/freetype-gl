@@ -150,7 +150,7 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
-    size_t width = 800, height = 200;
+    size_t width = 850, height = 200;
 
     glutInit( &argc, argv );
     glutInitWindowSize( width, height );
@@ -172,7 +172,7 @@ int main( int argc, char **argv )
     atlas = texture_atlas_new( 1024, 1024, 1 );
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 
     texture_font_t *font =
-		texture_font_new_from_file( atlas, 128, "fonts/ObelixPro.ttf" );
+		texture_font_new_from_file( atlas, 128, "fonts/LuckiestGuy.ttf" );
 
     vec2 pen    = {{50, 50}};
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
