@@ -36,16 +36,11 @@
 #include "vector.h"
 
 #include <stdlib.h>
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#elif defined(_WIN32) || defined(_WIN64)
-     #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
 #include <stdio.h>
 #include <wchar.h>
 #include "vera-16.h"
+
+#include <GLFW/glfw3.h>
 
 void print_at( int pen_x, int pen_y, wchar_t *text )
 {
@@ -85,41 +80,70 @@ void print_at( int pen_x, int pen_y, wchar_t *text )
     }
 }
 
-void display( void )
+
+void display( GLFWwindow* window )
 {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glColor4f(0,0,0,1);
     print_at( 100, 100, L"Hello World !" );
-    glutSwapBuffers( );
+
+    glfwSwapBuffers( window );
 }
 
-void reshape(int width, int height)
+
+void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, width, 0, height, -1, 1);
     glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
 }
 
-void keyboard( unsigned char key, int x, int y )
+
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
-    if ( key == 27 )
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
     {
-        exit( 1 );
+        glfwSetWindowShouldClose( window, GL_TRUE );
     }
 }
 
+
+void error_callback( int error, const char* description )
+{
+    fputs( description, stderr );
+}
+
+
 int main( int argc, char **argv )
 {
-    glutInit( &argc, argv );
-    glutInitWindowSize( 640, 480 );
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Freetype OpenGL" );
-    glutReshapeFunc( reshape );
-    glutDisplayFunc( display );
-    glutKeyboardFunc( keyboard );
+    GLFWwindow* window;
+
+    glfwSetErrorCallback( error_callback );
+
+    if (!glfwInit( ))
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    window = glfwCreateWindow( 1, 1, "Freetype OpenGL", NULL, NULL );
+
+    if (!window)
+    {
+        glfwTerminate( );
+        exit( EXIT_FAILURE );
+    }
+
+    glfwMakeContextCurrent( window );
+    glfwSwapInterval( 1 );
+
+    glfwSetFramebufferSizeCallback( window, reshape );
+    glfwSetWindowRefreshCallback( window, display );
+    glfwSetKeyCallback( window, keyboard );
 
     GLuint texid;
     glGenTextures( 1, &texid );
@@ -137,6 +161,17 @@ int main( int argc, char **argv )
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glEnable( GL_TEXTURE_2D );
 
-    glutMainLoop( );
+    glfwSetWindowSize( window, 640, 480 );
+    glfwShowWindow( window );
+
+    while(!glfwWindowShouldClose( window ))
+    {
+        display( window );
+        glfwPollEvents( );
+    }
+
+    glfwDestroyWindow( window );
+    glfwTerminate( );
+
     return 0;
 }
