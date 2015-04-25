@@ -43,13 +43,8 @@
 #include "shader.h"
 #include "vertex-buffer.h"
 
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#elif defined(_WIN32) || defined(_WIN64)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
+#include <GLFW/glfw3.h>
+
 
 // ------------------------------------------------------- global variables ---
 GLuint shader;
@@ -58,7 +53,7 @@ mat4 model, view, projection;
 
 
 // ---------------------------------------------------------------- display ---
-void display( void )
+void display( GLFWwindow* window )
 {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glUseProgram( shader );
@@ -74,12 +69,12 @@ void display( void )
         vertex_buffer_render( buffer, GL_TRIANGLES );
     }
 
-    glutSwapBuffers( );
+    glfwSwapBuffers( window );
 }
 
 
 // ---------------------------------------------------------------- reshape ---
-void reshape( int width, int height )
+void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
     mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
@@ -87,24 +82,52 @@ void reshape( int width, int height )
 
 
 // --------------------------------------------------------------- keyboard ---
-void keyboard( unsigned char key, int x, int y )
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
-    if ( key == 27 )
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
     {
-        exit( 1 );
+        glfwSetWindowShouldClose( window, GL_TRUE );
     }
 }
+
+
+// --------------------------------------------------------- error-callback ---
+void error_callback( int error, const char* description )
+{
+    fputs( description, stderr );
+}
+
 
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
-    glutInit( &argc, argv );
-    glutInitWindowSize( 512, 512 );
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( argv[0] );
-    glutReshapeFunc( reshape );
-    glutDisplayFunc( display );
-    glutKeyboardFunc( keyboard );
+    GLFWwindow* window;
+
+    glfwSetErrorCallback( error_callback );
+
+    if (!glfwInit( ))
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
+
+    if (!window)
+    {
+        glfwTerminate( );
+        exit( EXIT_FAILURE );
+    }
+
+    glfwMakeContextCurrent( window );
+    glfwSwapInterval( 1 );
+
+    glfwSetFramebufferSizeCallback( window, reshape );
+    glfwSetWindowRefreshCallback( window, display );
+    glfwSetKeyCallback( window, keyboard );
+
 #ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
@@ -164,7 +187,17 @@ int main( int argc, char **argv )
     mat4_set_identity( &model );
     mat4_set_identity( &view );
 
-    glutMainLoop( );
+    glfwSetWindowSize( window, 512, 512 );
+    glfwShowWindow( window );
+
+    while(!glfwWindowShouldClose( window ))
+    {
+        display( window );
+        glfwPollEvents( );
+    }
+
+    glfwDestroyWindow( window );
+    glfwTerminate( );
 
     return 0;
 }
