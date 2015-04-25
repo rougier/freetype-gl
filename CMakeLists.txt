@@ -79,7 +79,10 @@ ELSE( WIN32 OR WIN64 )
     FIND_LIBRARY( MATH_LIBRARY m )
 ENDIF( WIN32 OR WIN64 )
 
-INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIR}
+FIND_PACKAGE( glfw REQUIRED )
+
+INCLUDE_DIRECTORIES( ${GLFW_INCLUDE_DIR}
+                     ${GLUT_INCLUDE_DIR}
                      ${OPENGL_INCLUDE_DIRS}
                      ${FREETYPE_INCLUDE_DIRS}
                      ${CMAKE_CURRENT_SOURCE_DIR}
@@ -122,6 +125,7 @@ ENDIF()
 TARGET_LINK_LIBRARIES( makefont
                        freetype-gl
                        ${OPENGL_LIBRARY}
+                       ${GLFW_LIBRARY}
                        ${GLUT_LIBRARY}
                        ${FREETYPE_LIBRARY}
                        ${MATH_LIBRARY})
