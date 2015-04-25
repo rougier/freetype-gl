@@ -39,13 +39,7 @@
 #include "markup.h"
 #include "shader.h"
 
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#elif defined(_WIN32) || defined(_WIN64)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
+#include <GLFW/glfw3.h>
 
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
@@ -68,8 +62,7 @@ GLuint program = 0;
 
 
 // ---------------------------------------------------------------- display ---
-void
-display( void )
+void display( GLFWwindow* window )
 {
     int v[4];
     glGetIntegerv( GL_VIEWPORT, v );
@@ -103,68 +96,61 @@ display( void )
     glEnd();
 
     glPopMatrix();
-    glutSwapBuffers( );
+    glfwSwapBuffers( window );
 }
 
 
-// ----------------------------------------------------------- mouse_motion ---
-void
-mouse_motion( int x, int y )
+// ---------------------------------------------------------- cursor_motion ---
+void cursor_motion( GLFWwindow* window, double x, double y )
 {
     int v[4];
+    static int _x=-1, _y=-1;
+
+    if( GLFW_PRESS == glfwGetMouseButton( window, GLFW_MOUSE_BUTTON_LEFT ) )
+    {
+        if( (_x == -1) && (_y == -1) )
+        {
+            _x = x; _y = y;
+            return;
+        }
+        int dy = y - _y;
+        if (dy < 0)
+        {
+            viewport.zoom *= 1.05;
+        }
+        else
+        {
+            viewport.zoom /= 1.05;
+        }
+        _x = x; _y = y;
+    }
+
     glGetIntegerv( GL_VIEWPORT, v );
     GLfloat width = v[2], height = v[3];
     float nx = min( max( x/width, 0.0), 1.0 );
     float ny = 1-min( max( y/height, 0.0), 1.0 );
     viewport.x = nx*width*(1-viewport.zoom);
     viewport.y = ny*height*(1-viewport.zoom);
-    glutPostRedisplay();
-}
-
-
-// ------------------------------------------------------------- mouse_drag ---
-void
-mouse_drag( int x, int y )
-{
-    static int _x=-1, _y=-1;
-    if( (_x == -1) && (_y == -1) )
-    {
-        _x = x; _y = y;
-        return;
-    }
-    int dy = y - _y;
-    if (dy < 0)
-    {
-        viewport.zoom *= 1.05;
-    }
-    else
-    {
-        viewport.zoom /= 1.05;
-    }
-    _x = x; _y = y;
-    mouse_motion(x,y);
 }
 
 
 // ---------------------------------------------------------------- reshape ---
-void reshape(int width, int height)
+void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, width, 0, height, -1, 1);
     glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
 }
 
 
 // --------------------------------------------------------------- keyboard ---
-void
-keyboard( unsigned char key, int x, int y )
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
-    if ( key == 27 )
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
     {
-        exit( 1 );
+        glfwSetWindowShouldClose( window, GL_TRUE );
     }
 }
 
@@ -240,20 +226,44 @@ make_distance_map( unsigned char *img,
 
 
 
+/* -------------------------------------------------------- error-callback - */
+void error_callback( int error, const char* description )
+{
+    fputs( description, stderr );
+}
+
 
 // ------------------------------------------------------------------- main ---
-int
-main( int argc, char **argv )
+int main( int argc, char **argv )
 {
-    glutInit( &argc, argv );
-    glutInitWindowSize( 512, 512 );
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Freetype OpenGL width shaders" );
-    glutReshapeFunc( reshape );
-    glutDisplayFunc( display );
-    glutMotionFunc( mouse_drag );
-    glutPassiveMotionFunc( mouse_motion );
-    glutKeyboardFunc( keyboard );
+    GLFWwindow* window;
+
+    glfwSetErrorCallback( error_callback );
+
+    if (!glfwInit( ))
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    window = glfwCreateWindow( 1, 1, "Freetype OpenGL width shaders", NULL, NULL );
+
+    if (!window)
+    {
+        glfwTerminate( );
+        exit( EXIT_FAILURE );
+    }
+
+    glfwMakeContextCurrent( window );
+    glfwSwapInterval( 1 );
+
+    glfwSetFramebufferSizeCallback( window, reshape );
+    glfwSetWindowRefreshCallback( window, display );
+    glfwSetKeyCallback( window, keyboard );
+    glfwSetCursorPosCallback( window, cursor_motion );
+
 #ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
@@ -291,6 +301,17 @@ main( int argc, char **argv )
                            "shaders/distance-field.frag" );
     glUseProgram( program );
 
-    glutMainLoop( );
+    glfwSetWindowSize( window, 512, 512 );
+    glfwShowWindow( window );
+
+    while(!glfwWindowShouldClose( window ))
+    {
+        display( window );
+        glfwPollEvents( );
+    }
+
+    glfwDestroyWindow( window );
+    glfwTerminate( );
+
     return 0;
 }
