@@ -41,13 +41,7 @@
 #include "shader.h"
 #include "mat4.h"
 
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#elif defined(_WIN32) || defined(_WIN64)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
+#include <GLFW/glfw3.h>
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -230,7 +224,7 @@ build_buffer( void )
 
 
 // ---------------------------------------------------------------- display ---
-void display(void)
+void display( GLFWwindow* window )
 {
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
@@ -260,12 +254,12 @@ void display(void)
     }
 
     TwDraw( );
-    glutSwapBuffers( );
+    glfwSwapBuffers( window );
 }
 
 
 // ---------------------------------------------------------------- reshape ---
-void reshape( int width, int height )
+void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
     mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
@@ -275,6 +269,129 @@ void reshape( int width, int height )
     glOrtho(0, width, 0, height, -1, 1);
     glMatrixMode(GL_MODELVIEW);
     TwWindowSize( width, height );
+}
+
+
+// ------------------------------------------------------------- cursor_pos ---
+void cursor_pos( GLFWwindow* window, double x, double y )
+{
+    TwMouseMotion( x, y );
+}
+
+
+// ----------------------------------------------------------- mouse_button ---
+void mouse_button( GLFWwindow* window, int button, int action, int mods)
+{
+    TwMouseAction tw_action;
+    TwMouseButtonID tw_button;
+
+    if ( GLFW_RELEASE == action )
+    {
+        tw_action = TW_MOUSE_RELEASED;
+    }
+    else
+    {
+        tw_action = TW_MOUSE_PRESSED;
+    }
+
+    switch (button)
+    {
+        case GLFW_MOUSE_BUTTON_LEFT:
+            tw_button = TW_MOUSE_LEFT;
+            break;
+        case GLFW_MOUSE_BUTTON_MIDDLE:
+            tw_button = TW_MOUSE_MIDDLE;
+            break;
+        case GLFW_MOUSE_BUTTON_RIGHT:
+            tw_button = TW_MOUSE_RIGHT;
+            break;
+        default:
+            return;
+    }
+
+    TwMouseButton( tw_action, tw_button );
+}
+
+
+// --------------------------------------------------------------- keyboard ---
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
+{
+    int tw_key = 0;
+    int tw_mods = TW_KMOD_NONE;
+
+    if( action != GLFW_PRESS )
+    {
+        return;
+    }
+
+    // those map to the corresponding number ascii code
+    if ( GLFW_KEY_0 <= key && key <= GLFW_KEY_9 )
+    {
+        tw_key = key;
+    }
+
+    // those map to the corresponding upper case ascii code
+    if ( GLFW_KEY_A <= key && key <= GLFW_KEY_Z )
+    {
+        tw_key = key;
+    }
+
+    if ( GLFW_KEY_PERIOD == key )
+    {
+        tw_key = '.';
+    }
+
+    if ( GLFW_KEY_BACKSPACE == key )
+    {
+        tw_key = TW_KEY_BACKSPACE;
+    }
+
+    if ( GLFW_KEY_DELETE == key )
+    {
+        tw_key = TW_KEY_DELETE;
+    }
+
+    if ( GLFW_KEY_LEFT == key )
+    {
+        tw_key = TW_KEY_LEFT;
+    }
+
+    if ( GLFW_KEY_RIGHT == key )
+    {
+        tw_key = TW_KEY_RIGHT;
+    }
+
+    if ( GLFW_KEY_UP == key )
+    {
+        tw_key = TW_KEY_UP;
+    }
+
+    if ( GLFW_KEY_DOWN == key )
+    {
+        tw_key = TW_KEY_DOWN;
+    }
+
+    if ( GLFW_KEY_ENTER == key )
+    {
+        tw_key = TW_KEY_RETURN;
+    }
+
+    if( GLFW_MOD_SHIFT & mods )
+    {
+        tw_mods |= TW_KMOD_SHIFT;
+    }
+
+    if( GLFW_MOD_CONTROL & mods )
+    {
+        tw_mods |= TW_KMOD_CTRL;
+    }
+
+    if( GLFW_MOD_ALT & mods )
+    {
+        tw_mods |= TW_KMOD_ALT;
+    }
+
+    TwKeyPressed( tw_key, tw_mods );
 }
 
 
@@ -308,21 +425,10 @@ void reset( void )
 }
 
 // ------------------------------------------------------------------- quit ---
-void quit( void )
+void quit( void* client_data )
 {
-    exit( EXIT_SUCCESS );
-}
-
-// -------------------------------------------------------------- terminate ---
-void terminate( void )
-{
-    TwTerminate();
-}
-
-void timer( int fps )
-{
-    glutPostRedisplay();
-    glutTimerFunc( 1000.0/fps, timer, fps );
+    GLFWwindow* window = (GLFWwindow*)client_data;
+    glfwSetWindowShouldClose( window, GL_TRUE );
 }
 
 // --------------------------------------------------------- get/set invert ---
@@ -501,14 +607,46 @@ void TW_CALL get_tertiary( void *value, void *data )
 }
 
 
+/* -------------------------------------------------------- error-callback - */
+void error_callback( int error, const char* description )
+{
+    fputs( description, stderr );
+}
+
+
 // Main
 int main(int argc, char *argv[])
 {
-    glutInit( &argc, argv );
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutInitWindowSize( 800, 600 );
-    glutCreateWindow( "Font rendering advanced tweaking" );
-    glutCreateMenu( NULL );
+    GLFWwindow* window;
+
+    glfwSetErrorCallback( error_callback );
+
+    if (!glfwInit( ))
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    window = glfwCreateWindow( 1, 1, "Font rendering advanced tweaking", NULL, NULL );
+
+    if (!window)
+    {
+        glfwTerminate( );
+        exit( EXIT_FAILURE );
+    }
+
+    glfwMakeContextCurrent( window );
+    glfwSwapInterval( 1 );
+
+    TwInit( TW_OPENGL, NULL );
+
+    glfwSetFramebufferSizeCallback( window, reshape );
+    glfwSetWindowRefreshCallback( window, display );
+    glfwSetCursorPosCallback( window, cursor_pos );
+    glfwSetMouseButtonCallback( window, mouse_button );
+    glfwSetKeyCallback( window, keyboard );
 
 #ifndef __APPLE__
     GLenum err = glewInit();
@@ -520,17 +658,6 @@ int main(int argc, char *argv[])
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
-
-    glutDisplayFunc( display );
-    glutReshapeFunc( reshape );
-    atexit( terminate );
-    TwInit( TW_OPENGL, NULL );
-    glutMouseFunc( (GLUTmousebuttonfun)TwEventMouseButtonGLUT );
-    glutMotionFunc( (GLUTmousemotionfun)TwEventMouseMotionGLUT );
-    glutPassiveMotionFunc( (GLUTmousemotionfun)TwEventMouseMotionGLUT );
-    glutKeyboardFunc( (GLUTkeyboardfun)TwEventKeyboardGLUT );
-    glutSpecialFunc( (GLUTspecialfun)TwEventSpecialGLUT );
-    TwGLUTModifiersFunc( glutGetModifiers );
 
     // Create a new tweak bar
     bar = TwNewBar("TweakBar");
@@ -655,7 +782,7 @@ int main(int argc, char *argv[])
     TwAddButton(bar, "Reset", (TwButtonCallback) reset, NULL,
                 "help='Reset all parameters to default values.'");
     TwAddSeparator(bar, "", "");
-    TwAddButton(bar, "Quit", (TwButtonCallback) quit, NULL,
+    TwAddButton(bar, "Quit", (TwButtonCallback) quit, window,
                 "help='Quit.'");
 
     buffer_a = text_buffer_new( 1 );
@@ -663,13 +790,23 @@ int main(int argc, char *argv[])
     buffer = buffer_rgb;
     reset();
 
-    glutTimerFunc( 1000.0/60.0, timer, 60 );
-
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
     mat4_set_identity( &view );
 
-    glutMainLoop();
+    glfwSetWindowSize( window, 800, 600 );
+    glfwShowWindow( window );
+
+    while(!glfwWindowShouldClose( window ))
+    {
+        display( window );
+        glfwPollEvents( );
+    }
+
+    TwTerminate();
+
+    glfwDestroyWindow( window );
+    glfwTerminate( );
+
     return EXIT_SUCCESS;
 }
-
