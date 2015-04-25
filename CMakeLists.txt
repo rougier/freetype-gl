@@ -79,7 +79,10 @@ ELSE( WIN32 OR WIN64 )
     FIND_LIBRARY( MATH_LIBRARY m )
 ENDIF( WIN32 OR WIN64 )
 
+FIND_PACKAGE( glfw3 REQUIRED )
+
 INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIR}
+                     ${GLFW3_INCLUDE_DIR}
                      ${OPENGL_INCLUDE_DIRS}
                      ${FREETYPE_INCLUDE_DIRS}
                      ${CMAKE_CURRENT_SOURCE_DIR}
@@ -111,7 +114,10 @@ SET( FREETYPE_GL_SRC freetype-gl.h
 
 ADD_LIBRARY( freetype-gl STATIC ${FREETYPE_GL_SRC} )
 
-LINK_DIRECTORIES(${PROJECT_SOURCE_DIR})
+LINK_DIRECTORIES(
+    ${PROJECT_SOURCE_DIR}
+    ${GLFW3_LIBRARY_DIR}
+)
 
 ADD_EXECUTABLE( makefont makefont.c )
 
@@ -122,6 +128,7 @@ ENDIF()
 TARGET_LINK_LIBRARIES( makefont
                        freetype-gl
                        ${OPENGL_LIBRARY}
+                       ${GLFW3_LIBRARY}
                        ${GLUT_LIBRARY}
                        ${FREETYPE_LIBRARY}
                        ${MATH_LIBRARY})
