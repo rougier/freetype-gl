@@ -39,15 +39,7 @@
 #include "texture-atlas.h"
 #include "platform.h"
 
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#elif defined(_WIN32) || defined(_WIN64)
-    #include <GLUT/glut.h>
-	// INFINITY only defined in C99
-	#define INFINITY 99999999999
-#else
-    #include <GL/glut.h>
-#endif
+#include <GLFW/glfw3.h>
 
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
@@ -226,8 +218,7 @@ resize( double *src_data, size_t src_width, size_t src_height,
 
 
 // ---------------------------------------------------------------- display ---
-void
-display( void )
+void display( GLFWwindow* window )
 {
     glClearColor(1.0,1.0,1.0,1.0);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -271,39 +262,28 @@ display( void )
     glEnd();
     glPopMatrix();
 
-    glutSwapBuffers( );
+    glfwSwapBuffers( window );
 }
 
 
 // ---------------------------------------------------------------- reshape ---
-void reshape(int width, int height)
+void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, width, 0, height, -1, 1);
     glMatrixMode(GL_MODELVIEW);
-    glutPostRedisplay();
 }
 
 
 // --------------------------------------------------------------- keyboard ---
-void
-keyboard( unsigned char key, int x, int y )
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
-    if ( key == 27 )
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
     {
-        exit( 1 );
+        glfwSetWindowShouldClose( window, GL_TRUE );
     }
-    glutPostRedisplay();
-}
-
-// ------------------------------------------------------------------ timer ---
-void timer( int fps )
-{
-    glutPostRedisplay();
-    glutTimerFunc( 1000.0/fps, timer, fps );
-    angle += .5;
 }
 
 
@@ -418,18 +398,43 @@ load_glyph( const char *  filename,     const wchar_t charcode,
 }
 
 
-// ------------------------------------------------------------------- main ---
-int
-main( int argc, char **argv )
+/* -------------------------------------------------------- error-callback - */
+void error_callback( int error, const char* description )
 {
-    glutInit( &argc, argv );
-    glutInitWindowSize( 512, 512 );
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Distance fields demo" );
-    glutReshapeFunc( reshape );
-    glutDisplayFunc( display );
-    glutKeyboardFunc( keyboard );
-    glutTimerFunc( 1000.0/60, timer, 60 );
+    fputs( description, stderr );
+}
+
+
+// ------------------------------------------------------------------- main ---
+int main( int argc, char **argv )
+{
+    GLFWwindow* window;
+
+    glfwSetErrorCallback( error_callback );
+
+    if (!glfwInit( ))
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    window = glfwCreateWindow( 1, 1, "Distance fields demo", NULL, NULL );
+
+    if (!window)
+    {
+        glfwTerminate( );
+        exit( EXIT_FAILURE );
+    }
+
+    glfwMakeContextCurrent( window );
+    glfwSwapInterval( 1 );
+
+    glfwSetFramebufferSizeCallback( window, reshape );
+    glfwSetWindowRefreshCallback( window, display );
+    glfwSetKeyCallback( window, keyboard );
+
 #ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
@@ -457,6 +462,23 @@ main( int argc, char **argv )
 
     texture_atlas_upload( atlas );
 
-    glutMainLoop( );
+    glfwSetWindowSize( window, 512, 512 );
+    glfwShowWindow( window );
+
+    glfwSetTime(0.0);
+
+    while(!glfwWindowShouldClose( window ))
+    {
+        display( window );
+
+        angle += 30 * glfwGetTime();
+        glfwSetTime(0.0);
+
+        glfwPollEvents( );
+    }
+
+    glfwDestroyWindow( window );
+    glfwTerminate( );
+
     return 0;
 }
