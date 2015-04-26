@@ -24,7 +24,7 @@ install:
   - sudo ln -s /usr/bin/gcc-4.8 /usr/bin/gcc
   - sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
 # Install dependencies
-  - sudo apt-get install -qq cmake libglew-dev libfreetype* freeglut3-dev doxygen libharfbuzz-dev
+  - sudo apt-get install -qq cmake libglew-dev libfreetype* doxygen libharfbuzz-dev
 # Prepare manual installation of dependencies
   - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP
 # GLFW 3.1.1 install

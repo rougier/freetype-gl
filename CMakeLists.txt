@@ -43,10 +43,8 @@ OPTION(freetype-gl_LIBS_SUPPLIED "Required libraries are supplied as part of par
 # Get required and optional library
 FIND_PACKAGE( OpenGL REQUIRED )
 IF( WIN32 OR WIN64 )
-    SET( GLUT_INCLUDE_DIR
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut )
-    SET( GLUT_LIBRARY
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut/glut32.lib )
+	SET( WINDOWS_DIR
+         ${CMAKE_CURRENT_SOURCE_DIR}/windows )
     SET( GLEW_INCLUDE_PATH
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/include )
     SET( GLEW_LIBRARY
@@ -63,13 +61,11 @@ IF( WIN32 OR WIN64 )
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/include )
 ELSE( WIN32 OR WIN64 )
     IF ( freetype-gl_LIBS_SUPPLIED )
-        FIND_PACKAGE( GLUT )
         FIND_PACKAGE( Freetype )
         IF ( NOT APPLE )
             FIND_PACKAGE( GLEW )
         ENDIF()
     ELSE ( freetype-gl_LIBS_SUPPLIED )
-        FIND_PACKAGE( GLUT REQUIRED )
         FIND_PACKAGE( Freetype REQUIRED )
         IF ( NOT APPLE )
             FIND_PACKAGE( GLEW REQUIRED )
@@ -81,8 +77,7 @@ ENDIF( WIN32 OR WIN64 )
 
 FIND_PACKAGE( glfw3 REQUIRED )
 
-INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIR}
-                     ${GLFW3_INCLUDE_DIR}
+INCLUDE_DIRECTORIES( ${GLFW3_INCLUDE_DIR}
                      ${OPENGL_INCLUDE_DIRS}
                      ${FREETYPE_INCLUDE_DIRS}
                      ${CMAKE_CURRENT_SOURCE_DIR}
@@ -129,7 +124,6 @@ TARGET_LINK_LIBRARIES( makefont
                        freetype-gl
                        ${OPENGL_LIBRARY}
                        ${GLFW3_LIBRARY}
-                       ${GLUT_LIBRARY}
                        ${FREETYPE_LIBRARY}
                        ${MATH_LIBRARY})
 
