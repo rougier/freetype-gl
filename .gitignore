@@ -34,3 +34,4 @@ CMakeCache.txt
 libfreetype-gl.a
 demo-make
 cmake_install.cmake
+Makefile

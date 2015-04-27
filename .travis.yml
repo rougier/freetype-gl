@@ -1,0 +1,34 @@
+language: c
+compiler:
+  - gcc
+install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -qq
+# We remove g++ because Travis Ubuntu VM is < g++-4.8
+  - sudo apt-get remove g++ gcc
+  - sudo apt-get install -qq g++-4.8 gcc-4.8
+  - sudo ln -s /usr/bin/gcc-4.8 /usr/bin/gcc
+  - sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
+#
+  - sudo apt-get install -qq libglew-dev libfreetype* freeglut3-dev
+# AntTweakBar install
+  - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP 
+  - wget -O AntTweakBar_116.zip http://sourceforge.net/projects/anttweakbar/files/latest/download?source=dlp 
+  - unzip AntTweakBar_116.zip
+  - cd AntTweakBar/src
+# And as it uses C++ ... we need to link with g++, but this Makefile's version doesn't !
+# So we modify the makefile with sed !
+  - sed -i "s/LINK     	= gcc/LINK     	= g++/" Makefile
+  - make
+  - sudo mv ../lib/libAntTweakBar.so /usr/lib/ 
+  - sudo mv ../lib/libAntTweakBar.so.1 /usr/lib/
+  - sudo mv ../include/* /usr/include/
+  - cd ../../
+  - rm -rf AntTweakBar_116.zip
+  - rm -rf AntTweakBar
+# another requirement
+  - sudo apt-get install libxmu-dev libxi-dev
+#
+  - cd ..
+script:
+  - cmake . && make
