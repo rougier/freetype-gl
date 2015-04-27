@@ -36,6 +36,7 @@ SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules"
 
 OPTION(freetype-gl_USE_VAO "Use a VAO to render a vertex_buffer instance (required for forward compatible OpenGL 3.0 contexts)" OFF)
 OPTION(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
+OPTION(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
 OPTION(freetype-gl_LIBS_SUPPLIED "Required libraries are supplied as part of parent build" OFF)
 
 # Get required and optional library
@@ -128,6 +129,10 @@ if(MSVC)
     # Compile makefont as C++
     set_source_files_properties( makefont.c PROPERTIES LANGUAGE CXX )
 endif()
+
+IF (freetype-gl_BUILD_APIDOC)
+    ADD_SUBDIRECTORY(doc)
+ENDIF (freetype-gl_BUILD_APIDOC)
 
 IF (freetype-gl_BUILD_DEMOS)
     ADD_SUBDIRECTORY(demos)

@@ -10,7 +10,7 @@ install:
   - sudo ln -s /usr/bin/gcc-4.8 /usr/bin/gcc
   - sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
 #
-  - sudo apt-get install -qq libglew-dev libfreetype* freeglut3-dev
+  - sudo apt-get install -qq libglew-dev libfreetype* freeglut3-dev doxygen
 # AntTweakBar install
   - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP 
   - wget -O AntTweakBar_116.zip http://sourceforge.net/projects/anttweakbar/files/latest/download?source=dlp 

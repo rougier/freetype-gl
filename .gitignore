@@ -21,6 +21,8 @@ demos/outline
 demos/subpixel
 demos/texture
 
+doc/html/
+
 fonts/Arial.ttf
 fonts/DroidSansJapanese.ttf
 fonts/DroidSerif-Bold.ttf
