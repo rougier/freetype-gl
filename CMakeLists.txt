@@ -34,6 +34,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.8.5 )
 SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules"
                        "${CMAKE_MODULE_PATH}" )
 
+OPTION(freetype-gl_USE_VAO "Use a VAO to render a vertex_buffer instance (required for forward compatible OpenGL 3.0 contexts)" OFF)
 OPTION(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
 OPTION(freetype-gl_LIBS_SUPPLIED "Required libraries are supplied as part of parent build" OFF)
 
@@ -85,6 +86,10 @@ INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIR}
 IF(MSVC)
     ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(MSVC)
+
+if( freetype-gl_USE_VAO )
+    ADD_DEFINITIONS( -DFREETYPE_GL_USE_VAO )
+ENDIF( freetype-gl_USE_VAO )
 
 SET( FREETYPE_GL_SRC freetype-gl.h
                      vec234.h
