@@ -78,7 +78,7 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
         texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
         if( glyph != NULL )
         {
-            int kerning = 0;
+            float kerning = 0.0f;
             if( i > 0)
             {
                 kerning = texture_glyph_get_kerning( glyph, text[i-1] );
@@ -217,7 +217,8 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
     glutIdleFunc( idle );
-
+#ifndef __APPLE__
+    glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
@@ -226,7 +227,7 @@ int main( int argc, char **argv )
         exit( EXIT_FAILURE );
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-
+#endif
     atlas  = texture_atlas_new( 512, 512, 1 );
     font = texture_font_new_from_file( atlas, 12, "fonts/VeraMono.ttf" );
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 

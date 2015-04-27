@@ -52,10 +52,13 @@
 #endif
 
 
-
+#ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
-#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
@@ -153,7 +156,7 @@ add_text( vertex_buffer_t * buffer, texture_font_t * font,
         texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
         if( glyph != NULL )
         {
-            int kerning = 0;
+            float kerning = 0.0f;
             if( i > 0)
             {
                 kerning = texture_glyph_get_kerning( glyph, text[i-1] );
@@ -215,8 +218,8 @@ make_distance_map( unsigned char *img,
     }
 
     // Compute outside = edtaa3(bitmap); % Transform background (0's)
-    computegradient( data, height, width, gx, gy);
-    edtaa3(data, gx, gy, height, width, xdist, ydist, outside);
+    computegradient( data, width, height, gx, gy);
+    edtaa3(data, gx, gy, width, height, xdist, ydist, outside);
     for( i=0; i<width*height; ++i)
         if( outside[i] < 0 )
             outside[i] = 0.0;
@@ -226,8 +229,8 @@ make_distance_map( unsigned char *img,
     memset(gy, 0, sizeof(double)*width*height );
     for( i=0; i<width*height; ++i)
         data[i] = 1 - data[i];
-    computegradient( data, height, width, gx, gy);
-    edtaa3(data, gx, gy, height, width, xdist, ydist, inside);
+    computegradient( data, width, height, gx, gy);
+    edtaa3(data, gx, gy, width, height, xdist, ydist, inside);
     for( i=0; i<width*height; ++i)
         if( inside[i] < 0 )
             inside[i] = 0.0;
@@ -268,7 +271,8 @@ main( int argc, char **argv )
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
-
+#ifndef __APPLE__
+    glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
@@ -277,7 +281,7 @@ main( int argc, char **argv )
         exit( EXIT_FAILURE );
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-
+#endif
     texture_font_t *font = 0;
     texture_atlas_t *atlas = texture_atlas_new( 512, 512, 1 );
     const char * filename = "fonts/Vera.ttf";

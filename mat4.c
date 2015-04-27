@@ -161,14 +161,14 @@ mat4_set_frustum( mat4 *self,
 
     mat4_set_zero( self );
 
-    self->m00 = +2.0*znear/(right-left);
+    self->m00 = (2.0*znear)/(right-left);
     self->m20 = (right+left)/(right-left);
 
-    self->m11 = +2.0*znear/(top-bottom);
-    self->m31 = (top+bottom)/(top-bottom);
+    self->m11 = (2.0*znear)/(top-bottom);
+    self->m21 = (top+bottom)/(top-bottom);
 
     self->m22 = -(zfar+znear)/(zfar-znear);
-    self->m32 = -2.0*znear/(zfar-znear);
+    self->m32 = -(2.0*zfar*znear)/(zfar-znear);
 
     self->m23 = -1.0;
 }

@@ -42,6 +42,10 @@ extern "C" {
 
 #include <stddef.h>
 
+#ifdef __cplusplus
+namespace ftgl {
+#endif
+
 /**
  * @file   vector.h
  * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
@@ -62,7 +66,7 @@ extern "C" {
  *   int i,j = 1;
  *   vector_t * vector = vector_new( sizeof(int) );
  *   vector_push_back( &i );
- * 
+ *
  *   j = * (int *) vector_get( vector, 0 );
  *   vector_delete( vector);
  *
@@ -78,7 +82,7 @@ extern "C" {
  *
  * @memberof vector
  */
-typedef struct
+typedef struct vector_t
  {
      /** Pointer to dynamically allocated items. */
      void * items;
@@ -329,7 +333,7 @@ typedef struct
  */
   void
   vector_push_back_data( vector_t *self,
-                         const void * data, 
+                         const void * data,
                          const size_t count );
 
 
@@ -347,6 +351,7 @@ typedef struct
 /** @} */
 
 #ifdef __cplusplus
+}
 }
 #endif
 

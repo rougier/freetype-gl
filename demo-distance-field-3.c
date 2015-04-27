@@ -37,6 +37,7 @@
 #include "shader.h"
 #include "texture-font.h"
 #include "texture-atlas.h"
+#include "platform.h"
 
 #if defined(__APPLE__)
     #include <Glut/glut.h>
@@ -48,8 +49,13 @@
     #include <GL/glut.h>
 #endif
 
+#ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 
 // ------------------------------------------------------- global variables ---
@@ -71,7 +77,7 @@ distance_map( double *data, unsigned int width, unsigned int height )
     int i;
 
     // Compute outside = edtaa3(bitmap); % Transform background (0's)
-    computegradient( data, height, width, gx, gy);
+    computegradient( data, width, height, gx, gy);
     edtaa3(data, gx, gy, width, height, xdist, ydist, outside);
     for( i=0; i<width*height; ++i)
     {
@@ -86,7 +92,7 @@ distance_map( double *data, unsigned int width, unsigned int height )
     memset( gy, 0, sizeof(double)*width*height );
     for( i=0; i<width*height; ++i)
         data[i] = 1 - data[i];
-    computegradient( data, height, width, gx, gy );
+    computegradient( data, width, height, gx, gy );
     edtaa3( data, gx, gy, width, height, xdist, ydist, inside );
     for( i=0; i<width*height; ++i )
     {
@@ -424,7 +430,8 @@ main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
     glutTimerFunc( 1000.0/60, timer, 60 );
-
+#ifndef __APPLE__
+    glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
@@ -433,7 +440,7 @@ main( int argc, char **argv )
         exit( EXIT_FAILURE );
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-
+#endif
     program = shader_load( "shaders/distance-field.vert",
                            "shaders/distance-field-3.frag" );
     glUseProgram( program );

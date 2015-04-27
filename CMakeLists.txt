@@ -35,6 +35,7 @@ SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules"
                        "${CMAKE_MODULE_PATH}" )
 
 OPTION(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
+OPTION(freetype-gl_LIBS_SUPPLIED "Required libraries are supplied as part of parent build" OFF)
 
 # Get required and optional library
 FIND_PACKAGE( OpenGL REQUIRED )
@@ -45,7 +46,7 @@ IF( WIN32 OR WIN64 )
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut )
 	SET( GLUT_LIBRARY
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut/glut32.lib )
-    SET( GLEW_INCLUDE_DIR
+    SET( GLEW_INCLUDE_PATH
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/include )
     SET( GLEW_LIBRARY
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/lib/glew32.lib )
@@ -65,9 +66,20 @@ IF( WIN32 OR WIN64 )
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/include )
     SET( ANT_TWEAK_BAR_FOUND "YES" )
 ELSE( WIN32 OR WIN64 )
-    FIND_PACKAGE( GLUT REQUIRED )
-    FIND_PACKAGE( Freetype REQUIRED )
-    FIND_PACKAGE( GLEW REQUIRED )
+    IF ( freetype-gl_LIBS_SUPPLIED )
+        FIND_PACKAGE( GLUT )
+        FIND_PACKAGE( Freetype )
+        IF ( NOT APPLE )
+            FIND_PACKAGE( GLEW )
+        ENDIF()
+    ELSE ( freetype-gl_LIBS_SUPPLIED )
+        FIND_PACKAGE( GLUT REQUIRED )
+        FIND_PACKAGE( Freetype REQUIRED )
+        IF ( NOT APPLE )
+            FIND_PACKAGE( GLEW )
+        ENDIF()
+    ENDIF ( freetype-gl_LIBS_SUPPLIED )
+
     FIND_PACKAGE( FontConfig )
     FIND_LIBRARY( MATH_LIBRARY m )
     #FIND_LIBRARY( STDC_LIBRARY stdc++) #Buggy Cmake can't find libstdc++
@@ -78,10 +90,9 @@ ENDIF( WIN32 OR WIN64 )
 INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIR}
                      ${OPENGL_INCLUDE_DIRS}
                      ${FREETYPE_INCLUDE_DIRS}
-                     ${GLEW_INCLUDE_DIRS}
                      ${CMAKE_CURRENT_SOURCE_DIR}
                      ${VS789FIX_INCLUDE_DIR}
-                     ${GLEW_INCLUDE_DIR})
+                     ${GLEW_INCLUDE_PATH})
 					 
 IF(MSVC)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
@@ -108,12 +119,13 @@ LINK_DIRECTORIES(${PROJECT_SOURCE_DIR})
 
 MACRO( DEMO _target _sources)
      add_executable(${_target} ${_sources})
-     include_directories(${WINDOWS_DIR} ${GLUT_INCLUDE_DIR} ${GLEW_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
+     include_directories(${WINDOWS_DIR} ${GLUT_INCLUDE_DIR} ${GLEW_INCLUDE_PATH} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
+    if(NOT APPLE)
      target_link_libraries(${_target} ${GLEW_LIBRARY})
+    endif()
      target_link_libraries(${_target} freetype-gl)
      target_link_libraries(${_target} ${OPENGL_LIBRARY})
      target_link_libraries(${_target} ${GLUT_LIBRARY})
-     target_link_libraries(${_target} ${GLEW_LIBRARY})
      target_link_libraries(${_target} ${FREETYPE_LIBRARY})
      IF( MATH_LIBRARY )
          target_link_libraries(${_target} ${MATH_LIBRARY})

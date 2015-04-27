@@ -43,6 +43,9 @@ extern "C" {
 #include "markup.h"
 #include "shader.h"
 
+#ifdef __cplusplus
+namespace ftgl {
+#endif
 
 /**
  * Use LCD filtering
@@ -78,14 +81,14 @@ extern "C" {
 /**
  * Text buffer structure
  */
-typedef struct {
+typedef struct  text_buffer_t {
     /**
-     * Vertex buffer 
+     * Vertex buffer
      */
     vertex_buffer_t *buffer;
 
     /**
-     * Font manager 
+     * Font manager
      */
     font_manager_t *manager;
 
@@ -137,7 +140,7 @@ typedef struct {
 /**
  * Glyph vertex structure
  */
-typedef struct {
+typedef struct glyph_vertex_t {
     /**
      * Vertex x coordinates
      */
@@ -208,6 +211,14 @@ typedef struct {
   text_buffer_t *
   text_buffer_new( size_t depth );
 
+  /**
+  * Deletes texture buffer and its associated shader and vertex buffer.
+  *
+  * @param  self  texture buffer to delete
+  *
+  */
+void
+text_buffer_delete( text_buffer_t * self );
 
 /**
  * Render a text buffer.
@@ -271,6 +282,7 @@ typedef struct {
 /** @} */
 
 #ifdef __cplusplus
+}
 }
 #endif
 

@@ -32,7 +32,9 @@
  * ========================================================================= */
 #include <stdio.h>
 #include <wchar.h>
+
 #include "freetype-gl.h"
+
 #include "vertex-buffer.h"
 #include "markup.h"
 #include "shader.h"
@@ -115,7 +117,7 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
     for( i=0; i<wcslen(text); ++i )
     {
         texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
-        float kerning = 0;
+        float kerning = 0.0f;
         if( i > 0)
         {
             kerning = texture_glyph_get_kerning( glyph, text[i-1] );
@@ -148,7 +150,7 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
-    size_t width = 800, height = 200;
+    size_t width = 850, height = 200;
 
     glutInit( &argc, argv );
     glutInitWindowSize( width, height );
@@ -157,7 +159,7 @@ int main( int argc, char **argv )
     glutReshapeFunc( reshape );
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
-
+#ifndef __APPLE__
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
@@ -166,11 +168,11 @@ int main( int argc, char **argv )
         exit( EXIT_FAILURE );
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-
+#endif
     atlas = texture_atlas_new( 1024, 1024, 1 );
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 
     texture_font_t *font =
-		texture_font_new_from_file( atlas, 128, "fonts/ObelixPro.ttf" );
+		texture_font_new_from_file( atlas, 128, "fonts/LuckiestGuy.ttf" );
 
     vec2 pen    = {{50, 50}};
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};

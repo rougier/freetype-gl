@@ -43,6 +43,10 @@ extern "C" {
 #include "vector.h"
 #include "texture-atlas.h"
 
+#ifdef __cplusplus
+namespace ftgl {
+#endif
+
 /**
  * @file   texture-font.h
  * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
@@ -72,13 +76,13 @@ extern "C" {
  * This structure cannot be used alone since the (necessary) right charcode is
  * implicitely held by the owner of this structure.
  */
-typedef struct
+typedef struct kerning_t
 {
     /**
      * Left character code in the kern pair.
      */
     wchar_t charcode;
-    
+
     /**
      * Kerning value (in fractional pixels).
      */
@@ -96,26 +100,26 @@ typedef struct
  *                       xmin                     xmax
  *                        |                         |
  *                        |<-------- width -------->|
- *                        |                         |    
+ *                        |                         |
  *              |         +-------------------------+----------------- ymax
  *              |         |    ggggggggg   ggggg    |     ^        ^
- *              |         |   g:::::::::ggg::::g    |     |        | 
- *              |         |  g:::::::::::::::::g    |     |        | 
- *              |         | g::::::ggggg::::::gg    |     |        | 
- *              |         | g:::::g     g:::::g     |     |        | 
- *    offset_x -|-------->| g:::::g     g:::::g     |  offset_y    | 
- *              |         | g:::::g     g:::::g     |     |        | 
- *              |         | g::::::g    g:::::g     |     |        | 
- *              |         | g:::::::ggggg:::::g     |     |        |  
+ *              |         |   g:::::::::ggg::::g    |     |        |
+ *              |         |  g:::::::::::::::::g    |     |        |
+ *              |         | g::::::ggggg::::::gg    |     |        |
+ *              |         | g:::::g     g:::::g     |     |        |
+ *    offset_x -|-------->| g:::::g     g:::::g     |  offset_y    |
+ *              |         | g:::::g     g:::::g     |     |        |
+ *              |         | g::::::g    g:::::g     |     |        |
+ *              |         | g:::::::ggggg:::::g     |     |        |
  *              |         |  g::::::::::::::::g     |     |      height
- *              |         |   gg::::::::::::::g     |     |        | 
+ *              |         |   gg::::::::::::::g     |     |        |
  *  baseline ---*---------|---- gggggggg::::::g-----*--------      |
- *            / |         |             g:::::g     |              | 
- *     origin   |         | gggggg      g:::::g     |              | 
- *              |         | g:::::gg   gg:::::g     |              | 
- *              |         |  g::::::ggg:::::::g     |              | 
- *              |         |   gg:::::::::::::g      |              | 
- *              |         |     ggg::::::ggg        |              | 
+ *            / |         |             g:::::g     |              |
+ *     origin   |         | gggggg      g:::::g     |              |
+ *              |         | g:::::gg   gg:::::g     |              |
+ *              |         |  g::::::ggg:::::::g     |              |
+ *              |         |   gg:::::::::::::g      |              |
+ *              |         |     ggg::::::ggg        |              |
  *              |         |         gggggg          |              v
  *              |         +-------------------------+----------------- ymin
  *              |                                   |
@@ -125,7 +129,7 @@ typedef struct
 /**
  * A structure that describe a glyph.
  */
-typedef struct
+typedef struct texture_glyph_t
 {
     /**
      * Wide character this glyph represents
@@ -216,7 +220,7 @@ typedef struct
 /**
  *  Texture font structure.
  */
-typedef struct
+typedef struct texture_font_t
 {
     /**
      * Vector of glyphs contained in this font.
@@ -227,7 +231,7 @@ typedef struct
      * Atlas structure to store glyphs data.
      */
     texture_atlas_t * atlas;
-    
+
     /**
      * font location
      */
@@ -255,7 +259,7 @@ typedef struct
      * Font size
      */
     float size;
-    
+
     /**
      * Whether to use autohint when rendering font
      */
@@ -271,7 +275,7 @@ typedef struct
      */
     float outline_thickness;
 
-    /** 
+    /**
      * Whether to use our own lcd filter.
      */
     int filtering;
@@ -392,7 +396,7 @@ typedef struct
 
 /**
  * Request a new glyph from the font. If it has not been created yet, it will
- * be. 
+ * be.
  *
  * @param self     A valid texture font
  * @param charcode Character codepoint to be loaded.
@@ -424,10 +428,10 @@ typedef struct
  *
  * @param self      a valid texture glyph
  * @param charcode  codepoint of the peceding glyph
- * 
+ *
  * @return x kerning value
  */
-float 
+float
 texture_glyph_get_kerning( const texture_glyph_t * self,
                            const wchar_t charcode );
 
@@ -445,7 +449,7 @@ texture_glyph_new( void );
 
 #ifdef __cplusplus
 }
+}
 #endif
 
 #endif /* __TEXTURE_FONT_H__ */
-

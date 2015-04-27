@@ -48,8 +48,13 @@
     #include <GL/glut.h>
 #endif
 
+#ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -196,7 +201,7 @@ make_distance_map( unsigned char *img,
 
     // Compute outside = edtaa3(bitmap); % Transform background (0's)
     computegradient( data, width, height, gx, gy);
-    edtaa3(data, gx, gy, height, width, xdist, ydist, outside);
+    edtaa3(data, gx, gy, width, height, xdist, ydist, outside);
     for( i=0; i<width*height; ++i)
         if( outside[i] < 0 )
             outside[i] = 0.0;
@@ -207,7 +212,7 @@ make_distance_map( unsigned char *img,
     for( i=0; i<width*height; ++i)
         data[i] = 1 - data[i];
     computegradient( data, width, height, gx, gy);
-    edtaa3(data, gx, gy, height, width, xdist, ydist, inside);
+    edtaa3(data, gx, gy, width, height, xdist, ydist, inside);
     for( i=0; i<width*height; ++i)
         if( inside[i] < 0 )
             inside[i] = 0.0;
@@ -250,7 +255,8 @@ main( int argc, char **argv )
     glutMotionFunc( mouse_drag );
     glutPassiveMotionFunc( mouse_motion );
     glutKeyboardFunc( keyboard );
-
+#ifndef __APPLE__
+    glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
@@ -259,7 +265,7 @@ main( int argc, char **argv )
         exit( EXIT_FAILURE );
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-
+#endif
 
     unsigned char *map;
     texture_font_t * font;

@@ -26,7 +26,10 @@ install:
   - cd ~/
   - rm -rf AntTweakBar_116.zip
   - rm -rf AntTweakBar
-  - cd build/rougier/freetype-gl
+# another requirement
 
+# 
+  - cd build/rougier/freetype-gl
+  - sudo apt-get install libxmu-dev libxi-dev
 script:
-  - make
+  - cmake . && make

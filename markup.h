@@ -84,7 +84,7 @@ extern "C" {
 /**
  * Simple structure that describes text properties.
  */
-typedef struct
+typedef struct markup_t
 {
     /**
      * A font family name such as "normal", "sans", "serif" or "monospace".

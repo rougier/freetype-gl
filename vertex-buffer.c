@@ -39,7 +39,6 @@
 #include "platform.h"
 #include "vertex-buffer.h"
 
-
 /**
  * Buffer status
  */
@@ -113,6 +112,10 @@ vertex_buffer_new( const char *format )
         self->attributes[i]->stride = stride;
     }
 
+#ifdef FREETYPE_GL_USE_VAO
+    self->VAO_id = 0;
+#endif
+
     self->vertices = vector_new( stride );
     self->vertices_id  = 0;
     self->GPU_vsize = 0;
@@ -137,7 +140,6 @@ vertex_buffer_delete( vertex_buffer_t *self )
 
     assert( self );
 
-
     for( i=0; i<MAX_VERTEX_ATTRIBUTE; ++i )
     {
         if( self->attributes[i] )
@@ -146,6 +148,13 @@ vertex_buffer_delete( vertex_buffer_t *self )
         }
     }
 
+#ifdef FREETYPE_GL_USE_VAO
+    if( self->VAO_id )
+    {
+        glDeleteVertexArrays( 1, &self->VAO_id );
+    }
+    self->VAO_id = 0;
+#endif
 
     vector_delete( self->vertices );
     self->vertices = 0;
@@ -323,12 +332,53 @@ vertex_buffer_render_setup ( vertex_buffer_t *self, GLenum mode )
 {
     size_t i;
 
+#ifdef FREETYPE_GL_USE_VAO
+    // Unbind so no existing VAO-state is overwritten,
+    // (e.g. the GL_ELEMENT_ARRAY_BUFFER-binding).
+    glBindVertexArray( 0 ); 
+#endif
+
     if( self->state != CLEAN )
     {
         vertex_buffer_upload( self );
         self->state = CLEAN;
     }
-    
+
+#ifdef FREETYPE_GL_USE_VAO
+    if( self->VAO_id == 0 )
+    {
+        // Generate and set up VAO
+
+        glGenVertexArrays( 1, &self->VAO_id );
+        glBindVertexArray( self->VAO_id );
+
+        glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
+
+        for( i=0; i<MAX_VERTEX_ATTRIBUTE; ++i )
+        {
+            vertex_attribute_t *attribute = self->attributes[i];
+            if( attribute == 0 )
+            {
+                continue;
+            }
+            else
+            {
+                vertex_attribute_enable( attribute );
+            }
+        }
+
+        glBindBuffer( GL_ARRAY_BUFFER, 0 );
+
+        if( self->indices->size )
+        {
+            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
+        }
+    }
+
+    // Bind VAO for drawing
+    glBindVertexArray( self->VAO_id );
+#else
+
     glBindBuffer( GL_ARRAY_BUFFER, self->vertices_id );
 
     for( i=0; i<MAX_VERTEX_ATTRIBUTE; ++i )
@@ -348,6 +398,8 @@ vertex_buffer_render_setup ( vertex_buffer_t *self, GLenum mode )
     {
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
     }
+#endif
+
     self->mode = mode;
 }
 
@@ -355,8 +407,12 @@ vertex_buffer_render_setup ( vertex_buffer_t *self, GLenum mode )
 void
 vertex_buffer_render_finish ( vertex_buffer_t *self )
 {
+#ifdef FREETYPE_GL_USE_VAO
+    glBindVertexArray( 0 );
+#else
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+#endif
 }
 
 
@@ -395,7 +451,6 @@ vertex_buffer_render ( vertex_buffer_t *self, GLenum mode )
     vertex_buffer_render_setup( self, mode );
     if( icount )
     {
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, self->indices_id );
         glDrawElements( mode, icount, GL_UNSIGNED_INT, 0 );
     }
     else
