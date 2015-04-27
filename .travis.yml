@@ -12,7 +12,7 @@ install:
 #
   - sudo apt-get install -qq libglew-dev libfreetype* freeglut3-dev
 # AntTweakBar install
-  - cd ~/ 
+  - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP 
   - wget -O AntTweakBar_116.zip http://sourceforge.net/projects/anttweakbar/files/latest/download?source=dlp 
   - unzip AntTweakBar_116.zip
   - cd AntTweakBar/src
@@ -23,12 +23,12 @@ install:
   - sudo mv ../lib/libAntTweakBar.so /usr/lib/ 
   - sudo mv ../lib/libAntTweakBar.so.1 /usr/lib/
   - sudo mv ../include/* /usr/include/
-  - cd ~/
+  - cd ../../
   - rm -rf AntTweakBar_116.zip
   - rm -rf AntTweakBar
 # another requirement
   - sudo apt-get install libxmu-dev libxi-dev
 #
-  - cd build/rougier/freetype-gl
+  - cd ..
 script:
   - cmake . && make
