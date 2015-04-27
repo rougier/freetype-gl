@@ -78,7 +78,7 @@ Contributors:
 * PJ O'Halloran (svn to git migration)
 * William Light (Face creation from memory)
 * Jan Niklas Hasse (Bug report & fix + README.md)
-* Pierre-Emmnauel Lallemant (Bug report & fix)
+* Pierre-Emmanuel Lallemant (Bug report & fix + travis setup)
 * Robert Conde (Bug report & fix)
 * Mikołaj Siedlarek (Build system bug fix)
 * Preet Desai (Bug report & fix)
