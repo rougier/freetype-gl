@@ -1,18 +1,18 @@
 /**
-@example demo-ansi.c
-@example demo-font.c 
-@example demo-gamma.c 
-@example demo-markup.c
-@example demo-makefont.c
-@example demo-console.c
-@example demo-texture.c 
-@example demo-outline.c 
-@example demo-cartoon.c 
-@example demo-benchmark.c 
-@example demo-subpixel.c
-@example demo-atb-agg.c
-@example demo-distance-field.c
-@example demo-display-list.c
+@example ansi.c
+@example font.c
+@example gamma.c
+@example markup.c
+@example makefont.c
+@example console.c
+@example texture.c
+@example outline.c
+@example cartoon.c
+@example benchmark.c
+@example subpixel.c
+@example atb-agg.c
+@example distance-field.c
+@example display-list.c
 
 @page documentation Documentation
 
