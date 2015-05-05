@@ -125,7 +125,7 @@ texture_atlas_set_region( texture_atlas_t * self,
     charsize = sizeof(char);
     for( i=0; i<height; ++i )
     {
-        memcpy( self->data+((y+i)*self->width + x ) * charsize * depth, 
+        memcpy( self->data+((y+i)*self->width + x ) * charsize * depth,
                 data + (i*stride) * charsize, width * charsize * depth  );
     }
 }
@@ -230,7 +230,7 @@ texture_atlas_get_region( texture_atlas_t * self,
 			}
         }
     }
-   
+
 	if( best_index == -1 )
     {
         region.x = -1;
@@ -338,8 +338,13 @@ texture_atlas_upload( texture_atlas_t * self )
     }
     else
     {
+#if !defined(GL_RED) || defined(FREETYPEGL_USE_GL_ALPHA)
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->width, self->height,
+                      0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
+#else
         glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, self->width, self->height,
                       0, GL_RED, GL_UNSIGNED_BYTE, self->data );
+#endif
     }
 }
 

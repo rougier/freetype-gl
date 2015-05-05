@@ -48,6 +48,7 @@
 #define HRES  64
 #define HRESf 64.f
 #define DPI   72
+#define HHINT_SCALE 64
 
 #undef __FTERRORS_H__
 #define FT_ERRORDEF( e, v, s )  { e, s },
@@ -65,11 +66,7 @@ texture_font_load_face(texture_font_t *self, float size,
         FT_Library *library, FT_Face *face)
 {
     FT_Error error;
-    FT_Matrix matrix = {
-        (int)((1.0/HRES) * 0x10000L),
-        (int)((0.0)      * 0x10000L),
-        (int)((0.0)      * 0x10000L),
-        (int)((1.0)      * 0x10000L)};
+    FT_Matrix matrix_nohint = {(int)((1.0/HHINT_SCALE) * 0x10000L), 0, 0, 0x10000L};
 
     assert(library);
     assert(size);
@@ -112,7 +109,11 @@ texture_font_load_face(texture_font_t *self, float size,
     }
 
     /* Set char size */
-    error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI * HRES, DPI);
+    if(self->no_horizontal_hint) {
+      error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI * HHINT_SCALE, DPI);
+    } else {
+      error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI, DPI);
+    }
 
     if(error) {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
@@ -122,8 +123,13 @@ texture_font_load_face(texture_font_t *self, float size,
         return 0;
     }
 
-    /* Set transform matrix */
-    FT_Set_Transform(*face, &matrix, NULL);
+    if(self->no_horizontal_hint) {
+      /* Set transform matrix to use the horizontally stretched one */
+      FT_Set_Transform(*face, &matrix_nohint, NULL);
+    } else {
+      /* Set transform matrix to identity */
+      FT_Set_Transform(*face, NULL, NULL);
+    }
 
     return 1;
 }
@@ -210,34 +216,30 @@ texture_glyph_get_kerning( const texture_glyph_t * self,
 
 // ------------------------------------------ texture_font_generate_kerning ---
 void
-texture_font_generate_kerning( texture_font_t *self )
+texture_font_generate_kerning( texture_font_t *self, FT_Face *face )
 {
+    /* Assumes library and font are already loaded */
+
     size_t i, j;
-    FT_Library library;
-    FT_Face face;
     FT_UInt glyph_index, prev_index;
     texture_glyph_t *glyph, *prev_glyph;
     FT_Vector kerning;
 
     assert( self );
 
-    /* Load font */
-    if(!texture_font_get_face(self, &library, &face))
-        return;
-
     /* For each glyph couple combination, check if kerning is necessary */
     /* Starts at index 1 since 0 is for the special backgroudn glyph */
     for( i=1; i<self->glyphs->size; ++i )
     {
         glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
-        glyph_index = FT_Get_Char_Index( face, glyph->charcode );
+        glyph_index = FT_Get_Char_Index( *face, glyph->charcode );
         vector_clear( glyph->kerning );
 
         for( j=1; j<self->glyphs->size; ++j )
         {
             prev_glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
-            prev_index = FT_Get_Char_Index( face, prev_glyph->charcode );
-            FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
+            prev_index = FT_Get_Char_Index( *face, prev_glyph->charcode );
+            FT_Get_Kerning( *face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
             // printf("%c(%d)-%c(%d): %ld\n",
             //       prev_glyph->charcode, prev_glyph->charcode,
             //       glyph_index, glyph_index, kerning.x);
@@ -248,9 +250,6 @@ texture_font_generate_kerning( texture_font_t *self )
             }
         }
     }
-
-    FT_Done_Face( face );
-    FT_Done_FreeType( library );
 }
 
 // ------------------------------------------------------ texture_font_init ---
@@ -276,6 +275,7 @@ texture_font_init(texture_font_t *self)
     self->hinting = 1;
     self->kerning = 1;
     self->filtering = 1;
+    self->no_horizontal_hint = 0;
 
     // FT_LCD_FILTER_LIGHT   is (0x00, 0x55, 0x56, 0x55, 0x00)
     // FT_LCD_FILTER_DEFAULT is (0x10, 0x40, 0x70, 0x40, 0x10)
@@ -640,10 +640,10 @@ texture_font_load_glyphs( texture_font_t * self,
             FT_Done_Glyph( ft_glyph );
         }
     }
+    texture_font_generate_kerning( self, &face );
     FT_Done_Face( face );
     FT_Done_FreeType( library );
     texture_atlas_upload( self->atlas );
-    texture_font_generate_kerning( self );
     return missed;
 }
 
