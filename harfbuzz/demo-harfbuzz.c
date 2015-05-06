@@ -47,6 +47,7 @@
 #include "shader.h"
 #include "vertex-buffer.h"
 #include "texture-font.h"
+#include <math.h>
 
 
 

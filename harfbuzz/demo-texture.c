@@ -32,6 +32,9 @@
  * ============================================================================ */
 /* ------------------------------------ */
 #include "freetype-gl.h"
+
+#include <assert.h>
+
 #if defined(__APPLE__)
     #include <Glut/glut.h>
 #elif defined(_WIN32) || defined(_WIN64)
