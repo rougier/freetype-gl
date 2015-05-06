@@ -77,9 +77,9 @@ const hb_script_t scripts[NUM_EXAMPLES] = {
 };
 
 const char *fonts[NUM_EXAMPLES] = {
-    "fonts/DejaVuSerif.ttf",
-    "fonts/amiri-0.104/amiri-regular.ttf",
-    "fonts/fireflysung-1.3.0/fireflysung.ttf",
+    "fonts/Liberastika-Regular.ttf",
+    "fonts/amiri-regular.ttf",
+    "fonts/fireflysung.ttf",
 };
 
 enum {

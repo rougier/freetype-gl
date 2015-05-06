@@ -62,7 +62,7 @@ vertex_buffer_t * vbuffer;
 mat4 model, view, projection;
 
 const char *text = "صِف خَلقَ خَودِ كَمِثلِ الشَمسِ إِذ بَزَغَت — يَحظى الضَجيعُ بِها نَجلاءَ مِعطارِ";
-const char *font_filename      = "./amiri-regular.ttf";
+const char *font_filename      = "fonts/amiri-regular.ttf";
 const hb_direction_t direction = HB_DIRECTION_RTL;
 const hb_script_t script       = HB_SCRIPT_ARABIC;
 const char *language           = "ar";
