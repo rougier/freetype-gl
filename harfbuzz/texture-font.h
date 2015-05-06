@@ -70,7 +70,7 @@ extern "C" {
 /**
  * A structure that describe a glyph.
  */
-typedef struct
+typedef struct texture_glyph_t
 {
     /**
      * Wide character this glyph represents
@@ -126,7 +126,7 @@ typedef struct
 /**
  *  Texture font structure.
  */
-typedef struct
+typedef struct texture_font_t
 {
     /**
      * Vector of glyphs contained in this font.
