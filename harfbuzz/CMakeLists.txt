@@ -74,5 +74,4 @@ DEMO( hb-texture        "demo-texture.c" )
 
 # Copy font and shaders into build directory for in-place testing
 file(COPY ../fonts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY text.vert DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY text.frag DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ../shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

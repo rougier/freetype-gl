@@ -143,7 +143,7 @@ void display( void )
     glUseProgram( shader );
     {
         glUniform1i( glGetUniformLocation( shader, "texture" ), 0 );
-        glUniform2f( glGetUniformLocation( shader, "pixel" ), 1/512., 1/512. );
+        glUniform3f( glGetUniformLocation( shader, "pixel" ), 1/512., 1/512., 1.0f );
 
         glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
                             1, 0, model.data);
@@ -336,17 +336,18 @@ int main( int argc, char **argv )
     glBindTexture( GL_TEXTURE_2D, atlas->id );
     texture_atlas_upload( atlas );
 
-    typedef struct { float x,y,z, u,v, r,g,b,a; } vertex_t;
+    typedef struct { float x,y,z, u,v, r,g,b,a, shift, gamma; } vertex_t;
     vertex_t vertices[4] =  {
-        {  0, 0,  0,1, 1, 0,0,0,1},
-        {  0,512, 0,0, 1, 0,0,0,1},
-        {512,512, 1,0, 1, 0,0,0,1},
-        {512,  0, 1,1, 1, 0,0,0,1} };
+        {  0,  0,0, 0,1, 0,0,0,1, 0, 1},
+        {  0,512,0, 0,0, 0,0,0,1, 0, 1},
+        {512,512,0, 1,0, 0,0,0,1, 0, 1},
+        {512,  0,0, 1,1, 0,0,0,1, 0, 1} };
     GLuint indices[6] = { 0, 1, 2, 0,2,3 };
-    buffer = vertex_buffer_new( "a_vertex:2f,"
-                                "a_texcoord:2f,"
-                                "a_gamma:1f,"
-                                "a_color:4f" );
+    buffer = vertex_buffer_new( "vertex:3f,"
+                                "tex_coord:2f,"
+                                "color:4f,"
+                                "ashift:1f,"
+                                "agamma:1f" );
 
 
 
@@ -354,7 +355,7 @@ int main( int argc, char **argv )
 
 
     vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
-    shader = shader_load("text.vert", "text.frag");
+    shader = shader_load("shaders/text.vert", "shaders/text.frag");
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
     mat4_set_identity( &view );
