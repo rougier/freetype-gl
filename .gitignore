@@ -34,6 +34,11 @@ fonts/Tahoma.ttf
 fonts/Times.ttf
 fonts/Verdana.ttf
 
+harfbuzz/fonts/
+harfbuzz/harfbuzz
+harfbuzz/hb-texture
+harfbuzz/libfreetype-gl-hb.a
+
 CMakeFiles
 CMakeCache.txt
 cmake_install.cmake

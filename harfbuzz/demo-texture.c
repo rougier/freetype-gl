@@ -351,7 +351,7 @@ int main( int argc, char **argv )
 
 
     vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
-    shader = shader_load("shaders/text.vert", "shaders/text.frag");
+    shader = shader_load("text.vert", "text.frag");
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
     mat4_set_identity( &view );
