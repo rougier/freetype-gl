@@ -79,11 +79,10 @@ texture_glyph_delete( texture_glyph_t *self )
 { }
 
 
-// ------------------------------------------------------- texture_font_new ---
+// --------------------------------------------- texture_font_new_from_file ---
 texture_font_t *
-texture_font_new( texture_atlas_t *    atlas,
-                  const char *         filename,
-                  const float          size)
+texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
+        const char *filename)
 {
 
     int i;
@@ -91,7 +90,7 @@ texture_font_new( texture_atlas_t *    atlas,
     FT_Library library;
     
     assert( filename );
-    assert( size );
+    assert( pt_size );
 
     if( self == NULL)
     {
@@ -106,7 +105,7 @@ texture_font_new( texture_atlas_t *    atlas,
     self->ascender = 0;
     self->descender = 0;
     self->filename = strdup( filename );
-    self->size = size;
+    self->size = pt_size;
     self->hres = 100;
     self->ft_face = 0;
     self->hb_ft_font = 0;
@@ -138,7 +137,7 @@ texture_font_new( texture_atlas_t *    atlas,
                          (int)((1.0)      * 0x10000L) };
 
     /* Set char size */
-    FT_Set_Char_Size( self->ft_face, 0, (int)(size*64),(int)(hdpi*self->hres), vdpi );
+    FT_Set_Char_Size( self->ft_face, 0, (int)(pt_size*64),(int)(hdpi*self->hres), vdpi );
     if( error )
     {
         //fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",

@@ -224,16 +224,16 @@ typedef struct texture_font_t
  * freetype implementation).
  *
  * @param atlas     A texture atlas
+ * @param pt_size   Size of font to be created (in points)
  * @param filename  A font filename
- * @param size      Size of font to be created (in points)
  *
  * @return A new empty font (no glyph inside yet)
  *
  */
   texture_font_t *
-  texture_font_new( texture_atlas_t * atlas,
-                    const char *      filename,
-                    const float       size );
+  texture_font_new_from_file( texture_atlas_t * atlas,
+                              const float pt_size,
+                              const char * filename );
 
 
 /**

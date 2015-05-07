@@ -132,7 +132,7 @@ int main( int argc, char **argv )
     texture_font_t *fonts[20];
     for ( i=0; i< 20; ++i )
     {
-        fonts[i] =  texture_font_new(atlas, font_filename, 12+i),
+        fonts[i] =  texture_font_new_from_file(atlas, 12+i, font_filename),
         texture_font_load_glyphs(fonts[i], text, direction, language, script );
     }
 
