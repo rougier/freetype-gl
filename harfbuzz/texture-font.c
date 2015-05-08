@@ -246,10 +246,32 @@ texture_font_load_glyphs( texture_font_t * self,
                           const char *language,
                           const hb_script_t script )
 {
-    int i, j;
+    size_t i, j, x, y, width, height, w, h;
+
+    FT_Error error;
+    FT_GlyphSlot slot;
+    FT_Bitmap ft_bitmap;
+
+    unsigned int glyph_count;
+    texture_glyph_t *glyph;
+    FT_Int32 flags = 0;
+    int ft_glyph_top = 0;
+    int ft_glyph_left = 0;
+
+    hb_buffer_t *buffer;
+    hb_glyph_info_t *glyph_info;
+
+    ivec4 region;
+    char pass;
+
+    assert( self );
+    assert( text );
+
+    width  = self->atlas->width;
+    height = self->atlas->height;
 
     /* Create a buffer for harfbuzz to use */
-    hb_buffer_t *buffer = hb_buffer_create();
+    buffer = hb_buffer_create();
 
     hb_buffer_set_direction( buffer, directions );
     hb_buffer_set_script( buffer, script );
@@ -260,70 +282,61 @@ texture_font_load_glyphs( texture_font_t * self,
     hb_buffer_add_utf8( buffer, text, strlen(text), 0, strlen(text) );
     hb_shape( self->hb_ft_font, buffer, NULL, 0 );
 
-    unsigned int         glyph_count;
-    hb_glyph_info_t     *glyph_info = hb_buffer_get_glyph_infos(buffer, &glyph_count);
-    //hb_glyph_position_t *glyph_pos  = hb_buffer_get_glyph_positions(buffer, &glyph_count);
+    glyph_info = hb_buffer_get_glyph_infos(buffer, &glyph_count);
 
-    FT_Error error;
-    FT_GlyphSlot slot;
-    FT_Bitmap ft_bitmap;
-    FT_Int32 flags =  FT_LOAD_RENDER | FT_LOAD_TARGET_LCD;
-    for (i = 0; i < glyph_count; ++i)
-    {
-
-        int skip = 0;
-        for( j=0; j<self->glyphs->size; ++j )
-        {
-            texture_glyph_t * glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
+    flags =  FT_LOAD_RENDER | FT_LOAD_TARGET_LCD;
+    for( i = 0; i < glyph_count; ++i ) {
+        pass = 0;
+        /* Check if charcode has been already loaded */
+        for( j = 0; j < self->glyphs->size; ++j ) {
+            glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
             if( glyph->codepoint == glyph_info[i].codepoint ) 
             {
-                skip = 1;
+                pass = 1;
                 break;
             }
         }
-        if( skip ) continue;
 
+        if(pass)
+            continue;
 
-        /* Load glyph */
         error = FT_Load_Glyph( self->ft_face, glyph_info[i].codepoint, flags );
         if( error )
         {
-            //fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-            //         __LINE__, FT_Errors[error].code, FT_Errors[error].message );
+            fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+                     __LINE__, FT_Errors[error].code, FT_Errors[error].message );
             break;
         }
 
-        slot = self->ft_face->glyph;
-        ft_bitmap = slot->bitmap;
-        int ft_bitmap_width = slot->bitmap.width;
-        int ft_bitmap_rows  = slot->bitmap.rows;
-        // int ft_bitmap_pitch = slot->bitmap.pitch;
-        int ft_glyph_top    = slot->bitmap_top;
-        int ft_glyph_left   = slot->bitmap_left;
 
-        int w = ft_bitmap_width/3; // 3 because of LCD/RGB encoding
-        int h = ft_bitmap_rows;
-        ivec4 region = texture_atlas_get_region( self->atlas, w+1, h+1 );
+        slot            = self->ft_face->glyph;
+        ft_bitmap       = slot->bitmap;
+        ft_glyph_top    = slot->bitmap_top;
+        ft_glyph_left   = slot->bitmap_left;
+
+        w = ft_bitmap.width/3; // 3 because of LCD/RGB encoding
+        h = ft_bitmap.rows;
+        region = texture_atlas_get_region( self->atlas, w+1, h+1 );
         if ( region.x < 0 )
         {
             fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
             continue;
         }
-        int x = region.x, y = region.y;
-        texture_atlas_set_region( self->atlas, region.x, region.y,
-                                  w, h, ft_bitmap.buffer, ft_bitmap.pitch );
+        x = region.x;
+        y = region.y;
+        texture_atlas_set_region( self->atlas, x, y, w, h,
+                                  ft_bitmap.buffer, ft_bitmap.pitch );
 
-
-        texture_glyph_t *glyph = texture_glyph_new( );
+        glyph = texture_glyph_new( );
         glyph->codepoint = glyph_info[i].codepoint;
         glyph->width    = w;
         glyph->height   = h;
         glyph->offset_x = ft_glyph_left;
         glyph->offset_y = ft_glyph_top;
-        glyph->s0       = x/(float)self->atlas->width;
-        glyph->t0       = y/(float)self->atlas->height;
-        glyph->s1       = (x + w)/(float)self->atlas->width;
-        glyph->t1       = (y + h)/(float)self->atlas->height;
+        glyph->s0       = x/(float)width;
+        glyph->t0       = y/(float)height;
+        glyph->s1       = (x + glyph->width)/(float)width;
+        glyph->t1       = (y + glyph->height)/(float)height;
         vector_push_back( self->glyphs, &glyph );
     }
 
