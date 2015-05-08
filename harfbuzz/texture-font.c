@@ -78,34 +78,21 @@ void
 texture_glyph_delete( texture_glyph_t *self )
 { }
 
-
-// --------------------------------------------- texture_font_new_from_file ---
-texture_font_t *
-texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
-        const char *filename)
+// ------------------------------------------------------ texture_font_init ---
+static int
+texture_font_init(texture_font_t *self)
 {
-
     int i;
-    texture_font_t *self = (texture_font_t *) malloc( sizeof(texture_font_t) );
     FT_Library library;
-    
-    assert( filename );
-    assert( pt_size );
 
-    if( self == NULL)
-    {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
-    }
+    assert(self->size);
+
 
     self->glyphs = vector_new( sizeof(texture_glyph_t *) );
-    self->atlas = atlas;
+
     self->height = 0;
     self->ascender = 0;
     self->descender = 0;
-    self->filename = strdup( filename );
-    self->size = pt_size;
     self->hres = 100;
     self->ft_face = 0;
     self->hb_ft_font = 0;
@@ -120,12 +107,12 @@ texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
     }
 
     /* Load face */
-    error = FT_New_Face( library, filename, 0, &self->ft_face );
+    error = FT_New_Face( library, self->filename, 0, &self->ft_face );
     if( error )
     {
         fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
                  __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-        return 0;
+        return 1;
     }
 
     size_t hdpi = 72;
@@ -137,13 +124,13 @@ texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
                          (int)((1.0)      * 0x10000L) };
 
     /* Set char size */
-    FT_Set_Char_Size( self->ft_face, 0, (int)(pt_size*64),(int)(hdpi*self->hres), vdpi );
+    FT_Set_Char_Size( self->ft_face, 0, (int)(self->size*64),(int)(hdpi*self->hres), vdpi );
     if( error )
     {
         //fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
         //         __LINE__, FT_Errors[error].code, FT_Errors[error].message );
         FT_Done_Face( self->ft_face );
-        return 0;
+        return 1;
     }
 
     /* Set charmap
@@ -175,8 +162,37 @@ texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
     /* Set harfbuzz font */
     self->hb_ft_font = hb_ft_font_create( self->ft_face, NULL );
 
+    return 0;
+}
+
+// --------------------------------------------- texture_font_new_from_file ---
+texture_font_t *
+texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
+        const char *filename)
+{
+    texture_font_t *self;
+
+    assert(filename);
+
+    self = calloc(1, sizeof(*self));
+    if (!self) {
+        fprintf(stderr,
+                "line %d: No more memory for allocating data\n", __LINE__);
+        return NULL;
+    }
+
+    self->atlas = atlas;
+    self->size  = pt_size;
+
+    self->filename = strdup(filename);
+
+    if (texture_font_init(self)) {
+        texture_font_delete(self);
+        return NULL;
+    }
+
     return self;
- }
+}
 
 
 // ---------------------------------------------------- texture_font_delete ---
