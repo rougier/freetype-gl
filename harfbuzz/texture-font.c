@@ -74,7 +74,16 @@ texture_font_load_face(texture_font_t *self, float size,
     }
 
     /* Load face */
-    error = FT_New_Face(*library, self->filename, 0, &self->ft_face);
+    switch (self->location) {
+    case TEXTURE_FONT_FILE:
+        error = FT_New_Face(*library, self->filename, 0, &self->ft_face);
+        break;
+
+    case TEXTURE_FONT_MEMORY:
+        error = FT_New_Memory_Face(*library,
+            self->memory.base, self->memory.size, 0, &self->ft_face);
+        break;
+    }
 
     if(error) {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
@@ -163,6 +172,9 @@ texture_font_init(texture_font_t *self)
 
     assert(self->atlas);
     assert(self->size > 0);
+    assert((self->location == TEXTURE_FONT_FILE && self->filename)
+        || (self->location == TEXTURE_FONT_MEMORY
+            && self->memory.base && self->memory.size));
 
     self->glyphs = vector_new(sizeof(texture_glyph_t *));
     self->height = 0;
@@ -200,6 +212,7 @@ texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
     self->atlas = atlas;
     self->size  = pt_size;
 
+    self->location = TEXTURE_FONT_FILE;
     self->filename = strdup(filename);
 
     if (texture_font_init(self)) {
@@ -210,6 +223,37 @@ texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
     return self;
 }
 
+// ------------------------------------------- texture_font_new_from_memory ---
+texture_font_t *
+texture_font_new_from_memory(texture_atlas_t *atlas, float pt_size,
+        const void *memory_base, size_t memory_size)
+{
+    texture_font_t *self;
+
+    assert(memory_base);
+    assert(memory_size);
+
+    self = calloc(1, sizeof(*self));
+    if (!self) {
+        fprintf(stderr,
+                "line %d: No more memory for allocating data\n", __LINE__);
+        return NULL;
+    }
+
+    self->atlas = atlas;
+    self->size  = pt_size;
+
+    self->location = TEXTURE_FONT_MEMORY;
+    self->memory.base = memory_base;
+    self->memory.size = memory_size;
+
+    if (texture_font_init(self)) {
+        texture_font_delete(self);
+        return NULL;
+    }
+
+    return self;
+}
 
 // ---------------------------------------------------- texture_font_delete ---
 void
@@ -220,7 +264,7 @@ texture_font_delete( texture_font_t *self )
 
     assert( self );
 
-    if(self->filename)
+    if(self->location == TEXTURE_FONT_FILE && self->filename)
         free( self->filename );
 
     for( i=0; i<vector_size( self->glyphs ); ++i)

@@ -137,11 +137,29 @@ typedef struct texture_font_t
      * Atlas structure to store glyphs data.
      */
     texture_atlas_t * atlas;
-    
+
     /**
-     * Font filename
+     * font location
      */
-    char * filename;
+    enum {
+        TEXTURE_FONT_FILE = 0,
+        TEXTURE_FONT_MEMORY,
+    } location;
+
+    union {
+        /**
+         * Font filename, for when location == TEXTURE_FONT_FILE
+         */
+        char *filename;
+
+        /**
+         * Font memory address, for when location == TEXTURE_FONT_MEMORY
+         */
+        struct {
+            const void *base;
+            size_t size;
+        } memory;
+    };
 
     /**
      * Font size
