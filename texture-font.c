@@ -408,6 +408,7 @@ texture_font_load_glyphs( texture_font_t * self,
                           const wchar_t * charcodes )
 {
     size_t i, j, x, y, width, height, depth, w, h;
+
     FT_Library library;
     FT_Error error;
     FT_Face face;
@@ -437,10 +438,10 @@ texture_font_load_glyphs( texture_font_t * self,
         return wcslen(charcodes);
 
     /* Load each glyph */
-    for( i=0; i<wcslen(charcodes); ++i ) {
+    for( i = 0; i < wcslen(charcodes); ++i ) {
         pass = 0;
         /* Check if charcode has been already loaded */
-        for(j = 0; j < self->glyphs->size; ++j ) {
+        for( j = 0; j < self->glyphs->size; ++j ) {
             glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
             // If charcode is -1, we don't care about outline type or thickness
             // if( (glyph->charcode == charcodes[i])) {
@@ -449,13 +450,13 @@ texture_font_load_glyphs( texture_font_t * self,
                  ((glyph->outline_type == self->outline_type) &&
                   (glyph->outline_thickness == self->outline_thickness)) ))
             {
-              pass = 1;
-              break;
+                pass = 1;
+                break;
             }
         }
 
         if(pass)
-          continue; // don't add the item
+            continue;
 
         flags = 0;
         ft_glyph_top = 0;
@@ -492,6 +493,7 @@ texture_font_load_glyphs( texture_font_t * self,
                 FT_Library_SetLcdFilterWeights( library, self->lcd_weights );
             }
         }
+
         error = FT_Load_Glyph( face, glyph_index, flags );
         if( error )
         {
@@ -640,6 +642,7 @@ texture_font_load_glyphs( texture_font_t * self,
             FT_Done_Glyph( ft_glyph );
         }
     }
+
     FT_Done_Face( face );
     FT_Done_FreeType( library );
     texture_atlas_upload( self->atlas );
@@ -656,8 +659,6 @@ texture_font_get_glyph( texture_font_t * self,
     size_t i;
     wchar_t buffer[2] = {0,0};
     texture_glyph_t *glyph;
-
-    assert( self );
 
     assert( self );
     assert( self->filename );

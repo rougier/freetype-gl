@@ -47,6 +47,7 @@
 #include "shader.h"
 #include "vertex-buffer.h"
 #include "texture-font.h"
+#include <math.h>
 
 
 
@@ -62,7 +63,7 @@ vertex_buffer_t * vbuffer;
 mat4 model, view, projection;
 
 const char *text = "صِف خَلقَ خَودِ كَمِثلِ الشَمسِ إِذ بَزَغَت — يَحظى الضَجيعُ بِها نَجلاءَ مِعطارِ";
-const char *font_filename      = "./amiri-regular.ttf";
+const char *font_filename      = "fonts/amiri-regular.ttf";
 const hb_direction_t direction = HB_DIRECTION_RTL;
 const hb_script_t script       = HB_SCRIPT_ARABIC;
 const char *language           = "ar";
@@ -74,7 +75,7 @@ void display( void )
     glUseProgram( shader );
     {
         glUniform1i( glGetUniformLocation( shader, "texture" ), 0 );
-        glUniform2f( glGetUniformLocation( shader, "pixel" ), 1/512., 1/512. );
+        glUniform3f( glGetUniformLocation( shader, "pixel" ), 1/512., 1/512., 1.0f );
 
         glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
                             1, 0, model.data);
@@ -131,14 +132,14 @@ int main( int argc, char **argv )
     texture_font_t *fonts[20];
     for ( i=0; i< 20; ++i )
     {
-        fonts[i] =  texture_font_new(atlas, font_filename, 12+i),
+        fonts[i] =  texture_font_new_from_file(atlas, 12+i, font_filename),
         texture_font_load_glyphs(fonts[i], text, direction, language, script );
     }
 
 
-    typedef struct { float x,y, u,v, gamma, r,g,b,a; } vertex_t;
-    vbuffer = vertex_buffer_new( "a_vertex:2f,a_texcoord:2f,"
-                                "a_gamma:1f,a_color:4f" );
+    typedef struct { float x,y,z, u,v, r,g,b,a, shift, gamma; } vertex_t;
+    vbuffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,"
+                                "color:4f,ashift:1f,agamma:1f" );
 
     /* Create a buffer for harfbuzz to use */
     hb_buffer_t *buffer = hb_buffer_create();
@@ -162,6 +163,7 @@ int main( int argc, char **argv )
                                   direction, language, script );
 
         float gamma = 1.0;
+        float shift = 0.0;
         float x = 0;
         float y = 600 - i * (10+i) - 15;
         float width = 0.0;
@@ -202,10 +204,10 @@ int main( int argc, char **argv )
             float s1 = glyph->s1;
             float t1 = glyph->t1;
             vertex_t vertices[4] =  {
-                {x0,y0, s0,t0, gamma, r,g,b,a},
-                {x0,y1, s0,t1, gamma, r,g,b,a},
-                {x1,y1, s1,t1, gamma, r,g,b,a},
-                {x1,y0, s1,t0, gamma, r,g,b,a} };
+                {x0,y0,0, s0,t0, r,g,b,a, shift, gamma},
+                {x0,y1,0, s0,t1, r,g,b,a, shift, gamma},
+                {x1,y1,0, s1,t1, r,g,b,a, shift, gamma},
+                {x1,y0,0, s1,t0, r,g,b,a, shift, gamma} };
             GLuint indices[6] = { 0,1,2, 0,2,3 };
             vertex_buffer_push_back( vbuffer, vertices, 4, indices, 6 );
             x += x_advance;
@@ -222,7 +224,7 @@ int main( int argc, char **argv )
     glBindTexture( GL_TEXTURE_2D, atlas->id );
     texture_atlas_upload( atlas );
     vertex_buffer_upload( vbuffer );
-    shader = shader_load("text.vert", "text.frag");
+    shader = shader_load("shaders/text.vert", "shaders/text.frag");
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
     mat4_set_identity( &view );

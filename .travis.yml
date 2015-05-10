@@ -2,15 +2,25 @@ language: c
 compiler:
   - gcc
 install:
+# Add repository for libharfbuzz-dev
+  - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu trusty universe"
+  - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu trusty main"
+# Add repository for g++-4.8
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+# Add repository for cmake 2.8.11 to find freetype headers properly
+  - sudo add-apt-repository ppa:kalakris/cmake -y
+# Install keyrings for trusty repositories
+  - sudo apt-get install debian-keyring debian-archive-keyring
+  - sudo apt-key update
+# Update system
   - sudo apt-get update -qq
 # We remove g++ because Travis Ubuntu VM is < g++-4.8
   - sudo apt-get remove g++ gcc
   - sudo apt-get install -qq g++-4.8 gcc-4.8
   - sudo ln -s /usr/bin/gcc-4.8 /usr/bin/gcc
   - sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
-#
-  - sudo apt-get install -qq libglew-dev libfreetype* freeglut3-dev doxygen
+# Install dependencies
+  - sudo apt-get install -qq cmake libglew-dev libfreetype* freeglut3-dev doxygen libharfbuzz-dev
 # AntTweakBar install
   - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP 
   - wget -O AntTweakBar_116.zip http://sourceforge.net/projects/anttweakbar/files/latest/download?source=dlp 
@@ -31,4 +41,4 @@ install:
 #
   - cd ..
 script:
-  - cmake . && make
+  - cmake -Dfreetype-gl_BUILD_HARFBUZZ=ON . && make

@@ -70,7 +70,7 @@ extern "C" {
 /**
  * A structure that describe a glyph.
  */
-typedef struct
+typedef struct texture_glyph_t
 {
     /**
      * Wide character this glyph represents
@@ -126,7 +126,7 @@ typedef struct
 /**
  *  Texture font structure.
  */
-typedef struct
+typedef struct texture_font_t
 {
     /**
      * Vector of glyphs contained in this font.
@@ -137,11 +137,29 @@ typedef struct
      * Atlas structure to store glyphs data.
      */
     texture_atlas_t * atlas;
-    
+
     /**
-     * Font filename
+     * font location
      */
-    char * filename;
+    enum {
+        TEXTURE_FONT_FILE = 0,
+        TEXTURE_FONT_MEMORY,
+    } location;
+
+    union {
+        /**
+         * Font filename, for when location == TEXTURE_FONT_FILE
+         */
+        char *filename;
+
+        /**
+         * Font memory address, for when location == TEXTURE_FONT_MEMORY
+         */
+        struct {
+            const void *base;
+            size_t size;
+        } memory;
+    };
 
     /**
      * Font size
@@ -224,16 +242,16 @@ typedef struct
  * freetype implementation).
  *
  * @param atlas     A texture atlas
+ * @param pt_size   Size of font to be created (in points)
  * @param filename  A font filename
- * @param size      Size of font to be created (in points)
  *
  * @return A new empty font (no glyph inside yet)
  *
  */
   texture_font_t *
-  texture_font_new( texture_atlas_t * atlas,
-                    const char *      filename,
-                    const float       size );
+  texture_font_new_from_file( texture_atlas_t * atlas,
+                              const float pt_size,
+                              const char * filename );
 
 
 /**
