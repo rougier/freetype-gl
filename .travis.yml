@@ -22,7 +22,7 @@ install:
   - sudo ln -s /usr/bin/gcc-4.8 /usr/bin/gcc
   - sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
 # Install dependencies
-  - sudo apt-get install -qq cmake libglew-dev libfreetype* doxygen libharfbuzz-dev libglfw3-dev
+  - sudo apt-get install -qq cmake libglew-dev libfreetype* doxygen libharfbuzz-dev libglfw3-dev~trusty
 # AntTweakBar install
   - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP 
   - wget -O AntTweakBar_116.zip http://sourceforge.net/projects/anttweakbar/files/latest/download?source=dlp 
