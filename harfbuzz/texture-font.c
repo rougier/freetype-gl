@@ -39,6 +39,8 @@
 #include "texture-font.h"
 #include "platform.h"
 
+#define DPI   72
+
 #undef __FTERRORS_H__
 #define FT_ERRORDEF( e, v, s )  { e, s },
 #define FT_ERROR_START_LIST     {
@@ -88,11 +90,9 @@ texture_font_load_face(texture_font_t *self, float size,
     if(error) {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
                 __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+        FT_Done_FreeType(*library);
         return 0;
     }
-
-    size_t hdpi = 72;
-    size_t vdpi = 72;
 
     FT_Library_SetLcdFilter(*library, FT_LCD_FILTER_LIGHT );
 
@@ -120,12 +120,13 @@ texture_font_load_face(texture_font_t *self, float size,
     }
 
     /* Set char size */
-    FT_Set_Char_Size(self->ft_face, 0, (int)(self->size*64),(int)(hdpi*self->hres), vdpi);
+    error = FT_Set_Char_Size(self->ft_face, 0, (int)(self->size*64), DPI * self->hres, DPI);
 
     if(error) {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
                 __LINE__, FT_Errors[error].code, FT_Errors[error].message);
         FT_Done_Face(self->ft_face);
+        FT_Done_FreeType(*library);
         return 0;
     }
 
@@ -143,7 +144,7 @@ texture_glyph_new(void)
     if(self == NULL) {
         fprintf( stderr,
                 "line %d: No more memory for allocating data\n", __LINE__);
-        exit( EXIT_FAILURE );
+        return NULL;
     }
 
     self->width     = 0;
