@@ -9,8 +9,6 @@ install:
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 # Add repository for cmake 2.8.11 to find freetype headers properly
   - sudo add-apt-repository ppa:kalakris/cmake -y
-# Add repository for GLFW 3.0.4
-  - sudo add-apt-repository ppa:keithw/glfw3 -y
 # Install keyrings for trusty repositories
   - sudo apt-get install debian-keyring debian-archive-keyring
   - sudo apt-key update
@@ -22,9 +20,18 @@ install:
   - sudo ln -s /usr/bin/gcc-4.8 /usr/bin/gcc
   - sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
 # Install dependencies
-  - sudo apt-get install -qq cmake libglew-dev libfreetype* doxygen libharfbuzz-dev libglfw3-dev~trusty
-# AntTweakBar install
+  - sudo apt-get install -qq cmake libglew-dev libfreetype* doxygen libharfbuzz-dev
+# Prepare manual installation of dependencies
   - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP 
+# GLFW 3.1.1 install
+  - wget -O https://github.com/glfw/glfw/archive/3.1.1.zip
+  - unzip 3.1.1.zip
+  - cd glfw-3.1.1
+  - cmake -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF -DCMAKE_INSTALL_PREFIX=/usr
+  - make
+  - sudo make install
+  - cd ..
+# AntTweakBar install
   - wget -O AntTweakBar_116.zip http://sourceforge.net/projects/anttweakbar/files/latest/download?source=dlp 
   - unzip AntTweakBar_116.zip
   - cd AntTweakBar/src
