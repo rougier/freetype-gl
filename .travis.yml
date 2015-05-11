@@ -24,8 +24,8 @@ install:
 # Prepare manual installation of dependencies
   - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP 
 # GLFW 3.1.1 install
-  - wget -O https://github.com/glfw/glfw/archive/3.1.1.zip
-  - unzip 3.1.1.zip
+  - wget -O glfw-3.1.1.zip https://github.com/glfw/glfw/archive/3.1.1.zip
+  - unzip glfw-3.1.1.zip
   - cd glfw-3.1.1
   - cmake -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF -DCMAKE_INSTALL_PREFIX=/usr
   - make
