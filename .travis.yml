@@ -30,6 +30,8 @@ install:
   - cmake -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF -DCMAKE_INSTALL_PREFIX=/usr -DLIB_SUFFIX=/x86_64-linux-gnu
   - make
   - sudo make install
+# Bug in GLFW upstream: https://github.com/glfw/glfw/pull/460
+  - sudo mv /usr/lib/x86_64-linux-gnu/cmake/glfw /usr/lib/x86_64-linux-gnu/cmake/glfw3
   - cd ..
 # AntTweakBar install
   - wget -O AntTweakBar_116.zip http://sourceforge.net/projects/anttweakbar/files/latest/download?source=dlp 
