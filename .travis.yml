@@ -50,4 +50,4 @@ install:
 #
   - cd ..
 script:
-  - cmake -Dfreetype-gl_BUILD_HARFBUZZ=ON . && make
+    - cmake -Dfreetype-gl_BUILD_HARFBUZZ=ON -Dglfw_DIR=/usr/lib/x86_64-linux-gnu/cmake/glfw . && make
