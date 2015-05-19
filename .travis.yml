@@ -1,6 +1,10 @@
 language: c
 compiler:
   - gcc
+before_install:
+# FreeGLUT requires a working X11 display and makefont uses FreeGLUT.
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
 install:
 # Add repository for libharfbuzz-dev
   - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu trusty universe"
