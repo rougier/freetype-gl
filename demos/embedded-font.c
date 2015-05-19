@@ -45,7 +45,7 @@
 #endif
 #include <stdio.h>
 #include <wchar.h>
-#include "arial-16.h"
+#include "vera-16.h"
 
 void print_at( int pen_x, int pen_y, wchar_t *text )
 {

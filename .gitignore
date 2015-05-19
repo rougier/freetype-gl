@@ -20,6 +20,7 @@ demos/markup
 demos/outline
 demos/subpixel
 demos/texture
+demos/vera-16.h
 
 doc/html/
 doc/Doxyfile

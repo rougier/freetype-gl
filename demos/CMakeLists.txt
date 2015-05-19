@@ -66,6 +66,17 @@ MACRO( DEMO _target _sources)
     endif()
 ENDMACRO( DEMO )
 
+ADD_CUSTOM_TARGET(generate-embedded-font
+    COMMAND ../makefont
+        --font fonts/Vera.ttf
+        --header ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
+        --size 16
+        --variable font
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+DEMO( embedded-font    "embedded-font.c" )
+
+ADD_DEPENDENCIES(embedded-font generate-embedded-font)
+
 DEMO( texture          "texture.c" )
 DEMO( font             "font.c" )
 DEMO( benchmark        "benchmark.c" )
@@ -78,7 +89,6 @@ DEMO( lcd              "lcd.c" )
 DEMO( gamma            "gamma.c" )
 DEMO( ansi             "ansi.c" )
 DEMO( subpixel         "subpixel.c" )
-DEMO( embedded-font    "embedded-font.c" )
 DEMO( distance-field   "distance-field.c")
 DEMO( distance-field-2 "distance-field-2.c")
 DEMO( distance-field-3 "distance-field-3.c")
