@@ -38,13 +38,7 @@
 #include "shader.h"
 #include "mat4.h"
 
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#elif defined(_WIN32) || defined(_WIN64)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
+#include <GLFW/glfw3.h>
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -108,10 +102,11 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
 
 
 // ---------------------------------------------------------------- display ---
-void display( void )
+void display( GLFWwindow* window )
 {
-    static int frame=0, time, timebase=0;
+    static int frame=0;
     static int count = 0;
+    static double time;
 
     if( count == 0 && frame == 0 )
     {
@@ -122,14 +117,14 @@ void display( void )
     }
 
 	frame++;
-	time = glutGet( GLUT_ELAPSED_TIME );
+	time = glfwGetTime( );
 
-    if( time-timebase > (2500) )
+    if( time > 2.5 )
     {
         printf( "FPS : %.2f (%d frames in %.2f second, %.1f glyph/second)\n",
-                frame*1000.0/(time-timebase), frame, (time-timebase)/1000.0,
-                frame*1000.0/(time-timebase) * wcslen(text)*line_count );
-        timebase = time;
+                frame/time, frame, time,
+                frame/time * wcslen(text)*line_count );
+        glfwSetTime( 0.0 );
         frame = 0;
         ++count;
         if( count == 5 )
@@ -139,7 +134,7 @@ void display( void )
         }
         if( count > 9 )
         {
-            exit( EXIT_SUCCESS );
+            glfwSetWindowShouldClose( window, GL_TRUE );
         }
     }
     if( count < 5 )
@@ -173,12 +168,12 @@ void display( void )
         vertex_buffer_render( buffer, GL_TRIANGLES );
     }
 
-    glutSwapBuffers( );
+    glfwSwapBuffers( window );
 }
 
 
 // ---------------------------------------------------------------- reshape ---
-void reshape( int width, int height )
+void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
     mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
@@ -186,19 +181,19 @@ void reshape( int width, int height )
 
 
 // --------------------------------------------------------------- keyboard ---
-void keyboard( unsigned char key, int x, int y )
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
-    if ( key == 27 )
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
     {
-        exit( EXIT_SUCCESS );
+        glfwSetWindowShouldClose( window, GL_TRUE );
     }
 }
 
 
-// ------------------------------------------------------------------- idle ---
-void idle( void )
+/* -------------------------------------------------------- error-callback - */
+void error_callback( int error, const char* description )
 {
-    glutPostRedisplay();
+    fputs( description, stderr );
 }
 
 
@@ -208,15 +203,33 @@ int main( int argc, char **argv )
     size_t i;
     vec4 color = {{0,0,0,1}};
     vec2 pen = {{0,0}};
+    GLFWwindow* window;
 
-    glutInit( &argc, argv );
-    glutInitWindowSize( 800, 600 );
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Freetype OpenGL benchmark" );
-    glutReshapeFunc( reshape );
-    glutDisplayFunc( display );
-    glutKeyboardFunc( keyboard );
-    glutIdleFunc( idle );
+    glfwSetErrorCallback( error_callback );
+
+    if (!glfwInit( ))
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    window = glfwCreateWindow( 1, 1, "Freetype OpenGL benchmark", NULL, NULL );
+
+    if (!window)
+    {
+        glfwTerminate( );
+        exit( EXIT_FAILURE );
+    }
+
+    glfwMakeContextCurrent( window );
+    glfwSwapInterval( 0 ); // disable V-SYNC
+
+    glfwSetFramebufferSizeCallback( window, reshape );
+    glfwSetWindowRefreshCallback( window, display );
+    glfwSetKeyCallback( window, keyboard );
+
 #ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
@@ -252,7 +265,19 @@ int main( int argc, char **argv )
     mat4_set_identity( &model );
     mat4_set_identity( &view );
 
-    glutMainLoop( );
+    glfwSetWindowSize( window, 800, 600 );
+    glfwShowWindow( window );
+
+    glfwSetTime(0.0);
+
+    while(!glfwWindowShouldClose( window ))
+    {
+        display( window );
+        glfwPollEvents( );
+    }
+
+    glfwDestroyWindow( window );
+    glfwTerminate( );
 
     return EXIT_SUCCESS;
 }

@@ -32,19 +32,11 @@
  * ============================================================================
  */
 #include <stdio.h>
-#include <time.h>
 #include "freetype-gl.h"
 #include "shader.h"
 #include "vertex-buffer.h"
 
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#elif defined(_WIN32) || defined(_WIN64)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
-
+#include <GLFW/glfw3.h>
 
 
 // ------------------------------------------------------- global variables ---
@@ -67,11 +59,11 @@ void init( void )
 
 
 // ---------------------------------------------------------------- display ---
-void display( void )
+void display( GLFWwindow* window )
 {
     static float theta=0, phi=0;
     static GLuint Color = 0;
-    float seconds_elapsed = (float)clock() / CLOCKS_PER_SEC;
+    double seconds_elapsed = glfwGetTime( );
 
     if( !Color )
     {
@@ -103,12 +95,12 @@ void display( void )
 
     glPopMatrix();
 
-    glutSwapBuffers( );
+    glfwSwapBuffers( window );
 }
 
 
 // ---------------------------------------------------------------- reshape ---
-void reshape( int width, int height )
+void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
     glMatrixMode( GL_PROJECTION );
@@ -121,34 +113,52 @@ void reshape( int width, int height )
 
 
 // --------------------------------------------------------------- keyboard ---
-void keyboard( unsigned char key, int x, int y )
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
-    if ( key == 27 )
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
     {
-        exit( EXIT_SUCCESS );
+        glfwSetWindowShouldClose( window, GL_TRUE );
     }
 }
 
 
-// ------------------------------------------------------------------ timer ---
-void timer( int dt )
+/* -------------------------------------------------------- error-callback - */
+void error_callback( int error, const char* description )
 {
-    glutPostRedisplay();
-    glutTimerFunc( dt, timer, dt );
+    fputs( description, stderr );
 }
+
 
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
-    glutInit( &argc, argv );
-    glutInitWindowSize( 400, 400 );
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( argv[0] );
-    glutReshapeFunc( reshape );
-    glutDisplayFunc( display );
-    glutKeyboardFunc( keyboard );
-    //glutTimerFunc( 1000/60, timer, 1000/60 ); // not working on some systems (bug in GLUT)
-    glutIdleFunc(display);
+    GLFWwindow* window;
+
+    glfwSetErrorCallback( error_callback );
+
+    if (!glfwInit( ))
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    window = glfwCreateWindow( 1, 1, "Distance fields demo", NULL, NULL );
+
+    if (!window)
+    {
+        glfwTerminate( );
+        exit( EXIT_FAILURE );
+    }
+
+    glfwMakeContextCurrent( window );
+    glfwSwapInterval( 1 );
+
+    glfwSetFramebufferSizeCallback( window, reshape );
+    glfwSetWindowRefreshCallback( window, display );
+    glfwSetKeyCallback( window, keyboard );
+
 #ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
@@ -185,6 +195,20 @@ int main( int argc, char **argv )
     shader = shader_load("shaders/cube.vert","shaders/cube.frag");
 
     init( );
-    glutMainLoop( );
+
+    glfwSetWindowSize( window, 400, 400 );
+    glfwShowWindow( window );
+
+    glfwSetTime(0.0);
+
+    while(!glfwWindowShouldClose( window ))
+    {
+        display( window );
+        glfwPollEvents( );
+    }
+
+    glfwDestroyWindow( window );
+    glfwTerminate( );
+
     return EXIT_SUCCESS;
 }
