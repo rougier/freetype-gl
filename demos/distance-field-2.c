@@ -32,7 +32,6 @@
  * ========================================================================= */
 #include <stdio.h>
 #include <string.h>
-#include <wchar.h>
 
 #include "freetype-gl.h"
 #include "edtaa3func.h"
@@ -41,7 +40,6 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
-#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -140,24 +138,20 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 // --------------------------------------------------------------- add_text ---
 vec4
 add_text( vertex_buffer_t * buffer, texture_font_t * font,
-          wchar_t * text, vec4 * color, vec2 * pen )
+          char *text, vec4 * color, vec2 * pen )
 {
     vec4 bbox = {{0,0,0,0}};
     size_t i;
     float r = color->red, g = color->green, b = color->blue, a = color->alpha;
-    for( i=0; i<wcslen(text); ++i )
+    for( i = 0; i < strlen(text); ++i )
     {
-        char * character = utf16_to_utf8( text[i] );
-        texture_glyph_t *glyph = texture_font_get_glyph( font, character );
-        free( character );
+        texture_glyph_t *glyph = texture_font_get_glyph( font, text + i );
         if( glyph != NULL )
         {
             float kerning = 0.0f;
             if( i > 0)
             {
-                char * character = utf16_to_utf8( text[i-1] );
-                kerning = texture_glyph_get_kerning( glyph, character );
-                free( character );
+                kerning = texture_glyph_get_kerning( glyph, text + i - 1 );
             }
             pen->x += kerning;
             int x0  = (int)( pen->x + glyph->offset_x );
@@ -307,7 +301,7 @@ int main( int argc, char **argv )
     texture_font_t *font = 0;
     texture_atlas_t *atlas = texture_atlas_new( 512, 512, 1 );
     const char * filename = "fonts/Vera.ttf";
-    wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
+    char *text = "A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
     vec2 pen = {{0,0}};
     vec4 black = {{1,1,1,1}};
