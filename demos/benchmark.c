@@ -32,12 +32,11 @@
  * ============================================================================
  */
 #include <stdio.h>
-#include <wchar.h>
+#include <string.h>
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
 #include "shader.h"
 #include "mat4.h"
-#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -54,9 +53,9 @@ typedef struct {
 texture_atlas_t * atlas;
 texture_font_t * font;
 vertex_buffer_t * buffer;
-wchar_t *text =
-    L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 "
-    L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 ";
+char *text =
+    "A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 "
+    "A Quick Brown Fox Jumps Over The Lazy Dog 0123456789 ";
 int line_count = 42;
 GLuint shader;
 mat4   model, view, projection;
@@ -64,23 +63,19 @@ mat4   model, view, projection;
 
 // --------------------------------------------------------------- add_text ---
 void add_text( vertex_buffer_t * buffer, texture_font_t * font,
-               wchar_t * text, vec4 * color, vec2 * pen )
+               char *text, vec4 * color, vec2 * pen )
 {
     size_t i;
     float r = color->red, g = color->green, b = color->blue, a = color->alpha;
-    for( i=0; i<wcslen(text); ++i )
+    for( i = 0; i < strlen(text); ++i )
     {
-        char * character = utf16_to_utf8( text[i] );
-        texture_glyph_t *glyph = texture_font_get_glyph( font, character );
-        free( character );
+        texture_glyph_t *glyph = texture_font_get_glyph( font, text + i );
         if( glyph != NULL )
         {
             float kerning = 0.0f;
             if( i > 0)
             {
-                char * character = utf16_to_utf8( text[i-1] );
-                kerning = texture_glyph_get_kerning( glyph, character );
-                free( character );
+                kerning = texture_glyph_get_kerning( glyph, text + i - 1 );
             }
             pen->x += kerning;
             int x0  = (int)( pen->x + glyph->offset_x );
@@ -118,7 +113,7 @@ void display( GLFWwindow* window )
         printf(
             "Computing FPS with text generation and rendering at each frame...\n" );
         printf(
-            "Number of glyphs: %d\n", (int)wcslen(text)*line_count );
+            "Number of glyphs: %d\n", (int)strlen(text)*line_count );
     }
 
 	frame++;
@@ -128,14 +123,14 @@ void display( GLFWwindow* window )
     {
         printf( "FPS : %.2f (%d frames in %.2f second, %.1f glyph/second)\n",
                 frame/time, frame, time,
-                frame/time * wcslen(text)*line_count );
+                frame/time * strlen(text)*line_count );
         glfwSetTime( 0.0 );
         frame = 0;
         ++count;
         if( count == 5 )
         {
             printf( "\nComputing FPS with text rendering at each frame...\n" );
-            printf( "Number of glyphs: %d\n", (int)wcslen(text)*line_count );
+            printf( "Number of glyphs: %d\n", (int)strlen(text)*line_count );
         }
         if( count > 9 )
         {
