@@ -30,7 +30,6 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-#include <wchar.h>
 #include <string.h>
 #include <stdio.h>
 #include "freetype-gl.h"
@@ -38,15 +37,8 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
-#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
-
-
-#if defined(_WIN32) || defined(_WIN64)
-#  define wcpncpy wcsncpy
-#  define wcpcpy  wcscpy
-#endif
 
 
 // -------------------------------------------------------------- constants ---
@@ -78,14 +70,14 @@ typedef struct {
 
 struct _console_t {
     vector_t *     lines;
-    wchar_t *      prompt;
-    wchar_t        killring[MAX_LINE_LENGTH+1];
-    wchar_t        input[MAX_LINE_LENGTH+1];
+    char *prompt;
+    char killring[MAX_LINE_LENGTH+1];
+    char input[MAX_LINE_LENGTH+1];
     size_t         cursor;
     markup_t       markup[MARKUP_COUNT];
     vertex_buffer_t * buffer;
     vec2           pen;
-    void (*handlers[4])( struct _console_t *, wchar_t * );
+    void (*handlers[4])( struct _console_t *, char * );
 };
 typedef struct _console_t console_t;
 
@@ -106,12 +98,12 @@ console_new( void )
     {
         return self;
     }
-    self->lines = vector_new( sizeof(wchar_t *) );
-    self->prompt = (wchar_t *) wcsdup( L">>> " );
+    self->lines = vector_new( sizeof(char *) );
+    self->prompt = strdup( ">>> " );
     self->cursor = 0;
     self->buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
-    self->input[0] = L'\0';
-    self->killring[0] = L'\0';
+    self->input[0] = '\0';
+    self->killring[0] = '\0';
     self->handlers[__SIGNAL_ACTIVATE__]     = 0;
     self->handlers[__SIGNAL_COMPLETE__]     = 0;
     self->handlers[__SIGNAL_HISTORY_NEXT__] = 0;
@@ -200,18 +192,14 @@ console_delete( console_t *self )
 // ----------------------------------------------------- console_add_glyph ---
 void
 console_add_glyph( console_t *self,
-                   wchar_t current,
-                   wchar_t previous,
+                   char* current,
+                   char* previous,
                    markup_t *markup )
 {
-    char * character = utf16_to_utf8( current );
-    texture_glyph_t *glyph  = texture_font_get_glyph( markup->font, character );
-    free( character );
-    if( previous != L'\0' )
+    texture_glyph_t *glyph  = texture_font_get_glyph( markup->font, current );
+    if( previous )
     {
-        char * character = utf16_to_utf8( previous );
-        self->pen.x += texture_glyph_get_kerning( glyph, character );
-        free( character );
+        self->pen.x += texture_glyph_get_kerning( glyph, previous );
     }
     float r = markup->foreground_color.r;
     float g = markup->foreground_color.g;
@@ -243,6 +231,9 @@ console_add_glyph( console_t *self,
 void
 console_render( console_t *self )
 {
+    char* cur_char;
+    char* prev_char;
+
     int viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
 
@@ -262,13 +253,18 @@ console_render( console_t *self )
 
     for( i=0; i<self->lines->size; ++i )
     {
-        wchar_t *text = * (wchar_t **) vector_get( self->lines, i ) ;
-        if( wcslen(text) > 0 )
+        char *text = * (char **) vector_get( self->lines, i ) ;
+        if( strlen(text) > 0 )
         {
-            console_add_glyph( console, text[0], L'\0', &markup );
-            for( index=1; index < wcslen(text)-1; ++index )
+            cur_char = text;
+            prev_char = NULL;
+            console_add_glyph( console, cur_char, prev_char, &markup );
+            prev_char = cur_char;
+            for( index=1; index < strlen(text)-1; ++index )
             {
-                console_add_glyph( console, text[index], text[index-1], &markup );
+                cur_char = text + index;
+                console_add_glyph( console, cur_char, prev_char, &markup );
+                prev_char = cur_char;
             }
         }
         self->pen.y -= markup.font->height - markup.font->linegap;
@@ -279,28 +275,38 @@ console_render( console_t *self )
 
     // Prompt
     markup = self->markup[MARKUP_BOLD];
-    if( wcslen( self->prompt ) > 0 )
+    if( strlen( self->prompt ) > 0 )
     {
-        console_add_glyph( console, self->prompt[0], L'\0', &markup );
-        for( index=1; index < wcslen(self->prompt); ++index )
+        cur_char = self->prompt;
+        prev_char = NULL;
+        console_add_glyph( console, cur_char, prev_char, &markup );
+        prev_char = cur_char;
+        for( index=1; index < strlen(self->prompt); ++index )
         {
-            console_add_glyph( console, self->prompt[index], self->prompt[index-1], &markup );
+            cur_char = self->prompt + index;
+            console_add_glyph( console, cur_char, prev_char, &markup );
+            prev_char = cur_char;
         }
     }
     cursor_x = (int) self->pen.x;
 
     // Input
     markup = self->markup[MARKUP_NORMAL];
-    if( wcslen(self->input) > 0 )
+    if( strlen(self->input) > 0 )
     {
-        console_add_glyph( console, self->input[0], L'\0', &markup );
+        cur_char = self->input;
+        prev_char = NULL;
+        console_add_glyph( console, cur_char, prev_char, &markup );
+        prev_char = cur_char;
         if( self->cursor > 0)
         {
             cursor_x = (int) self->pen.x;
         }
-        for( index=1; index < wcslen(self->input); ++index )
+        for( index=1; index < strlen(self->input); ++index )
         {
-            console_add_glyph( console, self->input[index], self->input[index-1], &markup );
+            cur_char = self->input + index;
+            console_add_glyph( console, cur_char, prev_char, &markup );
+            prev_char = cur_char;
             if( index < self->cursor )
             {
                 cursor_x = (int) self->pen.x;
@@ -352,7 +358,7 @@ console_render( console_t *self )
 void
 console_connect( console_t *self,
                   const char *signal,
-                  void (*handler)(console_t *, wchar_t *))
+                  void (*handler)(console_t *, char *))
 {
     if( strcmp( signal,"activate" ) == 0 )
     {
@@ -373,44 +379,43 @@ console_connect( console_t *self,
 }
 
 
-
 // --------------------------------------------------------- console_print ---
 void
-console_print( console_t *self, wchar_t *text )
+console_print( console_t *self, char *text )
 {
     // Make sure there is at least one line
     if( self->lines->size == 0 )
     {
-        wchar_t *line = wcsdup( L"" );
+        char *line = strdup( "" );
         vector_push_back( self->lines, &line );
     }
 
     // Make sure last line does not end with '\n'
-    wchar_t *last_line = *(wchar_t **) vector_get( self->lines, self->lines->size-1 ) ;
-    if( wcslen( last_line ) != 0 )
+    char *last_line = *(char **) vector_get( self->lines, self->lines->size-1 ) ;
+    if( strlen( last_line ) != 0 )
     {
-        if( last_line[wcslen( last_line ) - 1] == L'\n' )
+        if( last_line[strlen( last_line ) - 1] == '\n' )
         {
-            wchar_t *line = wcsdup( L"" );
+            char *line = strdup( "" );
             vector_push_back( self->lines, &line );
         }
     }
-    last_line = *(wchar_t **) vector_get( self->lines, self->lines->size-1 ) ;
+    last_line = *(char **) vector_get( self->lines, self->lines->size-1 ) ;
 
-    wchar_t *start = text;
-    wchar_t *end   = wcschr(start, L'\n');
-    size_t len = wcslen( last_line );
+    char *start = text;
+    char *end   = strchr(start, '\n');
+    size_t len = strlen( last_line );
     if( end != NULL)
     {
-        wchar_t *line = (wchar_t *) malloc( (len + end - start + 2)*sizeof( wchar_t ) );
-        wcpncpy( line, last_line, len );
-        wcpncpy( line + len, text, end-start+1 );
+        char *line = (char *) malloc( (len + end - start + 2)*sizeof( char ) );
+        strncpy( line, last_line, len );
+        strncpy( line + len, text, end-start+1 );
 
-        line[len+end-start+1] = L'\0';
+        line[len+end-start+1] = '\0';
 
         vector_set( self->lines, self->lines->size-1, &line );
         free( last_line );
-        if( (end-start)  < (wcslen( text )-1) )
+        if( (end-start)  < (strlen( text )-1) )
         {
             console_print(self, end+1 );
         }
@@ -418,15 +423,14 @@ console_print( console_t *self, wchar_t *text )
     }
     else
     {
-        wchar_t *line = (wchar_t *) malloc( (len + wcslen(text) + 1) * sizeof( wchar_t ) );
-        wcpncpy( line, last_line, len );
-        wcpcpy( line + len, text );
+        char *line = (char *) malloc( (len + strlen(text) + 1) * sizeof( char ) );
+        strncpy( line, last_line, len );
+        strcpy( line + len, text );
         vector_set( self->lines, self->lines->size-1, &line );
         free( last_line );
         return;
     }
 }
-
 
 
 // ------------------------------------------------------- console_process ---
@@ -435,7 +439,7 @@ console_process( console_t *self,
                   const char *action,
                   const unsigned char key )
 {
-    size_t len = wcslen(self->input);
+    size_t len = strlen(self->input);
 
     if( strcmp(action, "type") == 0 )
     {
@@ -443,8 +447,8 @@ console_process( console_t *self,
         {
             memmove( self->input + self->cursor+1,
                      self->input + self->cursor,
-                     (len - self->cursor+1)*sizeof(wchar_t) );
-            self->input[self->cursor] = (wchar_t) key;
+                     (len - self->cursor+1)*sizeof(char) );
+            self->input[self->cursor] = key;
             self->cursor++;
         }
         else
@@ -462,13 +466,13 @@ console_process( console_t *self,
             }
             console_print( self, self->prompt );
             console_print( self, self->input );
-            console_print( self, L"\n" );
-            self->input[0] = L'\0';
+            console_print( self, "\n" );
+            self->input[0] = '\0';
             self->cursor = 0;
         }
         else if( strcmp( action, "right" ) == 0 )
         {
-            if( self->cursor < wcslen(self->input) )
+            if( self->cursor < strlen(self->input) )
             {
                 self->cursor += 1;
             }
@@ -484,7 +488,7 @@ console_process( console_t *self,
         {
             memmove( self->input + self->cursor,
                      self->input + self->cursor+1,
-                     (len - self->cursor)*sizeof(wchar_t) );
+                     (len - self->cursor)*sizeof(char) );
         }
         else if( strcmp( action, "backspace" ) == 0 )
         {
@@ -492,7 +496,7 @@ console_process( console_t *self,
             {
                 memmove( self->input + self->cursor-1,
                          self->input + self->cursor,
-                         (len - self->cursor+1)*sizeof(wchar_t) );
+                         (len - self->cursor+1)*sizeof(char) );
                 self->cursor--;
             }
         }
@@ -500,22 +504,22 @@ console_process( console_t *self,
         {
             if( self->cursor < len )
             {
-                wcpcpy(self->killring, self->input + self->cursor );
-                self->input[self->cursor] = L'\0';
-                fwprintf(stderr, L"Kill ring: %ls\n", self->killring);
+                strcpy(self->killring, self->input);
+                self->input[self->cursor] = '\0';
+                fprintf(stderr, "Kill ring: %s\n", self->killring);
             }
 
         }
         else if( strcmp( action, "yank" ) == 0 )
         {
-            size_t l = wcslen(self->killring);
+            size_t l = strlen(self->killring);
             if( (len + l) < MAX_LINE_LENGTH )
             {
                 memmove( self->input + self->cursor + l,
                          self->input + self->cursor,
-                         (len - self->cursor)*sizeof(wchar_t) );
+                         (len - self->cursor)*sizeof(char) );
                 memcpy( self->input + self->cursor,
-                        self->killring, l*sizeof(wchar_t));
+                        self->killring, l*sizeof(char));
                 self->cursor += l;
             }
         }
@@ -525,7 +529,7 @@ console_process( console_t *self,
         }
         else if( strcmp( action, "end" ) == 0 )
         {
-            self->cursor = wcslen( self->input );
+            self->cursor = strlen( self->input );
         }
         else if( strcmp( action, "clear" ) == 0 )
         {
@@ -534,21 +538,21 @@ console_process( console_t *self,
         {
             if( console->handlers[__SIGNAL_HISTORY_PREV__] )
             {
-                (*console->handlers[__SIGNAL_HISTORY_PREV__])(console, console->input);
+                (*console->handlers[__SIGNAL_HISTORY_PREV__])( console, console->input );
             }
         }
         else if( strcmp( action, "history-next" ) == 0 )
         {
             if( console->handlers[__SIGNAL_HISTORY_NEXT__] )
             {
-                (*console->handlers[__SIGNAL_HISTORY_NEXT__])(console, console->input);
+                (*console->handlers[__SIGNAL_HISTORY_NEXT__])( console, console->input );
             }
         }
         else if( strcmp( action, "complete" ) == 0 )
         {
             if( console->handlers[__SIGNAL_COMPLETE__] )
             {
-                (*console->handlers[__SIGNAL_COMPLETE__])(console, console->input);
+                (*console->handlers[__SIGNAL_COMPLETE__])( console, console->input );
             }
         }
     }
@@ -658,25 +662,25 @@ void reshape( GLFWwindow* window, int width, int height )
 
 
 // ----------------------------------------------------------------------------
-void console_activate (console_t *self, wchar_t * input)
+void console_activate( console_t *self, char *input )
 {
-    //console_print( self, L"Activate callback\n" );
-    fwprintf( stderr, L"Activate callback : %ls\n", input );
+    //console_print( self, "Activate callback\n" );
+    fprintf( stderr, "Activate callback : %s\n", input );
 }
-void console_complete (console_t *self, wchar_t *input)
+void console_complete( console_t *self, char *input )
 {
-    // console_print( self, L"Complete callback\n" );
-    fwprintf( stderr, L"Complete callback : %ls\n", input );
+    // console_print( self, "Complete callback\n" );
+    fprintf( stderr, "Complete callback : %s\n", input );
 }
-void console_history_prev (console_t *self, wchar_t *input)
+void console_history_prev( console_t *self, char *input )
 {
-    // console_print( self, L"History prev callback\n" );
-    fwprintf( stderr, L"History prev callback : %ls\n", input );
+    // console_print( self, "History prev callback\n" );
+    fprintf( stderr, "History prev callback : %s\n", input );
 }
-void console_history_next (console_t *self, wchar_t *input)
+void console_history_next( console_t *self, char *input )
 {
-    // console_print( self, L"History next callback\n" );
-    fwprintf( stderr, L"History next callback : %ls\n", input );
+    // console_print( self, "History next callback\n" );
+    fprintf( stderr, "History next callback : %s\n", input );
 }
 
 
@@ -732,8 +736,8 @@ int main( int argc, char **argv )
 #endif
     console = console_new();
     console_print( console,
-                   L"OpenGL Freetype console\n"
-                   L"Copyright 2011 Nicolas P. Rougier. All rights reserved.\n \n" );
+                   "OpenGL Freetype console\n"
+                   "Copyright 2011 Nicolas P. Rougier. All rights reserved.\n \n" );
     console_connect( console, "activate",     console_activate );
     console_connect( console, "complete",     console_complete );
     console_connect( console, "history-prev", console_history_prev );
