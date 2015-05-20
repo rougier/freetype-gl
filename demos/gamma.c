@@ -37,7 +37,6 @@
  */
 #include <stdarg.h>
 #include <stdio.h>
-#include <wchar.h>
 
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
@@ -45,7 +44,6 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
-#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -186,13 +184,11 @@ int main( int argc, char **argv )
     pen.x = 32;
     pen.y = 508;
 
-    wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789\n";
+    char *text = "A Quick Brown Fox Jumps Over The Lazy Dog 0123456789\n";
     for( i=0; i < 14; ++i )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
-        char * utext = str_utf16_to_utf8( text );
-        text_buffer_add_text( buffer, &pen, &markup, utext, 0 );
-        free( utext );
+        text_buffer_add_text( buffer, &pen, &markup, text, 0 );
     }
     pen.x = 32;
     pen.y = 252;
@@ -200,9 +196,7 @@ int main( int argc, char **argv )
     for( i=0; i < 14; ++i )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
-        char * utext = str_utf16_to_utf8( text );
-        text_buffer_add_text( buffer, &pen, &markup, utext, 0 );
-        free( utext );
+        text_buffer_add_text( buffer, &pen, &markup, text, 0 );
     }
 
     background = vertex_buffer_new( "vertex:3f,color:4f" );
