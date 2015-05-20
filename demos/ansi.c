@@ -33,7 +33,7 @@
  */
 #include <stdarg.h>
 #include <stdio.h>
-#include <wchar.h>
+#include <string.h>
 #include "freetype-gl.h"
 #include "font-manager.h"
 #include "vertex-buffer.h"
@@ -41,7 +41,6 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
-#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -137,7 +136,7 @@ init_colors( vec4 *colors )
 
 /* -------------------------------------------------------- ansi_to_markup - */
 void
-ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
+ansi_to_markup( char *sequence, size_t length, markup_t *markup )
 {
     size_t i;
     int code = 0;
@@ -170,7 +169,7 @@ ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
 
     for( i=0; i<length; ++i)
     {
-        wchar_t c = *(sequence+i);
+        char c = *(sequence+i);
         if( c >= '0' && c <= '9' )
         {
             code = code * 10 + (c-'0');
@@ -253,17 +252,18 @@ ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
 /* ----------------------------------------------------------------- print - */
 void
 print( text_buffer_t * buffer, vec2 * pen,
-       wchar_t *text, markup_t *markup )
+       char *text, markup_t *markup )
 {
-    wchar_t *seq_start = text, *seq_end = text;
-    wchar_t *p;
-    for( p=text; p<(text+wcslen(text)); ++p )
+    char *seq_start = text, *seq_end = text;
+    char *p;
+    size_t i;
+    for( p=text; p<(text+strlen(text)); ++p )
     {
-        wchar_t *start = wcsstr( p, L"\033[" );
-        wchar_t *end = NULL;
+        char *start = strstr( p, "\033[" );
+        char *end = NULL;
         if( start)
         {
-            end = wcsstr( start+1, L"m");
+            end = strstr( start+1, "m" );
         }
         if( (start == p) && (end > start) )
         {
@@ -274,7 +274,7 @@ print( text_buffer_t * buffer, vec2 * pen,
         else
         {
             int seq_size = (seq_end-seq_start)+1;
-            wchar_t * text_start = p;
+            char * text_start = p;
             int text_size = 0;
             if( start )
             {
@@ -283,14 +283,12 @@ print( text_buffer_t * buffer, vec2 * pen,
             }
             else
             {
-                text_size = text+wcslen(text)-p;
-                p = text+wcslen(text);
+                text_size = text+strlen(text)-p;
+                p = text+strlen(text);
             }
             ansi_to_markup(seq_start, seq_size, markup );
             markup->font = font_manager_get_from_markup( buffer->manager, markup );
-            char * utext = str_utf16_to_utf8( text_start );
-            text_buffer_add_text( buffer, pen, markup, utext, text_size );
-            free( utext );
+            text_buffer_add_text( buffer, pen, markup, text_start, text_size );
         }
     }
 }
@@ -369,8 +367,8 @@ int main( int argc, char **argv )
     FILE *file = fopen ( "data/256colors.txt", "r" );
     if ( file != NULL )
     {
-        wchar_t line[1024];
-        while( fgetws ( line, sizeof(line), file ) != NULL )
+        char line[1024];
+        while( fgets ( line, sizeof(line), file ) != NULL )
         {
             print( buffer, &pen, line, &markup );
         }
