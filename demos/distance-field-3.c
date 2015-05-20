@@ -38,6 +38,7 @@
 #include "texture-font.h"
 #include "texture-atlas.h"
 #include "platform.h"
+#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -289,7 +290,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 // ------------------------------------------------------------- load_glyph ---
 texture_glyph_t *
-load_glyph( const char *  filename,     const wchar_t charcode,
+load_glyph( const char *  filename,     const char* charcode,
             const float   highres_size, const float   lowres_size,
             const float   padding )
 {
@@ -300,7 +301,7 @@ load_glyph( const char *  filename,     const wchar_t charcode,
     FT_Init_FreeType( &library );
     FT_New_Face( library, filename, 0, &face );
     FT_Select_Charmap( face, FT_ENCODING_UNICODE );
-    FT_UInt glyph_index = FT_Get_Char_Index( face, charcode );
+    FT_UInt glyph_index = FT_Get_Char_Index( face, utf8_to_utf32( charcode ) );
 
     // Render glyph at high resolution (highres_size points)
     FT_Set_Char_Size( face, highres_size*64, 0, 72, 72 );
@@ -362,7 +363,7 @@ load_glyph( const char *  filename,     const wchar_t charcode,
     glyph->offset_y = (slot->bitmap_top + padding*highres_height) * ratio;
     glyph->width    = lowres_width;
     glyph->height   = lowres_height;
-    glyph->charcode = charcode;
+    glyph->charcode = utf8_to_utf32( charcode );
     /*
     printf( "Glyph width:  %ld\n", glyph->width );
     printf( "Glyph height: %ld\n", glyph->height );
@@ -457,7 +458,7 @@ int main( int argc, char **argv )
     // Generate the glyp at 512 points, compute distance field and scale it
     // back to 32 points
     // Just load another glyph if you want to see difference (draw render a '@')
-    glyph = load_glyph( "fonts/Vera.ttf", L'@', 512, 64, 0.1);
+    glyph = load_glyph( "fonts/Vera.ttf", "@", 512, 64, 0.1);
     vector_push_back( font->glyphs, &glyph );
 
     texture_atlas_upload( atlas );
