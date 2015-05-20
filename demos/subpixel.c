@@ -35,7 +35,6 @@
 #include FT_CONFIG_OPTIONS_H
 
 #include <stdio.h>
-#include <wchar.h>
 
 #include "freetype-gl.h"
 
@@ -44,7 +43,6 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
-#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -203,12 +201,10 @@ int main( int argc, char **argv )
 
     size_t i;
     vec2 pen = {{20, 320}};
-    wchar_t *text = L"| A Quick Brown Fox Jumps Over The Lazy Dog\n";
+    char *text = "| A Quick Brown Fox Jumps Over The Lazy Dog\n";
     for( i=0; i < 30; ++i)
     {
-        char * utext = str_utf16_to_utf8( text );
-        text_buffer_add_text( text_buffer, &pen, &markup, utext, 0 );
-        free( utext );
+        text_buffer_add_text( text_buffer, &pen, &markup, text, 0 );
         pen.x += i*0.1;
     }
 
