@@ -121,7 +121,7 @@ void add_text( vertex_buffer_t * buffer, vec2 * pen, ... )
     markup_t *markup;
     wchar_t *text;
     va_list args;
-    va_start ( args, pen ); 
+    va_start ( args, pen );
 
     do {
         markup = va_arg( args, markup_t * );
@@ -203,7 +203,7 @@ int main( int argc, char **argv )
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
     atlas = texture_atlas_new( 512, 512, 1 );
-    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" ); 
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
 
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
@@ -218,11 +218,11 @@ int main( int argc, char **argv )
     markup.gamma   = 1.5;
     markup.foreground_color    = white;
     markup.background_color    = none;
-    markup.underline           = 0;   
+    markup.underline           = 0;
     markup.underline_color     = white;
-    markup.overline            = 0;  
+    markup.overline            = 0;
     markup.overline_color      = white;
-    markup.strikethrough       = 0;   
+    markup.strikethrough       = 0;
     markup.strikethrough_color = white;
     markup.font = 0;
 

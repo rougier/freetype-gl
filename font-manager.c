@@ -112,7 +112,7 @@ font_manager_delete_font( font_manager_t * self,
 
     assert( self );
     assert( font );
-    
+
     for( i=0; i<self->fonts->size;++i )
     {
         other = (texture_font_t *) vector_get( self->fonts, i );

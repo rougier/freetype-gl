@@ -26,15 +26,15 @@ install:
 # Install dependencies
   - sudo apt-get install -qq cmake libglew-dev libfreetype* freeglut3-dev doxygen libharfbuzz-dev
 # AntTweakBar install
-  - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP 
-  - wget -O AntTweakBar_116.zip http://sourceforge.net/projects/anttweakbar/files/latest/download?source=dlp 
+  - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP
+  - wget -O AntTweakBar_116.zip http://sourceforge.net/projects/anttweakbar/files/latest/download?source=dlp
   - unzip AntTweakBar_116.zip
   - cd AntTweakBar/src
 # And as it uses C++ ... we need to link with g++, but this Makefile's version doesn't !
 # So we modify the makefile with sed !
   - sed -i "s/LINK     	= gcc/LINK     	= g++/" Makefile
   - make
-  - sudo mv ../lib/libAntTweakBar.so /usr/lib/ 
+  - sudo mv ../lib/libAntTweakBar.so /usr/lib/
   - sudo mv ../lib/libAntTweakBar.so.1 /usr/lib/
   - sudo mv ../include/* /usr/include/
   - cd ../../

@@ -139,7 +139,7 @@ int main( int argc, char **argv )
     printf( "Total number of glyphs     : %ld/%ld\n",
             wcslen(cache)*count - missed, wcslen(cache)*count );
     printf( "Texture size               : %ldx%ld\n", atlas->width, atlas->height );
-    printf( "Texture occupancy          : %.2f%%\n", 
+    printf( "Texture occupancy          : %.2f%%\n",
             100.0*atlas->used/(float)(atlas->width*atlas->height) );
 
     glClearColor(1,1,1,1);

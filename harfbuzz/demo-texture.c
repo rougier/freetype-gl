@@ -243,14 +243,14 @@ int main( int argc, char **argv )
                                 hb_language_from_string(languages[i], strlen(languages[i])) );
 
         /* Layout the text */
-        hb_buffer_add_utf8( buf, texts[i], strlen(texts[i]), 0, strlen(texts[i]) ); 
+        hb_buffer_add_utf8( buf, texts[i], strlen(texts[i]), 0, strlen(texts[i]) );
         hb_shape( hb_ft_font[i], buf, NULL, 0 );
 
         unsigned int         glyph_count;
         hb_glyph_info_t     *glyph_info   = hb_buffer_get_glyph_infos(buf, &glyph_count);
         hb_glyph_position_t *glyph_pos    = hb_buffer_get_glyph_positions(buf, &glyph_count);
 
-        
+
         FT_GlyphSlot slot;
         FT_Bitmap ft_bitmap;
         float size = 24;

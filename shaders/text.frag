@@ -113,7 +113,7 @@ void main()
         r = mix(current.r, previous.b, z);
         g = mix(current.g, current.r,  z);
         b = mix(current.b, current.g,  z);
-    } 
+    }
     else if( vshift <= 0.666 )
     {
         float z = (vshift-0.33)/0.333;

@@ -100,7 +100,7 @@ void keyboard( unsigned char key, int x, int y )
 void
 init_colors( vec4 *colors )
 {
-    vec4 defaults[16] = 
+    vec4 defaults[16] =
         {
             {{ 46/256.0f,  52/256.0f,  54/256.0f, 1.0f}},
             {{204/256.0f,   0/256.0f,   0/256.0f, 1.0f}},
@@ -212,7 +212,7 @@ ansi_to_markup( wchar_t *sequence, size_t length, markup_t *markup )
             {
                 markup->background_color = colors[code-40];
             }
-            else 
+            else
             {
                 switch (code)
                 {
@@ -266,7 +266,7 @@ print( text_buffer_t * buffer, vec2 * pen,
     {
         wchar_t *start = wcsstr( p, L"\033[" );
         wchar_t *end = NULL;
-        if( start) 
+        if( start)
         {
             end = wcsstr( start+1, L"m");
         }
@@ -290,7 +290,7 @@ print( text_buffer_t * buffer, vec2 * pen,
             {
                 text_size = text+wcslen(text)-p;
                 p = text+wcslen(text);
-            }                
+            }
             ansi_to_markup(seq_start, seq_size, markup );
             markup->font = font_manager_get_from_markup( buffer->manager, markup );
             text_buffer_add_text( buffer, pen, markup, text_start, text_size );
@@ -336,11 +336,11 @@ int main( int argc, char **argv )
     markup.gamma   = 1.0;
     markup.foreground_color    = black;
     markup.background_color    = none;
-    markup.underline           = 0;   
+    markup.underline           = 0;
     markup.underline_color     = black;
-    markup.overline            = 0;  
+    markup.overline            = 0;
     markup.overline_color      = black;
-    markup.strikethrough       = 0;   
+    markup.strikethrough       = 0;
     markup.strikethrough_color = black;
     markup.font = 0;
 

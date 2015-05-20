@@ -335,7 +335,7 @@ texture_font_load_glyphs( texture_font_t * self,
         /* Check if charcode has been already loaded */
         for( j = 0; j < self->glyphs->size; ++j ) {
             glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
-            if( glyph->codepoint == glyph_info[i].codepoint ) 
+            if( glyph->codepoint == glyph_info[i].codepoint )
             {
                 pass = 1;
                 break;
@@ -409,7 +409,7 @@ texture_font_get_glyph( texture_font_t * self,
     for( i=0; i<self->glyphs->size; ++i )
     {
         glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
-        if( glyph->codepoint == codepoint ) 
+        if( glyph->codepoint == codepoint )
         {
             return glyph;
         }

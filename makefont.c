@@ -75,7 +75,7 @@ int main( int argc, char **argv )
     size_t i, j;
     int arg;
 
-    wchar_t * font_cache = 
+    wchar_t * font_cache =
         L" !\"#$%&'()*+,-./0123456789:;<=>?"
         L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
         L"`abcdefghijklmnopqrstuvwxyz{|}~";
@@ -250,7 +250,7 @@ int main( int argc, char **argv )
     wprintf( L"Number of missed glyphs    : %ld\n", missed );
     wprintf( L"Texture size               : %ldx%ldx%ld\n",
              atlas->width, atlas->height, atlas->depth );
-    wprintf( L"Texture occupancy          : %.2f%%\n", 
+    wprintf( L"Texture occupancy          : %.2f%%\n",
             100.0*atlas->used/(float)(atlas->width*atlas->height) );
     wprintf( L"\n" );
     wprintf( L"Header filename            : %s\n", header_filename );
@@ -277,7 +277,7 @@ int main( int argc, char **argv )
     // -------------
     // Header
     // -------------
-    fwprintf( file, 
+    fwprintf( file,
         L"/* ============================================================================\n"
         L" * Freetype GL - A C OpenGL Freetype engine\n"
         L" * Platform:    Any\n"
@@ -357,7 +357,7 @@ int main( int argc, char **argv )
         L"} texture_font_t;\n\n", texture_size, glyph_count );
 
 
-    
+
     fwprintf( file, L"texture_font_t %s = {\n", variable_name );
 
 
@@ -390,7 +390,7 @@ int main( int argc, char **argv )
     // -------------------
     // Texture information
     // -------------------
-    fwprintf( file, L" %ff, %ff, %ff, %ff, %ff, %d, \n", 
+    fwprintf( file, L" %ff, %ff, %ff, %ff, %ff, %d, \n",
              font->size, font->height,
              font->linegap,font->ascender, font->descender,
              glyph_count );
@@ -413,7 +413,7 @@ int main( int argc, char **argv )
                  glyph->offset_x, glyph->offset_y );
         wprintf( L"  advance    : %ff, %ff\n",
                  glyph->advance_x, glyph->advance_y );
-        wprintf( L"  tex coords.: %ff, %ff, %ff, %ff\n", 
+        wprintf( L"  tex coords.: %ff, %ff, %ff, %ff\n",
                  glyph->u0, glyph->v0, glyph->u1, glyph->v1 );
 
         wprintf( L"  kerning    : " );
@@ -421,7 +421,7 @@ int main( int argc, char **argv )
         {
             for( j=0; j < glyph->kerning_count; ++j )
             {
-                wprintf( L"('%lc', %ff)", 
+                wprintf( L"('%lc', %ff)",
                          glyph->kerning[j].charcode, glyph->kerning[j].kerning );
                 if( j < (glyph->kerning_count-1) )
                 {
