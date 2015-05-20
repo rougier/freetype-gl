@@ -32,14 +32,13 @@
  * ========================================================================= */
 #include <stdarg.h>
 #include <stdio.h>
-#include <wchar.h>
+#include <string.h>
 
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
-#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -114,7 +113,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 void add_text( vertex_buffer_t * buffer, vec2 * pen, ... )
 {
     markup_t *markup;
-    wchar_t *text;
+    char *text;
     va_list args;
     va_start ( args, pen );
 
@@ -124,7 +123,7 @@ void add_text( vertex_buffer_t * buffer, vec2 * pen, ... )
         {
             break;
         }
-        text = va_arg( args, wchar_t * );
+        text = va_arg( args, char * );
 
         size_t i;
         texture_font_t * font = markup->font;
@@ -133,20 +132,16 @@ void add_text( vertex_buffer_t * buffer, vec2 * pen, ... )
         float b = markup->foreground_color.blue;
         float a = markup->foreground_color.alpha;
 
-        for( i=0; i<wcslen(text); ++i )
+        for( i = 0; i < strlen(text); ++i )
         {
-            char * character = utf16_to_utf8( text[i] );
-            texture_glyph_t *glyph = texture_font_get_glyph( font, character );
-            free( character );
+            texture_glyph_t *glyph = texture_font_get_glyph( font, text + i );
 
             if( glyph != NULL )
             {
                 float kerning = 0.0f;
                 if( i > 0)
                 {
-                    char * character = utf16_to_utf8( text[i-1] );
-                    kerning = texture_glyph_get_kerning( glyph, character );
-                    free( character );
+                    kerning = texture_glyph_get_kerning( glyph, text + i - 1 );
                 }
                 pen->x += kerning;
 
@@ -259,7 +254,7 @@ int main( int argc, char **argv )
     for( i=0; i< 10; ++i)
     {
         markup.font->outline_thickness = 2*((i+1)/10.0);
-        add_text( buffer, &pen, &markup, L"g", NULL );
+        add_text( buffer, &pen, &markup, "g", NULL );
     }
 
     pen.x = 40;
@@ -268,7 +263,7 @@ int main( int argc, char **argv )
     for( i=0; i< 10; ++i)
     {
         markup.font->outline_thickness = 2*((i+1)/10.0);
-        add_text( buffer, &pen, &markup, L"g", NULL );
+        add_text( buffer, &pen, &markup, "g", NULL );
     }
 
     pen.x = 40;
@@ -277,7 +272,7 @@ int main( int argc, char **argv )
     for( i=0; i< 10; ++i)
     {
         markup.font->outline_thickness = 1*((i+1)/10.0);
-        add_text( buffer, &pen, &markup, L"g", NULL );
+        add_text( buffer, &pen, &markup, "g", NULL );
     }
     shader = shader_load("shaders/v3f-t2f-c4f.vert",
                          "shaders/v3f-t2f-c4f.frag");
