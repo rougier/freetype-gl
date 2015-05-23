@@ -52,13 +52,25 @@
 text_buffer_t *
 text_buffer_new( size_t depth )
 {
+    return text_buffer_new_with_shaders(depth, 
+                                        "shaders/text.vert",
+                                        "shaders/text.frag");
+}
+
+// ----------------------------------------------------------------------------
+
+text_buffer_t *
+text_buffer_new_with_shaders( size_t depth,
+                              const char * vert_filename,
+                              const char * frag_filename )
+{
     
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
     self->buffer = vertex_buffer_new(
-        "vertex:3f,tex_coord:2f,color:4f,ashift:1f,agamma:1f" );
+                                     "vertex:3f,tex_coord:2f,color:4f,ashift:1f,agamma:1f" );
     self->manager = font_manager_new( 512, 512, depth );
-    self->shader = shader_load("shaders/text.vert",
-                               "shaders/text.frag");
+    self->shader = shader_load(vert_filename,
+                               frag_filename);
     self->shader_texture = glGetUniformLocation(self->shader, "texture");
     self->shader_pixel = glGetUniformLocation(self->shader, "pixel");
     self->line_start = 0;
