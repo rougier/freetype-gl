@@ -211,7 +211,7 @@ int main( int argc, char **argv )
     markup_t underline = normal; underline.underline = 1;
     markup_t small     = normal; small.size = 10.0;
     markup_t big       = normal; big.size = 48.0;
-                                 big.italic = 1; 
+                                 big.italic = 1;
                                  big.foreground_color = yellow;
     markup_t bold      = normal; bold.bold = 1; bold.family = f_bold;
     markup_t italic    = normal; italic.italic = 1; italic.family = f_italic;

@@ -266,7 +266,7 @@ typedef struct texture_font_t
 
 /**
  * Request a new glyph from the font. If it has not been created yet, it will
- * be. 
+ * be.
  *
  * @param self     A valid texture font
  * @param charcode Character codepoint to be loaded.

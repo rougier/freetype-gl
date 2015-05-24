@@ -90,7 +90,7 @@ float p_primary;
 float p_secondary;
 float p_tertiary;
 
-static wchar_t text[] = 
+static wchar_t text[] =
     L"A single pixel on a color LCD is made of three colored elements \n"
     L"ordered (on various displays) either as blue, green, and red (BGR), \n"
     L"or as red, green, and blue (RGB). These pixel components, sometimes \n"
@@ -111,7 +111,7 @@ static wchar_t text[] =
 // ----------------------------------------------------------- build_buffer ---
 void
 build_buffer( void )
-{ 
+{
     vec2 pen;
     texture_font_t *font;
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
@@ -219,9 +219,9 @@ build_buffer( void )
         float dy = abs(y1-y0);
         float dx = tan(p_faux_italic/180.0 * M_PI) * dy;
         v0->x += dx;
-        v0->shift = fmod(v0->shift + dx-(int)(dx),1.0); 
+        v0->shift = fmod(v0->shift + dx-(int)(dx),1.0);
         v3->x += dx;
-        v3->shift = fmod(v3->shift + dx-(int)(dx),1.0); 
+        v3->shift = fmod(v3->shift + dx-(int)(dx),1.0);
     }
 
 
@@ -240,7 +240,7 @@ void display(void)
     {
         glClearColor( 0, 0, 0, 1 );
         buffer->base_color = white;
-                
+
     }
     else
     {
@@ -281,7 +281,7 @@ void reshape( int width, int height )
 
 // ------------------------------------------------------------------- quit ---
 void reset( void )
-{ 
+{
     p_family    = VERA;
     p_size      = 12.0;
     p_invert    = 0;
@@ -310,13 +310,13 @@ void reset( void )
 
 // ------------------------------------------------------------------- quit ---
 void quit( void )
-{ 
+{
     exit( EXIT_SUCCESS );
 }
 
 // -------------------------------------------------------------- terminate ---
 void terminate( void )
-{ 
+{
     TwTerminate();
 }
 
@@ -500,7 +500,7 @@ void TW_CALL get_tertiary( void *value, void *data )
 {
     *(float *)value = p_tertiary;
 }
- 
+
 
 // Main
 int main(int argc, char *argv[])
@@ -557,50 +557,50 @@ int main(int argc, char *argv[])
             {OLD_STANDARD, "Old Standard TT"},
             {LOBSTER,      "Lobster"} };
         TwType family_type = TwDefineEnum("Family", familyEV, NUM_FONTS);
-        TwAddVarCB(bar, "Family", family_type, set_family, get_family, NULL, 
+        TwAddVarCB(bar, "Family", family_type, set_family, get_family, NULL,
                    "label = 'Family'      "
                    "group = 'Font'        "
                    "help  = ' '           ");
     }
-    TwAddVarCB(bar, "Size", TW_TYPE_FLOAT, set_size, get_size, NULL, 
+    TwAddVarCB(bar, "Size", TW_TYPE_FLOAT, set_size, get_size, NULL,
                "label = 'Size' "
                "group = 'Font' "
                "min   = 6.0    "
                "max   = 24.0   "
                "step  = 0.05   "
                "help  = ' '    ");
-    TwAddVarCB(bar, "LCD filtering", TW_TYPE_BOOL32, set_lcd_filtering, get_lcd_filtering, NULL, 
+    TwAddVarCB(bar, "LCD filtering", TW_TYPE_BOOL32, set_lcd_filtering, get_lcd_filtering, NULL,
                "label = 'LCD filtering' "
               "group = 'Font'        "
                "help  = ' '             ");
 
 
     // Rendering
-    TwAddVarCB(bar, "Kerning", TW_TYPE_BOOL32, set_kerning, get_kerning, NULL, 
+    TwAddVarCB(bar, "Kerning", TW_TYPE_BOOL32, set_kerning, get_kerning, NULL,
                "label = 'Kerning'   "
                "group = 'Rendering' "
                "help  = ' '         ");
-    TwAddVarCB(bar, "Hinting", TW_TYPE_BOOL32, set_hinting, get_hinting, NULL, 
+    TwAddVarCB(bar, "Hinting", TW_TYPE_BOOL32, set_hinting, get_hinting, NULL,
                "label = 'Hinting'   "
                "group = 'Rendering' "
                "help  = ' '         ");
 
     // Color
-    TwAddVarCB(bar, "Invert", TW_TYPE_BOOL32, set_invert, get_invert, NULL, 
+    TwAddVarCB(bar, "Invert", TW_TYPE_BOOL32, set_invert, get_invert, NULL,
                "label = 'Invert' "
                "group = 'Color'  "
                "help  = ' '      ");
-    
+
     // Glyph
-    TwAddVarCB(bar, "Width", TW_TYPE_FLOAT, set_width, get_width, NULL, 
+    TwAddVarCB(bar, "Width", TW_TYPE_FLOAT, set_width, get_width, NULL,
                "label = 'Width' "
                "group = 'Glyph' "
                "min   = 0.75    "
-               "max   = 1.25    " 
+               "max   = 1.25    "
                "step  = 0.01    "
                "help  = ' '     ");
 
-    TwAddVarCB(bar, "Interval", TW_TYPE_FLOAT, set_interval, get_interval, NULL, 
+    TwAddVarCB(bar, "Interval", TW_TYPE_FLOAT, set_interval, get_interval, NULL,
                "label = 'Spacing' "
                "group = 'Glyph'   "
                "min   = -0.2      "
@@ -608,7 +608,7 @@ int main(int argc, char *argv[])
                "step  = 0.01      "
                "help  = ' '       " );
 
-    TwAddVarCB(bar, "Faux italic", TW_TYPE_FLOAT, set_faux_italic, get_faux_italic, NULL, 
+    TwAddVarCB(bar, "Faux italic", TW_TYPE_FLOAT, set_faux_italic, get_faux_italic, NULL,
                "label = 'Faux italic' "
                "group = 'Glyph'       "
                "min   = -30.0         "
@@ -644,7 +644,7 @@ int main(int argc, char *argv[])
     TwAddSeparator(bar, "",
                    "group = 'Energy distribution' " );
 
-    TwAddVarCB(bar, "Gamma", TW_TYPE_FLOAT, set_gamma, get_gamma, NULL, 
+    TwAddVarCB(bar, "Gamma", TW_TYPE_FLOAT, set_gamma, get_gamma, NULL,
                "label = 'Gamma correction'    "
                "group = 'Energy distribution' "
                "min   = 0.50                  "
@@ -659,8 +659,8 @@ int main(int argc, char *argv[])
     TwAddButton(bar, "Quit", (TwButtonCallback) quit, NULL,
                 "help='Quit.'");
 
-    buffer_a = text_buffer_new( 1 ); 
-    buffer_rgb = text_buffer_new( 3 ); 
+    buffer_a = text_buffer_new( 1 );
+    buffer_rgb = text_buffer_new( 3 );
     buffer = buffer_rgb;
     reset();
 

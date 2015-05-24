@@ -118,7 +118,7 @@ distance_map( double *data, unsigned int width, unsigned int height )
         float v = outside[i];
         if     ( v < -vmin) outside[i] = -vmin;
         else if( v > +vmin) outside[i] = +vmin;
-        data[i] = (outside[i]+vmin)/(2*vmin); 
+        data[i] = (outside[i]+vmin)/(2*vmin);
     }
 
     free( xdist );
@@ -140,7 +140,7 @@ MitchellNetravali( float x )
     // const float B =   0.0, C = 1/2.0; // Catmull-Rom spline (sharper results)
     x = fabs(x);
     if( x < 1 )
-         return ( ( 12 -  9 * B - 6 * C) * x * x * x 
+         return ( ( 12 -  9 * B - 6 * C) * x * x * x
                 + (-18 + 12 * B + 6 * C) * x * x
                 + (  6 -  2 * B) ) / 6;
     else if( x < 2 )

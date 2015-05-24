@@ -57,7 +57,7 @@ vertex buffer and a single texture where necessary glyphs are tighly packed.
    ...
 
 @endcode
- 
+
 -------------------------------------------------------------------------------
 @section API Application Programming Interface
 

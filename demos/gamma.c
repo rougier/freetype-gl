@@ -153,11 +153,11 @@ int main( int argc, char **argv )
     markup.gamma   = 1.0;
     markup.foreground_color    = white;
     markup.background_color    = none;
-    markup.underline           = 0;   
+    markup.underline           = 0;
     markup.underline_color     = none;
-    markup.overline            = 0;  
+    markup.overline            = 0;
     markup.overline_color      = none;
-    markup.strikethrough       = 0;   
+    markup.strikethrough       = 0;
     markup.strikethrough_color = none;
     markup.font = 0;
 

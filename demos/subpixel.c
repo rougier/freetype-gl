@@ -172,11 +172,11 @@ int main( int argc, char **argv )
     markup.gamma   = 1.0;
     markup.foreground_color    = black;
     markup.background_color    = none;
-    markup.underline           = 0;   
+    markup.underline           = 0;
     markup.underline_color     = black;
-    markup.overline            = 0;  
+    markup.overline            = 0;
     markup.overline_color      = black;
-    markup.strikethrough       = 0;   
+    markup.strikethrough       = 0;
     markup.strikethrough_color = black;
     markup.font = 0;
 
