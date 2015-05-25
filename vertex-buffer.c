@@ -561,7 +561,7 @@ vertex_buffer_erase_vertices( vertex_buffer_t *self,
     assert( self );
     assert( self->vertices );
     assert( first < self->vertices->size );
-    assert( (first+last) <= self->vertices->size );
+    assert( last < self->vertices->size );
     assert( last > first );
 
     self->state |= DIRTY;
