@@ -66,15 +66,22 @@ MACRO( DEMO _target _sources)
     endif()
 ENDMACRO( DEMO )
 
-ADD_CUSTOM_TARGET(generate-embedded-font
-    COMMAND ../makefont
+ADD_CUSTOM_COMMAND(
+    DEPENDS
+        makefont
+        ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
+    COMMAND
+        ../makefont
+    ARGS
         --font fonts/Vera.ttf
         --header ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
         --size 16
         --variable font
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h)
+ADD_CUSTOM_TARGET(generate-embedded-font
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h)
 DEMO( embedded-font    "embedded-font.c" )
-
 ADD_DEPENDENCIES(embedded-font generate-embedded-font)
 
 DEMO( texture          "texture.c" )
