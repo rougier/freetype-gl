@@ -153,6 +153,8 @@ text_buffer_render( text_buffer_t * self )
                  1.0/self->manager->atlas->height,
                  self->manager->atlas->depth );
     vertex_buffer_render( self->buffer, GL_TRIANGLES );
+    glBindTexture( GL_TEXTURE_2D, 0 );
+    glBlendColor( 0, 0, 0, 0 );
     glUseProgram( 0 );
 }
 
