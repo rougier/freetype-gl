@@ -241,14 +241,14 @@ typedef struct glyph_vertex_t {
   text_buffer_new_with_program( size_t depth,
                                 GLuint program );
 
-  /**
-  * Deletes texture buffer and its associated shader and vertex buffer.
-  *
-  * @param  self  texture buffer to delete
-  *
-  */
-void
-text_buffer_delete( text_buffer_t * self );
+/**
+ * Deletes texture buffer and its associated shader and vertex buffer.
+ *
+ * @param  self  texture buffer to delete
+ *
+ */
+  void
+  text_buffer_delete( text_buffer_t * self );
 
 /**
  * Render a text buffer.
