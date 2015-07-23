@@ -64,12 +64,24 @@ text_buffer_new_with_shaders( size_t depth,
                               const char * vert_filename,
                               const char * frag_filename )
 {
+    GLuint program = shader_load( vert_filename, frag_filename );
+
+    text_buffer_t * p = text_buffer_new_with_program( depth, program );
+
+    return p;
+}
+
+// ----------------------------------------------------------------------------
+
+text_buffer_t *
+text_buffer_new_with_program( size_t depth,
+                                    GLuint program )
+{
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
     self->buffer = vertex_buffer_new(
                                      "vertex:3f,tex_coord:2f,color:4f,ashift:1f,agamma:1f" );
     self->manager = font_manager_new( 512, 512, depth );
-    self->shader = shader_load(vert_filename,
-                               frag_filename);
+    self->shader = program;
     self->shader_texture = glGetUniformLocation(self->shader, "texture");
     self->shader_pixel = glGetUniformLocation(self->shader, "pixel");
     self->line_start = 0;
