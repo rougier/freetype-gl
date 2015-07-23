@@ -206,7 +206,7 @@ text_buffer_move_last_line( text_buffer_t * self, float dy )
 void
 text_buffer_add_text( text_buffer_t * self,
                       vec2 * pen, markup_t * markup,
-                      wchar_t * text, size_t length )
+                      const wchar_t * text, size_t length )
 {
     font_manager_t * manager = self->manager;
     size_t i;
