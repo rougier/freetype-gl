@@ -31,7 +31,7 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-uniform sampler2D texture;
+uniform sampler2D tex;
 uniform vec3 pixel;
 uniform mat4 model;
 uniform mat4 view;

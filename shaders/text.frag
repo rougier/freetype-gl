@@ -77,7 +77,7 @@ energy_distribution( vec4 previous, vec4 current, vec4 next )
     return vec3(r,g,b);
 }
 
-uniform sampler2D texture;
+uniform sampler2D tex;
 uniform vec3 pixel;
 
 varying vec4 vcolor;
@@ -90,15 +90,15 @@ void main()
     // LCD Off
     if( pixel.z == 1.0)
     {
-        float a = texture2D(texture, vtex_coord).r;
+        float a = texture2D(tex, vtex_coord).r;
         gl_FragColor = vcolor * pow( a, 1.0/vgamma );
         return;
     }
 
     // LCD On
-    vec4 current = texture2D(texture, vtex_coord);
-    vec4 previous= texture2D(texture, vtex_coord+vec2(-1.,0.)*pixel.xy);
-    vec4 next    = texture2D(texture, vtex_coord+vec2(+1.,0.)*pixel.xy);
+    vec4 current = texture2D(tex, vtex_coord);
+    vec4 previous= texture2D(tex, vtex_coord+vec2(-1.,0.)*pixel.xy);
+    vec4 next    = texture2D(tex, vtex_coord+vec2(+1.,0.)*pixel.xy);
 
     current = pow(current, vec4(1.0/vgamma));
     previous= pow(previous, vec4(1.0/vgamma));

@@ -82,7 +82,7 @@ text_buffer_new_with_program( size_t depth,
                                      "vertex:3f,tex_coord:2f,color:4f,ashift:1f,agamma:1f" );
     self->manager = font_manager_new( 512, 512, depth );
     self->shader = program;
-    self->shader_texture = glGetUniformLocation(self->shader, "texture");
+    self->shader_texture = glGetUniformLocation(self->shader, "tex");
     self->shader_pixel = glGetUniformLocation(self->shader, "pixel");
     self->line_start = 0;
     self->line_ascender = 0;
