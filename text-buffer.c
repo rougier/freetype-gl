@@ -64,13 +64,25 @@ text_buffer_new_with_shaders( size_t depth,
                               const char * vert_filename,
                               const char * frag_filename )
 {
+    GLuint program = shader_load( vert_filename, frag_filename );
+
+    text_buffer_t * p = text_buffer_new_with_program( depth, program );
+
+    return p;
+}
+
+// ----------------------------------------------------------------------------
+
+text_buffer_t *
+text_buffer_new_with_program( size_t depth,
+                                    GLuint program )
+{
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
     self->buffer = vertex_buffer_new(
                                      "vertex:3f,tex_coord:2f,color:4f,ashift:1f,agamma:1f" );
     self->manager = font_manager_new( 512, 512, depth );
-    self->shader = shader_load(vert_filename,
-                               frag_filename);
-    self->shader_texture = glGetUniformLocation(self->shader, "texture");
+    self->shader = program;
+    self->shader_texture = glGetUniformLocation(self->shader, "tex");
     self->shader_pixel = glGetUniformLocation(self->shader, "pixel");
     self->line_start = 0;
     self->line_ascender = 0;
@@ -141,6 +153,8 @@ text_buffer_render( text_buffer_t * self )
                  1.0/self->manager->atlas->height,
                  self->manager->atlas->depth );
     vertex_buffer_render( self->buffer, GL_TRIANGLES );
+    glBindTexture( GL_TEXTURE_2D, 0 );
+    glBlendColor( 0, 0, 0, 0 );
     glUseProgram( 0 );
 }
 
@@ -192,7 +206,7 @@ text_buffer_move_last_line( text_buffer_t * self, float dy )
 void
 text_buffer_add_text( text_buffer_t * self,
                       vec2 * pen, markup_t * markup,
-                      wchar_t * text, size_t length )
+                      const wchar_t * text, size_t length )
 {
     font_manager_t * manager = self->manager;
     size_t i;

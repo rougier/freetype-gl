@@ -407,6 +407,21 @@ vertex_buffer_render_setup ( vertex_buffer_t *self, GLenum mode )
 void
 vertex_buffer_render_finish ( vertex_buffer_t *self )
 {
+    int i;
+
+    for( i=0; i<MAX_VERTEX_ATTRIBUTE; ++i )
+    {
+        vertex_attribute_t *attribute = self->attributes[i];
+        if( attribute == 0 )
+        {
+            continue;
+        }
+        else
+        {
+            glDisableVertexAttribArray( attribute->index );
+        }
+    }
+
 #ifdef FREETYPE_GL_USE_VAO
     glBindVertexArray( 0 );
 #else

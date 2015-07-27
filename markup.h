@@ -40,6 +40,10 @@ extern "C" {
 #include "texture-font.h"
 #include "vec234.h"
 
+#ifdef __cplusplus
+namespace ftgl {
+#endif
+
 /**
  * @file   markup.h
  * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
@@ -185,6 +189,7 @@ extern markup_t default_markup;
 /** @} */
 
 #ifdef __cplusplus
+}
 }
 #endif
 

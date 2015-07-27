@@ -65,7 +65,7 @@ void keyboard( unsigned char key, int x, int y )
 void print_help()
 {
     fprintf( stderr, "Usage: makefont [--help] --font <font file> "
-             "--header <header file> --size <font size> --variable <variable name>\n" );
+             "--header <header file> --size <font size> --variable <variable name> --texture <texture size>\n" );
 }
 
 // ------------------------------------------------------------------- main ---
@@ -85,6 +85,7 @@ int main( int argc, char **argv )
     const char * header_filename = NULL;
     const char * variable_name   = "font";
     int show_help = 0;
+    size_t texture_width = 128;
 
     for ( arg = 1; arg < argc; ++arg )
     {
@@ -192,6 +193,38 @@ int main( int argc, char **argv )
             continue;
         }
 
+        if ( 0 == strcmp( "--texture", argv[arg] ) || 0 == strcmp( "-t", argv[arg] ) )
+        {
+            ++arg;
+
+            if ( 128.0 != texture_width )
+            {
+                fprintf( stderr, "Multiple --texture parameters.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            if ( arg >= argc )
+            {
+                fprintf( stderr, "No texture size given.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            errno = 0;
+
+            texture_width = atof( argv[arg] );
+
+            if ( errno )
+            {
+                fprintf( stderr, "No valid texture size given.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            continue;
+        }
+
         fprintf( stderr, "Unknown parameter %s\n", argv[arg] );
         print_help();
         exit( 1 );
@@ -231,7 +264,7 @@ int main( int argc, char **argv )
         exit( 1 );
     }
 
-    texture_atlas_t * atlas = texture_atlas_new( 128, 128, 1 );
+    texture_atlas_t * atlas = texture_atlas_new( texture_width, texture_width, 1 );
     texture_font_t  * font  = texture_font_new_from_file( atlas, font_size, font_filename );
 
     glutInit( &argc, argv );
