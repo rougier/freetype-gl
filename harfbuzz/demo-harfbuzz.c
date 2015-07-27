@@ -121,12 +121,17 @@ int main( int argc, char **argv )
     glutDisplayFunc( display );
     glutKeyboardFunc( keyboard );
 
+#ifndef __APPLE__
+    glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
+        /* Problem: glewInit failed, something is seriously wrong. */
         fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
         exit( EXIT_FAILURE );
     }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
+#endif
 
     texture_atlas_t * atlas = texture_atlas_new( 512, 512, 3 );
     texture_font_t *fonts[20];
