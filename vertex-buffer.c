@@ -407,6 +407,9 @@ vertex_buffer_render_setup ( vertex_buffer_t *self, GLenum mode )
 void
 vertex_buffer_render_finish ( vertex_buffer_t *self )
 {
+#ifdef FREETYPE_GL_USE_VAO
+    glBindVertexArray( 0 );
+#else
     int i;
 
     for( i=0; i<MAX_VERTEX_ATTRIBUTE; ++i )
@@ -422,9 +425,6 @@ vertex_buffer_render_finish ( vertex_buffer_t *self )
         }
     }
 
-#ifdef FREETYPE_GL_USE_VAO
-    glBindVertexArray( 0 );
-#else
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 #endif
