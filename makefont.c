@@ -41,25 +41,8 @@
 #include <string.h>
 #include <wchar.h>
 
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#elif defined(_WIN32) || defined(_WIN64)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
+#include <GLFW/glfw3.h>
 
-// ---------------------------------------------------------------- display ---
-void display( void )
-{}
-
-// ---------------------------------------------------------------- reshape ---
-void reshape(int width, int height)
-{}
-
-// --------------------------------------------------------------- keyboard ---
-void keyboard( unsigned char key, int x, int y )
-{}
 
 // ------------------------------------------------------------- print help ---
 void print_help()
@@ -67,6 +50,14 @@ void print_help()
     fprintf( stderr, "Usage: makefont [--help] --font <font file> "
              "--header <header file> --size <font size> --variable <variable name> --texture <texture size>\n" );
 }
+
+
+/* -------------------------------------------------------- error-callback - */
+void error_callback( int error, const char* description )
+{
+    fputs( description, stderr );
+}
+
 
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
@@ -86,6 +77,8 @@ int main( int argc, char **argv )
     const char * variable_name   = "font";
     int show_help = 0;
     size_t texture_width = 128;
+
+    GLFWwindow* window;
 
     for ( arg = 1; arg < argc; ++arg )
     {
@@ -267,13 +260,25 @@ int main( int argc, char **argv )
     texture_atlas_t * atlas = texture_atlas_new( texture_width, texture_width, 1 );
     texture_font_t  * font  = texture_font_new_from_file( atlas, font_size, font_filename );
 
-    glutInit( &argc, argv );
-    glutInitWindowSize( atlas->width, atlas->height );
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( "Freetype OpenGL" );
-    glutReshapeFunc( reshape );
-    glutDisplayFunc( display );
-    glutKeyboardFunc( keyboard );
+    glfwSetErrorCallback( error_callback );
+
+    if (!glfwInit( ))
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    window = glfwCreateWindow( atlas->width, atlas->height, argv[0], NULL, NULL );
+
+    if (!window)
+    {
+        glfwTerminate( );
+        exit( EXIT_FAILURE );
+    }
+
+    glfwMakeContextCurrent( window );
 
     size_t missed = texture_font_load_glyphs( font, font_cache );
 
@@ -518,6 +523,9 @@ int main( int argc, char **argv )
         L"#ifdef __cplusplus\n"
         L"}\n"
         L"#endif\n" );
+
+    glfwDestroyWindow( window );
+    glfwTerminate( );
 
     return 0;
 }

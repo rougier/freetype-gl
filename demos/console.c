@@ -39,13 +39,7 @@
 #include "shader.h"
 #include "mat4.h"
 
-#if defined(__APPLE__)
-    #include <Glut/glut.h>
-#elif defined(_WIN32) || defined(_WIN64)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
+#include <GLFW/glfw3.h>
 
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -99,6 +93,7 @@ typedef struct _console_t console_t;
 static console_t * console;
 GLuint shader;
 mat4   model, view, projection;
+int control_key_handled;
 
 
 // ------------------------------------------------------------ console_new ---
@@ -555,118 +550,105 @@ console_process( console_t *self,
 }
 
 
-
-// ----------------------------------------------------------- on_key_press ---
-void
-on_key_press ( unsigned char key, int x, int y )
+// ----------------------------------------------------------- on_char_input ---
+void char_input( GLFWwindow* window, unsigned int cp )
 {
-    // fprintf( stderr, "key: %d\n", key);
-    if (key == 1)
+    if( control_key_handled )
     {
-        console_process( console, "home", 0 );
+        control_key_handled = 0;
+        return;
     }
-    else if (key == 4)
-    {
-        console_process( console, "delete", 0 );
-    }
-    else if (key == 5)
-    {
-        console_process( console, "end", 0 );
-    }
-    else if (key == 8)
-    {
-        console_process( console, "backspace", 0 );
-    }
-    else if (key == 9)
-    {
-        console_process( console, "complete", 0 );
-    }
-    else if (key == 11)
-    {
-        console_process( console, "kill", 0 );
-    }
-    else if (key == 12)
-    {
-        console_process( console, "clear", 0 );
-    }
-    else if (key == 13)
-    {
-        console_process( console, "enter", 0 );
-    }
-    else if (key == 25)
-    {
-        console_process( console, "yank", 0 );
-    }
-    else if (key == 27)
-    {
-        console_process( console, "escape", 0 );
-    }
-    else if (key == 127)
-    {
-        console_process( console, "backspace", 0 );
-    }
-    else if( key > 31)
-    {
-        console_process( console, "type", key );
-    }
-    glutPostRedisplay();
+
+    console_process( console, "type", cp );
 }
 
 
-
-// --------------------------------------------------- on_special_key_press ---
-void
-on_special_key_press( int key, int x, int y )
+// ---------------------------------------------------------------- keyboard ---
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
-    switch (key)
+    if( GLFW_PRESS != action && GLFW_REPEAT != action )
     {
-    case GLUT_KEY_UP:
-        console_process( console, "history-prev", 0 );
-        break;
-    case GLUT_KEY_DOWN:
-        console_process( console, "history-next", 0 );
-        break;
-    case GLUT_KEY_LEFT:
-        console_process( console,  "left", 0 );
-        break;
-    case GLUT_KEY_RIGHT:
-        console_process( console, "right", 0 );
-        break;
-    case GLUT_KEY_HOME:
-        console_process( console, "home", 0 );
-        break;
-    case GLUT_KEY_END:
-        console_process( console, "end", 0 );
-        break;
-    default:
-        break;
+        return;
     }
-    glutPostRedisplay();
+
+    switch( key )
+    {
+        case GLFW_KEY_HOME:
+            console_process( console, "home", 0 );
+            break;
+        case GLFW_KEY_DELETE:
+            console_process( console, "delete", 0 );
+            break;
+        case GLFW_KEY_END:
+            console_process( console, "end", 0 );
+            break;
+        case GLFW_KEY_BACKSPACE:
+            console_process( console, "backspace", 0 );
+            break;
+        case GLFW_KEY_TAB:
+            console_process( console, "complete", 0 );
+            break;
+        case GLFW_KEY_ENTER:
+            console_process( console, "enter", 0 );
+            break;
+        case GLFW_KEY_ESCAPE:
+            console_process( console, "escape", 0 );
+            break;
+        case GLFW_KEY_UP:
+            console_process( console, "history-prev", 0 );
+            break;
+        case GLFW_KEY_DOWN:
+            console_process( console, "history-next", 0 );
+            break;
+        case GLFW_KEY_LEFT:
+            console_process( console,  "left", 0 );
+            break;
+        case GLFW_KEY_RIGHT:
+            console_process( console, "right", 0 );
+            break;
+        default:
+            break;
+    }
+
+    if( ( GLFW_MOD_CONTROL & mods ) == 0 )
+    {
+        return;
+    }
+
+    switch( key )
+    {
+        case GLFW_KEY_K:
+            control_key_handled = 1;
+            console_process( console, "kill", 0 );
+            break;
+        case GLFW_KEY_L:
+            control_key_handled = 1;
+            console_process( console, "clear", 0 );
+            break;
+        case GLFW_KEY_Y:
+            control_key_handled = 1;
+            console_process( console, "yank", 0 );
+            break;
+        default:
+            break;
+    }
 }
 
 
-
-// ------------------------------------------------------------- on_display ---
-void on_display (void) {
+// ---------------------------------------------------------------- display ---
+void display( GLFWwindow* window )
+{
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     console_render( console );
-    glutSwapBuffers();
+    glfwSwapBuffers( window );
 }
 
 
-
-// ------------------------------------------------------------- on_reshape ---
-void on_reshape (int width, int height)
+// ---------------------------------------------------------------- reshape ---
+void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
     mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
-}
-
-
-
-// ---------------------------------------------------------------- on_init ---
-void on_init( void )
-{
 }
 
 
@@ -693,17 +675,45 @@ void console_history_next (console_t *self, wchar_t *input)
 }
 
 
-int
-main( int argc, char **argv )
+/* -------------------------------------------------------- error-callback - */
+void error_callback( int error, const char* description )
 {
-    glutInit( &argc, argv );
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-    glutCreateWindow( argv[0] );
-    glutReshapeFunc( on_reshape );
-    glutDisplayFunc( on_display );
-    glutKeyboardFunc( on_key_press );
-    glutSpecialFunc( on_special_key_press );
-    glutReshapeWindow( 600,400 );
+    fputs( description, stderr );
+}
+
+
+int main( int argc, char **argv )
+{
+    GLFWwindow* window;
+
+    glfwSetErrorCallback( error_callback );
+
+    if (!glfwInit( ))
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
+
+    if (!window)
+    {
+        glfwTerminate( );
+        exit( EXIT_FAILURE );
+    }
+
+    glfwMakeContextCurrent( window );
+    glfwSwapInterval( 1 );
+
+    glfwSetFramebufferSizeCallback( window, reshape );
+    glfwSetWindowRefreshCallback( window, display );
+    glfwSetKeyCallback( window, keyboard );
+    glfwSetCharCallback( window, char_input );
+
+    control_key_handled = 0;
+
 #ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
@@ -735,8 +745,18 @@ main( int argc, char **argv )
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
     mat4_set_identity( &view );
-    glutMainLoop();
 
+    glfwSetWindowSize( window, 600,400 );
+    glfwShowWindow( window );
+
+    while(!glfwWindowShouldClose( window ))
+    {
+        display( window );
+        glfwPollEvents( );
+    }
+
+    glfwDestroyWindow( window );
+    glfwTerminate( );
 
     return 0;
 }
