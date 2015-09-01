@@ -232,7 +232,7 @@ int main( int argc, char **argv )
                 {x0,y1,0, s0,t1, r,g,b,a, shift, gamma},
                 {x1,y1,0, s1,t1, r,g,b,a, shift, gamma},
                 {x1,y0,0, s1,t0, r,g,b,a, shift, gamma} };
-            GLuint indices[6] = { 0,1,2, 0,2,3 };
+            GLushort indices[6] = { 0,1,2, 0,2,3 };
             vertex_buffer_push_back( vbuffer, vertices, 4, indices, 6 );
             x += x_advance;
             y += y_advance;
@@ -244,7 +244,6 @@ int main( int argc, char **argv )
     glClearColor(1,1,1,1);
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_TEXTURE_2D );
     glBindTexture( GL_TEXTURE_2D, atlas->id );
     texture_atlas_upload( atlas );
     vertex_buffer_upload( vbuffer );
