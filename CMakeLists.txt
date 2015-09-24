@@ -39,6 +39,7 @@ OPTION(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
 OPTION(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
 OPTION(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (experimental)" OFF)
 OPTION(freetype-gl_LIBS_SUPPLIED "Required libraries are supplied as part of parent build" OFF)
+OPTION(freetype-gl_GLFW_SUPPLIED "GLFW library is supplied as part of parent build" OFF)
 
 # Get required and optional library
 FIND_PACKAGE( OpenGL REQUIRED )
@@ -75,7 +76,9 @@ ELSE( WIN32 OR WIN64 )
     FIND_LIBRARY( MATH_LIBRARY m )
 ENDIF( WIN32 OR WIN64 )
 
-FIND_PACKAGE( glfw3 REQUIRED )
+IF ( NOT freetype-gl_LIBS_SUPPLIED )
+    FIND_PACKAGE( glfw3 REQUIRED )
+ENDIF ( NOT freetype-gl_LIBS_SUPPLIED )
 
 INCLUDE_DIRECTORIES( ${GLFW3_INCLUDE_DIR}
                      ${OPENGL_INCLUDE_DIRS}
