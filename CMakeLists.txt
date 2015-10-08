@@ -38,6 +38,7 @@ OPTION(freetype-gl_USE_VAO "Use a VAO to render a vertex_buffer instance (requir
 OPTION(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
 OPTION(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
 OPTION(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (experimental)" OFF)
+OPTION(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 OPTION(freetype-gl_LIBS_SUPPLIED "Required libraries are supplied as part of parent build" OFF)
 OPTION(freetype-gl_GLFW_SUPPLIED "GLFW library is supplied as part of parent build" OFF)
 
@@ -117,23 +118,25 @@ LINK_DIRECTORIES(
     ${GLFW3_LIBRARY_DIR}
 )
 
-ADD_EXECUTABLE( makefont makefont.c )
+IF (freetype-gl_BUILD_MAKEFONT)
+    ADD_EXECUTABLE( makefont makefont.c )
 
-IF(NOT APPLE)
-    TARGET_LINK_LIBRARIES( makefont ${GLEW_LIBRARY} )
-ENDIF()
+    IF(NOT APPLE)
+        TARGET_LINK_LIBRARIES( makefont ${GLEW_LIBRARY} )
+    ENDIF()
 
-TARGET_LINK_LIBRARIES( makefont
-                       freetype-gl
-                       ${OPENGL_LIBRARY}
-                       ${GLFW3_LIBRARY}
-                       ${FREETYPE_LIBRARY}
-                       ${MATH_LIBRARY})
+    TARGET_LINK_LIBRARIES( makefont
+                           freetype-gl
+                           ${OPENGL_LIBRARY}
+                           ${GLFW3_LIBRARY}
+                           ${FREETYPE_LIBRARY}
+                           ${MATH_LIBRARY})
 
-if(MSVC)
-    # Compile makefont as C++
-    set_source_files_properties( makefont.c PROPERTIES LANGUAGE CXX )
-endif()
+    if(MSVC)
+        # Compile makefont as C++
+        set_source_files_properties( makefont.c PROPERTIES LANGUAGE CXX )
+    endif()
+ENDIF (freetype-gl_BUILD_MAKEFONT)
 
 IF (freetype-gl_BUILD_APIDOC)
     ADD_SUBDIRECTORY(doc)
