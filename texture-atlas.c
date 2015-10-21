@@ -338,7 +338,7 @@ texture_atlas_upload( texture_atlas_t * self )
     }
     else
     {
-#if defined(GL_ES_VERSION_2_0) && !defined(GL_ES_VERSION_3_0)
+#if defined(GL_ES_VERSION_2_0) || defined(GL_ES_VERSION_3_0)
         glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE, self->width, self->height,
                       0, GL_LUMINANCE, GL_UNSIGNED_BYTE, self->data );
 #else
