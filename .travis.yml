@@ -10,7 +10,7 @@ install:
 # Update system
   - sudo apt-get update -qq
 # Install dependencies
-  - sudo apt-get install -qq cmake g++-4.8 gcc-4.8 libglew-dev libfreetype6-dev doxygen libharfbuzz-dev libxmu-dev libxi-dev
+  - sudo apt-get install -qq cmake g++-4.8 gcc-4.8 libglew-dev libfreetype6-dev doxygen libharfbuzz-dev libxmu-dev libxi-dev libxrandr-dev
 # Prepare manual installation of dependencies
   - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP
 # GLFW 3.1.1 install
