@@ -3,7 +3,7 @@
 // A high quality OpenGL rendering engine for C
 // Copyright (C) 2012 Nicolas P. Rougier. All rights reserved.
 // Contact: Nicolas.Rougier@gmail.com
-//          http://code.google.com/p/gl-agg/
+//          https://github.com/rougier/freetype-gl
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:

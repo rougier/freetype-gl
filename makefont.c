@@ -1,7 +1,7 @@
 /* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
+ * WWW:         https://github.com/rougier/freetype-gl
  * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
@@ -319,7 +319,7 @@ int main( int argc, char **argv )
         L"/* ============================================================================\n"
         L" * Freetype GL - A C OpenGL Freetype engine\n"
         L" * Platform:    Any\n"
-        L" * WWW:         http://code.google.com/p/freetype-gl/\n"
+        L" * WWW:         https://github.com/rougier/freetype-gl\n"
         L" * ----------------------------------------------------------------------------\n"
         L" * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.\n"
         L" *\n"
