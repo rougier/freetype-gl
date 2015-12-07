@@ -1,30 +1,16 @@
 language: c
+dist: trusty
 compiler:
   - gcc
 before_install:
-# FreeGLUT requires a working X11 display and makefont uses FreeGLUT.
+# GLFW requires a working X11 display and makefont uses GLFW.
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
 install:
-# Add repository for libharfbuzz-dev
-  - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu trusty universe"
-  - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu trusty main"
-# Add repository for g++-4.8
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-# Add repository for cmake 2.8.11 to find freetype headers properly
-  - sudo add-apt-repository ppa:kalakris/cmake -y
-# Install keyrings for trusty repositories
-  - sudo apt-get install debian-keyring debian-archive-keyring
-  - sudo apt-key update
 # Update system
   - sudo apt-get update -qq
-# We remove g++ because Travis Ubuntu VM is < g++-4.8
-  - sudo apt-get remove g++ gcc
-  - sudo apt-get install -qq g++-4.8 gcc-4.8
-  - sudo ln -s /usr/bin/gcc-4.8 /usr/bin/gcc
-  - sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
 # Install dependencies
-  - sudo apt-get install -qq cmake libglew-dev libfreetype* doxygen libharfbuzz-dev
+  - sudo apt-get install -qq cmake g++-4.8 gcc-4.8 libglew-dev libfreetype6-dev doxygen libharfbuzz-dev libxmu-dev libxi-dev
 # Prepare manual installation of dependencies
   - mkdir TRAVIS_TMP/ && cd TRAVIS_TMP
 # GLFW 3.1.1 install
@@ -52,8 +38,6 @@ install:
   - cd ../../
   - rm -rf AntTweakBar_116.zip
   - rm -rf AntTweakBar
-# another requirement
-  - sudo apt-get install libxmu-dev libxi-dev
 #
   - cd ..
 script:
