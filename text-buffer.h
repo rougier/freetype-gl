@@ -300,6 +300,16 @@ typedef struct glyph_vertex_t {
                          vec2 * pen, markup_t * markup,
                          wchar_t current, wchar_t previous );
 
+ /**
+  * Applies an affine transform to all characters added since the last newline character '\n' or the beginning of the last text_buffer_add_text.
+  * This can be used to move, rescale and/or rotate the last line.
+  *
+  * @param self     a text buffer
+  * @param matrix   an array of 16 floats that defines a column major 4x4 affine transformation matrix.
+  */
+  void
+  text_buffer_transform_last_line( text_buffer_t * self, const float* matrix );
+
 /**
   * Clear text buffer
   *

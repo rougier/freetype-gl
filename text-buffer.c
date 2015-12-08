@@ -201,6 +201,31 @@ text_buffer_move_last_line( text_buffer_t * self, float dy )
     }
 }
 
+// ----------------------------------------------------------------------------
+void
+text_buffer_transform_last_line( text_buffer_t * self, const float* m )
+{
+    size_t i, j;
+    float x, y, z;
+    for( i=self->line_start; i < vector_size( self->buffer->items ); ++i )
+    {
+        ivec4 *item = (ivec4 *) vector_get( self->buffer->items, i);
+        for( j=item->vstart; j<item->vstart+item->vcount; ++j)
+        {
+            glyph_vertex_t* v =
+                (glyph_vertex_t *)  vector_get( self->buffer->vertices, j );
+
+            // affine matrix multiplication "v = m*v".
+            // m is a 4x4 matrix (column-major) and fourth element of v is 1 in an affine transform.
+            x = m[0]*v->x + m[4]*v->y + m[8]*v->z + m[12];
+            y = m[1]*v->x + m[5]*v->y + m[9]*v->z + m[13];
+            z = m[2]*v->x + m[6]*v->y + m[10]*v->z + m[14];
+            v->x = x;
+            v->y = y;
+            v->z = z;
+        }
+    }
+}
 
 // ----------------------------------------------------------------------------
 void
@@ -234,6 +259,8 @@ text_buffer_add_text( text_buffer_t * self,
     {
         self->origin = *pen;
     }
+
+    self->line_start = vector_size( self->buffer->items );
 
     text_buffer_add_wchar( self, pen, markup, text[0], 0 );
     for( i=1; i<length; ++i )
