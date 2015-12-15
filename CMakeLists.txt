@@ -108,6 +108,7 @@ SET( FREETYPE_GL_SRC freetype-gl.h
                      text-buffer.c      text-buffer.h
                      shader.c           shader.h
                      vector.c           vector.h
+                     utf8-utils.c       utf8-utils.h
                      platform.c         platform.h
                      edtaa3func.c       edtaa3func.h)
 
