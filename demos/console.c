@@ -209,7 +209,9 @@ console_add_glyph( console_t *self,
     free( character );
     if( previous != L'\0' )
     {
-        self->pen.x += texture_glyph_get_kerning( glyph, previous );
+        char * character = utf16_to_utf8( previous );
+        self->pen.x += texture_glyph_get_kerning( glyph, character );
+        free( character );
     }
     float r = markup->foreground_color.r;
     float g = markup->foreground_color.g;

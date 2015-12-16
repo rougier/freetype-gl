@@ -433,7 +433,7 @@ typedef struct texture_font_t
  */
 float
 texture_glyph_get_kerning( const texture_glyph_t * self,
-                           const wchar_t charcode );
+                           const char * charcode );
 
 
 /**

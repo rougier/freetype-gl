@@ -41,7 +41,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
-#include <wchar.h>
 #include "texture-font.h"
 #include "platform.h"
 #include "utf8-utils.h"
@@ -192,15 +191,16 @@ texture_glyph_delete( texture_glyph_t *self )
 // ---------------------------------------------- texture_glyph_get_kerning ---
 float
 texture_glyph_get_kerning( const texture_glyph_t * self,
-                           const wchar_t charcode )
+                           const char * charcode )
 {
     size_t i;
+    uint32_t ucharcode = utf8_to_utf32( charcode );
 
     assert( self );
     for( i=0; i<vector_size(self->kerning); ++i )
     {
         kerning_t * kerning = (kerning_t *) vector_get( self->kerning, i );
-        if( kerning->charcode == charcode )
+        if( kerning->charcode == ucharcode )
         {
             return kerning->kerning;
         }

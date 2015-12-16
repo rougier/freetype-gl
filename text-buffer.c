@@ -300,7 +300,9 @@ text_buffer_add_wchar( text_buffer_t * self,
 
     if( previous && markup->font->kerning )
     {
-        kerning = texture_glyph_get_kerning( glyph, previous );
+        char * character = utf16_to_utf8( previous );
+        kerning = texture_glyph_get_kerning( glyph, character );
+        free( character );
     }
     pen->x += kerning;
 

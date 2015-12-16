@@ -144,7 +144,9 @@ void add_text( vertex_buffer_t * buffer, vec2 * pen, ... )
                 float kerning = 0.0f;
                 if( i > 0)
                 {
-                    kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+                    char * character = utf16_to_utf8( text[i-1] );
+                    kerning = texture_glyph_get_kerning( glyph, character );
+                    free( character );
                 }
                 pen->x += kerning;
 
