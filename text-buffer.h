@@ -296,9 +296,9 @@ typedef struct glyph_vertex_t {
   * @param previous previous character (if any)
   */
   void
-  text_buffer_add_wchar( text_buffer_t * self,
-                         vec2 * pen, markup_t * markup,
-                         wchar_t current, wchar_t previous );
+  text_buffer_add_char( text_buffer_t * self,
+                        vec2 * pen, markup_t * markup,
+                        const char * current, const char * previous );
 
 /**
   * Clear text buffer

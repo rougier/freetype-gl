@@ -235,18 +235,24 @@ text_buffer_add_text( text_buffer_t * self,
         self->origin = *pen;
     }
 
-    text_buffer_add_wchar( self, pen, markup, text[0], 0 );
+    char * character = utf16_to_utf8( text[0] );
+    text_buffer_add_char( self, pen, markup, character, NULL );
+    free( character );
     for( i=1; i<length; ++i )
     {
-        text_buffer_add_wchar( self, pen, markup, text[i], text[i-1] );
+        char * character = utf16_to_utf8( text[i] );
+        char * prev_character = utf16_to_utf8( text[i-1] );
+        text_buffer_add_char( self, pen, markup, character, prev_character );
+        free( character );
+        free( prev_character );
     }
 }
 
 // ----------------------------------------------------------------------------
 void
-text_buffer_add_wchar( text_buffer_t * self,
-                       vec2 * pen, markup_t * markup,
-                       wchar_t current, wchar_t previous )
+text_buffer_add_char( text_buffer_t * self,
+                      vec2 * pen, markup_t * markup,
+                      const char * current, const char * previous )
 {
     size_t vcount = 0;
     size_t icount = 0;
@@ -266,7 +272,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     texture_glyph_t *black;
     float kerning = 0.0f;
 
-    if( current == L'\n' )
+    if( current[0] == '\n' )
     {
         pen->x = self->origin.x;
         pen->y += self->line_descender;
@@ -288,9 +294,7 @@ text_buffer_add_wchar( text_buffer_t * self,
         self->line_descender = markup->font->descender;
     }
 
-    char * cur_buffer = utf16_to_utf8( current );
-    glyph = texture_font_get_glyph( font, cur_buffer );
-    free( cur_buffer );
+    glyph = texture_font_get_glyph( font, current );
     black = texture_font_get_glyph( font, NULL );
 
     if( glyph == NULL )
@@ -300,9 +304,7 @@ text_buffer_add_wchar( text_buffer_t * self,
 
     if( previous && markup->font->kerning )
     {
-        char * character = utf16_to_utf8( previous );
-        kerning = texture_glyph_get_kerning( glyph, character );
-        free( character );
+        kerning = texture_glyph_get_kerning( glyph, previous );
     }
     pen->x += kerning;
 
