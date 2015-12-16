@@ -179,7 +179,9 @@ text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
             return;
         }
         text = va_arg( args, wchar_t * );
-        text_buffer_add_text( self, pen, markup, text, wcslen(text) );
+        char * utext = str_utf16_to_utf8( text );
+        text_buffer_add_text( self, pen, markup, utext, 0 );
+        free( utext );
     } while( markup != 0 );
     va_end ( args );
 }
@@ -206,7 +208,7 @@ text_buffer_move_last_line( text_buffer_t * self, float dy )
 void
 text_buffer_add_text( text_buffer_t * self,
                       vec2 * pen, markup_t * markup,
-                      const wchar_t * text, size_t length )
+                      const char * text, size_t length )
 {
     font_manager_t * manager = self->manager;
     size_t i;
@@ -228,23 +230,19 @@ text_buffer_add_text( text_buffer_t * self,
 
     if( length == 0 )
     {
-        length = wcslen(text);
+        length = utf8_strlen(text);
     }
     if( vertex_buffer_size( self->buffer ) == 0 )
     {
         self->origin = *pen;
     }
 
-    char * character = utf16_to_utf8( text[0] );
-    text_buffer_add_char( self, pen, markup, character, NULL );
-    free( character );
-    for( i=1; i<length; ++i )
+    const char * prev_character = NULL;
+    for( i = 0; utf8_strlen( text + i ) && length; i += utf8_surrogate_len( text + i ) )
     {
-        char * character = utf16_to_utf8( text[i] );
-        char * prev_character = utf16_to_utf8( text[i-1] );
-        text_buffer_add_char( self, pen, markup, character, prev_character );
-        free( character );
-        free( prev_character );
+        text_buffer_add_char( self, pen, markup, text + i, prev_character );
+        prev_character = text + i;
+        length--;
     }
 }
 

@@ -41,6 +41,7 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -287,7 +288,9 @@ print( text_buffer_t * buffer, vec2 * pen,
             }
             ansi_to_markup(seq_start, seq_size, markup );
             markup->font = font_manager_get_from_markup( buffer->manager, markup );
-            text_buffer_add_text( buffer, pen, markup, text_start, text_size );
+            char * utext = str_utf16_to_utf8( text_start );
+            text_buffer_add_text( buffer, pen, markup, utext, text_size );
+            free( utext );
         }
     }
 }

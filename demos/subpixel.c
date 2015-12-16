@@ -44,6 +44,7 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -205,7 +206,9 @@ int main( int argc, char **argv )
     wchar_t *text = L"| A Quick Brown Fox Jumps Over The Lazy Dog\n";
     for( i=0; i < 30; ++i)
     {
-        text_buffer_add_text( text_buffer, &pen, &markup, text, wcslen(text) );
+        char * utext = str_utf16_to_utf8( text );
+        text_buffer_add_text( text_buffer, &pen, &markup, utext, 0 );
+        free( utext );
         pen.x += i*0.1;
     }
 

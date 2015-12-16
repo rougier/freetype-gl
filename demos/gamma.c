@@ -45,6 +45,7 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -189,7 +190,9 @@ int main( int argc, char **argv )
     for( i=0; i < 14; ++i )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
-        text_buffer_add_text( buffer, &pen, &markup, text, wcslen(text) );
+        char * utext = str_utf16_to_utf8( text );
+        text_buffer_add_text( buffer, &pen, &markup, utext, 0 );
+        free( utext );
     }
     pen.x = 32;
     pen.y = 252;
@@ -197,7 +200,9 @@ int main( int argc, char **argv )
     for( i=0; i < 14; ++i )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
-        text_buffer_add_text( buffer, &pen, &markup, text, wcslen(text) );
+        char * utext = str_utf16_to_utf8( text );
+        text_buffer_add_text( buffer, &pen, &markup, utext, 0 );
+        free( utext );
     }
 
     background = vertex_buffer_new( "vertex:3f,color:4f" );

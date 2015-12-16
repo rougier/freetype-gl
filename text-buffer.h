@@ -284,7 +284,7 @@ typedef struct glyph_vertex_t {
   void
   text_buffer_add_text( text_buffer_t * self,
                         vec2 * pen, markup_t * markup,
-                        const wchar_t * text, size_t length );
+                        const char * text, size_t length );
 
  /**
   * Add a char to the text buffer
