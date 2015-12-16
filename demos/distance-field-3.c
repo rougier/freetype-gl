@@ -232,7 +232,7 @@ void display( GLFWwindow* window )
     GLuint handle = glGetUniformLocation( program, "texture" );
     glUniform1i( handle, 0);
 
-    texture_glyph_t * glyph = texture_font_get_glyph( font, L'@');
+    texture_glyph_t * glyph = texture_font_get_glyph( font, "@");
 
     float s0 = glyph->s0;
     float t0 = glyph->t0;

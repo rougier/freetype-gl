@@ -40,6 +40,7 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -136,7 +137,9 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
     float r = color->red, g = color->green, b = color->blue, a = color->alpha;
     for( i=0; i<wcslen(text); ++i )
     {
-        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
+        char * character = utf16_to_utf8( text[i] );
+        texture_glyph_t *glyph = texture_font_get_glyph( font, character );
+        free( character );
         if( glyph != NULL )
         {
             float kerning = 0.0f;
@@ -227,7 +230,7 @@ int main( int argc, char **argv )
 
     vec2 pen, origin;
 
-    texture_glyph_t *glyph  = texture_font_get_glyph( big, L'g' );
+    texture_glyph_t *glyph  = texture_font_get_glyph( big, "g" );
     origin.x = width/2  - glyph->offset_x - glyph->width/2;
     origin.y = height/2 - glyph->offset_y + glyph->height/2;
     add_text( text_buffer, big, L"g", &black, &origin );

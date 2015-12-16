@@ -37,6 +37,7 @@
 #include "vertex-buffer.h"
 #include "shader.h"
 #include "mat4.h"
+#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -69,7 +70,9 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
     float r = color->red, g = color->green, b = color->blue, a = color->alpha;
     for( i=0; i<wcslen(text); ++i )
     {
-        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
+        char * character = utf16_to_utf8( text[i] );
+        texture_glyph_t *glyph = texture_font_get_glyph( font, character );
+        free( character );
         if( glyph != NULL )
         {
             float kerning = 0.0f;

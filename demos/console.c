@@ -38,6 +38,7 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -203,7 +204,9 @@ console_add_glyph( console_t *self,
                    wchar_t previous,
                    markup_t *markup )
 {
-    texture_glyph_t *glyph  = texture_font_get_glyph( markup->font, current );
+    char * character = utf16_to_utf8( current );
+    texture_glyph_t *glyph  = texture_font_get_glyph( markup->font, character );
+    free( character );
     if( previous != L'\0' )
     {
         self->pen.x += texture_glyph_get_kerning( glyph, previous );
@@ -303,8 +306,8 @@ console_render( console_t *self )
         }
     }
 
-    // Cursor (we use the black character (-1) as texture )
-    texture_glyph_t *glyph  = texture_font_get_glyph( markup.font, -1 );
+    // Cursor (we use the black character (NULL) as texture )
+    texture_glyph_t *glyph  = texture_font_get_glyph( markup.font, NULL );
     float r = markup.foreground_color.r;
     float g = markup.foreground_color.g;
     float b = markup.foreground_color.b;

@@ -38,7 +38,7 @@
 #include <assert.h>
 #include "opengl.h"
 #include "text-buffer.h"
-
+#include "utf8-utils.h"
 
 #define SET_GLYPH_VERTEX(value,x0,y0,z0,s0,t0,r,g,b,a,sh,gm) { \
 	glyph_vertex_t *gv=&value;                                 \
@@ -288,8 +288,10 @@ text_buffer_add_wchar( text_buffer_t * self,
         self->line_descender = markup->font->descender;
     }
 
-    glyph = texture_font_get_glyph( font, current );
-    black = texture_font_get_glyph( font, -1 );
+    char * cur_buffer = utf16_to_utf8( current );
+    glyph = texture_font_get_glyph( font, cur_buffer );
+    free( cur_buffer );
+    black = texture_font_get_glyph( font, NULL );
 
     if( glyph == NULL )
     {

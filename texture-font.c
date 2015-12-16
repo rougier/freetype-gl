@@ -312,8 +312,8 @@ texture_font_init(texture_font_t *self)
     FT_Done_Face( face );
     FT_Done_FreeType( library );
 
-    /* -1 is a special glyph */
-    texture_font_get_glyph( self, -1 );
+    /* NULL is a special glyph */
+    texture_font_get_glyph( self, NULL );
 
     return 0;
 }
@@ -662,7 +662,7 @@ texture_font_load_glyphs( texture_font_t * self,
 // ------------------------------------------------- texture_font_get_glyph ---
 texture_glyph_t *
 texture_font_get_glyph( texture_font_t * self,
-                        wchar_t charcode )
+                        const char * charcode )
 {
     texture_glyph_t *glyph;
 
@@ -670,18 +670,14 @@ texture_font_get_glyph( texture_font_t * self,
     assert( self->filename );
     assert( self->atlas );
 
-    char * ucharcode = utf16_to_utf8( charcode );
     /* Check if charcode has been already loaded */
-    if( (glyph = texture_font_find_glyph( self, charcode )) ) {
-        free( ucharcode );
+    if( (glyph = texture_font_find_glyph( self, charcode )) )
         return glyph;
-    }
-    free( ucharcode );
 
-    /* charcode -1 is special : it is used for line drawing (overline,
+    /* charcode NULL is special : it is used for line drawing (overline,
      * underline, strikethrough) and background.
      */
-    if( charcode == (wchar_t)(-1) )
+    if( !charcode )
     {
         size_t width  = self->atlas->width;
         size_t height = self->atlas->height;
@@ -707,12 +703,9 @@ texture_font_get_glyph( texture_font_t * self,
     }
 
     /* Glyph has not been already loaded */
-    char * buffer = utf16_to_utf8( charcode );
-    if( texture_font_load_glyphs( self, buffer ) == 0 )
+    if( texture_font_load_glyphs( self, charcode ) == 0 )
     {
-        free( buffer );
-        return *(texture_glyph_t **) vector_back( self->glyphs );
+        return texture_font_find_glyph( self, charcode );
     }
-    free( buffer );
     return NULL;
 }
