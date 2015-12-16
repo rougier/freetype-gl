@@ -42,6 +42,7 @@
 #include "mat4.h"
 #include "shader.h"
 #include "vertex-buffer.h"
+#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -151,7 +152,9 @@ int main( int argc, char **argv )
     for( i=minsize; i < maxsize; ++i )
     {
         texture_font_t * font = texture_font_new_from_file( atlas, i, filename );
-        missed += texture_font_load_glyphs( font, cache );
+        char* ucache = str_utf16_to_utf8( cache );
+        missed += texture_font_load_glyphs( font, ucache );
+        free( ucache );
         texture_font_delete( font );
     }
 

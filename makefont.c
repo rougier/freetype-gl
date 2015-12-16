@@ -35,6 +35,7 @@
 #include "vec234.h"
 #include "vector.h"
 #include "freetype-gl.h"
+#include "utf8-utils.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -280,7 +281,9 @@ int main( int argc, char **argv )
 
     glfwMakeContextCurrent( window );
 
-    size_t missed = texture_font_load_glyphs( font, font_cache );
+    char * ucache = str_utf16_to_utf8( font_cache );
+    size_t missed = texture_font_load_glyphs( font, ucache );
+    free( ucache );
 
     wprintf( L"Font filename              : %s\n", font_filename );
     wprintf( L"Font size                  : %.1f\n", font_size );

@@ -279,9 +279,9 @@ int main( int argc, char **argv )
     unsigned char *map;
     texture_font_t * font;
     const char *filename = "fonts/Vera.ttf";
-    const wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
-                           L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-                           L"`abcdefghijklmnopqrstuvwxyz{|}~";
+    const char * cache = " !\"#$%&'()*+,-./0123456789:;<=>?"
+                         "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
+                         "`abcdefghijklmnopqrstuvwxyz{|}~";
 
     atlas = texture_atlas_new( 512, 512, 1 );
     font = texture_font_new_from_file( atlas, 72, filename );
