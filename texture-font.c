@@ -44,6 +44,7 @@
 #include <wchar.h>
 #include "texture-font.h"
 #include "platform.h"
+#include "utf8-utils.h"
 
 #define HRES  64
 #define HRESf 64.f
@@ -403,17 +404,18 @@ texture_font_delete( texture_font_t *self )
 
 texture_glyph_t *
 texture_font_find_glyph( texture_font_t * self,
-                         wchar_t charcode )
+                         const char * charcode )
 {
     size_t i;
     texture_glyph_t *glyph;
+    uint32_t ucharcode = utf8_to_utf32( charcode );
 
     for( i = 0; i < self->glyphs->size; ++i )
     {
         glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
         // If charcode is -1, we don't care about outline type or thickness
-        if( (glyph->charcode == charcode) &&
-            ((charcode == (wchar_t)(-1) ) ||
+        if( (glyph->charcode == ucharcode) &&
+            ((ucharcode == -1) ||
              ((glyph->outline_type == self->outline_type) &&
               (glyph->outline_thickness == self->outline_thickness)) ))
         {
@@ -461,8 +463,12 @@ texture_font_load_glyphs( texture_font_t * self,
     /* Load each glyph */
     for( i = 0; i < wcslen(charcodes); ++i ) {
         /* Check if charcode has been already loaded */
-        if( texture_font_find_glyph( self, charcodes[i] ) )
+        char * ucharcode = utf16_to_utf8( charcodes[i] );
+        if( texture_font_find_glyph( self, ucharcode ) ) {
+            free( ucharcode );
             continue;
+        }
+        free( ucharcode );
 
         flags = 0;
         ft_glyph_top = 0;
@@ -669,9 +675,13 @@ texture_font_get_glyph( texture_font_t * self,
     assert( self->filename );
     assert( self->atlas );
 
+    char * ucharcode = utf16_to_utf8( charcode );
     /* Check if charcode has been already loaded */
-    if( (glyph = texture_font_find_glyph( self, charcode )) )
+    if( (glyph = texture_font_find_glyph( self, charcode )) ) {
+        free( ucharcode );
         return glyph;
+    }
+    free( ucharcode );
 
     /* charcode -1 is special : it is used for line drawing (overline,
      * underline, strikethrough) and background.
