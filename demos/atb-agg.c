@@ -40,6 +40,7 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -188,7 +189,9 @@ build_buffer( void )
     font->lcd_weights[4] = (unsigned char)(p_tertiary*norm*256);
     pen.x = 10;
     pen.y = 600 - font->height - 10;
-    text_buffer_printf( buffer, &pen, &markup, text, NULL );
+    char * utext = str_utf16_to_utf8( text );
+    text_buffer_printf( buffer, &pen, &markup, utext, NULL );
+    free( utext );
 
     // Post-processing for width and orientation
     vertex_buffer_t * vbuffer = buffer->buffer;

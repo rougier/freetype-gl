@@ -31,7 +31,6 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-#include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -163,7 +162,7 @@ void
 text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
 {
     markup_t *markup;
-    wchar_t *text;
+    char *text;
     va_list args;
 
     if( vertex_buffer_size( self->buffer ) == 0 )
@@ -178,10 +177,8 @@ text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
         {
             return;
         }
-        text = va_arg( args, wchar_t * );
-        char * utext = str_utf16_to_utf8( text );
-        text_buffer_add_text( self, pen, markup, utext, 0 );
-        free( utext );
+        text = va_arg( args, char * );
+        text_buffer_add_text( self, pen, markup, text, 0 );
     } while( markup != 0 );
     va_end ( args );
 }

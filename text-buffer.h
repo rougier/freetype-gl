@@ -265,7 +265,7 @@ typedef struct glyph_vertex_t {
   *
   * @param self a text buffer
   * @param pen  position of text start
-  * @param ...  a series of markup_t *, wchar_t * ended by NULL
+  * @param ...  a series of markup_t *, char * ended by NULL
   *
   */
   void
