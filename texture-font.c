@@ -401,13 +401,35 @@ texture_font_delete( texture_font_t *self )
     free( self );
 }
 
+texture_glyph_t *
+texture_font_find_glyph( texture_font_t * self,
+                         wchar_t charcode )
+{
+    size_t i;
+    texture_glyph_t *glyph;
+
+    for( i = 0; i < self->glyphs->size; ++i )
+    {
+        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
+        // If charcode is -1, we don't care about outline type or thickness
+        if( (glyph->charcode == charcode) &&
+            ((charcode == (wchar_t)(-1) ) ||
+             ((glyph->outline_type == self->outline_type) &&
+              (glyph->outline_thickness == self->outline_thickness)) ))
+        {
+            return glyph;
+        }
+    }
+
+    return NULL;
+}
 
 // ----------------------------------------------- texture_font_load_glyphs ---
 size_t
 texture_font_load_glyphs( texture_font_t * self,
                           const wchar_t * charcodes )
 {
-    size_t i, j, x, y, width, height, depth, w, h;
+    size_t i, x, y, width, height, depth, w, h;
 
     FT_Library library;
     FT_Error error;
@@ -424,7 +446,6 @@ texture_font_load_glyphs( texture_font_t * self,
 
     ivec4 region;
     size_t missed = 0;
-    char pass;
 
     assert( self );
     assert( charcodes );
@@ -439,23 +460,8 @@ texture_font_load_glyphs( texture_font_t * self,
 
     /* Load each glyph */
     for( i = 0; i < wcslen(charcodes); ++i ) {
-        pass = 0;
         /* Check if charcode has been already loaded */
-        for( j = 0; j < self->glyphs->size; ++j ) {
-            glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
-            // If charcode is -1, we don't care about outline type or thickness
-            // if( (glyph->charcode == charcodes[i])) {
-            if( (glyph->charcode == charcodes[i]) &&
-                ((charcodes[i] == (wchar_t)(-1) ) ||
-                 ((glyph->outline_type == self->outline_type) &&
-                  (glyph->outline_thickness == self->outline_thickness)) ))
-            {
-                pass = 1;
-                break;
-            }
-        }
-
-        if(pass)
+        if( texture_font_find_glyph( self, charcodes[i] ) )
             continue;
 
         flags = 0;
@@ -656,7 +662,6 @@ texture_glyph_t *
 texture_font_get_glyph( texture_font_t * self,
                         wchar_t charcode )
 {
-    size_t i;
     wchar_t buffer[2] = {0,0};
     texture_glyph_t *glyph;
 
@@ -665,18 +670,8 @@ texture_font_get_glyph( texture_font_t * self,
     assert( self->atlas );
 
     /* Check if charcode has been already loaded */
-    for( i=0; i<self->glyphs->size; ++i )
-    {
-        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
-        // If charcode is -1, we don't care about outline type or thickness
-        if( (glyph->charcode == charcode) &&
-            ((charcode == (wchar_t)(-1) ) ||
-             ((glyph->outline_type == self->outline_type) &&
-              (glyph->outline_thickness == self->outline_thickness)) ))
-        {
-            return glyph;
-        }
-    }
+    if( glyph = texture_font_find_glyph( self, charcode ))
+        return glyph;
 
     /* charcode -1 is special : it is used for line drawing (overline,
      * underline, strikethrough) and background.
