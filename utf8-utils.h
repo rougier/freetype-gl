@@ -73,37 +73,6 @@ namespace ftgl {
   utf8_strlen( const char* string );
 
   /**
-   * Converts a given UTF-16 LE encoded string to its UTF-8 equivalent
-   *
-   * @param string  An UTF-16 LE encoded and NULL terminated string
-   *
-   * @return  The equivalent of the given string in UTF-8 encoding.
-   */
-  char *
-  str_utf16_to_utf8( const wchar_t * string );
-
-  /**
-   * Converts a given UTF-8 encoded character to its UTF-16 LE equivalent
-   *
-   * @param character  An UTF-8 encoded character
-   *
-   * @return  The equivalent of the given character in UTF-16 LE
-   *          encoding.
-   */
-  wchar_t
-  utf8_to_utf16( const char * character );
-
-  /**
-   * Converts a given UTF-16 LE encoded character to its UTF-8 equivalent
-   *
-   * @param character  An UTF-16 LE encoded character
-   *
-   * @return  The equivalent of the given character in UTF-8 encoding.
-   */
-  char *
-  utf16_to_utf8( wchar_t character );
-
-  /**
    * Converts a given UTF-8 encoded character to its UTF-32 LE equivalent
    *
    * @param character  An UTF-8 encoded character

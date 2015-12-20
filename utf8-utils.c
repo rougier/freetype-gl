@@ -32,7 +32,6 @@
  * ========================================================================= */
 
 #include <string.h>
-#include <wchar.h>
 #include "utf8-utils.h"
 
 // ----------------------------------------------------- utf8_surrogate_len ---
@@ -75,103 +74,6 @@ utf8_strlen( const char* string )
     return result;
 }
 
-// ------------------------------------------------------ str_utf16_to_utf8 ---
-char *
-str_utf16_to_utf8( const wchar_t * string )
-{
-    size_t i;
-
-    char * result = NULL;
-    char * character = NULL;
-    size_t strlength = 0;
-
-    for( i = 0; i < wcslen( string ); ++i )
-    {
-        character = utf16_to_utf8( string[i] );
-        strlength = result ? strlen( result ) : 0;
-        result = realloc( result, strlength + utf8_surrogate_len( character ) + 1 );
-        result[strlength] = '\0';
-        strncat( result, character, utf8_surrogate_len( character ) );
-        free( character );
-    }
-
-    return result;
-}
-
-// ---------------------------------------------------------- utf8_to_utf16 ---
-wchar_t
-utf8_to_utf16( const char * character )
-{
-    return utf8_to_utf32( character );
-}
-
-// ---------------------------------------------------------- utf16_to_utf8 ---
-char *
-utf16_to_utf8( wchar_t character )
-{
-    wchar_t counter = character;
-    char * result = NULL;
-
-    if ( character == -1 )
-    {
-        return '\0';
-    }
-    else if ( character < 0x80 )
-    {
-        result = malloc( sizeof(char) * 2 );
-        result[0] = character & 0xFF;
-        result[1] = '\0';
-    }
-    else if ( character < 0x800 )
-    {
-        result = malloc( sizeof(char) * 3 );
-        result[0] = 0xC0 | ((character & 0x7C0) >> 6);
-        result[1] = 0x80 | (character & 0x3F);
-        result[2] = '\0';
-    }
-    else if ( character < 0x100000 )
-    {
-        result = malloc( sizeof(char) * 4 );
-        result[0] = 0xE0 | ((character & 0xF000) >> 12);
-        result[1] = 0x80 | ((character & 0xFC0) >> 6);
-        result[2] = 0x80 | (character & 0x3F);
-        result[3] = '\0';
-    }
-    else if ( character < 0x200000 )
-    {
-        result = malloc( sizeof(char) * 5 );
-        result[0] = 0xF0 | ((character & 0x1C0000) >> 18);
-        result[1] = 0x80 | ((character & 0x3F000) >> 12);
-        result[2] = 0x80 | ((character & 0xFC0) >> 6);
-        result[3] = 0x80 | (character & 0x3F);
-        result[4] = '\0';
-    }
-    else if ( character < 0x4000000 )
-    {
-        result = malloc( sizeof(char) * 6 );
-        result[0] = 0xF8 | ((character & 0x3000000) >> 24);
-        result[1] = 0x80 | ((character & 0xFC0000) >> 18);
-        result[2] = 0x80 | ((character & 0x3F000) >> 12);
-        result[3] = 0x80 | ((character & 0xFC0) >> 6);
-        result[4] = 0x80 | (character & 0x3F);
-        result[5] = '\0';
-    }
-    else
-    {
-        result = malloc( sizeof(char) * 7 );
-        result[0] = 0xFC | ((character & 0x40000000) >> 30);
-        result[1] = 0x80 | ((character & 0x3F000000) >> 24);
-        result[2] = 0x80 | ((character & 0xFC0000) >> 18);
-        result[3] = 0x80 | ((character & 0x3F000) >> 12);
-        result[4] = 0x80 | ((character & 0xFC0) >> 6);
-        result[5] = 0x80 | (character & 0x3F);
-        result[6] = '\0';
-    }
-
-    return result;
-}
-
-// ---------------------------------------------------------- utf8_to_utf32 ---
 uint32_t
 utf8_to_utf32( const char * character )
 {
