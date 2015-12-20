@@ -40,9 +40,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <wchar.h>
 #include "font-manager.h"
-#include "utf8-utils.h"
 
 
 // ------------------------------------------------------------ file_exists ---
@@ -74,7 +72,7 @@ font_manager_new( size_t width, size_t height, size_t depth )
     }
     self->atlas = atlas;
     self->fonts = vector_new( sizeof(texture_font_t *) );
-    self->cache = wcsdup( L" " );
+    self->cache = strdup( " " );
     return self;
 }
 
@@ -150,10 +148,8 @@ font_manager_get_from_filename( font_manager_t *self,
     font = texture_font_new_from_file( self->atlas, size, filename );
     if( font )
     {
-        char* cache = str_utf16_to_utf8( self->cache );
         vector_push_back( self->fonts, &font );
-        texture_font_load_glyphs( font, cache );
-        free(cache);
+        texture_font_load_glyphs( font, self->cache );
         return font;
     }
     fprintf( stderr, "Unable to load \"%s\" (size=%.1f)\n", filename, size );
