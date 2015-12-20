@@ -366,7 +366,7 @@ int main( int argc, char **argv )
         L"\n"
         L"typedef struct\n"
         L"{\n"
-        L"    wchar_t charcode;\n"
+        L"    uint32_t charcode;\n"
         L"    float kerning;\n"
         L"} kerning_t;\n\n" );
 
@@ -490,16 +490,8 @@ int main( int argc, char **argv )
         for( j=0; j < vector_size(glyph->kerning); ++j )
         {
             kerning_t *kerning = (kerning_t *) vector_get( glyph->kerning, j);
-            wchar_t charcode = kerning->charcode;
 
-            if( (charcode == L'\'' ) || (charcode == L'\\') )
-            {
-                fwprintf( file, L"{L'\\%lc', %ff}", charcode, kerning->kerning );
-            }
-            else if( (charcode != (wchar_t)(-1) ) )
-            {
-                fwprintf( file, L"{L'%lc', %ff}", charcode, kerning->kerning );
-            }
+            fwprintf( file, L"{%zu, %ff}", kerning->charcode, kerning->kerning );
             if( j < (vector_size(glyph->kerning)-1))
             {
                 fwprintf( file, L", " );

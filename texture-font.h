@@ -80,9 +80,9 @@ namespace ftgl {
 typedef struct kerning_t
 {
     /**
-     * Left character code in the kern pair.
+     * Left character code in the kern pair in UTF-32 LE encoding.
      */
-    wchar_t charcode;
+    uint32_t charcode;
 
     /**
      * Kerning value (in fractional pixels).
