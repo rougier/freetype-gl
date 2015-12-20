@@ -161,6 +161,7 @@ texture_glyph_new(void)
         return NULL;
     }
 
+    self->charcode  = -1;
     self->id        = 0;
     self->width     = 0;
     self->height    = 0;
@@ -625,7 +626,7 @@ texture_font_load_glyphs( texture_font_t * self,
                                   ft_bitmap.buffer, ft_bitmap.pitch );
 
         glyph = texture_glyph_new( );
-        glyph->charcode = utf8_to_utf16(charcodes + i);
+        glyph->charcode = utf8_to_utf32( charcodes + i );
         glyph->width    = w;
         glyph->height   = h;
         glyph->outline_type = self->outline_type;
@@ -693,7 +694,7 @@ texture_font_get_glyph( texture_font_t * self,
             return NULL;
         }
         texture_atlas_set_region( self->atlas, region.x, region.y, 4, 4, data, 0 );
-        glyph->charcode = (wchar_t)(-1);
+        glyph->charcode = -1;
         glyph->s0 = (region.x+2)/(float)width;
         glyph->t0 = (region.y+2)/(float)height;
         glyph->s1 = (region.x+3)/(float)width;

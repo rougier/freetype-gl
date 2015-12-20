@@ -359,6 +359,7 @@ int main( int argc, char **argv )
     // ----------------------
     fwprintf( file,
         L"#include <stddef.h>\n"
+        L"#include <stdint.h>\n"
         L"#ifdef __cplusplus\n"
         L"extern \"C\" {\n"
         L"#endif\n"
@@ -372,7 +373,7 @@ int main( int argc, char **argv )
     fwprintf( file,
         L"typedef struct\n"
         L"{\n"
-        L"    wchar_t charcode;\n"
+        L"    uint32_t charcode;\n"
         L"    int width, height;\n"
         L"    int offset_x, offset_y;\n"
         L"    float advance_x, advance_y;\n"
@@ -479,21 +480,7 @@ int main( int argc, char **argv )
 
 
         // TextureFont
-        if( (glyph->charcode == L'\'' ) || (glyph->charcode == L'\\' ) )
-        {
-            fwprintf( file, L"  {L'\\%lc', ", glyph->charcode );
-            //wprintf( L"  {L'\\%lc', ", glyph->charcode );
-        }
-        else if( glyph->charcode == (wchar_t)(-1) )
-        {
-            fwprintf( file, L"  {L'\\0', " );
-            //wprintf( L"  {L'\\0', " );
-        }
-        else
-        {
-            fwprintf( file, L"  {L'%lc', ", glyph->charcode );
-            //wprintf( L"  {L'%lc', ", glyph->charcode );
-        }
+        fwprintf( file, L"  {%zu, ", glyph->charcode );
         fwprintf( file, L"%d, %d, ", glyph->width, glyph->height );
         fwprintf( file, L"%d, %d, ", glyph->offset_x, glyph->offset_y );
         fwprintf( file, L"%ff, %ff, ", glyph->advance_x, glyph->advance_y );

@@ -35,6 +35,7 @@
 #define __TEXTURE_FONT_H__
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -132,9 +133,9 @@ typedef struct kerning_t
 typedef struct texture_glyph_t
 {
     /**
-     * Wide character this glyph represents
+     * Character this glyph represents in UTF-32 LE encoding.
      */
-    wchar_t charcode;
+    uint32_t charcode;
 
     /**
      * Glyph id (used for display lists)
