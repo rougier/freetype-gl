@@ -29,7 +29,7 @@ vertex buffer and a single texture where necessary glyphs are tighly packed.
    ...
 
    // Text to be printed
-   wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
+   char *text = "A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
 
    // Texture atlas to store individual glyphs
    texture_atlas_t *atlas = texture_atlas_new( 512, 512, 1 );
