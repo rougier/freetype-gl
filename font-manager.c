@@ -40,7 +40,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <wchar.h>
 #include "font-manager.h"
 
 
@@ -73,7 +72,7 @@ font_manager_new( size_t width, size_t height, size_t depth )
     }
     self->atlas = atlas;
     self->fonts = vector_new( sizeof(texture_font_t *) );
-    self->cache = wcsdup( L" " );
+    self->cache = strdup( " " );
     return self;
 }
 

@@ -35,6 +35,7 @@
 #define __TEXTURE_FONT_H__
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -79,9 +80,9 @@ namespace ftgl {
 typedef struct kerning_t
 {
     /**
-     * Left character code in the kern pair.
+     * Left character code in the kern pair in UTF-32 LE encoding.
      */
-    wchar_t charcode;
+    uint32_t charcode;
 
     /**
      * Kerning value (in fractional pixels).
@@ -132,9 +133,9 @@ typedef struct kerning_t
 typedef struct texture_glyph_t
 {
     /**
-     * Wide character this glyph represents
+     * Character this glyph represents in UTF-32 LE encoding.
      */
-    wchar_t charcode;
+    uint32_t charcode;
 
     /**
      * Glyph id (used for display lists)
@@ -407,21 +408,21 @@ typedef struct texture_font_t
  */
   texture_glyph_t *
   texture_font_get_glyph( texture_font_t * self,
-                          wchar_t charcode );
+                          const char * charcode );
 
 
 /**
  * Request the loading of several glyphs at once.
  *
  * @param self      a valid texture font
- * @param charcodes character codepoints to be loaded.
+ * @param charcodes UTF-8 encoded character codepoints to be loaded.
  *
  * @return Number of missed glyph if the texture is not big enough to hold
  *         every glyphs.
  */
   size_t
   texture_font_load_glyphs( texture_font_t * self,
-                            const wchar_t * charcodes );
+                            const char * charcodes );
 
 /**
  * Get the kerning between two horizontal glyphs.
@@ -433,7 +434,7 @@ typedef struct texture_font_t
  */
 float
 texture_glyph_get_kerning( const texture_glyph_t * self,
-                           const wchar_t charcode );
+                           const char * charcode );
 
 
 /**

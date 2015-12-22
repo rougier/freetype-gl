@@ -36,12 +36,13 @@
  * ============================================================================
  */
 #include <stdio.h>
-#include <wchar.h>
+#include <string.h>
 
 #include "freetype-gl.h"
 #include "mat4.h"
 #include "shader.h"
 #include "vertex-buffer.h"
+#include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
 
@@ -141,9 +142,9 @@ int main( int argc, char **argv )
 #endif
     texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
     const char *filename = "fonts/Vera.ttf";
-    const wchar_t *cache = L" !\"#$%&'()*+,-./0123456789:;<=>?"
-                           L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-                           L"`abcdefghijklmnopqrstuvwxyz{|}~";
+    const char * cache = " !\"#$%&'()*+,-./0123456789:;<=>?"
+                         "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
+                         "`abcdefghijklmnopqrstuvwxyz{|}~";
     size_t minsize = 8, maxsize = 27;
     size_t count = maxsize - minsize;
     size_t i, missed = 0;
@@ -157,10 +158,10 @@ int main( int argc, char **argv )
 
     printf( "Matched font               : %s\n", filename );
     printf( "Number of fonts            : %ld\n", count );
-    printf( "Number of glyphs per font  : %ld\n", wcslen(cache) );
+    printf( "Number of glyphs per font  : %ld\n", utf8_strlen(cache) );
     printf( "Number of missed glyphs    : %ld\n", missed );
     printf( "Total number of glyphs     : %ld/%ld\n",
-            wcslen(cache)*count - missed, wcslen(cache)*count );
+            utf8_strlen(cache)*count - missed, utf8_strlen(cache)*count );
     printf( "Texture size               : %ldx%ld\n", atlas->width, atlas->height );
     printf( "Texture occupancy          : %.2f%%\n",
             100.0*atlas->used/(float)(atlas->width*atlas->height) );

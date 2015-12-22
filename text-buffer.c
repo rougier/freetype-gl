@@ -31,14 +31,13 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-#include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <assert.h>
 #include "opengl.h"
 #include "text-buffer.h"
-
+#include "utf8-utils.h"
 
 #define SET_GLYPH_VERTEX(value,x0,y0,z0,s0,t0,r,g,b,a,sh,gm) { \
 	glyph_vertex_t *gv=&value;                                 \
@@ -163,7 +162,7 @@ void
 text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
 {
     markup_t *markup;
-    wchar_t *text;
+    char *text;
     va_list args;
 
     if( vertex_buffer_size( self->buffer ) == 0 )
@@ -178,8 +177,8 @@ text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
         {
             return;
         }
-        text = va_arg( args, wchar_t * );
-        text_buffer_add_text( self, pen, markup, text, wcslen(text) );
+        text = va_arg( args, char * );
+        text_buffer_add_text( self, pen, markup, text, 0 );
     } while( markup != 0 );
     va_end ( args );
 }
@@ -206,7 +205,7 @@ text_buffer_move_last_line( text_buffer_t * self, float dy )
 void
 text_buffer_add_text( text_buffer_t * self,
                       vec2 * pen, markup_t * markup,
-                      const wchar_t * text, size_t length )
+                      const char * text, size_t length )
 {
     font_manager_t * manager = self->manager;
     size_t i;
@@ -228,25 +227,27 @@ text_buffer_add_text( text_buffer_t * self,
 
     if( length == 0 )
     {
-        length = wcslen(text);
+        length = utf8_strlen(text);
     }
     if( vertex_buffer_size( self->buffer ) == 0 )
     {
         self->origin = *pen;
     }
 
-    text_buffer_add_wchar( self, pen, markup, text[0], 0 );
-    for( i=1; i<length; ++i )
+    const char * prev_character = NULL;
+    for( i = 0; utf8_strlen( text + i ) && length; i += utf8_surrogate_len( text + i ) )
     {
-        text_buffer_add_wchar( self, pen, markup, text[i], text[i-1] );
+        text_buffer_add_char( self, pen, markup, text + i, prev_character );
+        prev_character = text + i;
+        length--;
     }
 }
 
 // ----------------------------------------------------------------------------
 void
-text_buffer_add_wchar( text_buffer_t * self,
-                       vec2 * pen, markup_t * markup,
-                       wchar_t current, wchar_t previous )
+text_buffer_add_char( text_buffer_t * self,
+                      vec2 * pen, markup_t * markup,
+                      const char * current, const char * previous )
 {
     size_t vcount = 0;
     size_t icount = 0;
@@ -266,7 +267,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     texture_glyph_t *black;
     float kerning = 0.0f;
 
-    if( current == L'\n' )
+    if( current[0] == '\n' )
     {
         pen->x = self->origin.x;
         pen->y += self->line_descender;
@@ -289,7 +290,7 @@ text_buffer_add_wchar( text_buffer_t * self,
     }
 
     glyph = texture_font_get_glyph( font, current );
-    black = texture_font_get_glyph( font, -1 );
+    black = texture_font_get_glyph( font, NULL );
 
     if( glyph == NULL )
     {

@@ -31,7 +31,7 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
 #include <stdio.h>
-#include <wchar.h>
+#include <string.h>
 
 #include "freetype-gl.h"
 
@@ -130,19 +130,19 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 // --------------------------------------------------------------- add_text ---
 void add_text( vertex_buffer_t * buffer, texture_font_t * font,
-               wchar_t *  text, vec4 * color, vec2 * pen )
+               char *text, vec4 * color, vec2 * pen )
 {
     size_t i;
     float r = color->red, g = color->green, b = color->blue, a = color->alpha;
-    for( i=0; i<wcslen(text); ++i )
+    for( i = 0; i < strlen(text); ++i )
     {
-        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
+        texture_glyph_t *glyph = texture_font_get_glyph( font, text + i );
         if( glyph != NULL )
         {
             float kerning = 0.0f;
             if( i > 0)
             {
-                kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+                kerning = texture_glyph_get_kerning( glyph, text + i - 1 );
             }
             pen->x += kerning;
             int x0  = (int)( pen->x + glyph->offset_x );
@@ -227,15 +227,15 @@ int main( int argc, char **argv )
 
     vec2 pen, origin;
 
-    texture_glyph_t *glyph  = texture_font_get_glyph( big, L'g' );
+    texture_glyph_t *glyph  = texture_font_get_glyph( big, "g" );
     origin.x = width/2  - glyph->offset_x - glyph->width/2;
     origin.y = height/2 - glyph->offset_y + glyph->height/2;
-    add_text( text_buffer, big, L"g", &black, &origin );
+    add_text( text_buffer, big, "g", &black, &origin );
 
     // title
     pen.x = 50;
     pen.y = 560;
-    add_text( text_buffer, title, L"Glyph metrics", &black, &pen );
+    add_text( text_buffer, title, "Glyph metrics", &black, &pen );
 
     point_t vertices[] =
         {   // Baseline
@@ -295,27 +295,27 @@ int main( int argc, char **argv )
 
     pen.x = width/2 - 48;
     pen.y = .2*height - 18;
-    add_text( text_buffer, small, L"advance_x", &blue, &pen );
+    add_text( text_buffer, small, "advance_x", &blue, &pen );
 
     pen.x = width/2 - 20;
     pen.y = .8*height + 3;
-    add_text( text_buffer, small, L"width", &blue, &pen );
+    add_text( text_buffer, small, "width", &blue, &pen );
 
     pen.x = width/2 - glyph->width/2 + 5;
     pen.y = .85*height-8;
-    add_text( text_buffer, small, L"offset_x", &blue, &pen );
+    add_text( text_buffer, small, "offset_x", &blue, &pen );
 
     pen.x = 0.2*width/2-30;
     pen.y = origin.y + glyph->offset_y - glyph->height/2;
-    add_text( text_buffer, small, L"height", &blue, &pen );
+    add_text( text_buffer, small, "height", &blue, &pen );
 
     pen.x = 0.8*width+3;
     pen.y = origin.y + glyph->offset_y/2 -6;
-    add_text( text_buffer, small, L"offset_y", &blue, &pen );
+    add_text( text_buffer, small, "offset_y", &blue, &pen );
 
     pen.x = width/2  - glyph->offset_x - glyph->width/2 - 58;
     pen.y = height/2 - glyph->offset_y + glyph->height/2 - 20;
-    add_text( text_buffer, small, L"Origin", &black, &pen );
+    add_text( text_buffer, small, "Origin", &black, &pen );
 
 
     GLuint i = 0;

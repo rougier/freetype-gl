@@ -89,7 +89,7 @@ typedef struct font_manager_t {
     /**
      * Default glyphs to be loaded when loading a new font.
      */
-    wchar_t * cache;
+    char * cache;
 
 } font_manager_t;
 

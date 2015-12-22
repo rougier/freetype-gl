@@ -34,23 +34,24 @@
 #include "opengl.h"
 #include "vec234.h"
 #include "vector.h"
+#include "utf8-utils.h"
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <wchar.h>
+#include <string.h>
 #include "vera-16.h"
 
 #include <GLFW/glfw3.h>
 
-void print_at( int pen_x, int pen_y, wchar_t *text )
+void print_at( int pen_x, int pen_y, char *text )
 {
     size_t i, j;
-    for( i=0; i<wcslen(text); ++i)
+    for( i=0; i < strlen(text); ++i)
     {
         texture_glyph_t *glyph = 0;
         for( j=0; j<font.glyphs_count; ++j)
         {
-            if( font.glyphs[j].charcode == text[i] )
+            if( font.glyphs[j].charcode == utf8_to_utf32( text + i ) )
             {
                 glyph = &font.glyphs[j];
                 break;
@@ -85,7 +86,7 @@ void display( GLFWwindow* window )
 {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glColor4f(0,0,0,1);
-    print_at( 100, 100, L"Hello World !" );
+    print_at( 100, 100, "Hello World !" );
 
     glfwSwapBuffers( window );
 }

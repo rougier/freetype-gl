@@ -83,22 +83,22 @@ float p_primary;
 float p_secondary;
 float p_tertiary;
 
-static wchar_t text[] =
-    L"A single pixel on a color LCD is made of three colored elements \n"
-    L"ordered (on various displays) either as blue, green, and red (BGR), \n"
-    L"or as red, green, and blue (RGB). These pixel components, sometimes \n"
-    L"called sub-pixels, appear as a single color to the human eye because \n"
-    L"of blurring by the optics and spatial integration by nerve cells in "
-    L"the eye.\n"
-    L"\n"
-    L"The resolution at which colored sub-pixels go unnoticed differs, \n"
-    L"however, with each user some users are distracted by the colored \n"
-    L"\"fringes\" resulting from sub-pixel rendering. Subpixel rendering \n"
-    L"is better suited to some display technologies than others. The \n"
-    L"technology is well-suited to LCDs, but less so for CRTs. In a CRT \n"
-    L"the light from the pixel components often spread across pixels, \n"
-    L"and the outputs of adjacent pixels are not perfectly independent."
-    L"\n";
+static char text[] =
+    "A single pixel on a color LCD is made of three colored elements \n"
+    "ordered (on various displays) either as blue, green, and red (BGR), \n"
+    "or as red, green, and blue (RGB). These pixel components, sometimes \n"
+    "called sub-pixels, appear as a single color to the human eye because \n"
+    "of blurring by the optics and spatial integration by nerve cells in "
+    "the eye.\n"
+    "\n"
+    "The resolution at which colored sub-pixels go unnoticed differs, \n"
+    "however, with each user some users are distracted by the colored \n"
+    "\"fringes\" resulting from sub-pixel rendering. Subpixel rendering \n"
+    "is better suited to some display technologies than others. The \n"
+    "technology is well-suited to LCDs, but less so for CRTs. In a CRT \n"
+    "the light from the pixel components often spread across pixels, \n"
+    "and the outputs of adjacent pixels are not perfectly independent."
+    "\n";
 
 
 // ----------------------------------------------------------- build_buffer ---

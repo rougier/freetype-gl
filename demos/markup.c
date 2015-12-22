@@ -241,18 +241,18 @@ int main( int argc, char **argv )
 
     vec2 pen = {{20, 200}};
     text_buffer_printf( buffer, &pen,
-                        &underline, L"The",
-                        &normal,    L" Quick",
-                        &big,       L" brown ",
-                        &reverse,   L" fox \n",
-                        &italic,    L"jumps over ",
-                        &bold,      L"the lazy ",
-                        &normal,    L"dog.\n",
-                        &small,     L"Now is the time for all good men "
-                                    L"to come to the aid of the party.\n",
-                        &italic,    L"Ég get etið gler án þess að meiða mig.\n",
-                        &japanese,  L"私はガラスを食べられます。 それは私を傷つけません\n",
-                        &math,      L"ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ",
+                        &underline, "The",
+                        &normal,    " Quick",
+                        &big,       " brown ",
+                        &reverse,   " fox \n",
+                        &italic,    "jumps over ",
+                        &bold,      "the lazy ",
+                        &normal,    "dog.\n",
+                        &small,     "Now is the time for all good men "
+                                    "to come to the aid of the party.\n",
+                        &italic,    "Ég get etið gler án þess að meiða mig.\n",
+                        &japanese,  "私はガラスを食べられます。 それは私を傷つけません\n",
+                        &math,      "ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ",
                         NULL );
     mat4_set_identity( &projection );
     mat4_set_identity( &model );

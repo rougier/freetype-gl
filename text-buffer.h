@@ -265,7 +265,7 @@ typedef struct glyph_vertex_t {
   *
   * @param self a text buffer
   * @param pen  position of text start
-  * @param ...  a series of markup_t *, wchar_t * ended by NULL
+  * @param ...  a series of markup_t *, char * ended by NULL
   *
   */
   void
@@ -284,7 +284,7 @@ typedef struct glyph_vertex_t {
   void
   text_buffer_add_text( text_buffer_t * self,
                         vec2 * pen, markup_t * markup,
-                        const wchar_t * text, size_t length );
+                        const char * text, size_t length );
 
  /**
   * Add a char to the text buffer
@@ -296,9 +296,9 @@ typedef struct glyph_vertex_t {
   * @param previous previous character (if any)
   */
   void
-  text_buffer_add_wchar( text_buffer_t * self,
-                         vec2 * pen, markup_t * markup,
-                         wchar_t current, wchar_t previous );
+  text_buffer_add_char( text_buffer_t * self,
+                        vec2 * pen, markup_t * markup,
+                        const char * current, const char * previous );
 
 /**
   * Clear text buffer

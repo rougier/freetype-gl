@@ -31,7 +31,7 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
 #include <stdio.h>
-#include <wchar.h>
+#include <string.h>
 
 #include "freetype-gl.h"
 
@@ -104,16 +104,16 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 // --------------------------------------------------------------- add_text ---
 void add_text( vertex_buffer_t * buffer, texture_font_t * font,
-               wchar_t *text, vec2 pen, vec4 fg_color_1, vec4 fg_color_2 )
+               char *text, vec2 pen, vec4 fg_color_1, vec4 fg_color_2 )
 {
     size_t i;
-    for( i=0; i<wcslen(text); ++i )
+    for( i = 0; i < strlen(text); ++i )
     {
-        texture_glyph_t *glyph = texture_font_get_glyph( font, text[i] );
+        texture_glyph_t *glyph = texture_font_get_glyph( font, text + i );
         float kerning = 0.0f;
         if( i > 0)
         {
-            kerning = texture_glyph_get_kerning( glyph, text[i-1] );
+            kerning = texture_glyph_get_kerning( glyph, text + i - 1 );
         }
         pen.x += kerning;
 
@@ -202,19 +202,19 @@ int main( int argc, char **argv )
 
     font->outline_type = 2;
     font->outline_thickness = 7;
-    add_text( buffer, font, L"Freetype GL", pen, black, black );
+    add_text( buffer, font, "Freetype GL", pen, black, black );
 
     font->outline_type = 2;
     font->outline_thickness = 5;
-    add_text( buffer, font, L"Freetype GL", pen, yellow, yellow );
+    add_text( buffer, font, "Freetype GL", pen, yellow, yellow );
 
     font->outline_type = 1;
     font->outline_thickness = 3;
-    add_text( buffer, font, L"Freetype GL", pen, black, black );
+    add_text( buffer, font, "Freetype GL", pen, black, black );
 
     font->outline_type = 0;
     font->outline_thickness = 0;
-    add_text( buffer, font, L"Freetype GL", pen, orange1, orange2 );
+    add_text( buffer, font, "Freetype GL", pen, orange1, orange2 );
 
     shader = shader_load("shaders/v3f-t2f-c4f.vert",
                          "shaders/v3f-t2f-c4f.frag");

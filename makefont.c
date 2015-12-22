@@ -39,7 +39,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <wchar.h>
 
 #include <GLFW/glfw3.h>
 
@@ -66,10 +65,10 @@ int main( int argc, char **argv )
     size_t i, j;
     int arg;
 
-    wchar_t * font_cache =
-        L" !\"#$%&'()*+,-./0123456789:;<=>?"
-        L"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-        L"`abcdefghijklmnopqrstuvwxyz{|}~";
+    char * font_cache =
+        " !\"#$%&'()*+,-./0123456789:;<=>?"
+        "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
+        "`abcdefghijklmnopqrstuvwxyz{|}~";
 
     float  font_size   = 0.0;
     const char * font_filename   = NULL;
@@ -282,18 +281,23 @@ int main( int argc, char **argv )
 
     size_t missed = texture_font_load_glyphs( font, font_cache );
 
-    wprintf( L"Font filename              : %s\n", font_filename );
-    wprintf( L"Font size                  : %.1f\n", font_size );
-    wprintf( L"Number of glyphs           : %ld\n", wcslen(font_cache) );
-    wprintf( L"Number of missed glyphs    : %ld\n", missed );
-    wprintf( L"Texture size               : %ldx%ldx%ld\n",
-             atlas->width, atlas->height, atlas->depth );
-    wprintf( L"Texture occupancy          : %.2f%%\n",
-            100.0*atlas->used/(float)(atlas->width*atlas->height) );
-    wprintf( L"\n" );
-    wprintf( L"Header filename            : %s\n", header_filename );
-    wprintf( L"Variable name              : %s\n", variable_name );
-
+    printf( "Font filename           : %s\n"
+            "Font size               : %.1f\n"
+            "Number of glyphs        : %ld\n"
+            "Number of missed glyphs : %ld\n"
+            "Texture size            : %ldx%ldx%ld\n"
+            "Texture occupancy       : %.2f%%\n"
+            "\n"
+            "Header filename         : %s\n"
+            "Variable name           : %s\n",
+            font_filename,
+            font_size,
+            strlen(font_cache),
+            missed,
+            atlas->width, atlas->height, atlas->depth,
+            100.0 * atlas->used / (float)(atlas->width * atlas->height),
+            header_filename,
+            variable_name );
 
     size_t texture_size = atlas->width * atlas->height *atlas->depth;
     size_t glyph_count = font->glyphs->size;
@@ -315,120 +319,121 @@ int main( int argc, char **argv )
     // -------------
     // Header
     // -------------
-    fwprintf( file,
-        L"/* ============================================================================\n"
-        L" * Freetype GL - A C OpenGL Freetype engine\n"
-        L" * Platform:    Any\n"
-        L" * WWW:         https://github.com/rougier/freetype-gl\n"
-        L" * ----------------------------------------------------------------------------\n"
-        L" * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.\n"
-        L" *\n"
-        L" * Redistribution and use in source and binary forms, with or without\n"
-        L" * modification, are permitted provided that the following conditions are met:\n"
-        L" *\n"
-        L" *  1. Redistributions of source code must retain the above copyright notice,\n"
-        L" *     this list of conditions and the following disclaimer.\n"
-        L" *\n"
-        L" *  2. Redistributions in binary form must reproduce the above copyright\n"
-        L" *     notice, this list of conditions and the following disclaimer in the\n"
-        L" *     documentation and/or other materials provided with the distribution.\n"
-        L" *\n"
-        L" * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR\n"
-        L" * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF\n"
-        L" * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO\n"
-        L" * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,\n"
-        L" * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n"
-        L" * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\n"
-        L" * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n"
-        L" * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
-        L" * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF\n"
-        L" * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n"
-        L" *\n"
-        L" * The views and conclusions contained in the software and documentation are\n"
-        L" * those of the authors and should not be interpreted as representing official\n"
-        L" * policies, either expressed or implied, of Nicolas P. Rougier.\n"
-        L" * ===============================================================================\n"
-        L" */\n");
+    fprintf( file,
+        "/* ============================================================================\n"
+        " * Freetype GL - A C OpenGL Freetype engine\n"
+        " * Platform:    Any\n"
+        " * WWW:         https://github.com/rougier/freetype-gl\n"
+        " * ----------------------------------------------------------------------------\n"
+        " * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.\n"
+        " *\n"
+        " * Redistribution and use in source and binary forms, with or without\n"
+        " * modification, are permitted provided that the following conditions are met:\n"
+        " *\n"
+        " *  1. Redistributions of source code must retain the above copyright notice,\n"
+        " *     this list of conditions and the following disclaimer.\n"
+        " *\n"
+        " *  2. Redistributions in binary form must reproduce the above copyright\n"
+        " *     notice, this list of conditions and the following disclaimer in the\n"
+        " *     documentation and/or other materials provided with the distribution.\n"
+        " *\n"
+        " * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR\n"
+        " * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF\n"
+        " * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO\n"
+        " * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,\n"
+        " * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n"
+        " * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;\n"
+        " * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND\n"
+        " * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
+        " * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF\n"
+        " * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n"
+        " *\n"
+        " * The views and conclusions contained in the software and documentation are\n"
+        " * those of the authors and should not be interpreted as representing official\n"
+        " * policies, either expressed or implied, of Nicolas P. Rougier.\n"
+        " * ============================================================================\n"
+        " */\n");
 
 
     // ----------------------
     // Structure declarations
     // ----------------------
-    fwprintf( file,
-        L"#include <stddef.h>\n"
-        L"#ifdef __cplusplus\n"
-        L"extern \"C\" {\n"
-        L"#endif\n"
-        L"\n"
-        L"typedef struct\n"
-        L"{\n"
-        L"    wchar_t charcode;\n"
-        L"    float kerning;\n"
-        L"} kerning_t;\n\n" );
+    fprintf( file,
+        "#include <stddef.h>\n"
+        "#include <stdint.h>\n"
+        "#ifdef __cplusplus\n"
+        "extern \"C\" {\n"
+        "#endif\n"
+        "\n"
+        "typedef struct\n"
+        "{\n"
+        "    uint32_t charcode;\n"
+        "    float kerning;\n"
+        "} kerning_t;\n\n" );
 
-    fwprintf( file,
-        L"typedef struct\n"
-        L"{\n"
-        L"    wchar_t charcode;\n"
-        L"    int width, height;\n"
-        L"    int offset_x, offset_y;\n"
-        L"    float advance_x, advance_y;\n"
-        L"    float s0, t0, s1, t1;\n"
-        L"    size_t kerning_count;\n"
-        L"    kerning_t kerning[%d];\n"
-        L"} texture_glyph_t;\n\n", max_kerning_count );
+    fprintf( file,
+        "typedef struct\n"
+        "{\n"
+        "    uint32_t charcode;\n"
+        "    int width, height;\n"
+        "    int offset_x, offset_y;\n"
+        "    float advance_x, advance_y;\n"
+        "    float s0, t0, s1, t1;\n"
+        "    size_t kerning_count;\n"
+        "    kerning_t kerning[%d];\n"
+        "} texture_glyph_t;\n\n", max_kerning_count );
 
-    fwprintf( file,
-        L"typedef struct\n"
-        L"{\n"
-        L"    size_t tex_width;\n"
-        L"    size_t tex_height;\n"
-        L"    size_t tex_depth;\n"
-        L"    char tex_data[%d];\n"
-        L"    float size;\n"
-        L"    float height;\n"
-        L"    float linegap;\n"
-        L"    float ascender;\n"
-        L"    float descender;\n"
-        L"    size_t glyphs_count;\n"
-        L"    texture_glyph_t glyphs[%d];\n"
-        L"} texture_font_t;\n\n", texture_size, glyph_count );
+    fprintf( file,
+        "typedef struct\n"
+        "{\n"
+        "    size_t tex_width;\n"
+        "    size_t tex_height;\n"
+        "    size_t tex_depth;\n"
+        "    char tex_data[%d];\n"
+        "    float size;\n"
+        "    float height;\n"
+        "    float linegap;\n"
+        "    float ascender;\n"
+        "    float descender;\n"
+        "    size_t glyphs_count;\n"
+        "    texture_glyph_t glyphs[%d];\n"
+        "} texture_font_t;\n\n", texture_size, glyph_count );
 
 
 
-    fwprintf( file, L"texture_font_t %s = {\n", variable_name );
+    fprintf( file, "texture_font_t %s = {\n", variable_name );
 
 
     // ------------
     // Texture data
     // ------------
-    fwprintf( file, L" %d, %d, %d, \n", atlas->width, atlas->height, atlas->depth );
-    fwprintf( file, L" {" );
+    fprintf( file, " %d, %d, %d, \n", atlas->width, atlas->height, atlas->depth );
+    fprintf( file, " {" );
     for( i=0; i < texture_size; i+= 32 )
     {
         for( j=0; j < 32 && (j+i) < texture_size ; ++ j)
         {
             if( (j+i) < (texture_size-1) )
             {
-                fwprintf( file, L"%d,", atlas->data[i+j] );
+                fprintf( file, "%d,", atlas->data[i+j] );
             }
             else
             {
-                fwprintf( file, L"%d", atlas->data[i+j] );
+                fprintf( file, "%d", atlas->data[i+j] );
             }
         }
         if( (j+i) < texture_size )
         {
-            fwprintf( file, L"\n  " );
+            fprintf( file, "\n  " );
         }
     }
-    fwprintf( file, L"}, \n" );
+    fprintf( file, "}, \n" );
 
 
     // -------------------
     // Texture information
     // -------------------
-    fwprintf( file, L" %ff, %ff, %ff, %ff, %ff, %d, \n",
+    fprintf( file, " %ff, %ff, %ff, %ff, %ff, %d, \n",
              font->size, font->height,
              font->linegap,font->ascender, font->descender,
              glyph_count );
@@ -436,93 +441,71 @@ int main( int argc, char **argv )
     // --------------
     // Texture glyphs
     // --------------
-    fwprintf( file, L" {\n" );
+    fprintf( file, " {\n" );
     for( i=0; i < glyph_count; ++i )
     {
         texture_glyph_t * glyph = *(texture_glyph_t **) vector_get( font->glyphs, i );
 
 /*
         // Debugging information
-        wprintf( L"glyph : '%lc'\n",
+        printf( "glyph : '%lc'\n",
                  glyph->charcode );
-        wprintf( L"  size       : %dx%d\n",
+        printf( "  size       : %dx%d\n",
                  glyph->width, glyph->height );
-        wprintf( L"  offset     : %+d%+d\n",
+        printf( "  offset     : %+d%+d\n",
                  glyph->offset_x, glyph->offset_y );
-        wprintf( L"  advance    : %ff, %ff\n",
+        printf( "  advance    : %ff, %ff\n",
                  glyph->advance_x, glyph->advance_y );
-        wprintf( L"  tex coords.: %ff, %ff, %ff, %ff\n",
+        printf( "  tex coords.: %ff, %ff, %ff, %ff\n",
                  glyph->u0, glyph->v0, glyph->u1, glyph->v1 );
 
-        wprintf( L"  kerning    : " );
+        printf( "  kerning    : " );
         if( glyph->kerning_count )
         {
             for( j=0; j < glyph->kerning_count; ++j )
             {
-                wprintf( L"('%lc', %ff)",
+                printf( "('%lc', %ff)",
                          glyph->kerning[j].charcode, glyph->kerning[j].kerning );
                 if( j < (glyph->kerning_count-1) )
                 {
-                    wprintf( L", " );
+                    printf( ", " );
                 }
             }
         }
         else
         {
-            wprintf( L"None" );
+            printf( "None" );
         }
-        wprintf( L"\n\n" );
+        printf( "\n\n" );
 */
 
 
         // TextureFont
-        if( (glyph->charcode == L'\'' ) || (glyph->charcode == L'\\' ) )
-        {
-            fwprintf( file, L"  {L'\\%lc', ", glyph->charcode );
-            //wprintf( L"  {L'\\%lc', ", glyph->charcode );
-        }
-        else if( glyph->charcode == (wchar_t)(-1) )
-        {
-            fwprintf( file, L"  {L'\\0', " );
-            //wprintf( L"  {L'\\0', " );
-        }
-        else
-        {
-            fwprintf( file, L"  {L'%lc', ", glyph->charcode );
-            //wprintf( L"  {L'%lc', ", glyph->charcode );
-        }
-        fwprintf( file, L"%d, %d, ", glyph->width, glyph->height );
-        fwprintf( file, L"%d, %d, ", glyph->offset_x, glyph->offset_y );
-        fwprintf( file, L"%ff, %ff, ", glyph->advance_x, glyph->advance_y );
-        fwprintf( file, L"%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
-        fwprintf( file, L"%d, ", vector_size(glyph->kerning) );
-        fwprintf( file, L"{ " );
+        fprintf( file, "  {%zu, ", glyph->charcode );
+        fprintf( file, "%d, %d, ", glyph->width, glyph->height );
+        fprintf( file, "%d, %d, ", glyph->offset_x, glyph->offset_y );
+        fprintf( file, "%ff, %ff, ", glyph->advance_x, glyph->advance_y );
+        fprintf( file, "%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
+        fprintf( file, "%d, ", vector_size(glyph->kerning) );
+        fprintf( file, "{ " );
         for( j=0; j < vector_size(glyph->kerning); ++j )
         {
             kerning_t *kerning = (kerning_t *) vector_get( glyph->kerning, j);
-            wchar_t charcode = kerning->charcode;
 
-            if( (charcode == L'\'' ) || (charcode == L'\\') )
-            {
-                fwprintf( file, L"{L'\\%lc', %ff}", charcode, kerning->kerning );
-            }
-            else if( (charcode != (wchar_t)(-1) ) )
-            {
-                fwprintf( file, L"{L'%lc', %ff}", charcode, kerning->kerning );
-            }
+            fprintf( file, "{%zu, %ff}", kerning->charcode, kerning->kerning );
             if( j < (vector_size(glyph->kerning)-1))
             {
-                fwprintf( file, L", " );
+                fprintf( file, ", " );
             }
         }
-        fwprintf( file, L"} },\n" );
+        fprintf( file, "} },\n" );
     }
-    fwprintf( file, L" }\n};\n" );
+    fprintf( file, " }\n};\n" );
 
-    fwprintf( file,
-        L"#ifdef __cplusplus\n"
-        L"}\n"
-        L"#endif\n" );
+    fprintf( file,
+        "#ifdef __cplusplus\n"
+        "}\n"
+        "#endif\n" );
 
     glfwDestroyWindow( window );
     glfwTerminate( );
