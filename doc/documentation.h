@@ -12,7 +12,6 @@
 @example subpixel.c
 @example atb-agg.c
 @example distance-field.c
-@example display-list.c
 
 @page documentation Documentation
 

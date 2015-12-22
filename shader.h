@@ -104,13 +104,6 @@ namespace ftgl {
                const char * frag_filename );
 
 
-/**
- *
- */
-  GLuint
-  shader_get( GLuint self,
-              const char * name );
-
 /** @} */
 
 #ifdef __cplusplus

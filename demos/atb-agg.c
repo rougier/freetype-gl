@@ -209,7 +209,7 @@ build_buffer( void )
         float x1 = v2->x, y1 = v2->y;
         v2->x = v3->x = x0 + (x1-x0)*p_width;
 
-        float dy = abs(y1-y0);
+        float dy = fabs(y1-y0);
         float dx = tan(p_faux_italic/180.0 * M_PI) * dy;
         v0->x += dx;
         v0->shift = fmod(v0->shift + dx-(int)(dx),1.0);

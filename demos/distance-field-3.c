@@ -104,7 +104,7 @@ distance_map( double *data, unsigned int width, unsigned int height )
             vmin = outside[i];
         }
     }
-    vmin = abs(vmin);
+    vmin = fabs(vmin);
     for( i=0; i<width*height; ++i)
     {
         float v = outside[i];

@@ -182,7 +182,9 @@ typedef struct markup_t
 
 } markup_t;
 
-
+/**
+  * Default markup
+  */
 extern markup_t default_markup;
 
 
