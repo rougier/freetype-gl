@@ -670,7 +670,7 @@ texture_font_get_glyph( texture_font_t * self,
     assert( self->atlas );
 
     /* Check if charcode has been already loaded */
-    if( glyph == texture_font_find_glyph( self, charcode ))
+    if( (glyph = texture_font_find_glyph( self, charcode )) )
         return glyph;
 
     /* charcode -1 is special : it is used for line drawing (overline,
