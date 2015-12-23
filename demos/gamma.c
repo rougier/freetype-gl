@@ -61,106 +61,14 @@ GLuint shader;
 mat4 model, view, projection;
 
 
-// ---------------------------------------------------------------- display ---
-void display( GLFWwindow* window )
+// ------------------------------------------------------------------- init ---
+void init( void )
 {
-    glClearColor( 1.0,1.0,1.0,1.0 );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    glUseProgram( shader );
-    {
-        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
-                            1, 0, model.data);
-        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
-                            1, 0, view.data);
-        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
-                            1, 0, projection.data);
-        vertex_buffer_render( background, GL_TRIANGLES );
-    }
-
-    glUseProgram( buffer->shader );
-    {
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
-                            1, 0, model.data);
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "view" ),
-                            1, 0, view.data);
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
-                            1, 0, projection.data);
-        text_buffer_render( buffer );
-    }
-
-    glfwSwapBuffers( window );
-}
-
-
-// ---------------------------------------------------------------- reshape ---
-void reshape( GLFWwindow* window, int width, int height )
-{
-    glViewport(0, 0, width, height);
-    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
-}
-
-
-// --------------------------------------------------------------- keyboard ---
-void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
-{
-    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
-    {
-        glfwSetWindowShouldClose( window, GL_TRUE );
-    }
-}
-
-/* -------------------------------------------------------- error-callback - */
-void error_callback( int error, const char* description )
-{
-    fputs( description, stderr );
-}
-
-// ------------------------------------------------------------------- main ---
-int main( int argc, char **argv )
-{
-    GLFWwindow* window;
-
-    glfwSetErrorCallback( error_callback );
-
-    if (!glfwInit( ))
-    {
-        exit( EXIT_FAILURE );
-    }
-
-    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
-    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
-
-    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
-
-    if (!window)
-    {
-        glfwTerminate( );
-        exit( EXIT_FAILURE );
-    }
-
-    glfwMakeContextCurrent( window );
-    glfwSwapInterval( 1 );
-
-    glfwSetFramebufferSizeCallback( window, reshape );
-    glfwSetWindowRefreshCallback( window, display );
-    glfwSetKeyCallback( window, keyboard );
-
-#ifndef __APPLE__
-    glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
-    {
-        /* Problem: glewInit failed, something is seriously wrong. */
-        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
-        exit( EXIT_FAILURE );
-    }
-    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-#endif
     buffer = text_buffer_new( LCD_FILTERING_OFF );
     vec4 white = {{1.0, 1.0, 1.0, 1.0}};
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
+
     markup_t markup;
     markup.family  = "fonts/Vera.ttf";
     markup.size    = 15.0;
@@ -212,6 +120,109 @@ int main( int argc, char **argv )
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
     mat4_set_identity( &view );
+}
+
+
+// ---------------------------------------------------------------- display ---
+void display( GLFWwindow* window )
+{
+    glClearColor( 1.0,1.0,1.0,1.0 );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    glUseProgram( shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+        vertex_buffer_render( background, GL_TRIANGLES );
+    }
+
+    glUseProgram( buffer->shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
+                            1, 0, projection.data);
+        text_buffer_render( buffer );
+    }
+
+    glfwSwapBuffers( window );
+}
+
+
+// ---------------------------------------------------------------- reshape ---
+void reshape( GLFWwindow* window, int width, int height )
+{
+    glViewport(0, 0, width, height);
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
+}
+
+
+// --------------------------------------------------------------- keyboard ---
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
+{
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
+    {
+        glfwSetWindowShouldClose( window, GL_TRUE );
+    }
+}
+
+
+// --------------------------------------------------------- error-callback ---
+void error_callback( int error, const char* description )
+{
+    fputs( description, stderr );
+}
+
+
+// ------------------------------------------------------------------- main ---
+int main( int argc, char **argv )
+{
+    GLFWwindow* window;
+
+    glfwSetErrorCallback( error_callback );
+
+    if (!glfwInit( ))
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
+
+    if (!window)
+    {
+        glfwTerminate( );
+        exit( EXIT_FAILURE );
+    }
+
+    glfwMakeContextCurrent( window );
+    glfwSwapInterval( 1 );
+
+    glfwSetFramebufferSizeCallback( window, reshape );
+    glfwSetWindowRefreshCallback( window, display );
+    glfwSetKeyCallback( window, keyboard );
+
+#ifndef __APPLE__
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
+#endif
+
+    init();
 
     glfwSetWindowSize( window, 512, 512 );
     glfwShowWindow( window );
@@ -225,5 +236,5 @@ int main( int argc, char **argv )
     glfwDestroyWindow( window );
     glfwTerminate( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }

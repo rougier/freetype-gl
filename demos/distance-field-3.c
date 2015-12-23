@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         https://github.com/rougier/freetype-gl
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,10 +29,12 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
-#include "freetype-gl.h"
+ * ============================================================================
+ */
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
+#include "freetype-gl.h"
 #include "edtaa3func.h"
 #include "shader.h"
 #include "texture-font.h"
@@ -214,80 +216,6 @@ resize( double *src_data, size_t src_width, size_t src_height,
 }
 
 
-
-
-
-
-// ---------------------------------------------------------------- display ---
-void display( GLFWwindow* window )
-{
-    glClearColor(1.0,1.0,1.0,1.0);
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, atlas->id);
-    glEnable( GL_TEXTURE_2D );
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-    GLuint handle = glGetUniformLocation( program, "texture" );
-    glUniform1i( handle, 0);
-
-    texture_glyph_t * glyph = texture_font_get_glyph( font, "@");
-
-    float s0 = glyph->s0;
-    float t0 = glyph->t0;
-    float s1 = glyph->s1;
-    float t1 = glyph->t1;
-
-    int width = 512;
-    int height = 512;
-    if( glyph->width > glyph->height )
-        height = glyph->height * width/(float)glyph->width;
-    else
-        width = glyph->width * height/(float)glyph->height;
-    int x = 0 - width/2;
-    int y = 0 - height/2;
-
-    glPushMatrix();
-    glTranslatef(256,256,0);
-    glRotatef(angle, 0,0,1);
-    float s = .025+.975*(1+cos(angle/100.0))/2.;
-    glScalef(s,s,s);
-
-    glBegin(GL_QUADS);
-    glTexCoord2f( s0, t1 ); glVertex2f( x, y );
-    glTexCoord2f( s0, t0 ); glVertex2f( x, y+height );
-    glTexCoord2f( s1, t0 ); glVertex2f( x+width, y+height );
-    glTexCoord2f( s1, t1 ); glVertex2f( x+width, y );
-    glEnd();
-    glPopMatrix();
-
-    glfwSwapBuffers( window );
-}
-
-
-// ---------------------------------------------------------------- reshape ---
-void reshape( GLFWwindow* window, int width, int height )
-{
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-}
-
-
-// --------------------------------------------------------------- keyboard ---
-void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
-{
-    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
-    {
-        glfwSetWindowShouldClose( window, GL_TRUE );
-    }
-}
-
-
 // ------------------------------------------------------------- load_glyph ---
 texture_glyph_t *
 load_glyph( const char *  filename,     const char* charcode,
@@ -399,7 +327,98 @@ load_glyph( const char *  filename,     const char* charcode,
 }
 
 
-/* -------------------------------------------------------- error-callback - */
+// ------------------------------------------------------------------- init ---
+void init( void )
+{
+    program = shader_load( "shaders/distance-field.vert",
+                           "shaders/distance-field-3.frag" );
+    glUseProgram( program );
+    atlas = texture_atlas_new( 512, 512, 1 );
+    font = texture_font_new_from_file( atlas, 32, "fonts/Vera.ttf" );
+
+    texture_glyph_t *glyph;
+
+    // Generate the glyp at 512 points, compute distance field and scale it
+    // back to 32 points
+    // Just load another glyph if you want to see difference (draw render a '@')
+    glyph = load_glyph( "fonts/Vera.ttf", "@", 512, 64, 0.1);
+    vector_push_back( font->glyphs, &glyph );
+
+    texture_atlas_upload( atlas );
+}
+
+
+// ---------------------------------------------------------------- display ---
+void display( GLFWwindow* window )
+{
+    glClearColor(1.0,1.0,1.0,1.0);
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, atlas->id);
+    glEnable( GL_TEXTURE_2D );
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    GLuint handle = glGetUniformLocation( program, "texture" );
+    glUniform1i( handle, 0);
+
+    texture_glyph_t * glyph = texture_font_get_glyph( font, "@");
+
+    float s0 = glyph->s0;
+    float t0 = glyph->t0;
+    float s1 = glyph->s1;
+    float t1 = glyph->t1;
+
+    int width = 512;
+    int height = 512;
+    if( glyph->width > glyph->height )
+        height = glyph->height * width/(float)glyph->width;
+    else
+        width = glyph->width * height/(float)glyph->height;
+    int x = 0 - width/2;
+    int y = 0 - height/2;
+
+    glPushMatrix();
+    glTranslatef(256,256,0);
+    glRotatef(angle, 0,0,1);
+    float s = .025+.975*(1+cos(angle/100.0))/2.;
+    glScalef(s,s,s);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f( s0, t1 ); glVertex2f( x, y );
+    glTexCoord2f( s0, t0 ); glVertex2f( x, y+height );
+    glTexCoord2f( s1, t0 ); glVertex2f( x+width, y+height );
+    glTexCoord2f( s1, t1 ); glVertex2f( x+width, y );
+    glEnd();
+    glPopMatrix();
+
+    glfwSwapBuffers( window );
+}
+
+
+// ---------------------------------------------------------------- reshape ---
+void reshape( GLFWwindow* window, int width, int height )
+{
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, width, 0, height, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+
+// --------------------------------------------------------------- keyboard ---
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
+{
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
+    {
+        glfwSetWindowShouldClose( window, GL_TRUE );
+    }
+}
+
+
+// --------------------------------------------------------- error-callback ---
 void error_callback( int error, const char* description )
 {
     fputs( description, stderr );
@@ -447,21 +466,8 @@ int main( int argc, char **argv )
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
-    program = shader_load( "shaders/distance-field.vert",
-                           "shaders/distance-field-3.frag" );
-    glUseProgram( program );
-    atlas = texture_atlas_new( 512, 512, 1 );
-    font = texture_font_new_from_file( atlas, 32, "fonts/Vera.ttf" );
 
-    texture_glyph_t *glyph;
-
-    // Generate the glyp at 512 points, compute distance field and scale it
-    // back to 32 points
-    // Just load another glyph if you want to see difference (draw render a '@')
-    glyph = load_glyph( "fonts/Vera.ttf", "@", 512, 64, 0.1);
-    vector_push_back( font->glyphs, &glyph );
-
-    texture_atlas_upload( atlas );
+    init();
 
     glfwSetWindowSize( window, 512, 512 );
     glfwShowWindow( window );
@@ -481,5 +487,5 @@ int main( int argc, char **argv )
     glfwDestroyWindow( window );
     glfwTerminate( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }

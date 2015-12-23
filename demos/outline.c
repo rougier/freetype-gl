@@ -1,8 +1,8 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         https://github.com/rougier/freetype-gl
- * -------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,8 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
+ * ============================================================================
+ */
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -56,57 +57,6 @@ texture_atlas_t * atlas;
 vertex_buffer_t * buffer;
 GLuint shader;
 mat4 model, view, projection;
-
-
-// ---------------------------------------------------------------- display ---
-void display( GLFWwindow* window )
-{
-    static GLuint texture = 0;
-    if( !texture )
-    {
-        texture = glGetUniformLocation( shader, "texture" );
-    }
-
-    glClearColor( 0.40, 0.40, 0.45, 1.00 );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glEnable( GL_BLEND );
-    glEnable( GL_TEXTURE_2D );
-    glEnable( GL_COLOR_MATERIAL );
-    glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-    glUseProgram( shader );
-    {
-        glUniform1i( glGetUniformLocation( shader, "texture" ),
-                     0 );
-        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
-                            1, 0, model.data);
-        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
-                            1, 0, view.data);
-        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
-                            1, 0, projection.data);
-        vertex_buffer_render( buffer, GL_TRIANGLES );
-    }
-
-    glfwSwapBuffers( window );
-}
-
-
-// ---------------------------------------------------------------- reshape ---
-void reshape( GLFWwindow* window, int width, int height )
-{
-    glViewport(0, 0, width, height);
-    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
-}
-
-// --------------------------------------------------------------- keyboard ---
-void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
-{
-    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
-    {
-        glfwSetWindowShouldClose( window, GL_TRUE );
-    }
-}
 
 
 // --------------------------------------------------------------- add_text ---
@@ -172,61 +122,19 @@ void add_text( vertex_buffer_t * buffer, vec2 * pen, ... )
     va_end ( args );
 }
 
-/* -------------------------------------------------------- error-callback - */
-void error_callback( int error, const char* description )
-{
-    fputs( description, stderr );
-}
 
-// ------------------------------------------------------------------- main ---
-int main( int argc, char **argv )
+// ------------------------------------------------------------------- init ---
+void init( void )
 {
     size_t i;
-    GLFWwindow* window;
 
-    glfwSetErrorCallback( error_callback );
-
-    if (!glfwInit( ))
-    {
-        exit( EXIT_FAILURE );
-    }
-
-    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
-    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
-
-    window = glfwCreateWindow( 1, 1, "Glyph Outline", NULL, NULL );
-
-    if (!window)
-    {
-        glfwTerminate( );
-        exit( EXIT_FAILURE );
-    }
-
-    glfwMakeContextCurrent( window );
-    glfwSwapInterval( 1 );
-
-    glfwSetFramebufferSizeCallback( window, reshape );
-    glfwSetWindowRefreshCallback( window, display );
-    glfwSetKeyCallback( window, keyboard );
-
-#ifndef __APPLE__
-    glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
-    {
-        /* Problem: glewInit failed, something is seriously wrong. */
-        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
-        exit( EXIT_FAILURE );
-    }
-    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
-#endif
     atlas = texture_atlas_new( 512, 512, 1 );
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
 
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
 
-	markup_t markup;
+    markup_t markup;
     markup.family  = "fonts/Vera.ttf";
     markup.size    = 80.0;
     markup.bold    = 0;
@@ -279,6 +187,111 @@ int main( int argc, char **argv )
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
     mat4_set_identity( &view );
+}
+
+
+// ---------------------------------------------------------------- display ---
+void display( GLFWwindow* window )
+{
+    static GLuint texture = 0;
+    if( !texture )
+    {
+        texture = glGetUniformLocation( shader, "texture" );
+    }
+
+    glClearColor( 0.40, 0.40, 0.45, 1.00 );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glEnable( GL_BLEND );
+    glEnable( GL_TEXTURE_2D );
+    glEnable( GL_COLOR_MATERIAL );
+    glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    glUseProgram( shader );
+    {
+        glUniform1i( glGetUniformLocation( shader, "texture" ),
+                     0 );
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+        vertex_buffer_render( buffer, GL_TRIANGLES );
+    }
+
+    glfwSwapBuffers( window );
+}
+
+
+// ---------------------------------------------------------------- reshape ---
+void reshape( GLFWwindow* window, int width, int height )
+{
+    glViewport(0, 0, width, height);
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
+}
+
+
+// --------------------------------------------------------------- keyboard ---
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
+{
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
+    {
+        glfwSetWindowShouldClose( window, GL_TRUE );
+    }
+}
+
+
+// --------------------------------------------------------- error-callback ---
+void error_callback( int error, const char* description )
+{
+    fputs( description, stderr );
+}
+
+
+// ------------------------------------------------------------------- main ---
+int main( int argc, char **argv )
+{
+    GLFWwindow* window;
+
+    glfwSetErrorCallback( error_callback );
+
+    if (!glfwInit( ))
+    {
+        exit( EXIT_FAILURE );
+    }
+
+    glfwWindowHint( GLFW_VISIBLE, GL_TRUE );
+    glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    window = glfwCreateWindow( 1, 1, "Glyph Outline", NULL, NULL );
+
+    if (!window)
+    {
+        glfwTerminate( );
+        exit( EXIT_FAILURE );
+    }
+
+    glfwMakeContextCurrent( window );
+    glfwSwapInterval( 1 );
+
+    glfwSetFramebufferSizeCallback( window, reshape );
+    glfwSetWindowRefreshCallback( window, display );
+    glfwSetKeyCallback( window, keyboard );
+
+#ifndef __APPLE__
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        fprintf( stderr, "Error: %s\n", glewGetErrorString(err) );
+        exit( EXIT_FAILURE );
+    }
+    fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
+#endif
+
+    init();
 
     glfwSetWindowSize( window, 600, 250 );
     glfwShowWindow( window );
@@ -292,5 +305,5 @@ int main( int argc, char **argv )
     glfwDestroyWindow( window );
     glfwTerminate( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }

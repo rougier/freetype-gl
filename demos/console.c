@@ -29,9 +29,11 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
-#include <string.h>
+ * ============================================================================
+ */
 #include <stdio.h>
+#include <string.h>
+
 #include "freetype-gl.h"
 #include "vertex-buffer.h"
 #include "markup.h"
@@ -348,10 +350,7 @@ console_render( console_t *self )
                             1, 0, projection.data);
         vertex_buffer_render( console->buffer, GL_TRIANGLES );
     }
-
-
 }
-
 
 
 // ------------------------------------------------------- console_connect ---
@@ -559,7 +558,84 @@ console_process( console_t *self,
 }
 
 
-// ----------------------------------------------------------- on_char_input ---
+// ------------------------------------------------------- console activate ---
+void console_activate( console_t *self, char *input )
+{
+    //console_print( self, "Activate callback\n" );
+    fprintf( stderr, "Activate callback : %s\n", input );
+}
+
+
+// ------------------------------------------------------- console complete ---
+void console_complete( console_t *self, char *input )
+{
+    // console_print( self, "Complete callback\n" );
+    fprintf( stderr, "Complete callback : %s\n", input );
+}
+
+
+// ----------------------------------------------- console previous history ---
+void console_history_prev( console_t *self, char *input )
+{
+    // console_print( self, "History prev callback\n" );
+    fprintf( stderr, "History prev callback : %s\n", input );
+}
+
+
+// --------------------------------------------------- console next history ---
+void console_history_next( console_t *self, char *input )
+{
+    // console_print( self, "History next callback\n" );
+    fprintf( stderr, "History next callback : %s\n", input );
+}
+
+
+// ------------------------------------------------------------------- init ---
+void init( void )
+{
+    control_key_handled = 0;
+
+    console = console_new();
+    console_print( console,
+                   "OpenGL Freetype console\n"
+                   "Copyright 2011 Nicolas P. Rougier. All rights reserved.\n \n" );
+    console_connect( console, "activate",     console_activate );
+    console_connect( console, "complete",     console_complete );
+    console_connect( console, "history-prev", console_history_prev );
+    console_connect( console, "history-next", console_history_next );
+
+    glClearColor( 1.00, 1.00, 1.00, 1.00 );
+    glDisable( GL_DEPTH_TEST );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glEnable( GL_TEXTURE_2D );
+    glEnable( GL_BLEND );
+
+    shader = shader_load("shaders/v3f-t2f-c4f.vert",
+                         "shaders/v3f-t2f-c4f.frag");
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
+}
+
+
+// ---------------------------------------------------------------- display ---
+void display( GLFWwindow* window )
+{
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    console_render( console );
+    glfwSwapBuffers( window );
+}
+
+
+// ---------------------------------------------------------------- reshape ---
+void reshape( GLFWwindow* window, int width, int height )
+{
+    glViewport(0, 0, width, height);
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
+}
+
+
+// ----------------------------------------------------------- on char input ---
 void char_input( GLFWwindow* window, unsigned int cp )
 {
     if( control_key_handled )
@@ -572,7 +648,7 @@ void char_input( GLFWwindow* window, unsigned int cp )
 }
 
 
-// ---------------------------------------------------------------- keyboard ---
+// --------------------------------------------------------------- keyboard ---
 void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
     if( GLFW_PRESS != action && GLFW_REPEAT != action )
@@ -644,53 +720,14 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 }
 
 
-// ---------------------------------------------------------------- display ---
-void display( GLFWwindow* window )
-{
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    console_render( console );
-    glfwSwapBuffers( window );
-}
-
-
-// ---------------------------------------------------------------- reshape ---
-void reshape( GLFWwindow* window, int width, int height )
-{
-    glViewport(0, 0, width, height);
-    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
-}
-
-
-// ----------------------------------------------------------------------------
-void console_activate( console_t *self, char *input )
-{
-    //console_print( self, "Activate callback\n" );
-    fprintf( stderr, "Activate callback : %s\n", input );
-}
-void console_complete( console_t *self, char *input )
-{
-    // console_print( self, "Complete callback\n" );
-    fprintf( stderr, "Complete callback : %s\n", input );
-}
-void console_history_prev( console_t *self, char *input )
-{
-    // console_print( self, "History prev callback\n" );
-    fprintf( stderr, "History prev callback : %s\n", input );
-}
-void console_history_next( console_t *self, char *input )
-{
-    // console_print( self, "History next callback\n" );
-    fprintf( stderr, "History next callback : %s\n", input );
-}
-
-
-/* -------------------------------------------------------- error-callback - */
+// --------------------------------------------------------- error-callback ---
 void error_callback( int error, const char* description )
 {
     fputs( description, stderr );
 }
 
 
+// ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
     GLFWwindow* window;
@@ -721,8 +758,6 @@ int main( int argc, char **argv )
     glfwSetKeyCallback( window, keyboard );
     glfwSetCharCallback( window, char_input );
 
-    control_key_handled = 0;
-
 #ifndef __APPLE__
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
@@ -734,26 +769,8 @@ int main( int argc, char **argv )
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
-    console = console_new();
-    console_print( console,
-                   "OpenGL Freetype console\n"
-                   "Copyright 2011 Nicolas P. Rougier. All rights reserved.\n \n" );
-    console_connect( console, "activate",     console_activate );
-    console_connect( console, "complete",     console_complete );
-    console_connect( console, "history-prev", console_history_prev );
-    console_connect( console, "history-next", console_history_next );
 
-    glClearColor( 1.00, 1.00, 1.00, 1.00 );
-    glDisable( GL_DEPTH_TEST );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_TEXTURE_2D );
-    glEnable( GL_BLEND );
-
-    shader = shader_load("shaders/v3f-t2f-c4f.vert",
-                         "shaders/v3f-t2f-c4f.frag");
-    mat4_set_identity( &projection );
-    mat4_set_identity( &model );
-    mat4_set_identity( &view );
+    init();
 
     glfwSetWindowSize( window, 600,400 );
     glfwShowWindow( window );
@@ -767,5 +784,5 @@ int main( int argc, char **argv )
     glfwDestroyWindow( window );
     glfwTerminate( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }

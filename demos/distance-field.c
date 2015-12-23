@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         https://github.com/rougier/freetype-gl
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,9 +29,11 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
+ * ============================================================================
+ */
 #include <stdio.h>
 #include <string.h>
+
 #include "freetype-gl.h"
 #include "edtaa3func.h"
 #include "vertex-buffer.h"
@@ -59,6 +61,106 @@ typedef struct {
 texture_atlas_t * atlas = 0;
 viewport_t viewport = {0,0,1};
 GLuint program = 0;
+
+
+// ------------------------------------------------------ make_distance_map ---
+unsigned char *
+make_distance_map( unsigned char *img,
+                   unsigned int width, unsigned int height )
+{
+    short * xdist = (short *)  malloc( width * height * sizeof(short) );
+    short * ydist = (short *)  malloc( width * height * sizeof(short) );
+    double * gx   = (double *) calloc( width * height, sizeof(double) );
+    double * gy      = (double *) calloc( width * height, sizeof(double) );
+    double * data    = (double *) calloc( width * height, sizeof(double) );
+    double * outside = (double *) calloc( width * height, sizeof(double) );
+    double * inside  = (double *) calloc( width * height, sizeof(double) );
+    int i;
+
+    // Convert img into double (data)
+    double img_min = 255, img_max = -255;
+    for( i=0; i<width*height; ++i)
+    {
+        double v = img[i];
+        data[i] = v;
+        if (v > img_max) img_max = v;
+        if (v < img_min) img_min = v;
+    }
+    // Rescale image levels between 0 and 1
+    for( i=0; i<width*height; ++i)
+    {
+        data[i] = (img[i]-img_min)/img_max;
+    }
+
+    // Compute outside = edtaa3(bitmap); % Transform background (0's)
+    computegradient( data, width, height, gx, gy);
+    edtaa3(data, gx, gy, width, height, xdist, ydist, outside);
+    for( i=0; i<width*height; ++i)
+        if( outside[i] < 0 )
+            outside[i] = 0.0;
+
+    // Compute inside = edtaa3(1-bitmap); % Transform foreground (1's)
+    memset(gx, 0, sizeof(double)*width*height );
+    memset(gy, 0, sizeof(double)*width*height );
+    for( i=0; i<width*height; ++i)
+        data[i] = 1 - data[i];
+    computegradient( data, width, height, gx, gy);
+    edtaa3(data, gx, gy, width, height, xdist, ydist, inside);
+    for( i=0; i<width*height; ++i)
+        if( inside[i] < 0 )
+            inside[i] = 0.0;
+
+    // distmap = outside - inside; % Bipolar distance field
+    unsigned char *out = (unsigned char *) malloc( width * height * sizeof(unsigned char) );
+    for( i=0; i<width*height; ++i)
+    {
+        outside[i] -= inside[i];
+        outside[i] = 128+outside[i]*16;
+        if( outside[i] < 0 ) outside[i] = 0;
+        if( outside[i] > 255 ) outside[i] = 255;
+        out[i] = 255 - (unsigned char) outside[i];
+        //out[i] = (unsigned char) outside[i];
+    }
+
+    free( xdist );
+    free( ydist );
+    free( gx );
+    free( gy );
+    free( data );
+    free( outside );
+    free( inside );
+    return out;
+}
+
+
+// ------------------------------------------------------------------- init ---
+void init( void )
+{
+    unsigned char *map;
+    texture_font_t * font;
+    const char *filename = "fonts/Vera.ttf";
+    const char * cache = " !\"#$%&'()*+,-./0123456789:;<=>?"
+                         "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
+                         "`abcdefghijklmnopqrstuvwxyz{|}~";
+
+    atlas = texture_atlas_new( 512, 512, 1 );
+    font = texture_font_new_from_file( atlas, 72, filename );
+    texture_font_load_glyphs( font, cache );
+    texture_font_delete( font );
+
+    fprintf( stderr, "Generating distance map...\n" );
+    map = make_distance_map(atlas->data, atlas->width, atlas->height);
+    fprintf( stderr, "done !\n");
+
+    memcpy( atlas->data, map, atlas->width*atlas->height*sizeof(unsigned char) );
+    free(map);
+    texture_atlas_upload( atlas );
+
+    // Create the GLSL program
+    program = shader_load( "shaders/distance-field.vert",
+                           "shaders/distance-field.frag" );
+    glUseProgram( program );
+}
 
 
 // ---------------------------------------------------------------- display ---
@@ -155,78 +257,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 }
 
 
-// ------------------------------------------------------ make_distance_map ---
-unsigned char *
-make_distance_map( unsigned char *img,
-                   unsigned int width, unsigned int height )
-{
-    short * xdist = (short *)  malloc( width * height * sizeof(short) );
-    short * ydist = (short *)  malloc( width * height * sizeof(short) );
-    double * gx   = (double *) calloc( width * height, sizeof(double) );
-    double * gy      = (double *) calloc( width * height, sizeof(double) );
-    double * data    = (double *) calloc( width * height, sizeof(double) );
-    double * outside = (double *) calloc( width * height, sizeof(double) );
-    double * inside  = (double *) calloc( width * height, sizeof(double) );
-    int i;
-
-    // Convert img into double (data)
-    double img_min = 255, img_max = -255;
-    for( i=0; i<width*height; ++i)
-    {
-        double v = img[i];
-        data[i] = v;
-        if (v > img_max) img_max = v;
-        if (v < img_min) img_min = v;
-    }
-    // Rescale image levels between 0 and 1
-    for( i=0; i<width*height; ++i)
-    {
-        data[i] = (img[i]-img_min)/img_max;
-    }
-
-    // Compute outside = edtaa3(bitmap); % Transform background (0's)
-    computegradient( data, width, height, gx, gy);
-    edtaa3(data, gx, gy, width, height, xdist, ydist, outside);
-    for( i=0; i<width*height; ++i)
-        if( outside[i] < 0 )
-            outside[i] = 0.0;
-
-    // Compute inside = edtaa3(1-bitmap); % Transform foreground (1's)
-    memset(gx, 0, sizeof(double)*width*height );
-    memset(gy, 0, sizeof(double)*width*height );
-    for( i=0; i<width*height; ++i)
-        data[i] = 1 - data[i];
-    computegradient( data, width, height, gx, gy);
-    edtaa3(data, gx, gy, width, height, xdist, ydist, inside);
-    for( i=0; i<width*height; ++i)
-        if( inside[i] < 0 )
-            inside[i] = 0.0;
-
-    // distmap = outside - inside; % Bipolar distance field
-    unsigned char *out = (unsigned char *) malloc( width * height * sizeof(unsigned char) );
-    for( i=0; i<width*height; ++i)
-    {
-        outside[i] -= inside[i];
-        outside[i] = 128+outside[i]*16;
-        if( outside[i] < 0 ) outside[i] = 0;
-        if( outside[i] > 255 ) outside[i] = 255;
-        out[i] = 255 - (unsigned char) outside[i];
-        //out[i] = (unsigned char) outside[i];
-    }
-
-    free( xdist );
-    free( ydist );
-    free( gx );
-    free( gy );
-    free( data );
-    free( outside );
-    free( inside );
-    return out;
-}
-
-
-
-/* -------------------------------------------------------- error-callback - */
+// --------------------------------------------------------- error-callback ---
 void error_callback( int error, const char* description )
 {
     fputs( description, stderr );
@@ -276,30 +307,7 @@ int main( int argc, char **argv )
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
 
-    unsigned char *map;
-    texture_font_t * font;
-    const char *filename = "fonts/Vera.ttf";
-    const char * cache = " !\"#$%&'()*+,-./0123456789:;<=>?"
-                         "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
-                         "`abcdefghijklmnopqrstuvwxyz{|}~";
-
-    atlas = texture_atlas_new( 512, 512, 1 );
-    font = texture_font_new_from_file( atlas, 72, filename );
-    texture_font_load_glyphs( font, cache );
-    texture_font_delete( font );
-
-    fprintf( stderr, "Generating distance map...\n" );
-    map = make_distance_map(atlas->data, atlas->width, atlas->height);
-    fprintf( stderr, "done !\n");
-
-    memcpy( atlas->data, map, atlas->width*atlas->height*sizeof(unsigned char) );
-    free(map);
-    texture_atlas_upload( atlas );
-
-    // Create the GLSL program
-    program = shader_load( "shaders/distance-field.vert",
-                           "shaders/distance-field.frag" );
-    glUseProgram( program );
+    init();
 
     glfwSetWindowSize( window, 512, 512 );
     glfwShowWindow( window );
@@ -313,5 +321,5 @@ int main( int argc, char **argv )
     glfwDestroyWindow( window );
     glfwTerminate( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }

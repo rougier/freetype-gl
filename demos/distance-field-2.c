@@ -1,9 +1,9 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         https://github.com/rougier/freetype-gl
- * -------------------------------------------------------------------------
- * Copyright 2011 Nicolas P. Rougier. All rights reserved.
+ * ----------------------------------------------------------------------------
+ * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,7 +29,8 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
+ * ============================================================================
+ */
 #include <stdio.h>
 #include <string.h>
 
@@ -52,6 +53,7 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
     float x, y, z;    // position
@@ -65,74 +67,6 @@ GLuint shader;
 vertex_buffer_t *buffer;
 texture_atlas_t * atlas = 0;
 mat4  model, view, projection;
-
-
-// ---------------------------------------------------------------- display ---
-void display( GLFWwindow* window )
-{
-    glClearColor( 1, 1, 1, 1 );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-    GLint viewport[4];
-    glGetIntegerv( GL_VIEWPORT, viewport );
-    GLint width  = viewport[2];
-    GLint height = viewport[3];
-
-    srand(4);
-    vec4 color = {{0.067,0.333, 0.486, 1.0}};
-    size_t i;
-    for( i=0; i<40; ++i)
-    {
-        float scale = .25 + 4.75 * pow(rand()/(float)(RAND_MAX),2);
-        float angle = 90*(rand()%2);
-        float x = (.05 + .9*(rand()/(float)(RAND_MAX)))*width;
-        float y = (-.05 + .9*(rand()/(float)(RAND_MAX)))*height;
-        float a =  0.1+.8*(pow((1.0-scale/5),2));
-
-        mat4_set_identity( &model );
-        mat4_rotate( &model, angle,0,0,1);
-        mat4_scale( &model, scale, scale, 1);
-        mat4_translate( &model, x, y, 0);
-
-        glUseProgram( shader );
-        {
-            glUniform1i( glGetUniformLocation( shader, "texture" ),
-                         0 );
-            glUniform4f( glGetUniformLocation( shader, "Color" ),
-                         color.r, color.g, color.b, a);
-            glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
-                                1, 0, model.data);
-            glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
-                                1, 0, view.data);
-            glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
-                                1, 0, projection.data);
-            vertex_buffer_render( buffer, GL_TRIANGLES );
-        }
-    }
-
-    glfwSwapBuffers( window );
-}
-
-
-// ---------------------------------------------------------------- reshape ---
-void reshape( GLFWwindow* window, int width, int height )
-{
-    glViewport(0, 0, width, height);
-    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
-}
-
-
-// --------------------------------------------------------------- keyboard ---
-void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
-{
-    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
-    {
-        glfwSetWindowShouldClose( window, GL_TRUE );
-    }
-}
 
 
 // --------------------------------------------------------------- add_text ---
@@ -250,7 +184,115 @@ make_distance_map( unsigned char *img,
 }
 
 
-/* -------------------------------------------------------- error-callback - */
+// ------------------------------------------------------------------- init ---
+void init( void )
+{
+    texture_font_t *font = 0;
+    texture_atlas_t *atlas = texture_atlas_new( 512, 512, 1 );
+    const char * filename = "fonts/Vera.ttf";
+    char *text = "A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
+    vec2 pen = {{0,0}};
+    vec4 black = {{1,1,1,1}};
+    font = texture_font_new_from_file( atlas, 48, filename );
+    vec4 bbox = add_text( buffer, font, text, &black, &pen );
+    size_t i;
+    vector_t * vertices = buffer->vertices;
+    for( i=0; i< vector_size(vertices); ++i )
+    {
+        vertex_t * vertex = (vertex_t *) vector_get(vertices,i);
+        vertex->x -= (int)(bbox.x + bbox.width/2);
+        vertex->y -= (int)(bbox.y + bbox.height/2);
+    }
+
+
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
+
+    fprintf( stderr, "Generating distance map...\n" );
+    unsigned char *map = make_distance_map(atlas->data, atlas->width, atlas->height);
+    fprintf( stderr, "done !\n");
+
+    memcpy( atlas->data, map, atlas->width*atlas->height*sizeof(unsigned char) );
+    free(map);
+    texture_atlas_upload( atlas );
+
+    shader = shader_load( "shaders/distance-field-2.vert",
+                          "shaders/distance-field-2.frag" );
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
+}
+
+
+// ---------------------------------------------------------------- display ---
+void display( GLFWwindow* window )
+{
+    glClearColor( 1, 1, 1, 1 );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    GLint viewport[4];
+    glGetIntegerv( GL_VIEWPORT, viewport );
+    GLint width  = viewport[2];
+    GLint height = viewport[3];
+
+    srand(4);
+    vec4 color = {{0.067,0.333, 0.486, 1.0}};
+    size_t i;
+    for( i=0; i<40; ++i)
+    {
+        float scale = .25 + 4.75 * pow(rand()/(float)(RAND_MAX),2);
+        float angle = 90*(rand()%2);
+        float x = (.05 + .9*(rand()/(float)(RAND_MAX)))*width;
+        float y = (-.05 + .9*(rand()/(float)(RAND_MAX)))*height;
+        float a =  0.1+.8*(pow((1.0-scale/5),2));
+
+        mat4_set_identity( &model );
+        mat4_rotate( &model, angle,0,0,1);
+        mat4_scale( &model, scale, scale, 1);
+        mat4_translate( &model, x, y, 0);
+
+        glUseProgram( shader );
+        {
+            glUniform1i( glGetUniformLocation( shader, "texture" ),
+                         0 );
+            glUniform4f( glGetUniformLocation( shader, "Color" ),
+                         color.r, color.g, color.b, a);
+            glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                                1, 0, model.data);
+            glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                                1, 0, view.data);
+            glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                                1, 0, projection.data);
+            vertex_buffer_render( buffer, GL_TRIANGLES );
+        }
+    }
+
+    glfwSwapBuffers( window );
+}
+
+
+// ---------------------------------------------------------------- reshape ---
+void reshape( GLFWwindow* window, int width, int height )
+{
+    glViewport(0, 0, width, height);
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
+}
+
+
+// --------------------------------------------------------------- keyboard ---
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
+{
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
+    {
+        glfwSetWindowShouldClose( window, GL_TRUE );
+    }
+}
+
+
+// --------------------------------------------------------- error-callback ---
 void error_callback( int error, const char* description )
 {
     fputs( description, stderr );
@@ -298,40 +340,8 @@ int main( int argc, char **argv )
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
-    texture_font_t *font = 0;
-    texture_atlas_t *atlas = texture_atlas_new( 512, 512, 1 );
-    const char * filename = "fonts/Vera.ttf";
-    char *text = "A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
-    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
-    vec2 pen = {{0,0}};
-    vec4 black = {{1,1,1,1}};
-    font = texture_font_new_from_file( atlas, 48, filename );
-    vec4 bbox = add_text( buffer, font, text, &black, &pen );
-    size_t i;
-    vector_t * vertices = buffer->vertices;
-    for( i=0; i< vector_size(vertices); ++i )
-    {
-        vertex_t * vertex = (vertex_t *) vector_get(vertices,i);
-        vertex->x -= (int)(bbox.x + bbox.width/2);
-        vertex->y -= (int)(bbox.y + bbox.height/2);
-    }
 
-
-    glBindTexture( GL_TEXTURE_2D, atlas->id );
-
-    fprintf( stderr, "Generating distance map...\n" );
-    unsigned char *map = make_distance_map(atlas->data, atlas->width, atlas->height);
-    fprintf( stderr, "done !\n");
-
-    memcpy( atlas->data, map, atlas->width*atlas->height*sizeof(unsigned char) );
-    free(map);
-    texture_atlas_upload( atlas );
-
-    shader = shader_load( "shaders/distance-field-2.vert",
-                          "shaders/distance-field-2.frag" );
-    mat4_set_identity( &projection );
-    mat4_set_identity( &model );
-    mat4_set_identity( &view );
+    init();
 
     glfwSetWindowSize( window, 800, 600 );
     glfwShowWindow( window );
@@ -345,5 +355,5 @@ int main( int argc, char **argv )
     glfwDestroyWindow( window );
     glfwTerminate( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }

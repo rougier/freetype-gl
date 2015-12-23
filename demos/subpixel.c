@@ -31,13 +31,11 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include <stdio.h>
 #include <ft2build.h>
 #include FT_CONFIG_OPTIONS_H
 
-#include <stdio.h>
-
 #include "freetype-gl.h"
-
 #include "vertex-buffer.h"
 #include "text-buffer.h"
 #include "markup.h"
@@ -59,6 +57,55 @@ text_buffer_t *text_buffer;
 vertex_buffer_t *buffer;
 GLuint shader;
 mat4 model, view, projection;
+
+void init()
+{
+    buffer = vertex_buffer_new( "vertex:3f,color:4f" );
+    vertex_t vertices[4*2] = { { 15,  0,0, 0,0,0,1},
+                               { 15,330,0, 0,0,0,1},
+                               {245,  0,0, 0,0,0,1},
+                               {245,330,0, 0,0,0,1} };
+    GLuint indices[4*3] = { 0,1,2,3, };
+    vertex_buffer_push_back( buffer, vertices, 4, indices, 4 );
+
+    text_buffer = text_buffer_new( LCD_FILTERING_ON );
+    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
+    text_buffer->base_color = black;
+
+    vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+    markup_t markup;
+    markup.family  = "fonts/Vera.ttf";
+    markup.size    = 9.0;
+    markup.bold    = 0;
+    markup.italic  = 0;
+    markup.rise    = 0.0;
+    markup.spacing = 0.0;
+    markup.gamma   = 1.0;
+    markup.foreground_color    = black;
+    markup.background_color    = none;
+    markup.underline           = 0;
+    markup.underline_color     = black;
+    markup.overline            = 0;
+    markup.overline_color      = black;
+    markup.strikethrough       = 0;
+    markup.strikethrough_color = black;
+    markup.font = 0;
+
+    size_t i;
+    vec2 pen = {{20, 320}};
+    char *text = "| A Quick Brown Fox Jumps Over The Lazy Dog\n";
+    for( i=0; i < 30; ++i)
+    {
+        text_buffer_add_text( text_buffer, &pen, &markup, text, 0 );
+        pen.x += i*0.1;
+    }
+
+    shader = shader_load("shaders/v3f-c4f.vert",
+                         "shaders/v3f-c4f.frag");
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
+}
 
 
 // ---------------------------------------------------------------- display ---
@@ -112,7 +159,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 }
 
 
-/* -------------------------------------------------------- error-callback - */
+// --------------------------------------------------------- error-callback ---
 void error_callback( int error, const char* description )
 {
     fputs( description, stderr );
@@ -123,7 +170,6 @@ void error_callback( int error, const char* description )
 int main( int argc, char **argv )
 {
     GLFWwindow* window;
-
 
 #ifndef FT_CONFIG_OPTION_SUBPIXEL_RENDERING
     fprintf(stderr,
@@ -168,51 +214,8 @@ int main( int argc, char **argv )
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
-    buffer = vertex_buffer_new( "vertex:3f,color:4f" );
-    vertex_t vertices[4*2] = { { 15,  0,0, 0,0,0,1},
-                               { 15,330,0, 0,0,0,1},
-                               {245,  0,0, 0,0,0,1},
-                               {245,330,0, 0,0,0,1} };
-    GLuint indices[4*3] = { 0,1,2,3, };
-    vertex_buffer_push_back( buffer, vertices, 4, indices, 4 );
 
-    text_buffer = text_buffer_new( LCD_FILTERING_ON );
-    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
-    text_buffer->base_color = black;
-
-    vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
- 	markup_t markup;
-    markup.family  = "fonts/Vera.ttf";
-    markup.size    = 9.0;
-    markup.bold    = 0;
-    markup.italic  = 0;
-    markup.rise    = 0.0;
-    markup.spacing = 0.0;
-    markup.gamma   = 1.0;
-    markup.foreground_color    = black;
-    markup.background_color    = none;
-    markup.underline           = 0;
-    markup.underline_color     = black;
-    markup.overline            = 0;
-    markup.overline_color      = black;
-    markup.strikethrough       = 0;
-    markup.strikethrough_color = black;
-    markup.font = 0;
-
-    size_t i;
-    vec2 pen = {{20, 320}};
-    char *text = "| A Quick Brown Fox Jumps Over The Lazy Dog\n";
-    for( i=0; i < 30; ++i)
-    {
-        text_buffer_add_text( text_buffer, &pen, &markup, text, 0 );
-        pen.x += i*0.1;
-    }
-
-    shader = shader_load("shaders/v3f-c4f.vert",
-                         "shaders/v3f-c4f.frag");
-    mat4_set_identity( &projection );
-    mat4_set_identity( &model );
-    mat4_set_identity( &view );
+    init();
 
     glfwSetWindowSize( window, 260, 330 );
     glfwShowWindow( window );
@@ -226,5 +229,5 @@ int main( int argc, char **argv )
     glfwDestroyWindow( window );
     glfwTerminate( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }

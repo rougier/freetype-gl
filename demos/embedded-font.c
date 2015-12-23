@@ -31,18 +31,21 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "opengl.h"
 #include "vec234.h"
 #include "vector.h"
 #include "utf8-utils.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+
 #include "vera-16.h"
 
 #include <GLFW/glfw3.h>
 
+// --------------------------------------------------------------- print_at ---
 void print_at( int pen_x, int pen_y, char *text )
 {
     size_t i, j;
@@ -82,6 +85,28 @@ void print_at( int pen_x, int pen_y, char *text )
 }
 
 
+// ------------------------------------------------------------------- init ---
+void init( void )
+{
+    GLuint texid;
+    glGenTextures( 1, &texid );
+    glBindTexture( GL_TEXTURE_2D, texid );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, font.tex_width, font.tex_height,
+                  0, GL_ALPHA, GL_UNSIGNED_BYTE, font.tex_data );
+    glBindTexture( GL_TEXTURE_2D, texid );
+
+    glClearColor( 1, 1, 1, 1 );
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glEnable( GL_TEXTURE_2D );
+}
+
+
+// ---------------------------------------------------------------- display ---
 void display( GLFWwindow* window )
 {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -92,6 +117,7 @@ void display( GLFWwindow* window )
 }
 
 
+// ---------------------------------------------------------------- reshape ---
 void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
@@ -102,6 +128,7 @@ void reshape( GLFWwindow* window, int width, int height )
 }
 
 
+// --------------------------------------------------------------- keyboard ---
 void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
     if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
@@ -111,12 +138,14 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 }
 
 
+// --------------------------------------------------------- error-callback ---
 void error_callback( int error, const char* description )
 {
     fputs( description, stderr );
 }
 
 
+// ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
     GLFWwindow* window;
@@ -146,21 +175,7 @@ int main( int argc, char **argv )
     glfwSetWindowRefreshCallback( window, display );
     glfwSetKeyCallback( window, keyboard );
 
-    GLuint texid;
-    glGenTextures( 1, &texid );
-    glBindTexture( GL_TEXTURE_2D, texid );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, font.tex_width, font.tex_height,
-                  0, GL_ALPHA, GL_UNSIGNED_BYTE, font.tex_data );
-    glBindTexture( GL_TEXTURE_2D, texid );
-
-    glClearColor( 1, 1, 1, 1 );
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_TEXTURE_2D );
+    init();
 
     glfwSetWindowSize( window, 640, 480 );
     glfwShowWindow( window );
@@ -174,5 +189,5 @@ int main( int argc, char **argv )
     glfwDestroyWindow( window );
     glfwTerminate( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }

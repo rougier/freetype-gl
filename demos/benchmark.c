@@ -101,6 +101,39 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
 }
 
 
+// ------------------------------------------------------------------- init ---
+void init( void )
+{
+    size_t i;
+    vec2 pen = {{0,0}};
+    vec4 color = {{0,0,0,1}};
+
+    atlas  = texture_atlas_new( 512, 512, 1 );
+    font = texture_font_new_from_file( atlas, 12, "fonts/VeraMono.ttf" );
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
+
+    pen.y = -font->descender;
+    for( i=0; i<line_count; ++i )
+    {
+        pen.x = 10.0;
+        add_text( buffer, font, text, &color, &pen );
+        pen.y += font->height - font->linegap;
+    }
+
+    glClearColor( 1.0, 1.0, 1.0, 1.0 );
+    glDisable( GL_DEPTH_TEST );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glEnable( GL_TEXTURE_2D );
+    glEnable( GL_BLEND );
+
+    shader = shader_load("shaders/v3f-t2f-c4f.vert",
+                         "shaders/v3f-t2f-c4f.frag");
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
+}
+
+
 // ---------------------------------------------------------------- display ---
 void display( GLFWwindow* window )
 {
@@ -116,8 +149,8 @@ void display( GLFWwindow* window )
             "Number of glyphs: %d\n", (int)strlen(text)*line_count );
     }
 
-	frame++;
-	time = glfwGetTime( );
+    frame++;
+    time = glfwGetTime( );
 
     if( time > 2.5 )
     {
@@ -190,7 +223,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 }
 
 
-/* -------------------------------------------------------- error-callback - */
+// --------------------------------------------------------- error-callback ---
 void error_callback( int error, const char* description )
 {
     fputs( description, stderr );
@@ -200,9 +233,6 @@ void error_callback( int error, const char* description )
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
-    size_t i;
-    vec4 color = {{0,0,0,1}};
-    vec2 pen = {{0,0}};
     GLFWwindow* window;
 
     glfwSetErrorCallback( error_callback );
@@ -241,29 +271,8 @@ int main( int argc, char **argv )
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
-    atlas  = texture_atlas_new( 512, 512, 1 );
-    font = texture_font_new_from_file( atlas, 12, "fonts/VeraMono.ttf" );
-    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
 
-    pen.y = -font->descender;
-    for( i=0; i<line_count; ++i )
-    {
-        pen.x = 10.0;
-        add_text( buffer, font, text, &color, &pen );
-        pen.y += font->height - font->linegap;
-    }
-
-    glClearColor( 1.0, 1.0, 1.0, 1.0 );
-    glDisable( GL_DEPTH_TEST );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_TEXTURE_2D );
-    glEnable( GL_BLEND );
-
-    shader = shader_load("shaders/v3f-t2f-c4f.vert",
-                         "shaders/v3f-t2f-c4f.frag");
-    mat4_set_identity( &projection );
-    mat4_set_identity( &model );
-    mat4_set_identity( &view );
+    init();
 
     glfwSetWindowSize( window, 800, 600 );
     glfwShowWindow( window );

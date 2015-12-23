@@ -1,8 +1,8 @@
-/* =========================================================================
+/* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
  * WWW:         https://github.com/rougier/freetype-gl
- * -------------------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,12 @@
  * The views and conclusions contained in the software and documentation are
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
- * ========================================================================= */
+ * ============================================================================
+ */
 #include <stdio.h>
 #include <string.h>
 
 #include "freetype-gl.h"
-
 #include "vertex-buffer.h"
 #include "markup.h"
 #include "shader.h"
@@ -56,50 +56,6 @@ texture_atlas_t * atlas;
 vertex_buffer_t * buffer;
 GLuint shader;
 mat4   model, view, projection;
-
-
-
-// ---------------------------------------------------------------- display ---
-void display( GLFWwindow* window )
-{
-    glClearColor( 1.0, 1.0, 1.0, 1.0 );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-    glUseProgram( shader );
-    {
-        glUniform1i( glGetUniformLocation( shader, "texture" ),
-                     0 );
-        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
-                            1, 0, model.data);
-        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
-                            1, 0, view.data);
-        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
-                            1, 0, projection.data);
-        vertex_buffer_render( buffer, GL_TRIANGLES );
-    }
-
-    glfwSwapBuffers( window );
-}
-
-
-// ---------------------------------------------------------------- reshape ---
-void reshape( GLFWwindow* window, int width, int height )
-{
-    glViewport(0, 0, width, height);
-    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
-}
-
-// --------------------------------------------------------------- keyboard ---
-void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
-{
-    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
-    {
-        glfwSetWindowShouldClose( window, GL_TRUE );
-    }
-}
 
 
 // --------------------------------------------------------------- add_text ---
@@ -141,7 +97,89 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
 }
 
 
-/* -------------------------------------------------------- error-callback - */
+// ------------------------------------------------------------------- init ---
+void init( void )
+{
+    atlas = texture_atlas_new( 1024, 1024, 1 );
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
+    texture_font_t *font =
+    texture_font_new_from_file( atlas, 128, "fonts/LuckiestGuy.ttf" );
+
+    vec2 pen    = {{50, 50}};
+    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
+    vec4 yellow = {{1.0, 1.0, 0.0, 1.0}};
+    vec4 orange1 = {{1.0, 0.9, 0.0, 1.0}};
+    vec4 orange2 = {{1.0, 0.6, 0.0, 1.0}};
+
+    font->outline_type = 2;
+    font->outline_thickness = 7;
+    add_text( buffer, font, "Freetype GL", pen, black, black );
+
+    font->outline_type = 2;
+    font->outline_thickness = 5;
+    add_text( buffer, font, "Freetype GL", pen, yellow, yellow );
+
+    font->outline_type = 1;
+    font->outline_thickness = 3;
+    add_text( buffer, font, "Freetype GL", pen, black, black );
+
+    font->outline_type = 0;
+    font->outline_thickness = 0;
+    add_text( buffer, font, "Freetype GL", pen, orange1, orange2 );
+
+    shader = shader_load("shaders/v3f-t2f-c4f.vert",
+                         "shaders/v3f-t2f-c4f.frag");
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
+}
+
+
+// ---------------------------------------------------------------- display ---
+void display( GLFWwindow* window )
+{
+    glClearColor( 1.0, 1.0, 1.0, 1.0 );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    glUseProgram( shader );
+    {
+        glUniform1i( glGetUniformLocation( shader, "texture" ),
+                     0 );
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+        vertex_buffer_render( buffer, GL_TRIANGLES );
+    }
+
+    glfwSwapBuffers( window );
+}
+
+
+// ---------------------------------------------------------------- reshape ---
+void reshape( GLFWwindow* window, int width, int height )
+{
+    glViewport(0, 0, width, height);
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
+}
+
+
+// --------------------------------------------------------------- keyboard ---
+void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
+{
+    if ( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
+    {
+        glfwSetWindowShouldClose( window, GL_TRUE );
+    }
+}
+
+
+// --------------------------------------------------------- error-callback ---
 void error_callback( int error, const char* description )
 {
     fputs( description, stderr );
@@ -188,39 +226,8 @@ int main( int argc, char **argv )
     }
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
-    atlas = texture_atlas_new( 1024, 1024, 1 );
-    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
-    texture_font_t *font =
-		texture_font_new_from_file( atlas, 128, "fonts/LuckiestGuy.ttf" );
 
-    vec2 pen    = {{50, 50}};
-    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
-    vec4 yellow = {{1.0, 1.0, 0.0, 1.0}};
-    vec4 orange1 = {{1.0, 0.9, 0.0, 1.0}};
-    vec4 orange2 = {{1.0, 0.6, 0.0, 1.0}};
-
-
-    font->outline_type = 2;
-    font->outline_thickness = 7;
-    add_text( buffer, font, "Freetype GL", pen, black, black );
-
-    font->outline_type = 2;
-    font->outline_thickness = 5;
-    add_text( buffer, font, "Freetype GL", pen, yellow, yellow );
-
-    font->outline_type = 1;
-    font->outline_thickness = 3;
-    add_text( buffer, font, "Freetype GL", pen, black, black );
-
-    font->outline_type = 0;
-    font->outline_thickness = 0;
-    add_text( buffer, font, "Freetype GL", pen, orange1, orange2 );
-
-    shader = shader_load("shaders/v3f-t2f-c4f.vert",
-                         "shaders/v3f-t2f-c4f.frag");
-    mat4_set_identity( &projection );
-    mat4_set_identity( &model );
-    mat4_set_identity( &view );
+    init();
 
     glfwSetWindowSize( window, 850, 200 );
     glfwShowWindow( window );
@@ -234,5 +241,5 @@ int main( int argc, char **argv )
     glfwDestroyWindow( window );
     glfwTerminate( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }
