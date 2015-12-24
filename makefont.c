@@ -380,7 +380,7 @@ int main( int argc, char **argv )
         "    float advance_x, advance_y;\n"
         "    float s0, t0, s1, t1;\n"
         "    size_t kerning_count;\n"
-        "    kerning_t kerning[%d];\n"
+        "    kerning_t kerning[%zu];\n"
         "} texture_glyph_t;\n\n", max_kerning_count );
 
     fprintf( file,
@@ -389,14 +389,14 @@ int main( int argc, char **argv )
         "    size_t tex_width;\n"
         "    size_t tex_height;\n"
         "    size_t tex_depth;\n"
-        "    char tex_data[%d];\n"
+        "    char tex_data[%zu];\n"
         "    float size;\n"
         "    float height;\n"
         "    float linegap;\n"
         "    float ascender;\n"
         "    float descender;\n"
         "    size_t glyphs_count;\n"
-        "    texture_glyph_t glyphs[%d];\n"
+        "    texture_glyph_t glyphs[%zu];\n"
         "} texture_font_t;\n\n", texture_size, glyph_count );
 
 
@@ -407,7 +407,7 @@ int main( int argc, char **argv )
     // ------------
     // Texture data
     // ------------
-    fprintf( file, " %d, %d, %d, \n", atlas->width, atlas->height, atlas->depth );
+    fprintf( file, " %zu, %zu, %zu, \n", atlas->width, atlas->height, atlas->depth );
     fprintf( file, " {" );
     for( i=0; i < texture_size; i+= 32 )
     {
@@ -433,7 +433,7 @@ int main( int argc, char **argv )
     // -------------------
     // Texture information
     // -------------------
-    fprintf( file, " %ff, %ff, %ff, %ff, %ff, %d, \n",
+    fprintf( file, " %ff, %ff, %ff, %ff, %ff, %zu, \n",
              font->size, font->height,
              font->linegap,font->ascender, font->descender,
              glyph_count );
@@ -481,18 +481,18 @@ int main( int argc, char **argv )
 
 
         // TextureFont
-        fprintf( file, "  {%zu, ", glyph->charcode );
-        fprintf( file, "%d, %d, ", glyph->width, glyph->height );
+        fprintf( file, "  {%u, ", glyph->charcode );
+        fprintf( file, "%zu, %zu, ", glyph->width, glyph->height );
         fprintf( file, "%d, %d, ", glyph->offset_x, glyph->offset_y );
         fprintf( file, "%ff, %ff, ", glyph->advance_x, glyph->advance_y );
         fprintf( file, "%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
-        fprintf( file, "%d, ", vector_size(glyph->kerning) );
+        fprintf( file, "%zu, ", vector_size(glyph->kerning) );
         fprintf( file, "{ " );
         for( j=0; j < vector_size(glyph->kerning); ++j )
         {
             kerning_t *kerning = (kerning_t *) vector_get( glyph->kerning, j);
 
-            fprintf( file, "{%zu, %ff}", kerning->charcode, kerning->kerning );
+            fprintf( file, "{%u, %ff}", kerning->charcode, kerning->kerning );
             if( j < (vector_size(glyph->kerning)-1))
             {
                 fprintf( file, ", " );
