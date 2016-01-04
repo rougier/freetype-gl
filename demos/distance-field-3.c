@@ -360,15 +360,15 @@ void init( void )
     glyph = texture_font_get_glyph( font, "@");
 
     GLuint indices[6] = {0,1,2, 0,2,3};
-    vertex_t vertices[4] = { { -.5,-.5,0,  glyph->s0,glyph->t1,  1,1,1,1 },
-                             { -.5, .5,0,  glyph->s0,glyph->t0,  1,1,1,1 },
-                             {  .5, .5,0,  glyph->s1,glyph->t0,  1,1,1,1 },
-                             {  .5,-.5,0,  glyph->s1,glyph->t1,  1,1,1,1 } };
+    vertex_t vertices[4] = { { -.5,-.5,0,  glyph->s0,glyph->t1,  0,0,0,1 },
+                             { -.5, .5,0,  glyph->s0,glyph->t0,  0,0,0,1 },
+                             {  .5, .5,0,  glyph->s1,glyph->t0,  0,0,0,1 },
+                             {  .5,-.5,0,  glyph->s1,glyph->t1,  0,0,0,1 } };
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
     vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
 
     program = shader_load( "shaders/distance-field.vert",
-                           "shaders/distance-field-3.frag" );
+                           "shaders/distance-field-2.frag" );
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
     mat4_set_identity( &view );
@@ -398,6 +398,8 @@ void display( GLFWwindow* window )
 
     float s = .025+.975*(1+cos(angle/100.0))/2.;
 
+    vec4 color = {{1.0, 1.0, 1.0, 1.0 }};
+
     mat4_set_identity( &model );
     mat4_scale( &model, width * s, width * s, 1 );
     mat4_rotate( &model, angle, 0, 0, 1 );
@@ -407,6 +409,8 @@ void display( GLFWwindow* window )
     {
         glUniform1i( glGetUniformLocation( program, "u_texture" ),
                      0);
+        glUniform4f( glGetUniformLocation( program, "u_color" ),
+                     color.r, color.g, color.b, color.a);
         glUniformMatrix4fv( glGetUniformLocation( program, "u_model" ),
                             1, 0, model.data);
         glUniformMatrix4fv( glGetUniformLocation( program, "u_view" ),
