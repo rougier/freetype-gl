@@ -40,6 +40,7 @@
 #include "text-buffer.h"
 #include "markup.h"
 #include "shader.h"
+#include "mat4.h"
 
 #include <GLFW/glfw3.h>
 
@@ -58,9 +59,10 @@ typedef struct {
 } viewport_t;
 
 // ------------------------------------------------------- global variables ---
+GLuint shader;
 texture_atlas_t * atlas = 0;
+mat4  model, view, projection;
 viewport_t viewport = {0,0,1};
-GLuint program = 0;
 
 
 // ------------------------------------------------------ make_distance_map ---
@@ -156,20 +158,18 @@ void init( void )
     free(map);
     texture_atlas_upload( atlas );
 
-    // Create the GLSL program
-    program = shader_load( "shaders/distance-field.vert",
+    // Create the GLSL shader
+    shader = shader_load( "shaders/distance-field.vert",
                            "shaders/distance-field.frag" );
-    glUseProgram( program );
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 }
 
 
 // ---------------------------------------------------------------- display ---
 void display( GLFWwindow* window )
 {
-    int v[4];
-    glGetIntegerv( GL_VIEWPORT, v );
-    GLuint width  = v[2];
-    GLuint height = v[3];
     glClearColor(0.5,0.5,0.5,1.00);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -179,25 +179,38 @@ void display( GLFWwindow* window )
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    GLuint handle;
-    handle = glGetUniformLocation( program, "texture" );
-    glUniform1i( handle, 0);
+    GLint v[4];
+    glGetIntegerv( GL_VIEWPORT, v );
+    GLint width  = v[2];
+    GLint height = v[3];
 
-    int x = viewport.x;
-    int y = viewport.y;
-    width *= viewport.zoom;
-    height *= viewport.zoom;
+    vec4 color = {{1.0, 1.0, 1.0, 1.0 }};
 
-    glColor4f( 1.0, 1.0, 1.0, 1.0 );
-    glPushMatrix();
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0, 1 ); glVertex2i( x, y );
-    glTexCoord2f( 0, 0 ); glVertex2i( x, y+height );
-    glTexCoord2f( 1, 0 ); glVertex2i( x+width, y+height );
-    glTexCoord2f( 1, 1 ); glVertex2i( x+width, y );
-    glEnd();
+    mat4_set_identity( &model );
+    mat4_scale( &model, width * viewport.zoom, height * viewport.zoom, 0 );
+    mat4_translate( &model, viewport.x, viewport.y, 0);
 
-    glPopMatrix();
+    glUseProgram( shader );
+    {
+        glUniform1i( glGetUniformLocation( shader, "texture" ),
+                     0);
+        glUniform4f( glGetUniformLocation( shader, "color" ),
+                     color.r, color.g, color.b, color.a);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+
+        glBegin(GL_QUADS);
+        glTexCoord2f( 0, 1 ); glVertex2i( 0, 0 );
+        glTexCoord2f( 0, 0 ); glVertex2i( 0, 1 );
+        glTexCoord2f( 1, 0 ); glVertex2i( 1, 1 );
+        glTexCoord2f( 1, 1 ); glVertex2i( 1, 0 );
+        glEnd();
+    }
+
     glfwSwapBuffers( window );
 }
 
@@ -240,10 +253,7 @@ void cursor_motion( GLFWwindow* window, double x, double y )
 void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
