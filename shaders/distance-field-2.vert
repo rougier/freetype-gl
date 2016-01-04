@@ -30,18 +30,18 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-uniform sampler2D texture;
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-uniform vec4 Color;
+uniform mat4 u_model;
+uniform mat4 u_view;
+uniform mat4 u_projection;
+uniform vec4 u_color;
 
 attribute vec3 vertex;
 attribute vec2 tex_coord;
 attribute vec4 color;
-void main()
+
+void main(void)
 {
     gl_TexCoord[0].xy = tex_coord.xy;
-    gl_FrontColor     = color*Color;
-    gl_Position       = projection*(view*(model*vec4(vertex,1.0)));
+    gl_FrontColor     = color * u_color;
+    gl_Position       = u_projection*(u_view*(u_model*vec4(vertex,1.0)));
 }

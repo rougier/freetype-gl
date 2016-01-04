@@ -389,13 +389,13 @@ void display( GLFWwindow* window )
 
     glUseProgram( program );
     {
-        glUniform1i( glGetUniformLocation( program, "texture" ),
+        glUniform1i( glGetUniformLocation( program, "u_texture" ),
                      0 );
-        glUniformMatrix4fv( glGetUniformLocation( program, "model" ),
+        glUniformMatrix4fv( glGetUniformLocation( program, "u_model" ),
                      1, 0, model.data);
-        glUniformMatrix4fv( glGetUniformLocation( program, "view" ),
+        glUniformMatrix4fv( glGetUniformLocation( program, "u_view" ),
                      1, 0, view.data);
-        glUniformMatrix4fv( glGetUniformLocation( program, "projection" ),
+        glUniformMatrix4fv( glGetUniformLocation( program, "u_projection" ),
                      1, 0, projection.data);
 
         glBegin(GL_QUADS);

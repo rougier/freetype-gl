@@ -30,16 +30,18 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-uniform sampler2D texture;
+uniform sampler2D u_texture;
+
        vec3 glyph_color    = vec3(1.0,1.0,1.0);
 const float glyph_center   = 0.50;
        vec3 outline_color  = vec3(0.0,0.0,0.0);
 const float outline_center = 0.55;
        vec3 glow_color     = vec3(1.0,1.0,1.0);
 const float glow_center    = 1.25;
+
 void main(void)
 {
-    vec4  color = texture2D(texture, gl_TexCoord[0].st);
+    vec4  color = texture2D(u_texture, gl_TexCoord[0].st);
     float dist  = color.r;
     float width = fwidth(dist);
     float alpha = smoothstep(glyph_center-width, glyph_center+width, dist);

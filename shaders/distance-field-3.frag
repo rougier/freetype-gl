@@ -30,11 +30,13 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-uniform sampler2D texture;
+uniform sampler2D u_texture;
+
+    vec3 color = vec3(0.0,0.0,0.0);
+
 void main(void)
 {
-    vec3 color = vec3(0.0,0.0,0.0);
-    float dist = texture2D(texture, gl_TexCoord[0].st).r;
+    float dist = texture2D(u_texture, gl_TexCoord[0].st).r;
     float width = fwidth(dist);
     float alpha = smoothstep(0.5-width, 0.5+width, dist);
     gl_FragColor = vec4(color, alpha);

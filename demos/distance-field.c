@@ -192,15 +192,15 @@ void display( GLFWwindow* window )
 
     glUseProgram( shader );
     {
-        glUniform1i( glGetUniformLocation( shader, "texture" ),
+        glUniform1i( glGetUniformLocation( shader, "u_texture" ),
                      0);
-        glUniform4f( glGetUniformLocation( shader, "color" ),
+        glUniform4f( glGetUniformLocation( shader, "u_color" ),
                      color.r, color.g, color.b, color.a);
-        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+        glUniformMatrix4fv( glGetUniformLocation( shader, "u_model" ),
                             1, 0, model.data);
-        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+        glUniformMatrix4fv( glGetUniformLocation( shader, "u_view" ),
                             1, 0, view.data);
-        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+        glUniformMatrix4fv( glGetUniformLocation( shader, "u_projection" ),
                             1, 0, projection.data);
 
         glBegin(GL_QUADS);
