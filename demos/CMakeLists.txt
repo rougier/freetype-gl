@@ -43,7 +43,6 @@ IF( WIN32 OR WIN64 )
     SET( ANT_TWEAK_BAR_FOUND "YES" )
 ELSE( WIN32 OR WIN64 )
     FIND_PACKAGE( FontConfig )
-    #FIND_LIBRARY( STDC_LIBRARY stdc++) #Buggy Cmake can't find libstdc++
     FIND_PACKAGE( AntTweakBar )
 ENDIF( WIN32 OR WIN64 )
 
@@ -107,31 +106,16 @@ IF (FONTCONFIG_FOUND)
 ENDIF (FONTCONFIG_FOUND)
 
 IF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )
- #DEMO( atb-agg     "atb-agg.c;markup.h;")
- FILE(WRITE ${CMAKE_SOURCE_DIR}/stdc_test.c
-  "int main(void){return 0;}\n")
-  EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -lstdc++ OUTPUT_VARIABLE out_res ERROR_VARIABLE err_res)
-  string(FIND VAL"${err_res}" "main" substr_index )
-  if(${substr_index} STRGREATER "0")
-      message (STATUS "Found Libstdc++ needed by atb-agg.c ." )
-
-      add_executable(atb-agg  atb-agg.c)
-      target_link_libraries( atb-agg freetype-gl)
-      target_link_libraries( atb-agg ${GLFW3_LIBRARY})
-      target_link_libraries( atb-agg ${GLEW_LIBRARY})
-      target_link_libraries( atb-agg ${FREETYPE_LIBRARY})
-      target_link_libraries( atb-agg ${ANT_TWEAK_BAR_LIBRARY})
-      # target_link_libraries( atb-agg ${STDC_LIBRARY}) # Buggy Cmake can't find libstdc++
-      # quirk: because of link order libstdc++ must be linked before libGLU
-      target_link_libraries( atb-agg "-lstdc++")
-      target_link_libraries( atb-agg ${OPENGL_LIBRARY})
-      IF(MATH_LIBRARY)
+    add_executable(atb-agg  atb-agg.c)
+    target_link_libraries( atb-agg freetype-gl)
+    target_link_libraries( atb-agg ${GLFW3_LIBRARY})
+    target_link_libraries( atb-agg ${GLEW_LIBRARY})
+    target_link_libraries( atb-agg ${FREETYPE_LIBRARY})
+    target_link_libraries( atb-agg ${ANT_TWEAK_BAR_LIBRARY})
+    target_link_libraries( atb-agg ${OPENGL_LIBRARY})
+    IF(MATH_LIBRARY)
         target_link_libraries( atb-agg ${MATH_LIBRARY})
-      ENDIF(MATH_LIBRARY)
-  else()
-      message (STATUS "NOT FOUND: Libstdc++ is not installed. It is needed by atb-agg.c" )
-  endif()
-  FILE(REMOVE ${CMAKE_SOURCE_DIR}/stdc_test.c)
+    ENDIF(MATH_LIBRARY)
 ENDIF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )
 
 # Copy font and shaders into build directory for in-place testing
