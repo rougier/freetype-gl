@@ -37,6 +37,7 @@
 #include "freetype-gl.h"
 #include "edtaa3func.h"
 #include "shader.h"
+#include "mat4.h"
 #include "texture-font.h"
 #include "texture-atlas.h"
 #include "platform.h"
@@ -58,6 +59,8 @@ float angle = 0;
 GLuint program = 0;
 texture_font_t * font = 0;
 texture_atlas_t * atlas = 0;
+mat4  model, view, projection;
+
 
 // ------------------------------------------------------ make_distance_map ---
 void
@@ -330,9 +333,6 @@ load_glyph( const char *  filename,     const char* charcode,
 // ------------------------------------------------------------------- init ---
 void init( void )
 {
-    program = shader_load( "shaders/distance-field.vert",
-                           "shaders/distance-field-3.frag" );
-    glUseProgram( program );
     atlas = texture_atlas_new( 512, 512, 1 );
     font = texture_font_new_from_file( atlas, 32, "fonts/Vera.ttf" );
 
@@ -345,6 +345,12 @@ void init( void )
     vector_push_back( font->glyphs, &glyph );
 
     texture_atlas_upload( atlas );
+
+    program = shader_load( "shaders/distance-field.vert",
+                           "shaders/distance-field-3.frag" );
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
 }
 
 
@@ -360,9 +366,6 @@ void display( GLFWwindow* window )
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    GLuint handle = glGetUniformLocation( program, "texture" );
-    glUniform1i( handle, 0);
-
     texture_glyph_t * glyph = texture_font_get_glyph( font, "@");
 
     float s0 = glyph->s0;
@@ -372,26 +375,36 @@ void display( GLFWwindow* window )
 
     int width = 512;
     int height = 512;
-    if( glyph->width > glyph->height )
-        height = glyph->height * width/(float)glyph->width;
-    else
-        width = glyph->width * height/(float)glyph->height;
-    int x = 0 - width/2;
-    int y = 0 - height/2;
+    float glyph_height = glyph->height * width/(float)glyph->width;
+    float glyph_width  = glyph->width * height/(float)glyph->height;
+    int x = -glyph_width/2 + 512/2.;
+    int y = -glyph_height/2 + 512/2.;
 
-    glPushMatrix();
-    glTranslatef(256,256,0);
-    glRotatef(angle, 0,0,1);
     float s = .025+.975*(1+cos(angle/100.0))/2.;
-    glScalef(s,s,s);
 
-    glBegin(GL_QUADS);
-    glTexCoord2f( s0, t1 ); glVertex2f( x, y );
-    glTexCoord2f( s0, t0 ); glVertex2f( x, y+height );
-    glTexCoord2f( s1, t0 ); glVertex2f( x+width, y+height );
-    glTexCoord2f( s1, t1 ); glVertex2f( x+width, y );
-    glEnd();
-    glPopMatrix();
+    mat4_set_identity( &model );
+    mat4_scale( &model, width * s, width * s, 1 );
+    mat4_rotate( &model, angle, 0, 0, 1 );
+    mat4_translate( &model, 256, 256, 0 );
+
+    glUseProgram( program );
+    {
+        glUniform1i( glGetUniformLocation( program, "texture" ),
+                     0 );
+        glUniformMatrix4fv( glGetUniformLocation( program, "model" ),
+                     1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( program, "view" ),
+                     1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( program, "projection" ),
+                     1, 0, projection.data);
+
+        glBegin(GL_QUADS);
+        glTexCoord2f( s0, t1 ); glVertex2f( -.5, -.5 );
+        glTexCoord2f( s0, t0 ); glVertex2f( -.5,  .5 );
+        glTexCoord2f( s1, t0 ); glVertex2f(  .5,  .5 );
+        glTexCoord2f( s1, t1 ); glVertex2f(  .5, -.5 );
+        glEnd();
+    }
 
     glfwSwapBuffers( window );
 }
@@ -401,10 +414,7 @@ void display( GLFWwindow* window )
 void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
+    mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
 }
 
 
