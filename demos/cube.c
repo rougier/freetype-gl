@@ -35,6 +35,7 @@
 
 #include "freetype-gl.h"
 #include "shader.h"
+#include "mat4.h"
 #include "vertex-buffer.h"
 
 #include <GLFW/glfw3.h>
@@ -43,6 +44,7 @@
 // ------------------------------------------------------- global variables ---
 GLuint shader;
 vertex_buffer_t * cube;
+mat4  model, view, projection;
 
 
 // ------------------------------------------------------------------- init ---
@@ -71,6 +73,10 @@ void init( void )
     vertex_buffer_push_back( cube, vertices, 24, indices, 24 );
     shader = shader_load("shaders/cube.vert","shaders/cube.frag");
 
+    mat4_set_identity( &projection );
+    mat4_set_identity( &model );
+    mat4_set_identity( &view );
+
     glPolygonOffset( 1, 1 );
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glEnable( GL_DEPTH_TEST );
@@ -97,26 +103,40 @@ void display( GLFWwindow* window )
     phi = .5f * seconds_elapsed / 0.016f;
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glPushMatrix();
-    glRotatef( theta, 0,0,1 );
-    glRotatef( phi,   0,1,0 );
+
+    mat4_set_identity( &model );
+    mat4_rotate( &model, theta, 0, 0, 1 );
+    mat4_rotate( &model, phi, 0, 1, 0 );
+    mat4_translate( &model, 0.0, 0.0, -5.0 );
+
     glDisable( GL_BLEND );
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_POLYGON_OFFSET_FILL );
+
     glUseProgram( shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+    }
+
     glUniform4f( Color, 1, 1, 1, 1 );
     vertex_buffer_render( cube, GL_QUADS );
+
     glDisable( GL_POLYGON_OFFSET_FILL );
     glEnable( GL_BLEND );
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     glDepthMask( GL_FALSE );
+
     glUniform4f( Color, 0, 0, 0, .5 );
     vertex_buffer_render( cube, GL_QUADS );
+
     glUseProgram( 0 );
     glDepthMask( GL_TRUE );
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
-    glPopMatrix();
 
     glfwSwapBuffers( window );
 }
@@ -126,12 +146,7 @@ void display( GLFWwindow* window )
 void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
-    glMatrixMode( GL_PROJECTION );
-    glLoadIdentity( );
-    gluPerspective( 45.0, width/(float) height, 2.0, 10.0 );
-    glMatrixMode( GL_MODELVIEW );
-    glLoadIdentity( );
-    glTranslatef( 0.0, 0.0, -5.0 );
+    mat4_set_perspective( &projection, 45.0f, width/(float) height, 2.0, 10.0 );
 }
 
 
