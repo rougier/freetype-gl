@@ -44,6 +44,7 @@
 
 #include <GLFW/glfw3.h>
 
+
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #endif
@@ -55,11 +56,19 @@
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
+    float x, y, z;    // position
+    float s, t;       // texture
+    float r, g, b, a; // color
+} vertex_t;
+
+typedef struct {
     float x, y, zoom;
 } viewport_t;
 
+
 // ------------------------------------------------------- global variables ---
 GLuint shader;
+vertex_buffer_t *buffer;
 texture_atlas_t * atlas = 0;
 mat4  model, view, projection;
 viewport_t viewport = {0,0,1};
@@ -158,7 +167,14 @@ void init( void )
     free(map);
     texture_atlas_upload( atlas );
 
-    // Create the GLSL shader
+    GLuint indices[6] = {0,1,2, 0,2,3};
+    vertex_t vertices[4] = { { 0,0,0,  0,1,  1,1,1,1 },
+                             { 0,1,0,  0,0,  1,1,1,1 },
+                             { 1,1,0,  1,0,  1,1,1,1 },
+                             { 1,0,0,  1,1,  1,1,1,1 } };
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
+    vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
+
     shader = shader_load( "shaders/distance-field.vert",
                            "shaders/distance-field.frag" );
     mat4_set_identity( &projection );
@@ -203,12 +219,7 @@ void display( GLFWwindow* window )
         glUniformMatrix4fv( glGetUniformLocation( shader, "u_projection" ),
                             1, 0, projection.data);
 
-        glBegin(GL_QUADS);
-        glTexCoord2f( 0, 1 ); glVertex2i( 0, 0 );
-        glTexCoord2f( 0, 0 ); glVertex2i( 0, 1 );
-        glTexCoord2f( 1, 0 ); glVertex2i( 1, 1 );
-        glTexCoord2f( 1, 1 ); glVertex2i( 1, 0 );
-        glEnd();
+        vertex_buffer_render( buffer, GL_TRIANGLES );
     }
 
     glfwSwapBuffers( window );

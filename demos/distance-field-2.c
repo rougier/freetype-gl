@@ -216,7 +216,7 @@ void init( void )
     free(map);
     texture_atlas_upload( atlas );
 
-    shader = shader_load( "shaders/distance-field-2.vert",
+    shader = shader_load( "shaders/distance-field.vert",
                           "shaders/distance-field-2.frag" );
     mat4_set_identity( &projection );
     mat4_set_identity( &model );

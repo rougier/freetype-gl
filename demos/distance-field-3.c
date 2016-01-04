@@ -36,6 +36,7 @@
 
 #include "freetype-gl.h"
 #include "edtaa3func.h"
+#include "vertex-buffer.h"
 #include "shader.h"
 #include "mat4.h"
 #include "texture-font.h"
@@ -44,6 +45,7 @@
 #include "utf8-utils.h"
 
 #include <GLFW/glfw3.h>
+
 
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
@@ -54,9 +56,18 @@
 #endif
 
 
+// ------------------------------------------------------- typedef & struct ---
+typedef struct {
+    float x, y, z;    // position
+    float s, t;       // texture
+    float r, g, b, a; // color
+} vertex_t;
+
+
 // ------------------------------------------------------- global variables ---
 float angle = 0;
 GLuint program = 0;
+vertex_buffer_t *buffer;
 texture_font_t * font = 0;
 texture_atlas_t * atlas = 0;
 mat4  model, view, projection;
@@ -346,6 +357,16 @@ void init( void )
 
     texture_atlas_upload( atlas );
 
+    glyph = texture_font_get_glyph( font, "@");
+
+    GLuint indices[6] = {0,1,2, 0,2,3};
+    vertex_t vertices[4] = { { -.5,-.5,0,  glyph->s0,glyph->t1,  1,1,1,1 },
+                             { -.5, .5,0,  glyph->s0,glyph->t0,  1,1,1,1 },
+                             {  .5, .5,0,  glyph->s1,glyph->t0,  1,1,1,1 },
+                             {  .5,-.5,0,  glyph->s1,glyph->t1,  1,1,1,1 } };
+    buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
+    vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
+
     program = shader_load( "shaders/distance-field.vert",
                            "shaders/distance-field-3.frag" );
     mat4_set_identity( &projection );
@@ -368,11 +389,6 @@ void display( GLFWwindow* window )
 
     texture_glyph_t * glyph = texture_font_get_glyph( font, "@");
 
-    float s0 = glyph->s0;
-    float t0 = glyph->t0;
-    float s1 = glyph->s1;
-    float t1 = glyph->t1;
-
     int width = 512;
     int height = 512;
     float glyph_height = glyph->height * width/(float)glyph->width;
@@ -390,20 +406,15 @@ void display( GLFWwindow* window )
     glUseProgram( program );
     {
         glUniform1i( glGetUniformLocation( program, "u_texture" ),
-                     0 );
+                     0);
         glUniformMatrix4fv( glGetUniformLocation( program, "u_model" ),
-                     1, 0, model.data);
+                            1, 0, model.data);
         glUniformMatrix4fv( glGetUniformLocation( program, "u_view" ),
-                     1, 0, view.data);
+                            1, 0, view.data);
         glUniformMatrix4fv( glGetUniformLocation( program, "u_projection" ),
-                     1, 0, projection.data);
+                            1, 0, projection.data);
 
-        glBegin(GL_QUADS);
-        glTexCoord2f( s0, t1 ); glVertex2f( -.5, -.5 );
-        glTexCoord2f( s0, t0 ); glVertex2f( -.5,  .5 );
-        glTexCoord2f( s1, t0 ); glVertex2f(  .5,  .5 );
-        glTexCoord2f( s1, t1 ); glVertex2f(  .5, -.5 );
-        glEnd();
+        vertex_buffer_render( buffer, GL_TRIANGLES );
     }
 
     glfwSwapBuffers( window );
