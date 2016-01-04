@@ -615,11 +615,6 @@ void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
     mat4_set_orthographic( &projection, 0, width, 0, height, -1, 1);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, width, 0, height, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
     TwWindowSize( width, height );
 }
 
