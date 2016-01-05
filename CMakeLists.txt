@@ -110,6 +110,7 @@ SET( FREETYPE_GL_SRC freetype-gl.h
                      vector.c           vector.h
                      utf8-utils.c       utf8-utils.h
                      platform.c         platform.h
+                     distance-field.c   distance-field.h
                      edtaa3func.c       edtaa3func.h)
 
 ADD_LIBRARY( freetype-gl STATIC ${FREETYPE_GL_SRC} )

@@ -31,11 +31,10 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
-#include <ft2build.h>
-#include FT_FREETYPE_H
+#include <math.h>
 
 #include "freetype-gl.h"
-#include "edtaa3func.h"
+#include "distance-field.h"
 #include "vertex-buffer.h"
 #include "shader.h"
 #include "mat4.h"
@@ -43,6 +42,9 @@
 #include "texture-atlas.h"
 #include "platform.h"
 #include "utf8-utils.h"
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 #include <GLFW/glfw3.h>
 
@@ -71,72 +73,6 @@ vertex_buffer_t *buffer;
 texture_font_t * font = 0;
 texture_atlas_t * atlas = 0;
 mat4  model, view, projection;
-
-
-// ------------------------------------------------------ make_distance_map ---
-void
-distance_map( double *data, unsigned int width, unsigned int height )
-{
-    short * xdist = (short *)  malloc( width * height * sizeof(short) );
-    short * ydist = (short *)  malloc( width * height * sizeof(short) );
-    double * gx   = (double *) calloc( width * height, sizeof(double) );
-    double * gy      = (double *) calloc( width * height, sizeof(double) );
-    double * outside = (double *) calloc( width * height, sizeof(double) );
-    double * inside  = (double *) calloc( width * height, sizeof(double) );
-    int i;
-
-    // Compute outside = edtaa3(bitmap); % Transform background (0's)
-    computegradient( data, width, height, gx, gy);
-    edtaa3(data, gx, gy, width, height, xdist, ydist, outside);
-    for( i=0; i<width*height; ++i)
-    {
-        if( outside[i] < 0.0 )
-        {
-            outside[i] = 0.0;
-        }
-    }
-
-    // Compute inside = edtaa3(1-bitmap); % Transform foreground (1's)
-    memset( gx, 0, sizeof(double)*width*height );
-    memset( gy, 0, sizeof(double)*width*height );
-    for( i=0; i<width*height; ++i)
-        data[i] = 1 - data[i];
-    computegradient( data, width, height, gx, gy );
-    edtaa3( data, gx, gy, width, height, xdist, ydist, inside );
-    for( i=0; i<width*height; ++i )
-    {
-        if( inside[i] < 0 )
-        {
-            inside[i] = 0.0;
-        }
-    }
-
-    // distmap = outside - inside; % Bipolar distance field
-    float vmin = +INFINITY;
-    for( i=0; i<width*height; ++i)
-    {
-        outside[i] -= inside[i];
-        if( outside[i] < vmin )
-        {
-            vmin = outside[i];
-        }
-    }
-    vmin = fabs(vmin);
-    for( i=0; i<width*height; ++i)
-    {
-        float v = outside[i];
-        if     ( v < -vmin) outside[i] = -vmin;
-        else if( v > +vmin) outside[i] = +vmin;
-        data[i] = (outside[i]+vmin)/(2*vmin);
-    }
-
-    free( xdist );
-    free( ydist );
-    free( gx );
-    free( gy );
-    free( outside );
-    free( inside );
-}
 
 
 // ------------------------------------------------------ MitchellNetravali ---
@@ -270,7 +206,7 @@ load_glyph( const char *  filename,     const char* charcode,
     }
 
     // Compute distance map
-    distance_map( highres_data, highres_width, highres_height );
+    highres_data = make_distance_mapd( highres_data, highres_width, highres_height );
 
     // Allocate low resolution buffer
     size_t lowres_width  = round(highres_width * lowres_size/highres_size);
