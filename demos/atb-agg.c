@@ -564,8 +564,8 @@ void init( GLFWwindow* window )
     TwAddButton(bar, "Quit", (TwButtonCallback) quit, window,
                 "help='Quit.'");
 
-    buffer_a = text_buffer_new( 1 );
-    buffer_rgb = text_buffer_new( 3 );
+    buffer_a = text_buffer_new( LCD_FILTERING_OFF );
+    buffer_rgb = text_buffer_new( LCD_FILTERING_ON );
     buffer = buffer_rgb;
     reset();
 
