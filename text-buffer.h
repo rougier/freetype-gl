@@ -201,19 +201,6 @@ typedef struct glyph_vertex_t {
 
 
 /**
- * Creates a new empty text buffer.
- *
- * @param depth  Underlying atlas bit depth (1 or 3)
- *
- * @return  a new empty text buffer.
- *
- */
-  text_buffer_t *
-  text_buffer_new( size_t depth );
-
-
-
-/**
  * Creates a new empty text buffer using custom shaders.
  *
  * @param depth          Underlying atlas bit depth (1 or 3)
@@ -224,9 +211,9 @@ typedef struct glyph_vertex_t {
  *
  */
   text_buffer_t *
-  text_buffer_new_with_shaders( size_t depth,
-                                const char * vert_filename,
-                                const char * frag_filename );
+  text_buffer_new( size_t depth,
+                   const char * vert_filename,
+                   const char * frag_filename );
 
 /**
  * Creates a new empty text buffer using custom shaders.

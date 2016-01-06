@@ -259,7 +259,9 @@ print( text_buffer_t * buffer, vec2 * pen,
 // ------------------------------------------------------------------- init ---
 void init( void )
 {
-    buffer = text_buffer_new( LCD_FILTERING_OFF );
+    buffer = text_buffer_new( LCD_FILTERING_OFF,
+                              "shaders/text.vert",
+                              "shaders/text.frag" );
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
 

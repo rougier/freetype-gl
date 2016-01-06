@@ -113,7 +113,9 @@ match_description( char * family, float size, int bold, int italic )
 
 void init()
 {
-    buffer = text_buffer_new( LCD_FILTERING_ON );
+    buffer = text_buffer_new( LCD_FILTERING_ON,
+                              "shaders/text.vert",
+                              "shaders/text.frag" );
 
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};

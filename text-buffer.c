@@ -48,20 +48,11 @@
 
 
 // ----------------------------------------------------------------------------
-text_buffer_t *
-text_buffer_new( size_t depth )
-{
-    return text_buffer_new_with_shaders(depth,
-                                        "shaders/text.vert",
-                                        "shaders/text.frag");
-}
-
-// ----------------------------------------------------------------------------
 
 text_buffer_t *
-text_buffer_new_with_shaders( size_t depth,
-                              const char * vert_filename,
-                              const char * frag_filename )
+text_buffer_new( size_t depth,
+                 const char * vert_filename,
+                 const char * frag_filename )
 {
     GLuint program = shader_load( vert_filename, frag_filename );
 
