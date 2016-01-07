@@ -52,6 +52,7 @@ MACRO( DEMO _target _sources)
     endif()
 ENDMACRO( DEMO )
 
+FIND_PACKAGE( glfw3 REQUIRED )
 FIND_PACKAGE( HarfBuzz REQUIRED )
 
 SET( FREETYPE_GL_HB_SRC freetype-gl.h
@@ -66,6 +67,10 @@ SET( FREETYPE_GL_HB_SRC freetype-gl.h
                         vector.c           vector.h)
 
 INCLUDE_DIRECTORIES( ${HARFBUZZ_INCLUDE_DIRS} )
+
+LINK_DIRECTORIES(
+    ${GLFW3_LIBRARY_DIR}
+)
 
 ADD_LIBRARY( freetype-gl-hb STATIC ${FREETYPE_GL_HB_SRC} )
 

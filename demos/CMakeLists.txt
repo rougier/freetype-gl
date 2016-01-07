@@ -46,6 +46,8 @@ ELSE( WIN32 OR WIN64 )
     FIND_PACKAGE( AntTweakBar )
 ENDIF( WIN32 OR WIN64 )
 
+FIND_PACKAGE( glfw3 REQUIRED )
+
 MACRO( DEMO _target _sources)
      add_executable(${_target} ${_sources})
      include_directories(${WINDOWS_DIR} ${GLFW3_INCLUDE_DIR} ${GLEW_INCLUDE_PATH} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
@@ -64,6 +66,10 @@ MACRO( DEMO _target _sources)
       set_source_files_properties(${_sources} PROPERTIES LANGUAGE CXX)
     endif()
 ENDMACRO( DEMO )
+
+LINK_DIRECTORIES(
+    ${GLFW3_LIBRARY_DIR}
+)
 
 ADD_CUSTOM_COMMAND(
     DEPENDS
