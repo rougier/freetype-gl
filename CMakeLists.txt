@@ -39,48 +39,33 @@ OPTION(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
 OPTION(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
 OPTION(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (experimental)" OFF)
 OPTION(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
-OPTION(freetype-gl_LIBS_SUPPLIED "Required libraries are supplied as part of parent build" OFF)
 
-# Get required and optional library
-FIND_PACKAGE( OpenGL REQUIRED )
 IF( WIN32 OR WIN64 )
-	SET( WINDOWS_DIR
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows )
-    SET( GLEW_INCLUDE_PATH
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/include )
-    SET( GLEW_LIBRARY
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/lib/glew32.lib )
-    SET( FREETYPE_INCLUDE_DIRS
+    SET( GLEW_ROOT_DIR
+         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew )
+    SET( ENV{FREETYPE_DIR}
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype )
-    SET( FREETYPE_INCLUDE_DIR_ft2build
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype )
-    SET( FREETYPE_INCLUDE_DIR_freetype2
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype/freetype )
-    SET( FREETYPE_LIBRARY
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype/freetype.lib )
     SET( VS789FIX_INCLUDE_DIR
          ${CMAKE_CURRENT_SOURCE_DIR}/windows/include )
 ELSE( WIN32 OR WIN64 )
-    IF ( freetype-gl_LIBS_SUPPLIED )
-        FIND_PACKAGE( Freetype )
-        IF ( NOT APPLE )
-            FIND_PACKAGE( GLEW )
-        ENDIF()
-    ELSE ( freetype-gl_LIBS_SUPPLIED )
-        FIND_PACKAGE( Freetype REQUIRED )
-        IF ( NOT APPLE )
-            FIND_PACKAGE( GLEW REQUIRED )
-        ENDIF()
-    ENDIF ( freetype-gl_LIBS_SUPPLIED )
-
     FIND_LIBRARY( MATH_LIBRARY m )
 ENDIF( WIN32 OR WIN64 )
 
-INCLUDE_DIRECTORIES( ${OPENGL_INCLUDE_DIRS}
-                     ${FREETYPE_INCLUDE_DIRS}
-                     ${CMAKE_CURRENT_SOURCE_DIR}
-                     ${VS789FIX_INCLUDE_DIR}
-                     ${GLEW_INCLUDE_PATH})
+# Find dependencies
+FIND_PACKAGE( OpenGL REQUIRED )
+FIND_PACKAGE( Freetype REQUIRED )
+IF ( NOT APPLE )
+    FIND_PACKAGE( GLEW REQUIRED )
+ENDIF()
+
+INCLUDE_DIRECTORIES(
+    ${OPENGL_INCLUDE_DIRS}
+    ${FREETYPE_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${VS789FIX_INCLUDE_DIR}
+    ${GLEW_INCLUDE_PATH}
+)
+
 IF(MSVC)
     ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(MSVC)
@@ -123,7 +108,7 @@ IF (freetype-gl_BUILD_MAKEFONT)
     TARGET_LINK_LIBRARIES( makefont
                            freetype-gl
                            ${OPENGL_LIBRARY}
-                           ${FREETYPE_LIBRARY}
+                           ${FREETYPE_LIBRARIES}
                            ${MATH_LIBRARY})
 
     if(MSVC)

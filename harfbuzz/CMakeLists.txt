@@ -34,14 +34,13 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.8.5 )
 
 MACRO( DEMO _target _sources)
      add_executable(${_target} ${_sources})
-     include_directories(${WINDOWS_DIR} ${GLFW3_INCLUDE_DIR} ${GLEW_INCLUDE_PATH} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
     if(NOT APPLE)
      target_link_libraries(${_target} ${GLEW_LIBRARY})
     endif()
      target_link_libraries(${_target} freetype-gl-hb)
      target_link_libraries(${_target} ${OPENGL_LIBRARY})
      target_link_libraries(${_target} ${GLFW3_LIBRARY})
-     target_link_libraries(${_target} ${FREETYPE_LIBRARY})
+     target_link_libraries(${_target} ${FREETYPE_LIBRARIES})
      target_link_libraries(${_target} ${HARFBUZZ_LIBRARIES})
      IF( MATH_LIBRARY )
          target_link_libraries(${_target} ${MATH_LIBRARY})
@@ -55,6 +54,15 @@ ENDMACRO( DEMO )
 FIND_PACKAGE( glfw3 REQUIRED )
 FIND_PACKAGE( HarfBuzz REQUIRED )
 
+INCLUDE_DIRECTORIES(
+    ${GLFW3_INCLUDE_DIR}
+    ${HARFBUZZ_INCLUDE_DIRS}
+)
+
+LINK_DIRECTORIES(
+    ${GLFW3_LIBRARY_DIR}
+)
+
 SET( FREETYPE_GL_HB_SRC freetype-gl.h
                         vec234.h
                         opengl.h
@@ -65,12 +73,6 @@ SET( FREETYPE_GL_HB_SRC freetype-gl.h
                         vertex-attribute.c vertex-attribute.h
                         shader.c           shader.h
                         vector.c           vector.h)
-
-INCLUDE_DIRECTORIES( ${HARFBUZZ_INCLUDE_DIRS} )
-
-LINK_DIRECTORIES(
-    ${GLFW3_LIBRARY_DIR}
-)
 
 ADD_LIBRARY( freetype-gl-hb STATIC ${FREETYPE_GL_HB_SRC} )
 

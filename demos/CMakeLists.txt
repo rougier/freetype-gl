@@ -32,32 +32,15 @@
 # =========================================================================
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8.5 )
 
-# Get required and optional library
-IF( WIN32 OR WIN64 )
-    SET( WINDOWS_DIR
-         ${CMAKE_CURRENT_SOURCE_DIR}/../windows )
-    SET( ANT_TWEAK_BAR_INCLUDE_PATH
-         ${CMAKE_CURRENT_SOURCE_DIR}/../windows/AntTweakBar/include )
-    SET( ANT_TWEAK_BAR_LIBRARY
-         ${CMAKE_CURRENT_SOURCE_DIR}/../windows/AntTweakBar/lib/AntTweakBar.lib )
-    SET( ANT_TWEAK_BAR_FOUND "YES" )
-ELSE( WIN32 OR WIN64 )
-    FIND_PACKAGE( FontConfig )
-    FIND_PACKAGE( AntTweakBar )
-ENDIF( WIN32 OR WIN64 )
-
-FIND_PACKAGE( glfw3 REQUIRED )
-
 MACRO( DEMO _target _sources)
      add_executable(${_target} ${_sources})
-     include_directories(${WINDOWS_DIR} ${GLFW3_INCLUDE_DIR} ${GLEW_INCLUDE_PATH} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
     if(NOT APPLE)
      target_link_libraries(${_target} ${GLEW_LIBRARY})
     endif()
      target_link_libraries(${_target} freetype-gl)
      target_link_libraries(${_target} ${OPENGL_LIBRARY})
      target_link_libraries(${_target} ${GLFW3_LIBRARY})
-     target_link_libraries(${_target} ${FREETYPE_LIBRARY})
+     target_link_libraries(${_target} ${FREETYPE_LIBRARIES})
      IF( MATH_LIBRARY )
          target_link_libraries(${_target} ${MATH_LIBRARY})
      ENDIF( MATH_LIBRARY )
@@ -66,6 +49,26 @@ MACRO( DEMO _target _sources)
       set_source_files_properties(${_sources} PROPERTIES LANGUAGE CXX)
     endif()
 ENDMACRO( DEMO )
+
+IF( WIN32 OR WIN64 )
+    SET( ENV{ANT_TWEAK_BAR_ROOT}
+         ${CMAKE_CURRENT_SOURCE_DIR}/../windows/AntTweakBar )
+ENDIF( WIN32 OR WIN64 )
+
+# Find dependencies
+FIND_PACKAGE( glfw3 REQUIRED )
+FIND_PACKAGE( AntTweakBar )
+FIND_PACKAGE( FontConfig )
+
+INCLUDE_DIRECTORIES(
+    ${GLFW3_INCLUDE_DIRS}
+)
+
+include_directories(
+    ${GLFW3_INCLUDE_DIR}
+    ${ANT_TWEAK_BAR_INCLUDE_PATH}
+    ${FONTCONFIG_INCLUDE_DIR}
+)
 
 LINK_DIRECTORIES(
     ${GLFW3_LIBRARY_DIR}
@@ -106,7 +109,6 @@ DEMO( distance-field-2 "distance-field-2.c")
 DEMO( distance-field-3 "distance-field-3.c")
 
 IF (FONTCONFIG_FOUND)
-   INCLUDE_DIRECTORIES( ${FONTCONFIG_INCLUDE_DIR} )
    DEMO( markup      "markup.c" )
    target_link_libraries(markup ${FONTCONFIG_LIBRARY})
 ENDIF (FONTCONFIG_FOUND)
@@ -116,7 +118,7 @@ IF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )
     target_link_libraries( atb-agg freetype-gl)
     target_link_libraries( atb-agg ${GLFW3_LIBRARY})
     target_link_libraries( atb-agg ${GLEW_LIBRARY})
-    target_link_libraries( atb-agg ${FREETYPE_LIBRARY})
+    target_link_libraries( atb-agg ${FREETYPE_LIBRARIES})
     target_link_libraries( atb-agg ${ANT_TWEAK_BAR_LIBRARY})
     target_link_libraries( atb-agg ${OPENGL_LIBRARY})
     IF(MATH_LIBRARY)
