@@ -130,7 +130,6 @@ IF (freetype-gl_BUILD_MAKEFONT)
     TARGET_LINK_LIBRARIES( makefont
                            freetype-gl
                            ${OPENGL_LIBRARY}
-                           ${GLFW3_LIBRARY}
                            ${FREETYPE_LIBRARY}
                            ${MATH_LIBRARY})
 
