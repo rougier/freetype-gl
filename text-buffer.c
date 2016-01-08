@@ -200,6 +200,7 @@ text_buffer_add_text( text_buffer_t * self,
 {
     font_manager_t * manager = self->manager;
     size_t i;
+    const char * prev_character = NULL;
 
     if( markup == NULL )
     {
@@ -225,7 +226,6 @@ text_buffer_add_text( text_buffer_t * self,
         self->origin = *pen;
     }
 
-    const char * prev_character = NULL;
     for( i = 0; utf8_strlen( text + i ) && length; i += utf8_surrogate_len( text + i ) )
     {
         text_buffer_add_char( self, pen, markup, text + i, prev_character );
