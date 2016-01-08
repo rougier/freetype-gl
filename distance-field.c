@@ -31,6 +31,7 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include <float.h>
 #include <stdlib.h>
 #include <string.h>
 #include "edtaa3func.h"
@@ -45,6 +46,7 @@ make_distance_mapd( double *data, unsigned int width, unsigned int height )
     double * gy      = (double *) calloc( width * height, sizeof(double) );
     double * outside = (double *) calloc( width * height, sizeof(double) );
     double * inside  = (double *) calloc( width * height, sizeof(double) );
+    double vmin = DBL_MAX;
     int i;
 
     // Compute outside = edtaa3(bitmap); % Transform background (0's)
@@ -66,7 +68,6 @@ make_distance_mapd( double *data, unsigned int width, unsigned int height )
             inside[i] = 0.0;
 
     // distmap = outside - inside; % Bipolar distance field
-    float vmin = +INFINITY;
     for( i=0; i<width*height; ++i)
     {
         outside[i] -= inside[i];
@@ -102,8 +103,8 @@ make_distance_mapb( unsigned char *img,
     int i;
 
     // find minimimum and maximum values
-    double img_min = INFINITY;
-    double img_max = -INFINITY;
+    double img_min = DBL_MAX;
+    double img_max = DBL_MIN;
 
     for( i=0; i<width*height; ++i)
     {
