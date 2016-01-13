@@ -27,7 +27,11 @@ rm conftest.$ac_ext
 AC_SUBST(FTINC)
 AC_SUBST(LIBADD)
 AC_SUBST(LIBGL)
-LIBTOOL=${CC%gcc}libtool
+
+PRECC=${CC%gcc*}
+PRECLANG=${PRECC%clang*}
+AC_CHECK_PROGS(GNU_LIBTOOL,"glibtool --tag=CC" libtool)
+LIBTOOL=${PRECLANG}${LIBTOOL}
 AC_SUBST(LIBTOOL)
 
 AC_CONFIG_FILES([Makefile])
