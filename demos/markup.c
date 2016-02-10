@@ -171,6 +171,8 @@ void init()
                         &japanese,  "私はガラスを食べられます。 それは私を傷つけません\n",
                         &math,      "ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ",
                         NULL );
+    text_buffer_align( buffer, &pen, ALIGN_CENTER );
+
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
     mat4_set_identity( &view );
