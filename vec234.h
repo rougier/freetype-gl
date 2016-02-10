@@ -146,37 +146,37 @@ typedef union
  * Tuple of 4 floats.
  *
  * Each field can be addressed using several aliases:
- *  - First component:  <b>x</b>, <b>r</b> or <b>red</b>
- *  - Second component: <b>y</b>, <b>g</b> or <b>green</b>
- *  - Third component:  <b>z</b>, <b>b</b>, <b>blue</b> or <b>width</b>
- *  - Fourth component: <b>w</b>, <b>a</b>, <b>alpha</b> or <b>height</b>
+ *  - First component:  <b>x</b>, <b>left</b>, <b>r</b> or <b>red</b>
+ *  - Second component: <b>y</b>, <b>top</b>, <b>g</b> or <b>green</b>
+ *  - Third component:  <b>z</b>, <b>width</b>, <b>b</b> or <b>blue</b>
+ *  - Fourth component: <b>w</b>, <b>height</b>, <b>a</b> or <b>alpha</b>
  */
 typedef union
 {
 	float data[4];    /**< All compoments at once    */
 	struct {
         float x;      /**< Alias for first component */
-        float y;      /**< Alias fo second component */
-        float z;      /**< Alias fo third component  */
-        float w;      /**< Alias fo fourth component */
+        float y;      /**< Alias for second component */
+        float z;      /**< Alias for third component  */
+        float w;      /**< Alias for fourth component */
     };
 	struct {
-        float x_;     /**< Alias for first component */
-        float y_;     /**< Alias fo second component */
-        float width;  /**< Alias fo third component  */
-        float height; /**< Alias fo fourth component */
+        float left;   /**< Alias for first component */
+        float top;    /**< Alias for second component */
+        float width;  /**< Alias for third component  */
+        float height; /**< Alias for fourth component */
     };
 	struct {
         float r;      /**< Alias for first component */
-        float g;      /**< Alias fo second component */
-        float b;      /**< Alias fo third component  */
-        float a;      /**< Alias fo fourth component */
+        float g;      /**< Alias for second component */
+        float b;      /**< Alias for third component  */
+        float a;      /**< Alias for fourth component */
     };
 	struct {
         float red;    /**< Alias for first component */
-        float green;  /**< Alias fo second component */
-        float blue;   /**< Alias fo third component  */
-        float alpha;  /**< Alias fo fourth component */
+        float green;  /**< Alias for second component */
+        float blue;   /**< Alias for third component  */
+        float alpha;  /**< Alias for fourth component */
     };
 } vec4;
 
