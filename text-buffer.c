@@ -244,9 +244,9 @@ text_buffer_finish_line( text_buffer_t * self, vec2 * pen, int advancePen )
     {
         self->bounds.width = line_right - self->bounds.left;
     }
-    if (line_bottom > self_bottom)
+    if (line_bottom < self_bottom)
     {
-        self->bounds.height = line_bottom - self->bounds.top;
+        self->bounds.height = self->bounds.top - line_bottom;
     }
 
     if ( advancePen )
