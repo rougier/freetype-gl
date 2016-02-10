@@ -78,10 +78,12 @@ ELSE( WIN32 OR WIN64 )
 ENDIF( WIN32 OR WIN64 )
 
 IF ( NOT freetype-gl_LIBS_SUPPLIED )
-    FIND_PACKAGE( glfw3 REQUIRED )
+    FIND_PACKAGE( PkgConfig REQUIRED )
+    pkg_search_module( GLFW REQUIRED glfw3 ) # sets GLFW as prefix for glfw vars
 ENDIF ( NOT freetype-gl_LIBS_SUPPLIED )
 
-INCLUDE_DIRECTORIES( ${GLFW3_INCLUDE_DIR}
+
+INCLUDE_DIRECTORIES( ${GLFW_INCLUDE_DIRS}
                      ${OPENGL_INCLUDE_DIRS}
                      ${FREETYPE_INCLUDE_DIRS}
                      ${CMAKE_CURRENT_SOURCE_DIR}
@@ -117,7 +119,6 @@ ADD_LIBRARY( freetype-gl STATIC ${FREETYPE_GL_SRC} )
 
 LINK_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
-    ${GLFW3_LIBRARY_DIR}
 )
 
 IF (freetype-gl_BUILD_MAKEFONT)
@@ -130,7 +131,7 @@ IF (freetype-gl_BUILD_MAKEFONT)
     TARGET_LINK_LIBRARIES( makefont
                            freetype-gl
                            ${OPENGL_LIBRARY}
-                           ${GLFW3_LIBRARY}
+                           ${GLFW_STATIC_LIBRARIES}
                            ${FREETYPE_LIBRARY}
                            ${MATH_LIBRARY})
 
