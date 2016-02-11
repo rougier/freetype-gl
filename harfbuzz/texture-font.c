@@ -265,6 +265,24 @@ texture_font_delete( texture_font_t *self )
     free( self );
 }
 
+texture_glyph_t *
+texture_font_find_glyph( texture_font_t * self,
+                         uint32_t codepoint )
+{
+    size_t i;
+    texture_glyph_t *glyph;
+
+    for( i = 0; i < self->glyphs->size; ++i )
+    {
+        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
+        if( glyph->codepoint == codepoint )
+        {
+            return glyph;
+        }
+    }
+
+    return NULL;
+}
 
 // ----------------------------------------------- texture_font_load_glyphs ---
 void
@@ -274,7 +292,7 @@ texture_font_load_glyphs( texture_font_t * self,
                           const char *language,
                           const hb_script_t script )
 {
-    size_t i, j, x, y, width, height, w, h;
+    size_t i, x, y, width, height, w, h;
 
     FT_Error error;
     FT_GlyphSlot slot;
@@ -290,7 +308,6 @@ texture_font_load_glyphs( texture_font_t * self,
     hb_glyph_info_t *glyph_info;
 
     ivec4 region;
-    char pass;
 
     assert( self );
     assert( text );
@@ -314,18 +331,7 @@ texture_font_load_glyphs( texture_font_t * self,
 
     flags =  FT_LOAD_RENDER | FT_LOAD_TARGET_LCD;
     for( i = 0; i < glyph_count; ++i ) {
-        pass = 0;
-        /* Check if charcode has been already loaded */
-        for( j = 0; j < self->glyphs->size; ++j ) {
-            glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
-            if( glyph->codepoint == glyph_info[i].codepoint )
-            {
-                pass = 1;
-                break;
-            }
-        }
-
-        if(pass)
+        if( texture_font_find_glyph( self, glyph_info[i].codepoint ) )
             continue;
 
         error = FT_Load_Glyph( self->ft_face, glyph_info[i].codepoint, flags );
@@ -381,7 +387,6 @@ texture_glyph_t *
 texture_font_get_glyph( texture_font_t * self,
                         size_t codepoint )
 {
-    size_t i;
     texture_glyph_t *glyph;
 
     assert( self );
@@ -389,13 +394,5 @@ texture_font_get_glyph( texture_font_t * self,
     assert( self->atlas );
 
     /* Check if charcode has been already loaded */
-    for( i=0; i<self->glyphs->size; ++i )
-    {
-        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
-        if( glyph->codepoint == codepoint )
-        {
-            return glyph;
-        }
-    }
-    return NULL;
+    return texture_font_find_glyph(self, codepoint );
 }
