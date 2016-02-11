@@ -46,6 +46,10 @@ extern "C" {
 #include "vector.h"
 #include "texture-atlas.h"
 
+#ifdef __cplusplus
+namespace ftgl {
+#endif
+
 /**
  * @file   texture-font.h
  * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
@@ -309,7 +313,7 @@ texture_glyph_new( void );
 
 #ifdef __cplusplus
 }
+}
 #endif
 
 #endif /* __TEXTURE_FONT_H__ */
-
