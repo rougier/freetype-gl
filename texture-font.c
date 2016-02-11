@@ -128,28 +128,6 @@ texture_font_load_face(texture_font_t *self, float size,
     return 1;
 }
 
-static int
-texture_font_get_face_with_size(texture_font_t *self, float size,
-        FT_Library *library, FT_Face *face)
-{
-    return texture_font_load_face(self, size, library, face);
-}
-
-static int
-texture_font_get_face(texture_font_t *self,
-        FT_Library *library, FT_Face *face)
-{
-    return texture_font_get_face_with_size(self, self->size, library, face);
-}
-
-static int
-texture_font_get_hires_face(texture_font_t *self,
-        FT_Library *library, FT_Face *face)
-{
-    return texture_font_get_face_with_size(self,
-            self->size * 100.f, library, face);
-}
-
 // ------------------------------------------------------ texture_glyph_new ---
 texture_glyph_t *
 texture_glyph_new(void)
@@ -224,7 +202,7 @@ texture_font_generate_kerning( texture_font_t *self )
     assert( self );
 
     /* Load font */
-    if(!texture_font_get_face(self, &library, &face))
+    if(!texture_font_load_face(self, self->size, &library, &face))
         return;
 
     /* For each glyph couple combination, check if kerning is necessary */
@@ -287,8 +265,7 @@ texture_font_init(texture_font_t *self)
     self->lcd_weights[3] = 0x40;
     self->lcd_weights[4] = 0x10;
 
-    /* Get font metrics at high resolution */
-    if (!texture_font_get_hires_face(self, &library, &face))
+    if (!texture_font_load_face(self, self->size * 100.f, &library, &face))
         return -1;
 
     self->underline_position = face->underline_position / (float)(HRESf*HRESf) * self->size;
@@ -458,7 +435,7 @@ texture_font_load_glyphs( texture_font_t * self,
     height = self->atlas->height;
     depth  = self->atlas->depth;
 
-    if (!texture_font_get_face(self, &library, &face))
+    if (!texture_font_load_face(self, self->size, &library, &face))
         return utf8_strlen(charcodes);
 
     /* Load each glyph */
