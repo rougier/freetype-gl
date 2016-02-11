@@ -62,7 +62,6 @@ texture_font_load_face(texture_font_t *self, float size,
         (int)((0.0)      * 0x10000L),
         (int)((0.0)      * 0x10000L),
         (int)((1.0)      * 0x10000L)};
-    int i;
 
     assert(library);
     assert(size);
@@ -96,27 +95,11 @@ texture_font_load_face(texture_font_t *self, float size,
 
     FT_Library_SetLcdFilter(*library, FT_LCD_FILTER_LIGHT );
 
-    /* Set charmap
-     *
-     * See http://www.microsoft.com/typography/otspec/name.htm for a list of
-     * some possible platform-encoding pairs.  We're interested in 0-3 aka 3-1
-     * - UCS-2.  Otherwise, fail. If a font has some unicode map, but lacks
-     * UCS-2 - it is a broken or irrelevant font. What exactly Freetype will
-     * select on face load (it promises most wide unicode, and if that will be
-     * slower that UCS-2 - left as an excercise to check.
-     */
-    for( i=0; i < self->ft_face->num_charmaps; i++ )
-    {
-        FT_UShort pid = self->ft_face->charmaps[i]->platform_id;
-        FT_UShort eid = self->ft_face->charmaps[i]->encoding_id;
-        if( ((pid == 0) && (eid == 3)) || ((pid == 3) && (eid == 1)) )
-        {
-            error = FT_Set_Charmap(self->ft_face, self->ft_face->charmaps[i]);
-            if(error) {
-                fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-                        __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-            }
-        }
+    /* Select charmap */
+    error = FT_Select_Charmap(self->ft_face, FT_ENCODING_UNICODE);
+    if(error) {
+        fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+                __LINE__, FT_Errors[error].code, FT_Errors[error].message);
     }
 
     /* Set char size */
