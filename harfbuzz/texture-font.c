@@ -146,6 +146,8 @@ texture_glyph_new(void)
 void
 texture_glyph_delete( texture_glyph_t *self )
 {
+    assert( self );
+    free( self );
 }
 
 // ------------------------------------------------------ texture_font_init ---
