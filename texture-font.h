@@ -282,14 +282,15 @@ typedef struct texture_font_t
     int filtering;
 
     /**
+     * LCD filter weights
+     */
+    unsigned char lcd_weights[5];
+
+    /**
      * Whether to use kerning if available
      */
     int kerning;
 
-    /**
-     * LCD filter weights
-     */
-    unsigned char lcd_weights[5];
 
     /**
      * This field is simply used to compute a default line spacing (i.e., the

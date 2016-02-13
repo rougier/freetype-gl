@@ -173,8 +173,17 @@ texture_font_init(texture_font_t *self)
     self->outline_thickness = 0.0;
     self->hres = 100;
     self->hinting = 1;
+    self->filtering = 1;
     self->ft_face = 0;
     self->hb_ft_font = 0;
+
+    // FT_LCD_FILTER_LIGHT   is (0x00, 0x55, 0x56, 0x55, 0x00)
+    // FT_LCD_FILTER_DEFAULT is (0x10, 0x40, 0x70, 0x40, 0x10)
+    self->lcd_weights[0] = 0x10;
+    self->lcd_weights[1] = 0x40;
+    self->lcd_weights[2] = 0x70;
+    self->lcd_weights[3] = 0x40;
+    self->lcd_weights[4] = 0x10;
 
     if (!texture_font_load_face(self, self->size * 100.f, &library))
         return -1;
@@ -378,6 +387,11 @@ texture_font_load_glyphs( texture_font_t * self,
         {
             FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
             flags |= FT_LOAD_TARGET_LCD;
+
+            if( self->filtering )
+            {
+                FT_Library_SetLcdFilterWeights( library, self->lcd_weights );
+            }
         }
 
         error = FT_Load_Glyph( self->ft_face, glyph_info[i].codepoint, flags );

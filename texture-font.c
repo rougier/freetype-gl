@@ -473,6 +473,7 @@ texture_font_load_glyphs( texture_font_t * self,
         {
             FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
             flags |= FT_LOAD_TARGET_LCD;
+
             if( self->filtering )
             {
                 FT_Library_SetLcdFilterWeights( library, self->lcd_weights );

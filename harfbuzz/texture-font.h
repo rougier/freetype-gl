@@ -202,6 +202,16 @@ typedef struct texture_font_t
     float outline_thickness;
 
     /**
+     * Whether to use our own lcd filter.
+     */
+    int filtering;
+
+    /**
+     * LCD filter weights
+     */
+    unsigned char lcd_weights[5];
+
+    /**
      * Freetype face
      */
     FT_Face ft_face;
