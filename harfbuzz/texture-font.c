@@ -172,6 +172,7 @@ texture_font_init(texture_font_t *self)
     self->outline_type = 0;
     self->outline_thickness = 0.0;
     self->hres = 100;
+    self->hinting = 1;
     self->ft_face = 0;
     self->hb_ft_font = 0;
 
@@ -364,7 +365,14 @@ texture_font_load_glyphs( texture_font_t * self,
             flags |= FT_LOAD_RENDER;
         }
 
-        flags |= FT_LOAD_FORCE_AUTOHINT;
+        if( !self->hinting )
+        {
+            flags |= FT_LOAD_NO_HINTING | FT_LOAD_NO_AUTOHINT;
+        }
+        else
+        {
+            flags |= FT_LOAD_FORCE_AUTOHINT;
+        }
 
         if( depth == 3 )
         {

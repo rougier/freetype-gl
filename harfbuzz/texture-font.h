@@ -187,6 +187,11 @@ typedef struct texture_font_t
     float hres;
 
     /**
+     * Whether to use autohint when rendering font
+     */
+    int hinting;
+
+    /**
      * Outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
      */
     int outline_type;
