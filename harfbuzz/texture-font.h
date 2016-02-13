@@ -350,7 +350,7 @@ typedef struct texture_font_t
  * @return Number of missed glyph if the texture is not big enough to hold
  *         every glyphs.
  */
-  void
+  size_t
   texture_font_load_glyphs( texture_font_t * self,
                             const char *text,
                             const hb_direction_t directions,

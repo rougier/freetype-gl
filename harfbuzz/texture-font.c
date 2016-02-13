@@ -305,7 +305,7 @@ texture_font_find_glyph( texture_font_t * self,
 }
 
 // ----------------------------------------------- texture_font_load_glyphs ---
-void
+size_t
 texture_font_load_glyphs( texture_font_t * self,
                           const char *text,
                           const hb_direction_t directions,
@@ -331,6 +331,7 @@ texture_font_load_glyphs( texture_font_t * self,
     hb_glyph_info_t *glyph_info;
 
     ivec4 region;
+    size_t missed = 0;
 
     assert( self );
     assert( text );
@@ -399,7 +400,8 @@ texture_font_load_glyphs( texture_font_t * self,
         {
             fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
                      __LINE__, FT_Errors[error].code, FT_Errors[error].message );
-            break;
+            FT_Done_FreeType( library );
+            return glyph_count - i;
         }
 
 
@@ -421,7 +423,7 @@ texture_font_load_glyphs( texture_font_t * self,
                         FT_Errors[error].code, FT_Errors[error].message);
                 FT_Stroker_Done( stroker );
                 FT_Done_FreeType( library );
-                break;
+                return 0;
             }
             FT_Stroker_Set(stroker,
                             (int)(self->outline_thickness * self->hres),
@@ -435,7 +437,7 @@ texture_font_load_glyphs( texture_font_t * self,
                         FT_Errors[error].code, FT_Errors[error].message);
                 FT_Stroker_Done( stroker );
                 FT_Done_FreeType( library );
-                break;
+                return 0;
             }
 
             if( self->outline_type == 1 )
@@ -456,7 +458,7 @@ texture_font_load_glyphs( texture_font_t * self,
                         FT_Errors[error].code, FT_Errors[error].message);
                 FT_Stroker_Done( stroker );
                 FT_Done_FreeType( library );
-                break;
+                return 0;
             }
 
             if( depth == 1 )
@@ -468,7 +470,7 @@ texture_font_load_glyphs( texture_font_t * self,
                             FT_Errors[error].code, FT_Errors[error].message);
                     FT_Stroker_Done( stroker );
                     FT_Done_FreeType( library );
-                    break;
+                    return 0;
                 }
             }
             else
@@ -480,7 +482,7 @@ texture_font_load_glyphs( texture_font_t * self,
                             FT_Errors[error].code, FT_Errors[error].message);
                     FT_Stroker_Done( stroker );
                     FT_Done_FreeType( library );
-                    break;
+                    return 0;
                 }
             }
 
@@ -497,6 +499,7 @@ texture_font_load_glyphs( texture_font_t * self,
         region = texture_atlas_get_region( self->atlas, w+1, h+1 );
         if ( region.x < 0 )
         {
+            missed++;
             fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
             continue;
         }
@@ -530,6 +533,8 @@ texture_font_load_glyphs( texture_font_t * self,
 
     /* Cleanup */
     hb_buffer_destroy( buffer );
+
+    return missed;
 }
 
 
