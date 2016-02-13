@@ -48,11 +48,21 @@
 #include "mat4.h"
 
 #include <GLFW/glfw3.h>
+#include <vec234.h>
+
+
+// ------------------------------------------------------- typedef & struct ---
+typedef struct {
+    float x, y, z;
+    float r, g, b, a;
+} vertex_t;
 
 
 // ------------------------------------------------------- global variables ---
 text_buffer_t * buffer;
 mat4 model, view, projection;
+vertex_buffer_t *lines_buffer;
+GLuint shader;
 
 
 // ------------------------------------------------------ match_description ---
@@ -171,6 +181,31 @@ void init()
                         &japanese,  "私はガラスを食べられます。 それは私を傷つけません\n",
                         &math,      "ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ",
                         NULL );
+    text_buffer_align( buffer, &pen, ALIGN_CENTER );
+
+    vec4 bounds = text_buffer_get_bounds( buffer, &pen );
+    float left = bounds.left;
+    float right = bounds.left + bounds.width;
+    float top = bounds.top;
+    float bottom = bounds.top - bounds.height;
+
+    shader = shader_load("shaders/v3f-c4f.vert",
+                         "shaders/v3f-c4f.frag");
+
+    lines_buffer = vertex_buffer_new( "vertex:3f,color:4f" );
+    vertex_t vertices[] = { { left - 10,         top, 0, 0,0,0,1}, // top
+                            {right + 10,         top, 0, 0,0,0,1},
+
+                            { left - 10,      bottom, 0, 0,0,0,1}, // bottom
+                            {right + 10,      bottom, 0, 0,0,0,1},
+
+                            {      left,    top + 10, 0, 0,0,0,1}, // left
+                            {      left, bottom - 10, 0, 0,0,0,1},
+                            {     right,    top + 10, 0, 0,0,0,1}, // right
+                            {     right, bottom - 10, 0, 0,0,0,1} };
+    GLuint indices[] = { 0,1,2,3,4,5,6,7 };
+    vertex_buffer_push_back( lines_buffer, vertices, 8, indices, 8);
+
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
     mat4_set_identity( &view );
@@ -195,6 +230,19 @@ void display( GLFWwindow* window )
         text_buffer_render( buffer );
     }
 
+    glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+    glBlendColor( 1.0, 1.0, 1.0, 1.0 );
+    glUseProgram( shader );
+    {
+        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+                            1, 0, model.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+                            1, 0, view.data);
+        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+                            1, 0, projection.data);
+        vertex_buffer_render( lines_buffer, GL_LINES );
+    }
+    
     glfwSwapBuffers( window );
 }
 

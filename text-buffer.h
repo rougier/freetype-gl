@@ -104,9 +104,29 @@ typedef struct  text_buffer_t {
     vec2 origin;
 
     /**
-     * Index (in the vertex buffer) of the line start
+     * Last pen y location
+     */
+    float last_pen_y;
+
+    /**
+     * Total bounds
+     */
+    vec4 bounds;
+
+    /**
+     * Index (in the vertex buffer) of the current line start
      */
     size_t line_start;
+
+    /**
+     * Location of the start of the line
+     */
+    float line_left;
+
+    /**
+     * Vector of line information
+     */
+    vector_t * lines;
 
     /**
      * Current line ascender
@@ -199,6 +219,43 @@ typedef struct glyph_vertex_t {
 } glyph_vertex_t;
 
 
+/**
+ * Line structure
+ */
+typedef struct line_info_t {
+    /**
+     * Index (in the vertex buffer) where this line starts
+     */
+    size_t line_start;
+
+    /**
+     * bounds of this line
+     */
+    vec4 bounds;
+
+} line_info_t;
+
+/**
+ * Align enumeration
+ */
+typedef enum Align
+{
+    /**
+     * Align text to the left hand side
+     */
+    ALIGN_LEFT,
+
+    /**
+     * Align text to the center
+     */
+    ALIGN_CENTER,
+
+    /**
+     * Align text to the right hand side
+     */
+    ALIGN_RIGHT
+} Align;
+
 
 /**
  * Creates a new empty text buffer using custom shaders.
@@ -286,6 +343,28 @@ typedef struct glyph_vertex_t {
   text_buffer_add_char( text_buffer_t * self,
                         vec2 * pen, markup_t * markup,
                         const char * current, const char * previous );
+
+ /**
+  * Align all the lines of text already added to the buffer
+  * This alignment will be relative to the overall bounds of the
+  * text which can be queried by text_buffer_get_bounds
+  *
+  * @param self      a text buffer
+  * @param pen       pen used in last call (must be unmodified)
+  * @param alignment desired alignment of text
+  */
+  void
+  text_buffer_align( text_buffer_t * self, vec2 * pen,
+                     enum Align alignment );
+
+ /**
+  * Get the rectangle surrounding the text
+  *
+  * @param self      a text buffer
+  * @param pen       pen used in last call (must be unmodified)
+  */
+  vec4
+  text_buffer_get_bounds( text_buffer_t * self, vec2 * pen );
 
 /**
   * Clear text buffer
