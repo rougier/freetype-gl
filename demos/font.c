@@ -115,6 +115,7 @@ void init( void )
         pen.y -= font->height;
         texture_font_load_glyphs( font, text );
         add_text( buffer, font, text, &black, &pen );
+        texture_atlas_upload( font->atlas );
         texture_font_delete( font );
     }
     glBindTexture( GL_TEXTURE_2D, atlas->id );

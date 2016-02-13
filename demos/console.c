@@ -273,6 +273,7 @@ console_render( console_t *self )
         self->pen.x = 0;
         cursor_x = self->pen.x;
         cursor_y = self->pen.y;
+        texture_atlas_upload( markup.font->atlas );
     }
 
     // Prompt
@@ -289,6 +290,8 @@ console_render( console_t *self )
             console_add_glyph( console, cur_char, prev_char, &markup );
             prev_char = cur_char;
         }
+
+        texture_atlas_upload( markup.font->atlas );
     }
     cursor_x = (int) self->pen.x;
 
@@ -314,6 +317,8 @@ console_render( console_t *self )
                 cursor_x = (int) self->pen.x;
             }
         }
+
+        texture_atlas_upload( markup.font->atlas );
     }
 
     // Cursor (we use the black character (NULL) as texture )

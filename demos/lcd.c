@@ -119,6 +119,8 @@ void init( void )
         add_text( buffer, font, text, &color, &pen );
         texture_font_delete( font );
     }
+
+    texture_atlas_upload( atlas );
     glBindTexture( GL_TEXTURE_2D, atlas->id );
 
     shader = shader_load( "shaders/text.vert",

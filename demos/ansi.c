@@ -251,6 +251,7 @@ print( text_buffer_t * buffer, vec2 * pen,
             ansi_to_markup(seq_start, seq_size, markup );
             markup->font = font_manager_get_from_markup( buffer->manager, markup );
             text_buffer_add_text( buffer, pen, markup, text_start, text_size );
+            texture_atlas_upload( markup->font->atlas );
         }
     }
 }

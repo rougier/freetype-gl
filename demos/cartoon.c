@@ -94,6 +94,8 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
         vertex_buffer_push_back_vertices( buffer, vertices, 4 );
         pen.x += glyph->advance_x;
     }
+
+    texture_atlas_upload( font->atlas );
 }
 
 

@@ -120,6 +120,8 @@ void init( void )
         pen.y += font->height - font->linegap;
     }
 
+    texture_atlas_upload( atlas );
+
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glDisable( GL_DEPTH_TEST );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );

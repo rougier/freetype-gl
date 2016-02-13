@@ -127,6 +127,7 @@ void init( void )
     vec4 black = {{1,1,1,1}};
     font = texture_font_new_from_file( atlas, 48, filename );
     vec4 bbox = add_text( buffer, font, text, &black, &pen );
+    texture_atlas_upload( font->atlas );
     size_t i;
     vector_t * vertices = buffer->vertices;
     for( i=0; i< vector_size(vertices); ++i )

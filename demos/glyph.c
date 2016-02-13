@@ -125,11 +125,13 @@ void init( void )
     origin.x = width/2  - glyph->offset_x - glyph->width/2;
     origin.y = height/2 - glyph->offset_y + glyph->height/2;
     add_text( text_buffer, big, "g", &black, &origin );
+    texture_atlas_upload( big->atlas );
 
     // title
     pen.x = 50;
     pen.y = 560;
     add_text( text_buffer, title, "Glyph metrics", &black, &pen );
+    texture_atlas_upload( title->atlas );
 
     point_t vertices[] =
         {   // Baseline
@@ -211,6 +213,7 @@ void init( void )
     pen.y = height/2 - glyph->offset_y + glyph->height/2 - 20;
     add_text( text_buffer, small, "Origin", &black, &pen );
 
+    texture_atlas_upload( small->atlas );
 
     GLuint i = 0;
     point_t p;

@@ -69,6 +69,7 @@ void init( void )
     {
         texture_font_t * font = texture_font_new_from_file( atlas, i, filename );
         missed += texture_font_load_glyphs( font, cache );
+        texture_atlas_upload( font->atlas );
         texture_font_delete( font );
     }
 

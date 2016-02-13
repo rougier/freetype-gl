@@ -99,6 +99,7 @@ void init( void )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
         text_buffer_add_text( buffer, &pen, &markup, text, 0 );
+        texture_atlas_upload( markup.font->atlas );
     }
     pen.x = 32;
     pen.y = 252;
@@ -107,6 +108,7 @@ void init( void )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
         text_buffer_add_text( buffer, &pen, &markup, text, 0 );
+        texture_atlas_upload( markup.font->atlas );
     }
 
     background = vertex_buffer_new( "vertex:3f,color:4f" );

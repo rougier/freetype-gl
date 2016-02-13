@@ -165,6 +165,8 @@ void init( void )
         add_text( buffer, &pen, &markup, "g", NULL );
     }
 
+    texture_atlas_upload( markup.font->atlas );
+
     pen.x = 40;
     pen.y  = 110;
     markup.font->outline_type = 2;
@@ -174,6 +176,8 @@ void init( void )
         add_text( buffer, &pen, &markup, "g", NULL );
     }
 
+    texture_atlas_upload( markup.font->atlas );
+
     pen.x = 40;
     pen.y  = 30;
     markup.font->outline_type = 3;
@@ -182,6 +186,8 @@ void init( void )
         markup.font->outline_thickness = 1*((i+1)/10.0);
         add_text( buffer, &pen, &markup, "g", NULL );
     }
+
+    texture_atlas_upload( markup.font->atlas );
     shader = shader_load("shaders/v3f-t2f-c4f.vert",
                          "shaders/v3f-t2f-c4f.frag");
     mat4_set_identity( &projection );
