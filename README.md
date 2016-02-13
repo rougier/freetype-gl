@@ -84,3 +84,4 @@ Contributors:
 * Preet Desai (Bug report & fix)
 * Andy Staton (CMake fix and added namespace safeguard (avoiding glm collisions))
 * Daniel Burke (Removed GLEW dependency and fix problems with font licences)
+* Bob Kocisko (Added horizontal text alignment and text bounds calculation)
