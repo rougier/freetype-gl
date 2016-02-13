@@ -585,18 +585,15 @@ texture_font_load_glyphs( texture_font_t * self,
         }
 
         // We want each glyph to be separated by at least one black pixel
-        // (for example for shader used in demo-subpixel.c)
-        w = ft_bitmap.width/depth + 1;
-        h = ft_bitmap.rows + 1;
-        region = texture_atlas_get_region( self->atlas, w, h );
+        w = ft_bitmap.width/depth;
+        h = ft_bitmap.rows;
+        region = texture_atlas_get_region( self->atlas, w+1, h+1 );
         if ( region.x < 0 )
         {
             missed++;
             fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
             continue;
         }
-        w = w - 1;
-        h = h - 1;
         x = region.x;
         y = region.y;
         texture_atlas_set_region( self->atlas, x, y, w, h,

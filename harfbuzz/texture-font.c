@@ -469,6 +469,7 @@ texture_font_load_glyphs( texture_font_t * self,
             FT_Stroker_Done(stroker);
         }
 
+        // We want each glyph to be separated by at least one black pixel
         w = ft_bitmap.width/depth;
         h = ft_bitmap.rows;
         region = texture_atlas_get_region( self->atlas, w+1, h+1 );
