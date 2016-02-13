@@ -31,6 +31,9 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_STROKER_H
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -132,6 +135,8 @@ texture_glyph_new(void)
 
     self->width     = 0;
     self->height    = 0;
+    self->outline_type = 0;
+    self->outline_thickness = 0.0;
     self->offset_x  = 0;
     self->offset_y  = 0;
     self->s0        = 0.0;
@@ -166,6 +171,8 @@ texture_font_init(texture_font_t *self)
     self->height = 0;
     self->ascender = 0;
     self->descender = 0;
+    self->outline_type = 0;
+    self->outline_thickness = 0.0;
     self->hres = 100;
     self->ft_face = 0;
     self->hb_ft_font = 0;
@@ -277,7 +284,10 @@ texture_font_find_glyph( texture_font_t * self,
     for( i = 0; i < self->glyphs->size; ++i )
     {
         glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
-        if( glyph->codepoint == codepoint )
+        if( (glyph->codepoint == codepoint) &&
+            ((codepoint == -1) ||
+             ((glyph->outline_type == self->outline_type) &&
+              (glyph->outline_thickness == self->outline_thickness)) ))
         {
             return glyph;
         }
@@ -296,11 +306,14 @@ texture_font_load_glyphs( texture_font_t * self,
 {
     size_t i, x, y, width, height, w, h;
 
+    FT_Library library;
     FT_Error error;
+    FT_Glyph ft_glyph;
     FT_GlyphSlot slot;
     FT_Bitmap ft_bitmap;
 
     unsigned int glyph_count;
+    FT_UInt glyph_index;
     texture_glyph_t *glyph;
     FT_Int32 flags = 0;
     int ft_glyph_top = 0;
@@ -317,6 +330,8 @@ texture_font_load_glyphs( texture_font_t * self,
     width  = self->atlas->width;
     height = self->atlas->height;
 
+    FT_Init_FreeType(&library);
+
     /* Create a buffer for harfbuzz to use */
     buffer = hb_buffer_create();
 
@@ -331,10 +346,27 @@ texture_font_load_glyphs( texture_font_t * self,
 
     glyph_info = hb_buffer_get_glyph_infos(buffer, &glyph_count);
 
-    flags =  FT_LOAD_RENDER | FT_LOAD_TARGET_LCD;
     for( i = 0; i < glyph_count; ++i ) {
         if( texture_font_find_glyph( self, glyph_info[i].codepoint ) )
             continue;
+
+        flags = 0;
+        ft_glyph_top = 0;
+        ft_glyph_left = 0;
+        // WARNING: We use texture-atlas depth to guess if user wants
+        //          LCD subpixel rendering
+
+        if( self->outline_type > 0 )
+        {
+            flags |= FT_LOAD_NO_BITMAP;
+        }
+        else
+        {
+            flags |= FT_LOAD_RENDER;
+        }
+
+        flags |= FT_LOAD_FORCE_AUTOHINT;
+        flags |= FT_LOAD_TARGET_LCD;
 
         error = FT_Load_Glyph( self->ft_face, glyph_info[i].codepoint, flags );
         if( error )
@@ -345,10 +377,77 @@ texture_font_load_glyphs( texture_font_t * self,
         }
 
 
-        slot            = self->ft_face->glyph;
-        ft_bitmap       = slot->bitmap;
-        ft_glyph_top    = slot->bitmap_top;
-        ft_glyph_left   = slot->bitmap_left;
+        if( self->outline_type == 0 )
+        {
+            slot            = self->ft_face->glyph;
+            ft_bitmap       = slot->bitmap;
+            ft_glyph_top    = slot->bitmap_top;
+            ft_glyph_left   = slot->bitmap_left;
+        }
+        else
+        {
+            FT_Stroker stroker;
+            FT_BitmapGlyph ft_bitmap_glyph;
+            error = FT_Stroker_New( library, &stroker );
+            if( error )
+            {
+                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                        FT_Errors[error].code, FT_Errors[error].message);
+                FT_Stroker_Done( stroker );
+                FT_Done_FreeType( library );
+                break;
+            }
+            FT_Stroker_Set(stroker,
+                            (int)(self->outline_thickness * self->hres),
+                            FT_STROKER_LINECAP_ROUND,
+                            FT_STROKER_LINEJOIN_ROUND,
+                            0);
+            error = FT_Get_Glyph( self->ft_face->glyph, &ft_glyph);
+            if( error )
+            {
+                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                        FT_Errors[error].code, FT_Errors[error].message);
+                FT_Stroker_Done( stroker );
+                FT_Done_FreeType( library );
+                break;
+            }
+
+            if( self->outline_type == 1 )
+            {
+                error = FT_Glyph_Stroke( &ft_glyph, stroker, 1 );
+            }
+            else if ( self->outline_type == 2 )
+            {
+                error = FT_Glyph_StrokeBorder( &ft_glyph, stroker, 0, 1 );
+            }
+            else if ( self->outline_type == 3 )
+            {
+                error = FT_Glyph_StrokeBorder( &ft_glyph, stroker, 1, 1 );
+            }
+            if( error )
+            {
+                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                        FT_Errors[error].code, FT_Errors[error].message);
+                FT_Stroker_Done( stroker );
+                FT_Done_FreeType( library );
+                break;
+            }
+
+            error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_LCD, 0, 1);
+            if( error )
+            {
+                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                        FT_Errors[error].code, FT_Errors[error].message);
+                FT_Stroker_Done( stroker );
+                FT_Done_FreeType( library );
+                break;
+            }
+            ft_bitmap_glyph = (FT_BitmapGlyph) ft_glyph;
+            ft_bitmap       = ft_bitmap_glyph->bitmap;
+            ft_glyph_top    = ft_bitmap_glyph->top;
+            ft_glyph_left   = ft_bitmap_glyph->left;
+            FT_Stroker_Done(stroker);
+        }
 
         w = ft_bitmap.width/3; // 3 because of LCD/RGB encoding
         h = ft_bitmap.rows;
@@ -367,6 +466,8 @@ texture_font_load_glyphs( texture_font_t * self,
         glyph->codepoint = glyph_info[i].codepoint;
         glyph->width    = w;
         glyph->height   = h;
+        glyph->outline_type = self->outline_type;
+        glyph->outline_thickness = self->outline_thickness;
         glyph->offset_x = ft_glyph_left;
         glyph->offset_y = ft_glyph_top;
         glyph->s0       = x/(float)width;
@@ -374,6 +475,11 @@ texture_font_load_glyphs( texture_font_t * self,
         glyph->s1       = (x + glyph->width)/(float)width;
         glyph->t1       = (y + glyph->height)/(float)height;
         vector_push_back( self->glyphs, &glyph );
+
+        if( self->outline_type > 0 )
+        {
+            FT_Done_Glyph( ft_glyph );
+        }
     }
 
     /* clean up the buffer, but don't kill it just yet */

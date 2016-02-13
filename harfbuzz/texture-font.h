@@ -123,6 +123,17 @@ typedef struct texture_glyph_t
      * Second normalized texture coordinate (y) of bottom-right corner
      */
     float t1;
+
+    /**
+     * Glyph outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
+     */
+    int outline_type;
+
+    /**
+     * Glyph outline thickness
+     */
+    float outline_thickness;
+
 } texture_glyph_t;
 
 
@@ -174,6 +185,16 @@ typedef struct texture_font_t
      * Font hres (vertical hinting trick
      */
     float hres;
+
+    /**
+     * Outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
+     */
+    int outline_type;
+
+    /**
+     * Outline thickness
+     */
+    float outline_thickness;
 
     /**
      * Freetype face
