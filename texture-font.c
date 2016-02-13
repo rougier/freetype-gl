@@ -550,7 +550,7 @@ texture_font_load_glyphs( texture_font_t * self,
                 return 0;
             }
 
-            if( depth == 1)
+            if( depth == 1 )
             {
                 error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_NORMAL, 0, 1);
                 if( error )
@@ -576,13 +576,13 @@ texture_font_load_glyphs( texture_font_t * self,
                     return 0;
                 }
             }
+
             ft_bitmap_glyph = (FT_BitmapGlyph) ft_glyph;
             ft_bitmap       = ft_bitmap_glyph->bitmap;
             ft_glyph_top    = ft_bitmap_glyph->top;
             ft_glyph_left   = ft_bitmap_glyph->left;
             FT_Stroker_Done(stroker);
         }
-
 
         // We want each glyph to be separated by at least one black pixel
         // (for example for shader used in demo-subpixel.c)

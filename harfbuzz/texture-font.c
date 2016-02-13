@@ -96,8 +96,6 @@ texture_font_load_face(texture_font_t *self, float size,
         return 0;
     }
 
-    FT_Library_SetLcdFilter(*library, FT_LCD_FILTER_LIGHT );
-
     /* Select charmap */
     error = FT_Select_Charmap(self->ft_face, FT_ENCODING_UNICODE);
     if(error) {
@@ -304,7 +302,7 @@ texture_font_load_glyphs( texture_font_t * self,
                           const char *language,
                           const hb_script_t script )
 {
-    size_t i, x, y, width, height, w, h;
+    size_t i, x, y, width, height, depth, w, h;
 
     FT_Library library;
     FT_Error error;
@@ -329,6 +327,7 @@ texture_font_load_glyphs( texture_font_t * self,
 
     width  = self->atlas->width;
     height = self->atlas->height;
+    depth  = self->atlas->depth;
 
     FT_Init_FreeType(&library);
 
@@ -366,7 +365,12 @@ texture_font_load_glyphs( texture_font_t * self,
         }
 
         flags |= FT_LOAD_FORCE_AUTOHINT;
-        flags |= FT_LOAD_TARGET_LCD;
+
+        if( depth == 3 )
+        {
+            FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
+            flags |= FT_LOAD_TARGET_LCD;
+        }
 
         error = FT_Load_Glyph( self->ft_face, glyph_info[i].codepoint, flags );
         if( error )
@@ -433,15 +437,31 @@ texture_font_load_glyphs( texture_font_t * self,
                 break;
             }
 
-            error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_LCD, 0, 1);
-            if( error )
+            if( depth == 1 )
             {
-                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
-                        FT_Errors[error].code, FT_Errors[error].message);
-                FT_Stroker_Done( stroker );
-                FT_Done_FreeType( library );
-                break;
+                error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_NORMAL, 0, 1);
+                if( error )
+                {
+                    fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                            FT_Errors[error].code, FT_Errors[error].message);
+                    FT_Stroker_Done( stroker );
+                    FT_Done_FreeType( library );
+                    break;
+                }
             }
+            else
+            {
+                error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_LCD, 0, 1);
+                if( error )
+                {
+                    fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                            FT_Errors[error].code, FT_Errors[error].message);
+                    FT_Stroker_Done( stroker );
+                    FT_Done_FreeType( library );
+                    break;
+                }
+            }
+
             ft_bitmap_glyph = (FT_BitmapGlyph) ft_glyph;
             ft_bitmap       = ft_bitmap_glyph->bitmap;
             ft_glyph_top    = ft_bitmap_glyph->top;
@@ -449,7 +469,7 @@ texture_font_load_glyphs( texture_font_t * self,
             FT_Stroker_Done(stroker);
         }
 
-        w = ft_bitmap.width/3; // 3 because of LCD/RGB encoding
+        w = ft_bitmap.width/depth;
         h = ft_bitmap.rows;
         region = texture_atlas_get_region( self->atlas, w+1, h+1 );
         if ( region.x < 0 )
