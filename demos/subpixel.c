@@ -102,6 +102,8 @@ void init()
         pen.x += i*0.1;
     }
 
+    texture_atlas_upload( text_buffer->manager->atlas );
+
     shader = shader_load("shaders/v3f-c4f.vert",
                          "shaders/v3f-c4f.frag");
     mat4_set_identity( &projection );
