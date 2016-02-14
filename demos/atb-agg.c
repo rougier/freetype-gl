@@ -218,6 +218,7 @@ build_buffer( void )
         v3->shift = fmod(v3->shift + dx-(int)(dx),1.0);
     }
 
+    texture_atlas_upload( atlas);
 
     texture_font_delete( font );
 }

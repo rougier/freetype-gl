@@ -181,6 +181,9 @@ void init()
                         &japanese,  "私はガラスを食べられます。 それは私を傷つけません\n",
                         &math,      "ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ",
                         NULL );
+
+    texture_atlas_upload( buffer->manager->atlas );
+
     text_buffer_align( buffer, &pen, ALIGN_CENTER );
 
     vec4 bounds = text_buffer_get_bounds( buffer, &pen );
