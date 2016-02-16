@@ -67,7 +67,7 @@ GLuint shader;
 
 // ------------------------------------------------------ match_description ---
 char *
-match_description( char * family, float size, int bold, int italic )
+match_description( char * description )
 {
 
 #if defined _WIN32 || defined _WIN64
@@ -77,22 +77,8 @@ match_description( char * family, float size, int bold, int italic )
 #endif
 
     char *filename = 0;
-    int weight = FC_WEIGHT_REGULAR;
-    int slant = FC_SLANT_ROMAN;
-    if ( bold )
-    {
-        weight = FC_WEIGHT_BOLD;
-    }
-    if( italic )
-    {
-        slant = FC_SLANT_ITALIC;
-    }
     FcInit();
-    FcPattern *pattern = FcPatternCreate();
-    FcPatternAddDouble( pattern, FC_SIZE, size );
-    FcPatternAddInteger( pattern, FC_WEIGHT, weight );
-    FcPatternAddInteger( pattern, FC_SLANT, slant );
-    FcPatternAddString( pattern, FC_FAMILY, (FcChar8*) family );
+    FcPattern *pattern = FcNameParse(description);
     FcConfigSubstitute( 0, pattern, FcMatchPattern );
     FcDefaultSubstitute( pattern );
     FcResult result;
@@ -101,7 +87,7 @@ match_description( char * family, float size, int bold, int italic )
 
     if ( !match )
     {
-        fprintf( stderr, "fontconfig error: could not match family '%s'", family );
+        fprintf( stderr, "fontconfig error: could not match description '%s'", description );
         return 0;
     }
     else
@@ -110,7 +96,7 @@ match_description( char * family, float size, int bold, int italic )
         FcResult result = FcPatternGet( match, FC_FILE, 0, &value );
         if ( result )
         {
-            fprintf( stderr, "fontconfig error: could not match family '%s'", family );
+            fprintf( stderr, "fontconfig error: could not match description '%s'", description );
         }
         else
         {
@@ -133,11 +119,11 @@ void init()
     vec4 grey   = {{0.5, 0.5, 0.5, 1.0}};
     vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
 
-    char *f_normal   = match_description("Droid Serif", 24, 0, 0);
-    char *f_bold     = match_description("Droid Serif", 24, 1, 0);
-    char *f_italic   = match_description("Droid Serif", 24, 0, 1);
-    char *f_japanese = match_description("Droid Sans Japanese", 18, 0, 0);
-    char *f_math     = match_description("DejaVu Sans", 24, 0, 0);
+    char *f_normal   = match_description("Droid Serif:size=24");
+    char *f_bold     = match_description("Droid Serif:size=24:weight=bold");
+    char *f_italic   = match_description("Droid Serif:size=24:slant=italic");
+    char *f_japanese = match_description("Droid Sans:size=18:lang=ja");
+    char *f_math     = match_description("DejaVu Sans:size=24");
 
     markup_t normal = {
         .family  = f_normal,
