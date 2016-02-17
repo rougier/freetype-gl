@@ -140,7 +140,6 @@ texture_glyph_new(void)
     }
 
     self->charcode  = -1;
-    self->id        = 0;
     self->width     = 0;
     self->height    = 0;
     self->outline_type = 0;

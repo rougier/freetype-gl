@@ -138,11 +138,6 @@ typedef struct texture_glyph_t
     uint32_t charcode;
 
     /**
-     * Glyph id (used for display lists)
-     */
-    unsigned int id;
-
-    /**
      * Glyph's width in pixels.
      */
     size_t width;
