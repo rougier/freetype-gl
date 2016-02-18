@@ -54,7 +54,7 @@ void print_at( int pen_x, int pen_y, char *text )
         texture_glyph_t *glyph = 0;
         for( j=0; j<font.glyphs_count; ++j)
         {
-            if( font.glyphs[j].charcode == utf8_to_utf32( text + i ) )
+            if( font.glyphs[j].codepoint == utf8_to_utf32( text + i ) )
             {
                 glyph = &font.glyphs[j];
                 break;

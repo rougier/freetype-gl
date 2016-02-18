@@ -336,14 +336,14 @@ int main( int argc, char **argv )
         "\n"
         "typedef struct\n"
         "{\n"
-        "    uint32_t charcode;\n"
+        "    uint32_t codepoint;\n"
         "    float kerning;\n"
         "} kerning_t;\n\n" );
 
     fprintf( file,
         "typedef struct\n"
         "{\n"
-        "    uint32_t charcode;\n"
+        "    uint32_t codepoint;\n"
         "    int width, height;\n"
         "    int offset_x, offset_y;\n"
         "    float advance_x, advance_y;\n"
@@ -418,7 +418,7 @@ int main( int argc, char **argv )
 /*
         // Debugging information
         printf( "glyph : '%lc'\n",
-                 glyph->charcode );
+                 glyph->codepoint );
         printf( "  size       : %dx%d\n",
                  glyph->width, glyph->height );
         printf( "  offset     : %+d%+d\n",
@@ -434,7 +434,7 @@ int main( int argc, char **argv )
             for( j=0; j < glyph->kerning_count; ++j )
             {
                 printf( "('%lc', %ff)",
-                         glyph->kerning[j].charcode, glyph->kerning[j].kerning );
+                         glyph->kerning[j].codepoint, glyph->kerning[j].kerning );
                 if( j < (glyph->kerning_count-1) )
                 {
                     printf( ", " );
@@ -450,7 +450,7 @@ int main( int argc, char **argv )
 
 
         // TextureFont
-        fprintf( file, "  {%u, ", glyph->charcode );
+        fprintf( file, "  {%u, ", glyph->codepoint );
         fprintf( file, "%zu, %zu, ", glyph->width, glyph->height );
         fprintf( file, "%d, %d, ", glyph->offset_x, glyph->offset_y );
         fprintf( file, "%ff, %ff, ", glyph->advance_x, glyph->advance_y );
@@ -461,7 +461,7 @@ int main( int argc, char **argv )
         {
             kerning_t *kerning = (kerning_t *) vector_get( glyph->kerning, j);
 
-            fprintf( file, "{%u, %ff}", kerning->charcode, kerning->kerning );
+            fprintf( file, "{%u, %ff}", kerning->codepoint, kerning->kerning );
             if( j < (vector_size(glyph->kerning)-1))
             {
                 fprintf( file, ", " );

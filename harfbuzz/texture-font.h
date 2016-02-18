@@ -34,6 +34,8 @@
 #ifndef __TEXTURE_FONT_H__
 #define __TEXTURE_FONT_H__
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -77,9 +79,9 @@ namespace ftgl {
 typedef struct texture_glyph_t
 {
     /**
-     * Wide character this glyph represents
+     * Unicode codepoint this glyph represents in UTF-32 LE encoding.
      */
-    size_t codepoint;
+    uint32_t codepoint;
 
     /**
      * Glyph's width in pixels.
@@ -329,8 +331,8 @@ typedef struct texture_font_t
  * Request a new glyph from the font. If it has not been created yet, it will
  * be.
  *
- * @param self     A valid texture font
- * @param charcode Character codepoint to be loaded.
+ * @param self      A valid texture font
+ * @param codepoint Character codepoint to be loaded in UTF-32 LE encoding.
  *
  * @return A pointer on the new glyph or 0 if the texture atlas is not big
  *         enough
@@ -338,21 +340,22 @@ typedef struct texture_font_t
  */
   texture_glyph_t *
   texture_font_get_glyph( texture_font_t * self,
-                          size_t codepoint );
+                          uint32_t codepoint );
 
 
 /**
  * Request the loading of several glyphs at once.
  *
- * @param self      a valid texture font
- * @param charcodes character codepoints to be loaded.
+ * @param self       A valid texture font
+ * @param codepoints Character codepoints to be loaded in UTF-8 encoding. May
+ *                   contain duplicates.
  *
  * @return Number of missed glyph if the texture is not big enough to hold
  *         every glyphs.
  */
   size_t
   texture_font_load_glyphs( texture_font_t * self,
-                            const char *text,
+                            const char * codepoints,
                             const hb_direction_t directions,
                             const char *language,
                             const hb_script_t script );

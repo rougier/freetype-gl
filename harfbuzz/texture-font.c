@@ -131,6 +131,7 @@ texture_glyph_new(void)
         return NULL;
     }
 
+    self->codepoint  = -1;
     self->width     = 0;
     self->height    = 0;
     self->outline_type = 0;
@@ -292,6 +293,7 @@ texture_font_find_glyph( texture_font_t * self,
     for( i = 0; i < self->glyphs->size; ++i )
     {
         glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
+        // If codepoint is -1, we don't care about outline type or thickness
         if( (glyph->codepoint == codepoint) &&
             ((codepoint == -1) ||
              ((glyph->outline_type == self->outline_type) &&
@@ -307,7 +309,7 @@ texture_font_find_glyph( texture_font_t * self,
 // ----------------------------------------------- texture_font_load_glyphs ---
 size_t
 texture_font_load_glyphs( texture_font_t * self,
-                          const char *text,
+                          const char * codepoints,
                           const hb_direction_t directions,
                           const char *language,
                           const hb_script_t script )
@@ -334,7 +336,7 @@ texture_font_load_glyphs( texture_font_t * self,
     size_t missed = 0;
 
     assert( self );
-    assert( text );
+    assert( codepoints );
 
     width  = self->atlas->width;
     height = self->atlas->height;
@@ -351,12 +353,13 @@ texture_font_load_glyphs( texture_font_t * self,
                             hb_language_from_string(language, strlen(language)) );
 
     /* Layout the text */
-    hb_buffer_add_utf8( buffer, text, strlen(text), 0, strlen(text) );
+    hb_buffer_add_utf8( buffer, codepoints, strlen(codepoints), 0, strlen(codepoints) );
     hb_shape( self->hb_ft_font, buffer, NULL, 0 );
 
     glyph_info = hb_buffer_get_glyph_infos(buffer, &glyph_count);
 
     for( i = 0; i < glyph_count; ++i ) {
+        /* Check if codepoint has been already loaded */
         if( texture_font_find_glyph( self, glyph_info[i].codepoint ) )
             continue;
 
@@ -541,7 +544,7 @@ texture_font_load_glyphs( texture_font_t * self,
 // ------------------------------------------------- texture_font_get_glyph ---
 texture_glyph_t *
 texture_font_get_glyph( texture_font_t * self,
-                        size_t codepoint )
+                        uint32_t codepoint )
 {
     texture_glyph_t *glyph;
 
@@ -549,6 +552,6 @@ texture_font_get_glyph( texture_font_t * self,
     assert( self->filename );
     assert( self->atlas );
 
-    /* Check if charcode has been already loaded */
+    /* Check if codepoint has been already loaded */
     return texture_font_find_glyph(self, codepoint );
 }

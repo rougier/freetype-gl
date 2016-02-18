@@ -168,7 +168,7 @@ resize( double *src_data, size_t src_width, size_t src_height,
 
 // ------------------------------------------------------------- load_glyph ---
 texture_glyph_t *
-load_glyph( const char *  filename,     const char* charcode,
+load_glyph( const char *  filename,     const char* codepoint,
             const float   highres_size, const float   lowres_size,
             const float   padding )
 {
@@ -179,7 +179,7 @@ load_glyph( const char *  filename,     const char* charcode,
     FT_Init_FreeType( &library );
     FT_New_Face( library, filename, 0, &face );
     FT_Select_Charmap( face, FT_ENCODING_UNICODE );
-    FT_UInt glyph_index = FT_Get_Char_Index( face, utf8_to_utf32( charcode ) );
+    FT_UInt glyph_index = FT_Get_Char_Index( face, utf8_to_utf32( codepoint ) );
 
     // Render glyph at high resolution (highres_size points)
     FT_Set_Char_Size( face, highres_size*64, 0, 72, 72 );
@@ -241,7 +241,7 @@ load_glyph( const char *  filename,     const char* charcode,
     glyph->offset_y = (slot->bitmap_top + padding*highres_height) * ratio;
     glyph->width    = lowres_width;
     glyph->height   = lowres_height;
-    glyph->charcode = utf8_to_utf32( charcode );
+    glyph->codepoint = utf8_to_utf32( codepoint );
     /*
     printf( "Glyph width:  %ld\n", glyph->width );
     printf( "Glyph height: %ld\n", glyph->height );
