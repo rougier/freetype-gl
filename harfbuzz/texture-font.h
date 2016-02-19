@@ -356,9 +356,7 @@ typedef struct texture_font_t
   size_t
   texture_font_load_glyphs( texture_font_t * self,
                             const char * codepoints,
-                            const hb_direction_t directions,
-                            const char *language,
-                            const hb_script_t script );
+                            const char *language );
 
 /**
  * Creates a new empty glyph

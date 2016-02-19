@@ -310,9 +310,7 @@ texture_font_find_glyph( texture_font_t * self,
 size_t
 texture_font_load_glyphs( texture_font_t * self,
                           const char * codepoints,
-                          const hb_direction_t directions,
-                          const char *language,
-                          const hb_script_t script )
+                          const char *language )
 {
     size_t i, x, y, width, height, depth, w, h;
 
@@ -347,13 +345,13 @@ texture_font_load_glyphs( texture_font_t * self,
     /* Create a buffer for harfbuzz to use */
     buffer = hb_buffer_create();
 
-    hb_buffer_set_direction( buffer, directions );
-    hb_buffer_set_script( buffer, script );
     hb_buffer_set_language( buffer,
                             hb_language_from_string(language, strlen(language)) );
 
     /* Layout the text */
     hb_buffer_add_utf8( buffer, codepoints, strlen(codepoints), 0, strlen(codepoints) );
+    /* Guess text script and direction */
+    hb_buffer_guess_segment_properties( buffer );
     hb_shape( self->hb_ft_font, buffer, NULL, 0 );
 
     glyph_info = hb_buffer_get_glyph_infos(buffer, &glyph_count);

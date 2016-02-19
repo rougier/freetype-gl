@@ -74,7 +74,7 @@ void init( void )
     for ( i=0; i< 20; ++i )
     {
         fonts[i] =  texture_font_new_from_file(atlas, 12+i, font_filename),
-        texture_font_load_glyphs(fonts[i], text, direction, language, script );
+        texture_font_load_glyphs(fonts[i], text, language );
     }
 
 
@@ -87,11 +87,10 @@ void init( void )
 
     for (i=0; i < 20; ++i)
     {
-        hb_buffer_set_direction( buffer, direction );
-        hb_buffer_set_script( buffer, script );
         hb_buffer_set_language( buffer,
                                 hb_language_from_string(language, strlen(language)) );
         hb_buffer_add_utf8( buffer, text, strlen(text), 0, strlen(text) );
+        hb_buffer_guess_segment_properties( buffer );
         hb_shape( fonts[i]->hb_ft_font, buffer, NULL, 0 );
 
         unsigned int         glyph_count;
@@ -100,8 +99,7 @@ void init( void )
         hb_glyph_position_t *glyph_pos =
             hb_buffer_get_glyph_positions(buffer, &glyph_count);
 
-        texture_font_load_glyphs( fonts[i], text,
-                                  direction, language, script );
+        texture_font_load_glyphs( fonts[i], text, language );
 
         float gamma = 1.0;
         float shift = 0.0;
