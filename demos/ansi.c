@@ -208,6 +208,23 @@ ansi_to_markup( char *sequence, size_t length, markup_t *markup )
     markup->overline_color = markup->foreground_color;
     markup->strikethrough_color = markup->foreground_color;
     markup->outline_color = markup->foreground_color;
+
+    if( markup->bold && markup->italic )
+    {
+        markup->family  = "fonts/VeraMoBI.ttf";
+    }
+    else if( markup->bold )
+    {
+        markup->family  = "fonts/VeraMoBd.ttf";
+    }
+    else if( markup->italic )
+    {
+        markup->family  = "fonts/VeraMoIt.ttf";
+    }
+    else
+    {
+        markup->family = "fonts/VeraMono.ttf";
+    }
 }
 
 
