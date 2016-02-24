@@ -348,12 +348,6 @@ text_buffer_add_char( text_buffer_t * self,
     texture_glyph_t *black;
     float kerning = 0.0f;
 
-    if( current[0] == '\n' )
-    {
-        text_buffer_finish_line(self, pen, true);
-        return;
-    }
-
     if( markup->font->ascender > self->line_ascender )
     {
         float y = pen->y;
@@ -364,6 +358,12 @@ text_buffer_add_char( text_buffer_t * self,
     if( markup->font->descender < self->line_descender )
     {
         self->line_descender = markup->font->descender;
+    }
+
+    if( *current == '\n' )
+    {
+        text_buffer_finish_line(self, pen, true);
+        return;
     }
 
     glyph = texture_font_get_glyph( font, current );
