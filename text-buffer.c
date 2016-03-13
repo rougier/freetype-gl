@@ -257,7 +257,7 @@ text_buffer_finish_line( text_buffer_t * self, vec2 * pen, bool advancePen )
     if ( advancePen )
     {
         pen->x = self->origin.x;
-        pen->y += self->line_descender;
+        pen->y += (int)(self->line_descender);
     }
 
     self->line_descender = 0;
