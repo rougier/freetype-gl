@@ -51,13 +51,14 @@ if(WIN32 OR WIN64)
     set(VS789FIX_INCLUDE_DIR
         ${CMAKE_CURRENT_SOURCE_DIR}/windows/include)
 else()
+    find_library(Z_LIBRARY z)
     find_library(MATH_LIBRARY m)
 endif()
 
 find_package(OpenGL REQUIRED)
 find_package(Freetype REQUIRED)
 
-if(NOT APPLE)
+if(NOT APPLE AND NOT DEFINED ANDROID_ABI )
     find_package(GLEW REQUIRED)
 endif()
 
@@ -121,16 +122,16 @@ add_library(freetype-gl STATIC
 if(freetype-gl_BUILD_MAKEFONT)
     add_executable(makefont makefont.c)
 
-    if(NOT APPLE)
+    if(NOT APPLE AND NOT DEFINED ANDROID_ABI)
         target_link_libraries(makefont ${GLEW_LIBRARY})
     endif()
-
     target_link_libraries(makefont
         freetype-gl
         ${OPENGL_LIBRARY}
         ${FREETYPE_LIBRARIES}
         ${MATH_LIBRARY}
-    )
+        ${Z_LIBRARY}  
+  )
 
     if(MSVC)
         # Compile makefont as C++
