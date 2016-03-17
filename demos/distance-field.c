@@ -230,7 +230,7 @@ int main( int argc, char **argv )
     glfwWindowHint( GLFW_VISIBLE, GL_FALSE );
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
-    window = glfwCreateWindow( 1, 1, "Freetype OpenGL width shaders", NULL, NULL );
+    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
 
     if (!window)
     {
