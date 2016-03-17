@@ -30,35 +30,38 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Nicolas P. Rougier.
 # =========================================================================
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8.5 )
-SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules"
-                       "${CMAKE_MODULE_PATH}" )
+cmake_minimum_required(VERSION 2.8.5)
 
-OPTION(freetype-gl_USE_VAO "Use a VAO to render a vertex_buffer instance (required for forward compatible OpenGL 3.0 contexts)" OFF)
-OPTION(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
-OPTION(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
-OPTION(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (experimental)" OFF)
-OPTION(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
+set(CMAKE_MODULE_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules"
+    "${CMAKE_MODULE_PATH}"
+)
 
-IF( WIN32 OR WIN64 )
-    SET( GLEW_ROOT_DIR
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew )
-    SET( ENV{FREETYPE_DIR}
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype )
-    SET( VS789FIX_INCLUDE_DIR
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/include )
-ELSE( WIN32 OR WIN64 )
-    FIND_LIBRARY( MATH_LIBRARY m )
-ENDIF( WIN32 OR WIN64 )
+option(freetype-gl_USE_VAO "Use a VAO to render a vertex_buffer instance (required for forward compatible OpenGL 3.0 contexts)" OFF)
+option(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
+option(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
+option(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (experimental)" OFF)
+option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 
-# Find dependencies
-FIND_PACKAGE( OpenGL REQUIRED )
-FIND_PACKAGE( Freetype REQUIRED )
-IF ( NOT APPLE )
-    FIND_PACKAGE( GLEW REQUIRED )
-ENDIF()
+if(WIN32 OR WIN64)
+    set(GLEW_ROOT_DIR
+        ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew)
+    set(ENV{FREETYPE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype)
+    set(VS789FIX_INCLUDE_DIR
+        ${CMAKE_CURRENT_SOURCE_DIR}/windows/include)
+else()
+    find_library(MATH_LIBRARY m)
+endif()
 
-INCLUDE_DIRECTORIES(
+find_package(OpenGL REQUIRED)
+find_package(Freetype REQUIRED)
+
+if(NOT APPLE)
+    find_package(GLEW REQUIRED)
+endif()
+
+include_directories(
     ${OPENGL_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -66,65 +69,83 @@ INCLUDE_DIRECTORIES(
     ${GLEW_INCLUDE_PATH}
 )
 
-IF(MSVC)
-    ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
-ENDIF(MSVC)
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif(MSVC)
 
-if( freetype-gl_USE_VAO )
-    ADD_DEFINITIONS( -DFREETYPE_GL_USE_VAO )
-ENDIF( freetype-gl_USE_VAO )
+if(freetype-gl_USE_VAO)
+    add_definitions(-DFREETYPE_GL_USE_VAO)
+endif(freetype-gl_USE_VAO)
 
-SET( FREETYPE_GL_SRC freetype-gl.h
-                     vec234.h
-                     opengl.h
-                     markup.h
-                     mat4.c             mat4.h
-                     texture-atlas.c    texture-atlas.h
-                     texture-font.c     texture-font.h
-                     vertex-buffer.c    vertex-buffer.h
-                     vertex-attribute.c vertex-attribute.h
-                     font-manager.c     font-manager.h
-                     text-buffer.c      text-buffer.h
-                     shader.c           shader.h
-                     vector.c           vector.h
-                     utf8-utils.c       utf8-utils.h
-                     platform.c         platform.h
-                     distance-field.c   distance-field.h
-                     edtaa3func.c       edtaa3func.h)
-
-ADD_LIBRARY( freetype-gl STATIC ${FREETYPE_GL_SRC} )
-
-LINK_DIRECTORIES(
-    ${PROJECT_SOURCE_DIR}
+set(FREETYPE_GL_HDR
+    distance-field.h
+    edtaa3func.h
+    font-manager.h
+    freetype-gl.h
+    markup.h
+    mat4.h
+    opengl.h
+    platform.h
+    shader.h
+    text-buffer.h
+    texture-atlas.h
+    texture-font.h
+    utf8-utils.h
+    vec234.h
+    vector.h
+    vertex-attribute.h
+    vertex-buffer.h
 )
 
-IF (freetype-gl_BUILD_MAKEFONT)
-    ADD_EXECUTABLE( makefont makefont.c )
+set(FREETYPE_GL_SRC
+    distance-field.c
+    edtaa3func.c
+    font-manager.c
+    mat4.c
+    platform.c
+    shader.c
+    text-buffer.c
+    texture-atlas.c
+    texture-font.c
+    utf8-utils.c
+    vector.c
+    vertex-attribute.c
+    vertex-buffer.c
+)
 
-    IF(NOT APPLE)
-        TARGET_LINK_LIBRARIES( makefont ${GLEW_LIBRARY} )
-    ENDIF()
+add_library(freetype-gl STATIC
+    ${FREETYPE_GL_SRC}
+    ${FREETYPE_GL_HDR}
+)
 
-    TARGET_LINK_LIBRARIES( makefont
-                           freetype-gl
-                           ${OPENGL_LIBRARY}
-                           ${FREETYPE_LIBRARIES}
-                           ${MATH_LIBRARY})
+if(freetype-gl_BUILD_MAKEFONT)
+    add_executable(makefont makefont.c)
+
+    if(NOT APPLE)
+        target_link_libraries(makefont ${GLEW_LIBRARY})
+    endif()
+
+    target_link_libraries(makefont
+        freetype-gl
+        ${OPENGL_LIBRARY}
+        ${FREETYPE_LIBRARIES}
+        ${MATH_LIBRARY}
+    )
 
     if(MSVC)
         # Compile makefont as C++
-        set_source_files_properties( makefont.c PROPERTIES LANGUAGE CXX )
+        set_source_files_properties(makefont.c PROPERTIES LANGUAGE CXX)
     endif()
-ENDIF (freetype-gl_BUILD_MAKEFONT)
+endif()
 
-IF (freetype-gl_BUILD_APIDOC)
-    ADD_SUBDIRECTORY(doc)
-ENDIF (freetype-gl_BUILD_APIDOC)
+if(freetype-gl_BUILD_APIDOC)
+    add_subdirectory(doc)
+endif()
 
-IF (freetype-gl_BUILD_DEMOS)
-    ADD_SUBDIRECTORY(demos)
-ENDIF (freetype-gl_BUILD_DEMOS)
+if(freetype-gl_BUILD_DEMOS)
+    add_subdirectory(demos)
+endif()
 
-IF (freetype-gl_BUILD_HARFBUZZ)
-    ADD_SUBDIRECTORY(harfbuzz)
-ENDIF (freetype-gl_BUILD_HARFBUZZ)
+if(freetype-gl_BUILD_HARFBUZZ)
+    add_subdirectory(harfbuzz)
+endif()

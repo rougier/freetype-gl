@@ -30,54 +30,71 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Nicolas P. Rougier.
 # =========================================================================
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8.5 )
+cmake_minimum_required(VERSION 2.8.5)
 
-MACRO( DEMO _target _sources)
-     add_executable(${_target} ${_sources})
+macro(CREATE_DEMO _target _sources)
+    add_executable(${_target} ${_sources})
     if(NOT APPLE)
-     target_link_libraries(${_target} ${GLEW_LIBRARY})
+        target_link_libraries(${_target} ${GLEW_LIBRARY})
     endif()
-     target_link_libraries(${_target} freetype-gl-hb)
-     target_link_libraries(${_target} ${OPENGL_LIBRARY})
-     target_link_libraries(${_target} ${GLFW3_LIBRARY})
-     target_link_libraries(${_target} ${FREETYPE_LIBRARIES})
-     target_link_libraries(${_target} ${HARFBUZZ_LIBRARIES})
-     IF( MATH_LIBRARY )
+    target_link_libraries(${_target}
+        freetype-gl-hb
+        ${OPENGL_LIBRARY}
+        ${GLFW3_LIBRARY}
+        ${FREETYPE_LIBRARIES}
+        ${HARFBUZZ_LIBRARIES}
+     )
+     if(MATH_LIBRARY)
          target_link_libraries(${_target} ${MATH_LIBRARY})
-     ENDIF( MATH_LIBRARY )
+     endif()
     if(MSVC)
       # Compile demos as C++
       set_source_files_properties(${_sources} PROPERTIES LANGUAGE CXX)
     endif()
-ENDMACRO( DEMO )
+endmacro()
 
-FIND_PACKAGE( glfw3 REQUIRED )
-FIND_PACKAGE( HarfBuzz REQUIRED )
+find_package(glfw3 REQUIRED)
+find_package(HarfBuzz REQUIRED)
 
-INCLUDE_DIRECTORIES(
+include_directories(
     ${GLFW3_INCLUDE_DIR}
     ${HARFBUZZ_INCLUDE_DIRS}
 )
 
-LINK_DIRECTORIES(
+link_directories(
     ${GLFW3_LIBRARY_DIR}
 )
 
-SET( FREETYPE_GL_HB_SRC freetype-gl.h
-                        vec234.h
-                        opengl.h
-                        mat4.c             mat4.h
-                        texture-atlas.c    texture-atlas.h
-                        texture-font.c     texture-font.h
-                        vertex-buffer.c    vertex-buffer.h
-                        vertex-attribute.c vertex-attribute.h
-                        shader.c           shader.h
-                        vector.c           vector.h)
+set(FREETYPE_GL_HB_HDR
+    freetype-gl.h
+    mat4.h
+    opengl.h
+    shader.h
+    texture-atlas.h
+    texture-font.h
+    vec234.h
+    vector.h
+    vertex-attribute.h
+    vertex-buffer.h
+)
 
-ADD_LIBRARY( freetype-gl-hb STATIC ${FREETYPE_GL_HB_SRC} )
+set(FREETYPE_GL_HB_SRC
+    mat4.c
+    shader.c
+    texture-atlas.c
+    texture-font.c
+    vector.c
+    vertex-attribute.c
+    vertex-buffer.c
+)
 
-DEMO( harfbuzz          "demo-harfbuzz.c" )
-DEMO( hb-texture        "demo-texture.c" )
+add_library(freetype-gl-hb STATIC
+    ${FREETYPE_GL_HB_SRC}
+    ${FREETYPE_GL_HB_HDR}
+)
+
+create_demo(harfbuzz demo-harfbuzz.c)
+create_demo(hb-texture demo-texture.c)
 
 # Copy font and shaders into build directory for in-place testing
 file(COPY ../fonts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

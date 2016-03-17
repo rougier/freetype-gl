@@ -30,39 +30,38 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Nicolas P. Rougier.
 # =========================================================================
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8.5 )
+cmake_minimum_required(VERSION 2.8.5)
 
-MACRO( DEMO _target _sources)
-     add_executable(${_target} ${_sources})
+macro(CREATE_DEMO _target _sources)
+    add_executable(${_target} ${_sources})
     if(NOT APPLE)
-     target_link_libraries(${_target} ${GLEW_LIBRARY})
+        target_link_libraries(${_target} ${GLEW_LIBRARY})
     endif()
-     target_link_libraries(${_target} freetype-gl)
-     target_link_libraries(${_target} ${OPENGL_LIBRARY})
-     target_link_libraries(${_target} ${GLFW3_LIBRARY})
-     target_link_libraries(${_target} ${FREETYPE_LIBRARIES})
-     IF( MATH_LIBRARY )
+    target_link_libraries(${_target}
+        freetype-gl
+        ${OPENGL_LIBRARY}
+        ${GLFW3_LIBRARY}
+        ${FREETYPE_LIBRARIES}
+     )
+     if(MATH_LIBRARY)
          target_link_libraries(${_target} ${MATH_LIBRARY})
-     ENDIF( MATH_LIBRARY )
+     endif()
     if(MSVC)
       # Compile demos as C++
       set_source_files_properties(${_sources} PROPERTIES LANGUAGE CXX)
     endif()
-ENDMACRO( DEMO )
+endmacro()
 
-IF( WIN32 OR WIN64 )
-    SET( ENV{ANT_TWEAK_BAR_ROOT}
-         ${CMAKE_CURRENT_SOURCE_DIR}/../windows/AntTweakBar )
-ENDIF( WIN32 OR WIN64 )
+if(WIN32 OR WIN64)
+    set(ENV{ANT_TWEAK_BAR_ROOT}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../windows/AntTweakBar
+    )
+endif()
 
 # Find dependencies
-FIND_PACKAGE( glfw3 REQUIRED )
-FIND_PACKAGE( AntTweakBar )
-FIND_PACKAGE( FontConfig )
-
-INCLUDE_DIRECTORIES(
-    ${GLFW3_INCLUDE_DIRS}
-)
+find_package(glfw3 REQUIRED)
+find_package(AntTweakBar)
+find_package(FontConfig)
 
 include_directories(
     ${GLFW3_INCLUDE_DIR}
@@ -70,11 +69,11 @@ include_directories(
     ${FONTCONFIG_INCLUDE_DIR}
 )
 
-LINK_DIRECTORIES(
+link_directories(
     ${GLFW3_LIBRARY_DIR}
 )
 
-ADD_CUSTOM_COMMAND(
+add_custom_command(
     DEPENDS
         makefont
         ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
@@ -86,45 +85,41 @@ ADD_CUSTOM_COMMAND(
         --size 16
         --variable font
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h)
-ADD_CUSTOM_TARGET(generate-embedded-font
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h)
-DEMO( embedded-font    "embedded-font.c" )
-ADD_DEPENDENCIES(embedded-font generate-embedded-font)
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
+)
 
-DEMO( texture          "texture.c" )
-DEMO( font             "font.c" )
-DEMO( benchmark        "benchmark.c" )
-DEMO( console          "console.c" )
-DEMO( cube             "cube.c" )
-DEMO( glyph            "glyph.c" )
-DEMO( cartoon          "cartoon.c" )
-DEMO( outline          "outline.c" )
-DEMO( lcd              "lcd.c" )
-DEMO( gamma            "gamma.c" )
-DEMO( ansi             "ansi.c" )
-DEMO( subpixel         "subpixel.c" )
-DEMO( distance-field   "distance-field.c")
-DEMO( distance-field-2 "distance-field-2.c")
-DEMO( distance-field-3 "distance-field-3.c")
+add_custom_target(generate-embedded-font
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
+)
 
-IF (FONTCONFIG_FOUND)
-   DEMO( markup      "markup.c" )
+create_demo(embedded-font embedded-font.c)
+add_dependencies(embedded-font generate-embedded-font)
+
+create_demo(texture texture.c)
+create_demo(font font.c)
+create_demo(benchmark benchmark.c)
+create_demo(console console.c)
+create_demo(cube cube.c)
+create_demo(glyph glyph.c)
+create_demo(cartoon cartoon.c)
+create_demo(outline outline.c)
+create_demo(lcd lcd.c)
+create_demo(gamma gamma.c)
+create_demo(ansi ansi.c)
+create_demo(subpixel subpixel.c)
+create_demo(distance-field distance-field.c)
+create_demo(distance-field-2 distance-field-2.c)
+create_demo(distance-field-3 distance-field-3.c)
+
+if(FONTCONFIG_FOUND)
+   create_demo(markup markup.c)
    target_link_libraries(markup ${FONTCONFIG_LIBRARY})
-ENDIF (FONTCONFIG_FOUND)
+endif()
 
-IF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )
-    add_executable(atb-agg  atb-agg.c)
-    target_link_libraries( atb-agg freetype-gl)
-    target_link_libraries( atb-agg ${GLFW3_LIBRARY})
-    target_link_libraries( atb-agg ${GLEW_LIBRARY})
-    target_link_libraries( atb-agg ${FREETYPE_LIBRARIES})
-    target_link_libraries( atb-agg ${ANT_TWEAK_BAR_LIBRARY})
-    target_link_libraries( atb-agg ${OPENGL_LIBRARY})
-    IF(MATH_LIBRARY)
-        target_link_libraries( atb-agg ${MATH_LIBRARY})
-    ENDIF(MATH_LIBRARY)
-ENDIF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )
+if(ANT_TWEAK_BAR_FOUND)
+    create_demo(atb-agg atb-agg.c)
+    target_link_libraries(atb-agg ${ANT_TWEAK_BAR_LIBRARY})
+endif()
 
 # Copy font and shaders into build directory for in-place testing
 file(COPY ../fonts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

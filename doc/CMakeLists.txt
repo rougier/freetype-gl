@@ -30,39 +30,48 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Nicolas P. Rougier.
 # =========================================================================
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8.5 )
+cmake_minimum_required(VERSION 2.8.5)
 
-FIND_PACKAGE( Doxygen )
+find_package(Doxygen)
 
-SET( FREETYPE_GL_APIDOC_SRC
-     Doxyfile.in
-     documentation.h
-     doxygen.css
-     footer.html
-     header.html
-     layout.xml
-     screenshots.h
-     style.css
-     text-rendering.h)
-FILE(GLOB FREETYPE_GL_APIDOC_IMG images/*)
-FILE(GLOB FREETYPE_GL_SRC ../*.h ../*.c)
-FILE(GLOB FREETYPE_GL_DEMOS ../demos/*.c)
+set(FREETYPE_GL_APIDOC_SRC
+    Doxyfile.in
+    documentation.h
+    doxygen.css
+    footer.html
+    header.html
+    layout.xml
+    screenshots.h
+    style.css
+    text-rendering.h
+)
 
-CONFIGURE_FILE(Doxyfile.in Doxyfile)
+file(GLOB FREETYPE_GL_APIDOC_IMG images/*)
+file(GLOB FREETYPE_GL_SRC ../*.h ../*.c)
+file(GLOB FREETYPE_GL_DEMOS ../demos/*.c)
 
-ADD_CUSTOM_COMMAND( OUTPUT html/index.html
+configure_file(Doxyfile.in Doxyfile)
+
+add_custom_command(
+    OUTPUT
+        html/index.html
     COMMAND
-    ${DOXYGEN_EXECUTABLE} Doxyfile
+        ${DOXYGEN_EXECUTABLE} Doxyfile
     DEPENDS
         ${FREETYPE_GL_APIDOC_SRC}
         ${FREETYPE_GL_APIDOC_IMG}
         ${FREETYPE_GL_SRC}
-        ${FREETYPE_GL_DEMOS})
+        ${FREETYPE_GL_DEMOS}
+)
 
-ADD_CUSTOM_TARGET( doc
+add_custom_target(doc
     ALL
     DEPENDS html/index.html
-    COMMENT "Generating API documentation with Doxygen" VERBATIM)
+    COMMENT "Generating API documentation with Doxygen"
+    VERBATIM
+)
 
-SET_DIRECTORY_PROPERTIES( PROPERTIES
-    ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/html)
+set_directory_properties(
+    PROPERTIES
+    ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/html
+)
