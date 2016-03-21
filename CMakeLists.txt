@@ -135,11 +135,6 @@ if(freetype-gl_BUILD_MAKEFONT)
         ${FREETYPE_LIBRARIES}
         ${MATH_LIBRARY}
     )
-
-    if(MSVC)
-        # Compile makefont as C++
-        set_source_files_properties(makefont.c PROPERTIES LANGUAGE CXX)
-    endif()
     
     if(MSVC AND NOT (MSVC_VERSION LESS 1900))
         # prevent error LNK2019: unresolved external symbol _sprintf referenced in function __bdf_parse_properties
