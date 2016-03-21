@@ -456,18 +456,24 @@ int main( int argc, char **argv )
         fprintf( file, "%ff, %ff, ", glyph->advance_x, glyph->advance_y );
         fprintf( file, "%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
         fprintf( file, "%zu, ", vector_size(glyph->kerning) );
-        fprintf( file, "{ " );
-        for( j=0; j < vector_size(glyph->kerning); ++j )
-        {
-            kerning_t *kerning = (kerning_t *) vector_get( glyph->kerning, j);
-
-            fprintf( file, "{%u, %ff}", kerning->codepoint, kerning->kerning );
-            if( j < (vector_size(glyph->kerning)-1))
-            {
-                fprintf( file, ", " );
-            }
+        if (vector_size(glyph->kerning) == 0) {
+            fprintf( file, "NULL" );
         }
-        fprintf( file, "} },\n" );
+        else {
+            fprintf( file, "{ " );
+            for( j=0; j < vector_size(glyph->kerning); ++j )
+            {
+                kerning_t *kerning = (kerning_t *) vector_get( glyph->kerning, j);
+
+                fprintf( file, "{%u, %ff}", kerning->codepoint, kerning->kerning );
+                if( j < (vector_size(glyph->kerning)-1))
+                {
+                    fprintf( file, ", " );
+                }
+            }
+            fprintf( file, "}" );
+        }
+        fprintf( file, " },\n" );
     }
     fprintf( file, " }\n};\n" );
 
