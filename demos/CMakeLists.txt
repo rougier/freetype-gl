@@ -46,6 +46,12 @@ macro(CREATE_DEMO _target _sources)
      if(MATH_LIBRARY)
          target_link_libraries(${_target} ${MATH_LIBRARY})
      endif()
+     
+    if(MSVC AND NOT (MSVC_VERSION LESS 1900))
+        # prevent error LNK2019: unresolved external symbol _sprintf referenced in function __bdf_parse_properties
+        # see http://stackoverflow.com/a/32418900/469659
+        target_link_libraries(${_target} "legacy_stdio_definitions.lib")
+    endif()
 endmacro()
 
 if(WIN32 OR WIN64)
