@@ -51,6 +51,7 @@ if(WIN32 OR WIN64)
     set(VS789FIX_INCLUDE_DIR
         ${CMAKE_CURRENT_SOURCE_DIR}/windows/include)
 else()
+    find_library(BZ_LIBRARY bz2)
     find_library(Z_LIBRARY z)
     find_library(MATH_LIBRARY m)
 endif()
@@ -114,10 +115,21 @@ set(FREETYPE_GL_SRC
     vertex-buffer.c
 )
 
-add_library(freetype-gl STATIC
+add_library(freetype-gl SHARED
     ${FREETYPE_GL_SRC}
     ${FREETYPE_GL_HDR}
 )
+target_link_libraries( freetype-gl
+${FREETYPE_LIBRARIES}
+)
+add_library(freetype-gl-a STATIC
+    ${FREETYPE_GL_SRC}
+    ${FREETYPE_GL_HDR}
+)
+target_link_libraries( freetype-gl-a
+${FREETYPE_LIBRARIES}
+)
+set_target_properties(freetype-gl-a PROPERTIES OUTPUT_NAME freetype-gl)
 
 if(freetype-gl_BUILD_MAKEFONT)
     add_executable(makefont makefont.c)
@@ -129,8 +141,9 @@ if(freetype-gl_BUILD_MAKEFONT)
         freetype-gl
         ${OPENGL_LIBRARY}
         ${FREETYPE_LIBRARIES}
+        ${Z_LIBRARY}
+        ${BZ_LIBRARY}
         ${MATH_LIBRARY}
-        ${Z_LIBRARY}  
   )
 
     if(MSVC)
