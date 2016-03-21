@@ -46,10 +46,6 @@ macro(CREATE_DEMO _target _sources)
      if(MATH_LIBRARY)
          target_link_libraries(${_target} ${MATH_LIBRARY})
      endif()
-    if(MSVC)
-      # Compile demos as C++
-      set_source_files_properties(${_sources} PROPERTIES LANGUAGE CXX)
-    endif()
 endmacro()
 
 if(WIN32 OR WIN64)
