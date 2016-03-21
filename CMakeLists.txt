@@ -32,6 +32,8 @@
 # =========================================================================
 cmake_minimum_required(VERSION 2.8.5)
 
+project(freetype-gl)
+
 set(CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules"
     "${CMAKE_MODULE_PATH}"
@@ -70,7 +72,8 @@ include_directories(
 )
 
 if(MSVC)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    # _CRT_NONSTDC_NO_DEPRECATE -> remove warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup.
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
 endif(MSVC)
 
 if(freetype-gl_USE_VAO)
