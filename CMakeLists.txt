@@ -72,8 +72,9 @@ include_directories(
 )
 
 if(MSVC)
+    # _USE_MATH_DEFINES -> define M_PI
     # _CRT_NONSTDC_NO_DEPRECATE -> remove warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup.
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_USE_MATH_DEFINES -D_CRT_NONSTDC_NO_DEPRECATE)
 endif(MSVC)
 
 if(freetype-gl_USE_VAO)
