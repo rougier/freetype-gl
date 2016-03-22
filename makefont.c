@@ -457,7 +457,7 @@ int main( int argc, char **argv )
         fprintf( file, "%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
         fprintf( file, "%zu, ", vector_size(glyph->kerning) );
         if (vector_size(glyph->kerning) == 0) {
-            fprintf( file, "NULL" );
+            fprintf( file, "0" );
         }
         else {
             fprintf( file, "{ " );
