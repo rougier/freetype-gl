@@ -47,7 +47,7 @@ make_distance_mapd( double *data, unsigned int width, unsigned int height )
     double * outside = (double *) calloc( width * height, sizeof(double) );
     double * inside  = (double *) calloc( width * height, sizeof(double) );
     double vmin = DBL_MAX;
-    int i;
+    unsigned int i;
 
     // Compute outside = edtaa3(bitmap); % Transform background (0's)
     computegradient( data, width, height, gx, gy);
@@ -79,7 +79,7 @@ make_distance_mapd( double *data, unsigned int width, unsigned int height )
 
     for( i=0; i<width*height; ++i)
     {
-        float v = outside[i];
+        double v = outside[i];
         if     ( v < -vmin) outside[i] = -vmin;
         else if( v > +vmin) outside[i] = +vmin;
         data[i] = (outside[i]+vmin)/(2*vmin);
@@ -100,7 +100,7 @@ make_distance_mapb( unsigned char *img,
 {
     double * data    = (double *) calloc( width * height, sizeof(double) );
     unsigned char *out = (unsigned char *) malloc( width * height * sizeof(unsigned char) );
-    int i;
+    unsigned int i;
 
     // find minimimum and maximum values
     double img_min = DBL_MAX;

@@ -32,6 +32,8 @@
 # =========================================================================
 cmake_minimum_required(VERSION 2.8.5)
 
+project(freetype-gl)
+
 set(CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules"
     "${CMAKE_MODULE_PATH}"
@@ -70,7 +72,9 @@ include_directories(
 )
 
 if(MSVC)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    # _USE_MATH_DEFINES -> define M_PI
+    # _CRT_NONSTDC_NO_DEPRECATE -> remove warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup.
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_USE_MATH_DEFINES -D_CRT_NONSTDC_NO_DEPRECATE)
 endif(MSVC)
 
 if(freetype-gl_USE_VAO)
@@ -131,10 +135,11 @@ if(freetype-gl_BUILD_MAKEFONT)
         ${FREETYPE_LIBRARIES}
         ${MATH_LIBRARY}
     )
-
-    if(MSVC)
-        # Compile makefont as C++
-        set_source_files_properties(makefont.c PROPERTIES LANGUAGE CXX)
+    
+    if(MSVC AND NOT (MSVC_VERSION LESS 1900))
+        # prevent error LNK2019: unresolved external symbol _sprintf referenced in function __bdf_parse_properties
+        # see http://stackoverflow.com/a/32418900/469659
+        target_link_libraries(makefont "legacy_stdio_definitions.lib")
     endif()
 endif()
 
