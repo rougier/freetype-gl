@@ -42,10 +42,10 @@ macro(CREATE_DEMO _target _sources)
         ${OPENGL_LIBRARY}
         ${GLFW3_LIBRARY}
         ${FREETYPE_LIBRARIES}
-     )
-     if(MATH_LIBRARY)
-         target_link_libraries(${_target} ${MATH_LIBRARY})
-     endif()
+    )
+    if(MATH_LIBRARY)
+        target_link_libraries(${_target} ${MATH_LIBRARY})
+    endif()
      
     if(MSVC AND NOT (MSVC_VERSION LESS 1900))
         # prevent error LNK2019: unresolved external symbol _sprintf referenced in function __bdf_parse_properties
