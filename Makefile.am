@@ -21,3 +21,6 @@ include_HEADERS = freetype-gl.h vec234.h vector.h texture-atlas.h texture-font.h
 libfreetype_gl_la_LIBADD = -lm -l@LIBGL@ -lfreetype -lz @LIBADD@
 
 distclean-am: clean-am distclean-compile distclean-hdr distclean-libtool distclean-tags
+
+install-exec-hook:
+	-/sbin/ldconfig $(libdir)
