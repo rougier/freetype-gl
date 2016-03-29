@@ -1,7 +1,7 @@
 /* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
+ * WWW:         https://github.com/rougier/freetype-gl
  * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
@@ -132,7 +132,7 @@ texture_atlas_set_region( texture_atlas_t * self,
     charsize = sizeof(char);
     for( i=0; i<height; ++i )
     {
-        memcpy( self->data+((y+i)*self->width + x ) * charsize * depth, 
+        memcpy( self->data+((y+i)*self->width + x ) * charsize * depth,
                 data + (i*stride) * charsize, width * charsize * depth  );
     }
 }
@@ -209,17 +209,17 @@ texture_atlas_get_region( texture_atlas_t * self,
                           const size_t width,
                           const size_t height )
 {
-
-	int y, best_height, best_width, best_index;
+	int y, best_index;
+    size_t best_height, best_width;
     ivec3 *node, *prev;
     ivec4 region = {{0,0,width,height}};
     size_t i;
 
     assert( self );
 
-    best_height = INT_MAX;
+    best_height = UINT_MAX;
     best_index  = -1;
-    best_width = INT_MAX;
+    best_width = UINT_MAX;
 	for( i=0; i<self->nodes->size; ++i )
 	{
         y = texture_atlas_fit( self, i, width, height );
@@ -227,7 +227,7 @@ texture_atlas_get_region( texture_atlas_t * self,
 		{
             node = (ivec3 *) vector_get( self->nodes, i );
 			if( ( (y + height) < best_height ) ||
-                ( ((y + height) == best_height) && (node->z < best_width)) )
+                ( ((y + height) == best_height) && (node->z > 0 && (size_t)node->z < best_width)) )
 			{
 				best_height = y + height;
 				best_index = i;
@@ -237,7 +237,7 @@ texture_atlas_get_region( texture_atlas_t * self,
 			}
         }
     }
-   
+
 	if( best_index == -1 )
     {
         region.x = -1;
@@ -344,8 +344,13 @@ texture_atlas_upload( texture_atlas_t * self )
     }
     else
     {
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->width, self->height,
-                      0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
+#if defined(GL_ES_VERSION_2_0) || defined(GL_ES_VERSION_3_0)
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE, self->width, self->height,
+                      0, GL_LUMINANCE, GL_UNSIGNED_BYTE, self->data );
+#else
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, self->width, self->height,
+                     0, GL_RED, GL_UNSIGNED_BYTE, self->data );
+#endif
     }
 }
 

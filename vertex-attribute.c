@@ -1,7 +1,7 @@
 /* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
+ * WWW:         https://github.com/rougier/freetype-gl
  * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
@@ -93,7 +93,7 @@ vertex_attribute_parse( char *format )
     if( p != NULL)
     {
         name = strndup(format, p-format);
-        if( *(++p) == '\0' ) 
+        if( *(++p) == '\0' )
         {
             fprintf( stderr, "No size specified for '%s' attribute\n", name );
             free( name );
@@ -101,7 +101,7 @@ vertex_attribute_parse( char *format )
         }
         size = *p - '0';
 
-        if( *(++p) == '\0' ) 
+        if( *(++p) == '\0' )
         {
             fprintf( stderr, "No format specified for '%s' attribute\n", name );
             free( name );
@@ -109,7 +109,7 @@ vertex_attribute_parse( char *format )
         }
         ctype = *p;
 
-        if( *(++p) != '\0' ) 
+        if( *(++p) != '\0' )
         {
             if( *p == 'n' )
             {
@@ -120,7 +120,7 @@ vertex_attribute_parse( char *format )
     }
     else
     {
-        fprintf(stderr, "Vertex attribute format not understood ('%s')\n", format );   
+        fprintf(stderr, "Vertex attribute format not understood ('%s')\n", format );
         return 0;
     }
 

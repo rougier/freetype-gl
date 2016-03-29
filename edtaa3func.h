@@ -65,6 +65,9 @@ extern "C" {
 
 #include <math.h>
 
+#ifdef __cplusplus
+namespace ftgl {
+#endif
 
 /*
  * Compute the local gradient at edge pixels using convolution filters.
@@ -94,6 +97,7 @@ void edtaa3(double *img, double *gx, double *gy, int w, int h, short *distx, sho
 
 
 #ifdef __cplusplus
+}
 }
 #endif
 

@@ -1,18 +1,17 @@
 /**
-@example demo-ansi.c
-@example demo-font.c 
-@example demo-gamma.c 
-@example demo-markup.c
-@example demo-makefont.c
-@example demo-console.c
-@example demo-texture.c 
-@example demo-outline.c 
-@example demo-cartoon.c 
-@example demo-benchmark.c 
-@example demo-subpixel.c
-@example demo-atb-agg.c
-@example demo-distance-field.c
-@example demo-display-list.c
+@example ansi.c
+@example font.c
+@example gamma.c
+@example markup.c
+@example makefont.c
+@example console.c
+@example texture.c
+@example outline.c
+@example cartoon.c
+@example benchmark.c
+@example subpixel.c
+@example atb-agg.c
+@example distance-field.c
 
 @page documentation Documentation
 
@@ -30,7 +29,7 @@ vertex buffer and a single texture where necessary glyphs are tighly packed.
    ...
 
    // Text to be printed
-   wchar_t *text = L"A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
+   char *text = "A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
 
    // Texture atlas to store individual glyphs
    texture_atlas_t *atlas = texture_atlas_new( 512, 512, 1 );
@@ -57,7 +56,7 @@ vertex buffer and a single texture where necessary glyphs are tighly packed.
    ...
 
 @endcode
- 
+
 -------------------------------------------------------------------------------
 @section API Application Programming Interface
 

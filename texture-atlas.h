@@ -1,7 +1,7 @@
 /* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
+ * WWW:         https://github.com/rougier/freetype-gl
  * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
@@ -52,6 +52,10 @@ extern "C" {
 
 #include "vector.h"
 #include "vec234.h"
+
+#ifdef __cplusplus
+namespace ftgl {
+#endif
 
 /**
  * @file   texture-atlas.h
@@ -219,6 +223,7 @@ typedef struct texture_atlas_t
 /** @} */
 
 #ifdef __cplusplus
+}
 }
 #endif
 

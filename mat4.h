@@ -1,7 +1,7 @@
 /* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
+ * WWW:         https://github.com/rougier/freetype-gl
  * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
@@ -36,6 +36,7 @@
 
 #ifdef __cplusplus
 extern "C" {
+namespace ftgl {
 #endif
 
 
@@ -111,6 +112,7 @@ mat4_scale( mat4 *self,
 
 
 #ifdef __cplusplus
+}
 }
 #endif
 

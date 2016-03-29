@@ -1,7 +1,7 @@
 /* =========================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
+ * WWW:         https://github.com/rougier/freetype-gl
  * -------------------------------------------------------------------------
  * Copyright 2011 Nicolas P. Rougier. All rights reserved.
  *
@@ -30,11 +30,11 @@
  * those of the authors and should not be interpreted as representing official
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ========================================================================= */
-uniform sampler2D texture;
+uniform sampler2D u_texture;
+
 void main(void)
 {
-    vec4  color = texture2D(texture, gl_TexCoord[0].st);
-    float dist  = color.r;
+    float dist = texture2D(u_texture, gl_TexCoord[0].st).r;
     float width = fwidth(dist);
     float alpha = smoothstep(0.5-width, 0.5+width, dist);
     gl_FragColor = vec4(gl_Color.rgb, alpha*gl_Color.a);

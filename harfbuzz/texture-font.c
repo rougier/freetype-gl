@@ -1,7 +1,7 @@
 /* ===========================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
+ * WWW:         https://github.com/rougier/freetype-gl
  * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
@@ -31,13 +31,18 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_STROKER_H
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
-#include "platform.h"
 #include "texture-font.h"
+#include "platform.h"
+
+#define DPI   72
 
 #undef __FTERRORS_H__
 #define FT_ERRORDEF( e, v, s )  { e, s },
@@ -49,20 +54,88 @@ const struct {
 } FT_Errors[] =
 #include FT_ERRORS_H
 
+// ------------------------------------------------- texture_font_load_face ---
+static int
+texture_font_load_face(texture_font_t *self, float size,
+        FT_Library *library)
+{
+    FT_Error error;
+    FT_Matrix matrix = {
+        (int)((1.0/self->hres) * 0x10000L),
+        (int)((0.0)      * 0x10000L),
+        (int)((0.0)      * 0x10000L),
+        (int)((1.0)      * 0x10000L)};
+
+    assert(library);
+    assert(size);
+
+    /* Initialize library */
+    error = FT_Init_FreeType(library);
+    if(error) {
+        fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                FT_Errors[error].code, FT_Errors[error].message);
+        return 0;
+    }
+
+    /* Load face */
+    switch (self->location) {
+    case TEXTURE_FONT_FILE:
+        error = FT_New_Face(*library, self->filename, 0, &self->ft_face);
+        break;
+
+    case TEXTURE_FONT_MEMORY:
+        error = FT_New_Memory_Face(*library,
+            self->memory.base, self->memory.size, 0, &self->ft_face);
+        break;
+    }
+
+    if(error) {
+        fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+                __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+        FT_Done_FreeType(*library);
+        return 0;
+    }
+
+    /* Select charmap */
+    error = FT_Select_Charmap(self->ft_face, FT_ENCODING_UNICODE);
+    if(error) {
+        fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+                __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+    }
+
+    /* Set char size */
+    error = FT_Set_Char_Size(self->ft_face, 0, (int)(self->size*64), DPI * self->hres, DPI);
+
+    if(error) {
+        fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+                __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+        FT_Done_Face(self->ft_face);
+        FT_Done_FreeType(*library);
+        return 0;
+    }
+
+    /* Set transform matrix */
+    FT_Set_Transform(self->ft_face, &matrix, NULL);
+
+    return 1;
+}
 
 // ------------------------------------------------------ texture_glyph_new ---
 texture_glyph_t *
-texture_glyph_new( void )
+texture_glyph_new(void)
 {
     texture_glyph_t *self = (texture_glyph_t *) malloc( sizeof(texture_glyph_t) );
-    if( self == NULL)
-    {
+    if(self == NULL) {
         fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
+                "line %d: No more memory for allocating data\n", __LINE__);
+        return NULL;
     }
+
+    self->codepoint  = -1;
     self->width     = 0;
     self->height    = 0;
+    self->outline_type = 0;
+    self->outline_thickness = 0.0;
     self->offset_x  = 0;
     self->offset_y  = 0;
     self->s0        = 0.0;
@@ -76,109 +149,113 @@ texture_glyph_new( void )
 // --------------------------------------------------- texture_glyph_delete ---
 void
 texture_glyph_delete( texture_glyph_t *self )
-{ }
-
-
-// ------------------------------------------------------- texture_font_new ---
-texture_font_t *
-texture_font_new( texture_atlas_t *    atlas,
-                  const char *         filename,
-                  const float          size)
 {
+    assert( self );
+    free( self );
+}
 
-    int i;
-    texture_font_t *self = (texture_font_t *) malloc( sizeof(texture_font_t) );
+// ------------------------------------------------------ texture_font_init ---
+static int
+texture_font_init(texture_font_t *self)
+{
     FT_Library library;
-    
-    assert( filename );
-    assert( size );
 
-    if( self == NULL)
-    {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
-    }
+    assert(self->atlas);
+    assert(self->size > 0);
+    assert((self->location == TEXTURE_FONT_FILE && self->filename)
+        || (self->location == TEXTURE_FONT_MEMORY
+            && self->memory.base && self->memory.size));
 
-    self->glyphs = vector_new( sizeof(texture_glyph_t *) );
-    self->atlas = atlas;
+    self->glyphs = vector_new(sizeof(texture_glyph_t *));
     self->height = 0;
     self->ascender = 0;
     self->descender = 0;
-    self->filename = strdup( filename );
-    self->size = size;
+    self->outline_type = 0;
+    self->outline_thickness = 0.0;
     self->hres = 100;
+    self->hinting = 1;
+    self->filtering = 1;
     self->ft_face = 0;
     self->hb_ft_font = 0;
 
-    /* Initialize freetype library */
-    FT_Error error = FT_Init_FreeType( &library );
-    if( error )
-    {
-        fprintf(stderr, "FT_Error (0x%02x) : %s\n",
-                FT_Errors[error].code, FT_Errors[error].message);
-        return 0;
-    }
+    // FT_LCD_FILTER_LIGHT   is (0x00, 0x55, 0x56, 0x55, 0x00)
+    // FT_LCD_FILTER_DEFAULT is (0x10, 0x40, 0x70, 0x40, 0x10)
+    self->lcd_weights[0] = 0x10;
+    self->lcd_weights[1] = 0x40;
+    self->lcd_weights[2] = 0x70;
+    self->lcd_weights[3] = 0x40;
+    self->lcd_weights[4] = 0x10;
 
-    /* Load face */
-    error = FT_New_Face( library, filename, 0, &self->ft_face );
-    if( error )
-    {
-        fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-                 __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-        return 0;
-    }
+    if (!texture_font_load_face(self, self->size * 100.f, &library))
+        return -1;
 
-    size_t hdpi = 72;
-    size_t vdpi = 72;
-    FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
-    FT_Matrix matrix = { (int)((1.0/self->hres) * 0x10000L),
-                         (int)((0.0)      * 0x10000L),
-                         (int)((0.0)      * 0x10000L),
-                         (int)((1.0)      * 0x10000L) };
-
-    /* Set char size */
-    FT_Set_Char_Size( self->ft_face, 0, (int)(size*64),(int)(hdpi*self->hres), vdpi );
-    if( error )
-    {
-        //fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-        //         __LINE__, FT_Errors[error].code, FT_Errors[error].message );
-        FT_Done_Face( self->ft_face );
-        return 0;
-    }
-
-    /* Set charmap
-     *
-     * See http://www.microsoft.com/typography/otspec/name.htm for a list of
-     * some possible platform-encoding pairs.  We're interested in 0-3 aka 3-1
-     * - UCS-2.  Otherwise, fail. If a font has some unicode map, but lacks
-     * UCS-2 - it is a broken or irrelevant font. What exactly Freetype will
-     * select on face load (it promises most wide unicode, and if that will be
-     * slower that UCS-2 - left as an excercise to check.
-     */
-    for( i=0; i < self->ft_face->num_charmaps; i++ )
-    {
-        FT_UShort pid = self->ft_face->charmaps[i]->platform_id;
-        FT_UShort eid = self->ft_face->charmaps[i]->encoding_id;
-        if( ((pid == 0) && (eid == 3)) || ((pid == 3) && (eid == 1)) )
-        {
-            error = FT_Set_Charmap( self->ft_face, self->ft_face->charmaps[i] );
-            if( error )
-            {
-                fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-                         __LINE__, FT_Errors[error].code, FT_Errors[error].message );
-            }
-        }
-    }
-    /* Set transform matrix */
-    FT_Set_Transform( self->ft_face, &matrix, NULL );
-    
     /* Set harfbuzz font */
     self->hb_ft_font = hb_ft_font_create( self->ft_face, NULL );
 
-    return self;
- }
+    return 0;
+}
 
+// --------------------------------------------- texture_font_new_from_file ---
+texture_font_t *
+texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
+        const char *filename)
+{
+    texture_font_t *self;
+
+    assert(filename);
+
+    self = calloc(1, sizeof(*self));
+    if (!self) {
+        fprintf(stderr,
+                "line %d: No more memory for allocating data\n", __LINE__);
+        return NULL;
+    }
+
+    self->atlas = atlas;
+    self->size  = pt_size;
+
+    self->location = TEXTURE_FONT_FILE;
+    self->filename = strdup(filename);
+
+    if (texture_font_init(self)) {
+        texture_font_delete(self);
+        return NULL;
+    }
+
+    return self;
+}
+
+// ------------------------------------------- texture_font_new_from_memory ---
+texture_font_t *
+texture_font_new_from_memory(texture_atlas_t *atlas, float pt_size,
+        const void *memory_base, size_t memory_size)
+{
+    texture_font_t *self;
+
+    assert(memory_base);
+    assert(memory_size);
+
+    self = calloc(1, sizeof(*self));
+    if (!self) {
+        fprintf(stderr,
+                "line %d: No more memory for allocating data\n", __LINE__);
+        return NULL;
+    }
+
+    self->atlas = atlas;
+    self->size  = pt_size;
+
+    self->location = TEXTURE_FONT_MEMORY;
+    self->memory.base = memory_base;
+    self->memory.size = memory_size;
+
+    if (texture_font_init(self)) {
+        texture_font_delete(self);
+        return NULL;
+    }
+
+    return self;
+}
 
 // ---------------------------------------------------- texture_font_delete ---
 void
@@ -189,11 +266,8 @@ texture_font_delete( texture_font_t *self )
 
     assert( self );
 
-    if( self->filename )
-    {
+    if(self->location == TEXTURE_FONT_FILE && self->filename)
         free( self->filename );
-    }
-
 
     for( i=0; i<vector_size( self->glyphs ); ++i)
     {
@@ -207,96 +281,252 @@ texture_font_delete( texture_font_t *self )
     hb_font_destroy( self->hb_ft_font );
 
     free( self );
- }
+}
 
+texture_glyph_t *
+texture_font_find_glyph( texture_font_t * self,
+                         uint32_t codepoint )
+{
+    size_t i;
+    texture_glyph_t *glyph;
+
+    for( i = 0; i < self->glyphs->size; ++i )
+    {
+        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
+        // If codepoint is -1, we don't care about outline type or thickness
+        if( (glyph->codepoint == codepoint) &&
+            ((codepoint == -1) ||
+             ((glyph->outline_type == self->outline_type) &&
+              (glyph->outline_thickness == self->outline_thickness)) ))
+        {
+            return glyph;
+        }
+    }
+
+    return NULL;
+}
 
 // ----------------------------------------------- texture_font_load_glyphs ---
-void
+size_t
 texture_font_load_glyphs( texture_font_t * self,
-                          const char *text,
-                          const hb_direction_t directions,
-                          const char *language,
-                          const hb_script_t script )
+                          const char * codepoints,
+                          const char *language )
 {
-    int i, j;
+    size_t i, x, y, width, height, depth, w, h;
+
+    FT_Library library;
+    FT_Error error;
+    FT_Glyph ft_glyph;
+    FT_GlyphSlot slot;
+    FT_Bitmap ft_bitmap;
+
+    unsigned int glyph_count;
+    FT_UInt glyph_index;
+    texture_glyph_t *glyph;
+    FT_Int32 flags = 0;
+    int ft_glyph_top = 0;
+    int ft_glyph_left = 0;
+
+    hb_buffer_t *buffer;
+    hb_glyph_info_t *glyph_info;
+
+    ivec4 region;
+    size_t missed = 0;
+
+    assert( self );
+    assert( codepoints );
+
+    width  = self->atlas->width;
+    height = self->atlas->height;
+    depth  = self->atlas->depth;
+
+    FT_Init_FreeType(&library);
 
     /* Create a buffer for harfbuzz to use */
-    hb_buffer_t *buffer = hb_buffer_create();
+    buffer = hb_buffer_create();
 
-    hb_buffer_set_direction( buffer, directions );
-    hb_buffer_set_script( buffer, script );
     hb_buffer_set_language( buffer,
                             hb_language_from_string(language, strlen(language)) );
 
     /* Layout the text */
-    hb_buffer_add_utf8( buffer, text, strlen(text), 0, strlen(text) );
+    hb_buffer_add_utf8( buffer, codepoints, strlen(codepoints), 0, strlen(codepoints) );
+    /* Guess text script and direction */
+    hb_buffer_guess_segment_properties( buffer );
     hb_shape( self->hb_ft_font, buffer, NULL, 0 );
 
-    unsigned int         glyph_count;
-    hb_glyph_info_t     *glyph_info = hb_buffer_get_glyph_infos(buffer, &glyph_count);
-    //hb_glyph_position_t *glyph_pos  = hb_buffer_get_glyph_positions(buffer, &glyph_count);
+    glyph_info = hb_buffer_get_glyph_infos(buffer, &glyph_count);
 
-    FT_Error error;
-    FT_GlyphSlot slot;
-    FT_Bitmap ft_bitmap;
-    FT_Int32 flags =  FT_LOAD_RENDER | FT_LOAD_TARGET_LCD;
-    for (i = 0; i < glyph_count; ++i)
-    {
+    for( i = 0; i < glyph_count; ++i ) {
+        /* Check if codepoint has been already loaded */
+        if( texture_font_find_glyph( self, glyph_info[i].codepoint ) )
+            continue;
 
-        int skip = 0;
-        for( j=0; j<self->glyphs->size; ++j )
+        flags = 0;
+        ft_glyph_top = 0;
+        ft_glyph_left = 0;
+        // WARNING: We use texture-atlas depth to guess if user wants
+        //          LCD subpixel rendering
+
+        if( self->outline_type > 0 )
         {
-            texture_glyph_t * glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
-            if( glyph->codepoint == glyph_info[i].codepoint ) 
+            flags |= FT_LOAD_NO_BITMAP;
+        }
+        else
+        {
+            flags |= FT_LOAD_RENDER;
+        }
+
+        if( !self->hinting )
+        {
+            flags |= FT_LOAD_NO_HINTING | FT_LOAD_NO_AUTOHINT;
+        }
+        else
+        {
+            flags |= FT_LOAD_FORCE_AUTOHINT;
+        }
+
+        if( depth == 3 )
+        {
+            FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
+            flags |= FT_LOAD_TARGET_LCD;
+
+            if( self->filtering )
             {
-                skip = 1;
-                break;
+                FT_Library_SetLcdFilterWeights( library, self->lcd_weights );
             }
         }
-        if( skip ) continue;
 
-
-        /* Load glyph */
         error = FT_Load_Glyph( self->ft_face, glyph_info[i].codepoint, flags );
         if( error )
         {
-            //fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-            //         __LINE__, FT_Errors[error].code, FT_Errors[error].message );
-            break;
+            fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+                     __LINE__, FT_Errors[error].code, FT_Errors[error].message );
+            FT_Done_FreeType( library );
+            return glyph_count - i;
         }
 
-        slot = self->ft_face->glyph;
-        ft_bitmap = slot->bitmap;
-        int ft_bitmap_width = slot->bitmap.width;
-        int ft_bitmap_rows  = slot->bitmap.rows;
-        // int ft_bitmap_pitch = slot->bitmap.pitch;
-        int ft_glyph_top    = slot->bitmap_top;
-        int ft_glyph_left   = slot->bitmap_left;
 
-        int w = ft_bitmap_width/3; // 3 because of LCD/RGB encoding
-        int h = ft_bitmap_rows;
-        ivec4 region = texture_atlas_get_region( self->atlas, w+1, h+1 );
+        if( self->outline_type == 0 )
+        {
+            slot            = self->ft_face->glyph;
+            ft_bitmap       = slot->bitmap;
+            ft_glyph_top    = slot->bitmap_top;
+            ft_glyph_left   = slot->bitmap_left;
+        }
+        else
+        {
+            FT_Stroker stroker;
+            FT_BitmapGlyph ft_bitmap_glyph;
+            error = FT_Stroker_New( library, &stroker );
+            if( error )
+            {
+                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                        FT_Errors[error].code, FT_Errors[error].message);
+                FT_Stroker_Done( stroker );
+                FT_Done_FreeType( library );
+                return 0;
+            }
+            FT_Stroker_Set(stroker,
+                            (int)(self->outline_thickness * self->hres),
+                            FT_STROKER_LINECAP_ROUND,
+                            FT_STROKER_LINEJOIN_ROUND,
+                            0);
+            error = FT_Get_Glyph( self->ft_face->glyph, &ft_glyph);
+            if( error )
+            {
+                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                        FT_Errors[error].code, FT_Errors[error].message);
+                FT_Stroker_Done( stroker );
+                FT_Done_FreeType( library );
+                return 0;
+            }
+
+            if( self->outline_type == 1 )
+            {
+                error = FT_Glyph_Stroke( &ft_glyph, stroker, 1 );
+            }
+            else if ( self->outline_type == 2 )
+            {
+                error = FT_Glyph_StrokeBorder( &ft_glyph, stroker, 0, 1 );
+            }
+            else if ( self->outline_type == 3 )
+            {
+                error = FT_Glyph_StrokeBorder( &ft_glyph, stroker, 1, 1 );
+            }
+            if( error )
+            {
+                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                        FT_Errors[error].code, FT_Errors[error].message);
+                FT_Stroker_Done( stroker );
+                FT_Done_FreeType( library );
+                return 0;
+            }
+
+            if( depth == 1 )
+            {
+                error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_NORMAL, 0, 1);
+                if( error )
+                {
+                    fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                            FT_Errors[error].code, FT_Errors[error].message);
+                    FT_Stroker_Done( stroker );
+                    FT_Done_FreeType( library );
+                    return 0;
+                }
+            }
+            else
+            {
+                error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_LCD, 0, 1);
+                if( error )
+                {
+                    fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                            FT_Errors[error].code, FT_Errors[error].message);
+                    FT_Stroker_Done( stroker );
+                    FT_Done_FreeType( library );
+                    return 0;
+                }
+            }
+
+            ft_bitmap_glyph = (FT_BitmapGlyph) ft_glyph;
+            ft_bitmap       = ft_bitmap_glyph->bitmap;
+            ft_glyph_top    = ft_bitmap_glyph->top;
+            ft_glyph_left   = ft_bitmap_glyph->left;
+            FT_Stroker_Done(stroker);
+        }
+
+        // We want each glyph to be separated by at least one black pixel
+        w = ft_bitmap.width/depth;
+        h = ft_bitmap.rows;
+        region = texture_atlas_get_region( self->atlas, w+1, h+1 );
         if ( region.x < 0 )
         {
+            missed++;
             fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
             continue;
         }
-        int x = region.x, y = region.y;
-        texture_atlas_set_region( self->atlas, region.x, region.y,
-                                  w, h, ft_bitmap.buffer, ft_bitmap.pitch );
+        x = region.x;
+        y = region.y;
+        texture_atlas_set_region( self->atlas, x, y, w, h,
+                                  ft_bitmap.buffer, ft_bitmap.pitch );
 
-
-        texture_glyph_t *glyph = texture_glyph_new( );
+        glyph = texture_glyph_new( );
         glyph->codepoint = glyph_info[i].codepoint;
         glyph->width    = w;
         glyph->height   = h;
+        glyph->outline_type = self->outline_type;
+        glyph->outline_thickness = self->outline_thickness;
         glyph->offset_x = ft_glyph_left;
         glyph->offset_y = ft_glyph_top;
-        glyph->s0       = x/(float)self->atlas->width;
-        glyph->t0       = y/(float)self->atlas->height;
-        glyph->s1       = (x + w)/(float)self->atlas->width;
-        glyph->t1       = (y + h)/(float)self->atlas->height;
+        glyph->s0       = x/(float)width;
+        glyph->t0       = y/(float)height;
+        glyph->s1       = (x + glyph->width)/(float)width;
+        glyph->t1       = (y + glyph->height)/(float)height;
         vector_push_back( self->glyphs, &glyph );
+
+        if( self->outline_type > 0 )
+        {
+            FT_Done_Glyph( ft_glyph );
+        }
     }
 
     /* clean up the buffer, but don't kill it just yet */
@@ -304,31 +534,22 @@ texture_font_load_glyphs( texture_font_t * self,
 
     /* Cleanup */
     hb_buffer_destroy( buffer );
+
+    return missed;
 }
 
 
 // ------------------------------------------------- texture_font_get_glyph ---
 texture_glyph_t *
 texture_font_get_glyph( texture_font_t * self,
-                        size_t codepoint )
+                        uint32_t codepoint )
 {
-    size_t i;
     texture_glyph_t *glyph;
 
     assert( self );
     assert( self->filename );
     assert( self->atlas );
 
-    /* Check if charcode has been already loaded */
-    for( i=0; i<self->glyphs->size; ++i )
-    {
-        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
-        if( glyph->codepoint == codepoint ) 
-        {
-            return glyph;
-        }
-    }
-    return NULL;
+    /* Check if codepoint has been already loaded */
+    return texture_font_find_glyph(self, codepoint );
 }
-
-

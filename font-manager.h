@@ -1,7 +1,7 @@
 /* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
+ * WWW:         https://github.com/rougier/freetype-gl
  * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
@@ -42,6 +42,10 @@ extern "C" {
 #include "markup.h"
 #include "texture-font.h"
 #include "texture-atlas.h"
+
+#ifdef __cplusplus
+namespace ftgl {
+#endif
 
 /**
  * @file   font-manager.h
@@ -85,7 +89,7 @@ typedef struct font_manager_t {
     /**
      * Default glyphs to be loaded when loading a new font.
      */
-    wchar_t * cache;
+    char * cache;
 
 } font_manager_t;
 
@@ -199,7 +203,7 @@ typedef struct font_manager_t {
 
 #ifdef __cplusplus
 }
+}
 #endif // ifdef __cplusplus
 
 #endif /* __FONT_MANAGER_H__ */
-

@@ -1,7 +1,7 @@
 /* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
+ * WWW:         https://github.com/rougier/freetype-gl
  * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
@@ -53,7 +53,7 @@ char *strndup( const char *s1, size_t n)
 	copy[n] = 0;
 	return copy;
 };
-#endif 
+#endif
 
 
 // strndup() was only added in OSX lion

@@ -1,7 +1,7 @@
 # =========================================================================
 # Freetype GL - A C OpenGL Freetype engine
 # Platform:    Any
-# WWW:         http://code.google.com/p/freetype-gl/
+# WWW:         https://github.com/rougier/freetype-gl
 # -------------------------------------------------------------------------
 # Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
 #
@@ -30,167 +30,127 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Nicolas P. Rougier.
 # =========================================================================
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8.5 )
-SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules"
-                       "${CMAKE_MODULE_PATH}" )
+cmake_minimum_required(VERSION 2.8.5)
 
-OPTION(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
+project(freetype-gl)
 
-# Get required and optional library
-FIND_PACKAGE( OpenGL REQUIRED )
-IF( WIN32 OR WIN64 )
-	SET( WINDOWS_DIR
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows )
-	SET( GLUT_INCLUDE_DIR
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut )
-	SET( GLUT_LIBRARY
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glut/glut32.lib )
-    SET( GLEW_INCLUDE_PATH
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/include )
-    SET( GLEW_LIBRARY
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew/lib/glew32.lib )
-	SET( FREETYPE_INCLUDE_DIRS
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype )
-	SET( FREETYPE_INCLUDE_DIR_ft2build
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype )
-	SET( FREETYPE_INCLUDE_DIR_freetype2
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype/freetype )
-	SET( FREETYPE_LIBRARY
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype/freetype.lib )
-	SET( ANT_TWEAK_BAR_INCLUDE_PATH
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/AntTweakBar/include )
-	SET( ANT_TWEAK_BAR_LIBRARY
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/AntTweakBar/lib/AntTweakBar.lib )
-    SET( VS789FIX_INCLUDE_DIR
-         ${CMAKE_CURRENT_SOURCE_DIR}/windows/include )
-    SET( ANT_TWEAK_BAR_FOUND "YES" )
-ELSE( WIN32 OR WIN64 )
-    FIND_PACKAGE( GLUT REQUIRED )
-    FIND_PACKAGE( Freetype REQUIRED )
-    FIND_PACKAGE( GLEW REQUIRED )
-    FIND_PACKAGE( FontConfig )
-    FIND_LIBRARY( MATH_LIBRARY m )
-    #FIND_LIBRARY( STDC_LIBRARY stdc++) #Buggy Cmake can't find libstdc++
-    SET( ANT_TWEAK_BAR_INCLUDE_PATH "")
-    FIND_PACKAGE( AntTweakBar )
-ENDIF( WIN32 OR WIN64 )
+set(CMAKE_MODULE_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules"
+    "${CMAKE_MODULE_PATH}"
+)
 
-INCLUDE_DIRECTORIES( ${GLUT_INCLUDE_DIR}
-                     ${OPENGL_INCLUDE_DIRS}
-                     ${FREETYPE_INCLUDE_DIRS}
-                     ${GLEW_INCLUDE_PATHS}
-                     ${CMAKE_CURRENT_SOURCE_DIR}
-                     ${VS789FIX_INCLUDE_DIR}
-                     ${GLEW_INCLUDE_PATH})
-					 
-IF(MSVC)
-	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
-ENDIF(MSVC)
+option(freetype-gl_USE_VAO "Use a VAO to render a vertex_buffer instance (required for forward compatible OpenGL 3.0 contexts)" OFF)
+option(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
+option(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
+option(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (experimental)" OFF)
+option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 
-SET( FREETYPE_GL_SRC freetype-gl.h
-                     vec234.h
-                     opengl.h
-                     markup.h
-                     mat4.c             mat4.h
-                     texture-atlas.c    texture-atlas.h
-                     texture-font.c     texture-font.h
-                     vertex-buffer.c    vertex-buffer.h
-                     vertex-attribute.c vertex-attribute.h
-                     font-manager.c     font-manager.h
-                     text-buffer.c      text-buffer.h
-                     shader.c           shader.h
-                     vector.c           vector.h
-                     platform.c         platform.h)
+if(WIN32 OR WIN64)
+    set(GLEW_ROOT_DIR
+        ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew)
+    set(ENV{FREETYPE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype)
+    set(VS789FIX_INCLUDE_DIR
+        ${CMAKE_CURRENT_SOURCE_DIR}/windows/include)
+else()
+    find_library(MATH_LIBRARY m)
+endif()
 
-ADD_LIBRARY( freetype-gl STATIC ${FREETYPE_GL_SRC} )
+find_package(OpenGL REQUIRED)
+find_package(Freetype REQUIRED)
 
-LINK_DIRECTORIES(${PROJECT_SOURCE_DIR})
+if(NOT APPLE)
+    find_package(GLEW REQUIRED)
+endif()
 
-MACRO( DEMO _target _sources)
-     add_executable(${_target} ${_sources})
-     include_directories(${WINDOWS_DIR} ${GLUT_INCLUDE_DIR} ${GLEW_INCLUDE_PATH} ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2} ${ANT_TWEAK_BAR_INCLUDE_PATH})
-     target_link_libraries(${_target} ${GLEW_LIBRARY})
-     target_link_libraries(${_target} freetype-gl)
-     target_link_libraries(${_target} ${OPENGL_LIBRARY})
-     target_link_libraries(${_target} ${GLUT_LIBRARY})
-     target_link_libraries(${_target} ${GLEW_LIBRARY})
-     target_link_libraries(${_target} ${FREETYPE_LIBRARY})
-     IF( MATH_LIBRARY )
-         target_link_libraries(${_target} ${MATH_LIBRARY})
-     ENDIF( MATH_LIBRARY )
-    if(MSVC)
-      # Compile demos as C++
-      set_source_files_properties(${_sources} PROPERTIES LANGUAGE CXX)
+include_directories(
+    ${OPENGL_INCLUDE_DIRS}
+    ${FREETYPE_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${VS789FIX_INCLUDE_DIR}
+    ${GLEW_INCLUDE_PATH}
+)
+
+if(MSVC)
+    # _USE_MATH_DEFINES -> define M_PI
+    # _CRT_NONSTDC_NO_DEPRECATE -> remove warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup.
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_USE_MATH_DEFINES -D_CRT_NONSTDC_NO_DEPRECATE)
+endif(MSVC)
+
+if(freetype-gl_USE_VAO)
+    add_definitions(-DFREETYPE_GL_USE_VAO)
+endif(freetype-gl_USE_VAO)
+
+set(FREETYPE_GL_HDR
+    distance-field.h
+    edtaa3func.h
+    font-manager.h
+    freetype-gl.h
+    markup.h
+    mat4.h
+    opengl.h
+    platform.h
+    shader.h
+    text-buffer.h
+    texture-atlas.h
+    texture-font.h
+    utf8-utils.h
+    vec234.h
+    vector.h
+    vertex-attribute.h
+    vertex-buffer.h
+)
+
+set(FREETYPE_GL_SRC
+    distance-field.c
+    edtaa3func.c
+    font-manager.c
+    mat4.c
+    platform.c
+    shader.c
+    text-buffer.c
+    texture-atlas.c
+    texture-font.c
+    utf8-utils.c
+    vector.c
+    vertex-attribute.c
+    vertex-buffer.c
+)
+
+add_library(freetype-gl STATIC
+    ${FREETYPE_GL_SRC}
+    ${FREETYPE_GL_HDR}
+)
+
+if(freetype-gl_BUILD_MAKEFONT)
+    add_executable(makefont makefont.c)
+
+    if(NOT APPLE)
+        target_link_libraries(makefont ${GLEW_LIBRARY})
     endif()
-ENDMACRO( DEMO )
 
-IF (freetype-gl_BUILD_DEMOS)
+    target_link_libraries(makefont
+        freetype-gl
+        ${OPENGL_LIBRARY}
+        ${FREETYPE_LIBRARIES}
+        ${MATH_LIBRARY}
+    )
+    
+    if(MSVC AND NOT (MSVC_VERSION LESS 1900))
+        # prevent error LNK2019: unresolved external symbol _sprintf referenced in function __bdf_parse_properties
+        # see http://stackoverflow.com/a/32418900/469659
+        target_link_libraries(makefont "legacy_stdio_definitions.lib")
+    endif()
+endif()
 
-DEMO( demo-texture          "demo-texture.c" )
-DEMO( demo-font             "demo-font.c" )
-DEMO( demo-benchmark        "demo-benchmark.c" )
-DEMO( demo-console          "demo-console.c" )
-DEMO( demo-cube             "demo-cube.c" )
-DEMO( demo-glyph            "demo-glyph.c" )
-DEMO( demo-cartoon          "demo-cartoon.c" )
-DEMO( demo-outline          "demo-outline.c" )
-DEMO( demo-lcd              "demo-lcd.c" )
-DEMO( demo-gamma            "demo-gamma.c" )
-DEMO( demo-ansi             "demo-ansi.c" )
-DEMO( demo-subpixel         "demo-subpixel.c" )
-DEMO( demo-make             "demo-makefont.c" )
-DEMO( makefont              "makefont.c" )
-DEMO( demo-distance-field   "demo-distance-field.c;edtaa3func.c")
-DEMO( demo-distance-field-2 "demo-distance-field-2.c;edtaa3func.c")
-DEMO( demo-distance-field-3 "demo-distance-field-3.c;edtaa3func.c")
+if(freetype-gl_BUILD_APIDOC)
+    add_subdirectory(doc)
+endif()
 
-IF (FONTCONFIG_FOUND)
-   INCLUDE_DIRECTORIES( ${FONTCONFIG_INCLUDE_DIR} )
-   DEMO( demo-markup      "demo-markup.c" )
-   target_link_libraries(demo-markup ${FONTCONFIG_LIBRARY})
-ENDIF (FONTCONFIG_FOUND)
+if(freetype-gl_BUILD_DEMOS)
+    add_subdirectory(demos)
+endif()
 
-IF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )  
- #DEMO( demo-atb-agg     "demo-atb-agg.c;markup.h;")
- FILE(WRITE ${CMAKE_SOURCE_DIR}/stdc_test.c
-  "int main(void){return 0;}\n")
-  EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -lstdc++ OUTPUT_VARIABLE out_res ERROR_VARIABLE err_res)
-  string(FIND VAL"${err_res}" "main" substr_index ) 
-  if(${substr_index} STRGREATER "0")
-      message (STATUS "Found Libstdc++ needed by demo-atb-agg.c ." )
-
-      add_executable(demo-atb-agg  demo-atb-agg.c) 
-      target_link_libraries( demo-atb-agg freetype-gl)
-      target_link_libraries( demo-atb-agg ${GLUT_LIBRARY})
-      target_link_libraries( demo-atb-agg ${GLEW_LIBRARY})
-      target_link_libraries( demo-atb-agg ${FREETYPE_LIBRARY})
-      target_link_libraries( demo-atb-agg ${ANT_TWEAK_BAR_LIBRARY})
-      # target_link_libraries( demo-atb-agg ${STDC_LIBRARY}) # Buggy Cmake can't find libstdc++
-      # quirk: because of link order libstdc++ must be linked before libGLU
-      target_link_libraries( demo-atb-agg "-lstdc++")
-      target_link_libraries( demo-atb-agg ${OPENGL_LIBRARY})
-      IF(MATH_LIBRARY)
-        target_link_libraries( demo-atb-agg ${MATH_LIBRARY})
-      ENDIF(MATH_LIBRARY) 
-  else()
-      message (STATUS "NOT FOUND: Libstdc++ is not installed. It is needed by demo-atb-agg.c" )
-  endif()
-  FILE(REMOVE ${CMAKE_SOURCE_DIR}/stdc_test.c)
-ENDIF (ANT_TWEAK_BAR_FOUND AND (NOT (WIN32 OR WIN64)) )  
-
-# Copy font and shaders into build directory for in-place testing
-FILE(GLOB Fonts   "fonts/Vera.ttf"
-                  "fonts/VeraMoBI.ttf"
-                  "fonts/VeraMoBd.ttf"
-                  "fonts/VeraMoIt.ttf"
-                  "fonts/VeraMono.ttf"
-                  "fonts/ObelixPro.ttf")
-file(COPY ${Fonts}   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/fonts)
-
-FILE(GLOB Data   "data/256colors.txt")
-file(COPY ${Data}   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
-
-FILE(GLOB Shaders "shaders/*.vert" "shaders/*.frag")
-file(COPY ${Shaders} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/shaders)
-
-ENDIF (freetype-gl_BUILD_DEMOS)
+if(freetype-gl_BUILD_HARFBUZZ)
+    add_subdirectory(harfbuzz)
+endif()

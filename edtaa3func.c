@@ -128,7 +128,7 @@ double edgedf(double gx, double gy, double a)
         } else { // 1-a1 < a <= 1
             df = -0.5*(gx + gy) + sqrt(2.0*gx*gy*(1.0-a));
         }
-    }    
+    }
     return df;
 }
 
@@ -136,12 +136,12 @@ double distaa3(double *img, double *gximg, double *gyimg, int w, int c, int xc, 
 {
   double di, df, dx, dy, gx, gy, a;
   int closest;
-  
+
   closest = c-xc-yc*w; // Index to the edge pixel pointed to from c
   a = img[closest];    // Grayscale value at the edge pixel
   gx = gximg[closest]; // X gradient component at the edge pixel
   gy = gyimg[closest]; // Y gradient component at the edge pixel
-  
+
   if(a > 1.0) a = 1.0;
   if(a < 0.0) a = 0.0; // Clip grayscale values outside the range [0,1]
   if(a == 0.0) return 1000000.0; // Not an object pixel, return "very far" ("don't know yet")
@@ -387,7 +387,7 @@ void edtaa3(double *img, double *gx, double *gy, int w, int h, short *distx, sho
                 }
             }
         }
-      
+
       /* Scan rows in reverse order, except last row */
       for(y=h-2; y>=0; y--)
         {

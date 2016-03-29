@@ -1,7 +1,7 @@
 /* =========================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
+ * WWW:         https://github.com/rougier/freetype-gl
  * -------------------------------------------------------------------------
  * Copyright 2011 Nicolas P. Rougier. All rights reserved.
  *
@@ -40,6 +40,5 @@ attribute vec4 color;
 void main()
 {
     gl_FrontColor = color*Color;
-    gl_Position = gl_ModelViewProjectionMatrix * vec4(vertex,1.0);
-    //gl_Position = projection*(view*(model*vec4(vertex,1.0)));
+    gl_Position = projection*(view*(model*vec4(vertex,1.0)));
 }

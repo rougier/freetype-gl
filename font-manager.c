@@ -1,7 +1,7 @@
 /* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any
- * WWW:         http://code.google.com/p/freetype-gl/
+ * WWW:         https://github.com/rougier/freetype-gl
  * ----------------------------------------------------------------------------
  * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
  *
@@ -40,7 +40,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <wchar.h>
 #include "font-manager.h"
 
 
@@ -73,7 +72,7 @@ font_manager_new( size_t width, size_t height, size_t depth )
     }
     self->atlas = atlas;
     self->fonts = vector_new( sizeof(texture_font_t *) );
-    self->cache = wcsdup( L" " );
+    self->cache = strdup( " " );
     return self;
 }
 
@@ -112,7 +111,7 @@ font_manager_delete_font( font_manager_t * self,
 
     assert( self );
     assert( font );
-    
+
     for( i=0; i<self->fonts->size;++i )
     {
         other = (texture_font_t *) vector_get( self->fonts, i );

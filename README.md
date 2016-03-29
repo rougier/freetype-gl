@@ -1,6 +1,8 @@
 Freetype GL - A C OpenGL Freetype engine
 ========================================
 
+[![Build Status](https://travis-ci.org/rougier/freetype-gl.png?branch=master)](https://travis-ci.org/rougier/freetype-gl)
+
 This code intends to show how to display fonts efficiently using regular C,
 Freetype and OpenGL. The idea is to use a single texture and a single vertex
 buffer. The code is fairly simple and organized as follow:
@@ -76,7 +78,10 @@ Contributors:
 * PJ O'Halloran (svn to git migration)
 * William Light (Face creation from memory)
 * Jan Niklas Hasse (Bug report & fix + README.md)
-* Pierre-Emmnauel Lallemant (Bug report & fix)
+* Pierre-Emmanuel Lallemant (Bug report & fix + travis setup)
 * Robert Conde (Bug report & fix)
 * Mikołaj Siedlarek (Build system bug fix)
 * Preet Desai (Bug report & fix)
+* Andy Staton (CMake fix and added namespace safeguard (avoiding glm collisions))
+* Daniel Burke (Removed GLEW dependency and fix problems with font licences)
+* Bob Kocisko (Added horizontal text alignment and text bounds calculation)
