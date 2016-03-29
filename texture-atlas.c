@@ -344,13 +344,9 @@ texture_atlas_upload( texture_atlas_t * self )
     }
     else
     {
-#if defined(GL_ES_VERSION_2_0) || defined(GL_ES_VERSION_3_0)
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE, self->width, self->height,
-                      0, GL_LUMINANCE, GL_UNSIGNED_BYTE, self->data );
-#else
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, self->width, self->height,
-                     0, GL_RED, GL_UNSIGNED_BYTE, self->data );
-#endif
+      /* Bernd: keep GL_ALPHA here for all versions of OpenGL */
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->width, self->height,
+                      0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
     }
 }
 

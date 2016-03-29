@@ -16,7 +16,7 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 AM_CPPFLAGS = $(EXAMPLE_CFLAGS) @FTINC@
 
 lib_LTLIBRARIES = libfreetype-gl.la
-libfreetype_gl_la_SOURCES = texture-atlas.c texture-font.c vector.c
+libfreetype_gl_la_SOURCES = texture-atlas.c texture-font.c vector.c utf8-utils.c
 include_HEADERS = freetype-gl.h vec234.h vector.h texture-atlas.h texture-font.h opengl.h
 libfreetype_gl_la_LIBADD = -lm -l@LIBGL@ -lfreetype -lz @LIBADD@
 
