@@ -35,4 +35,6 @@ LIBTOOL=${PRECLANG}${LIBTOOL}
 AC_SUBST(LIBTOOL)
 
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([debian/control])
+AC_CONFIG_FILES([debian/changelog])
 AC_OUTPUT

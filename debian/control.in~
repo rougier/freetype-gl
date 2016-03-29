@@ -1,0 +1,50 @@
+Source: gforth
+Section: programming
+Priority: optional
+Maintainer: Bernd Paysan <bernd.paysan@gmx.de>
+Build-Depends: debhelper (>= 4.1.16), build-essential, gcc, autoconf, automake, autotools-dev, libffi-dev, libtool, libtool-bin, libltdl7-dev
+
+Package: gforth-bin
+Version: @DEBVERSION@
+Architecture: any
+Multi-Arch: same
+Depends: libltdl7, gforth-common (= @DEBVERSION@)
+Recommends: gforth-lib (= @DEBVERSION@)
+Suggests: libtool, libtool-bin, libffi6 | libffi5, build-essential, gcc
+Description: GNU Forth
+ Gforth is the Forth implementation of the GNU project, providing all
+ features of the ANS Forth (Forth-94) and the Forth-2012 standards.
+ .
+ Forth is an awesome stack based programming language, which is able
+ to extend itself during runtime.
+
+Package: gforth-common
+Version: @DEBVERSION@
+Architecture: all
+Multi-Arch: foreign
+Description: GNU Forth
+ Gforth is the Forth implementation of the GNU project, providing all
+ features of the ANS Forth (Forth-94) and the Forth-2012 standards.
+ .
+ This is the architecture independent part
+
+Package: gforth-lib
+Version: @DEBVERSION@
+Architecture: any
+Multi-Arch: same
+Description: GNU Forth
+ Gforth is the Forth implementation of the GNU project, providing all
+ features of the ANS Forth (Forth-94) and the Forth-2012 standards.
+ .
+ These are the engines as shared librarys for embedding in C programs
+
+Package: gforth
+Version: @DEBVERSION@
+Architecture: any
+Multi-Arch: same
+Depends: gforth-bin (= @DEBVERSION@)
+Description: GNU Forth
+ Gforth is the Forth implementation of the GNU project, providing all
+ features of the ANS Forth (Forth-94) and the Forth-2012 standards.
+ .
+ This package contains the links to the architecture specific binaries

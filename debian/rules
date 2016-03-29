@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Simple debian/rules that uses debhelper.
+# Created by Bernd Paysan, in the public domain
+
+%:
+	dh $@
+
+override_dh_auto_test:
+override_dh_shlibdeps:

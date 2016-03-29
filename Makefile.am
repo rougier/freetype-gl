@@ -19,3 +19,5 @@ lib_LTLIBRARIES = libfreetype-gl.la
 libfreetype_gl_la_SOURCES = texture-atlas.c texture-font.c vector.c
 include_HEADERS = freetype-gl.h vec234.h vector.h texture-atlas.h texture-font.h opengl.h
 libfreetype_gl_la_LIBADD = -lm -l@LIBGL@ -lfreetype -lz @LIBADD@
+
+distclean-am: clean-am distclean-compile distclean-hdr distclean-libtool distclean-tags
