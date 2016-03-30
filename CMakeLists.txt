@@ -56,8 +56,12 @@ else()
     find_library(MATH_LIBRARY m)
 endif()
 
-find_package(OpenGL REQUIRED)
-find_package(Freetype REQUIRED)
+if(DEFINED ANDROID_ABI)
+  set(OPENGL_LIBRARY  ${OPENGL_gl_LIBRARY} )
+else()
+  find_package(OpenGL REQUIRED)
+endif()
+  find_package(Freetype REQUIRED)
 
 if(NOT APPLE AND NOT DEFINED ANDROID_ABI )
     find_package(GLEW REQUIRED)
@@ -119,9 +123,23 @@ add_library(freetype-gl SHARED
     ${FREETYPE_GL_SRC}
     ${FREETYPE_GL_HDR}
 )
-target_link_libraries( freetype-gl
-${FREETYPE_LIBRARIES}
-)
+if(NOT DEFINED ANDROID_ABI)
+  target_link_libraries( freetype-gl
+    ${OPENGL_LIBRARY}
+    ${Z_LIBRARY}
+    ${BZ_LIBRARY}
+    ${MATH_LIBRARY}
+  )
+else()
+  target_link_libraries( freetype-gl
+    ${FREETYPE_LIBRARIES}
+    ${OPENGL_LIBRARY}
+    ${Z_LIBRARY}
+    ${BZ_LIBRARY}
+    ${MATH_LIBRARY}
+  )
+
+endif()
 add_library(freetype-gl-a STATIC
     ${FREETYPE_GL_SRC}
     ${FREETYPE_GL_HDR}
@@ -129,6 +147,7 @@ add_library(freetype-gl-a STATIC
 target_link_libraries( freetype-gl-a
 ${FREETYPE_LIBRARIES}
 )
+
 set_target_properties(freetype-gl-a PROPERTIES OUTPUT_NAME freetype-gl)
 
 if(freetype-gl_BUILD_MAKEFONT)
