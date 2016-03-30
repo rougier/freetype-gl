@@ -42,13 +42,15 @@ macro(CREATE_DEMO _target _sources)
         ${OPENGL_LIBRARY}
         ${GLFW3_LIBRARY}
         ${FREETYPE_LIBRARIES}
-     )
-     if(MATH_LIBRARY)
-         target_link_libraries(${_target} ${MATH_LIBRARY})
-     endif()
-    if(MSVC)
-      # Compile demos as C++
-      set_source_files_properties(${_sources} PROPERTIES LANGUAGE CXX)
+    )
+    if(MATH_LIBRARY)
+        target_link_libraries(${_target} ${MATH_LIBRARY})
+    endif()
+     
+    if(MSVC AND NOT (MSVC_VERSION LESS 1900))
+        # prevent error LNK2019: unresolved external symbol _sprintf referenced in function __bdf_parse_properties
+        # see http://stackoverflow.com/a/32418900/469659
+        target_link_libraries(${_target} "legacy_stdio_definitions.lib")
     endif()
 endmacro()
 
@@ -78,7 +80,7 @@ add_custom_command(
         makefont
         ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
     COMMAND
-        ../makefont
+        ../$<$<BOOL:MSVC>:$(Configuration)/>makefont
     ARGS
         --font fonts/Vera.ttf
         --header ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
@@ -125,3 +127,11 @@ endif()
 file(COPY ../fonts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ../shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+if(MSVC)
+    foreach(config ${CMAKE_CONFIGURATION_TYPES})
+        file(COPY ../fonts DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${config})
+        file(COPY ../data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${config})
+        file(COPY ../shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${config})
+    endforeach()
+endif()

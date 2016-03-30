@@ -202,17 +202,17 @@ texture_atlas_get_region( texture_atlas_t * self,
                           const size_t width,
                           const size_t height )
 {
-
-	int y, best_height, best_width, best_index;
+	int y, best_index;
+    size_t best_height, best_width;
     ivec3 *node, *prev;
     ivec4 region = {{0,0,width,height}};
     size_t i;
 
     assert( self );
 
-    best_height = INT_MAX;
+    best_height = UINT_MAX;
     best_index  = -1;
-    best_width = INT_MAX;
+    best_width = UINT_MAX;
 	for( i=0; i<self->nodes->size; ++i )
 	{
         y = texture_atlas_fit( self, i, width, height );
@@ -220,7 +220,7 @@ texture_atlas_get_region( texture_atlas_t * self,
 		{
             node = (ivec3 *) vector_get( self->nodes, i );
 			if( ( (y + height) < best_height ) ||
-                ( ((y + height) == best_height) && (node->z < best_width)) )
+                ( ((y + height) == best_height) && (node->z > 0 && (size_t)node->z < best_width)) )
 			{
 				best_height = y + height;
 				best_index = i;
