@@ -16,7 +16,7 @@
 
 
 // ------------------------------------------------------------ file_exists ---
-int
+static int
 file_exists( const char * filename )
 {
     FILE * file = fopen( filename, "r" );
