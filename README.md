@@ -83,3 +83,4 @@ a single vertex buffer.
 * Andy Staton (CMake fix and added namespace safeguard (avoiding glm collisions))
 * Daniel Burke (Removed GLEW dependency and fix problems with font licences)
 * Bob Kocisko (Added horizontal text alignment and text bounds calculation)
+* Ciro Santilli (Improve markdown documentation)
