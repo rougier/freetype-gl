@@ -1,20 +1,17 @@
-Freetype GL - A C OpenGL Freetype engine
-========================================
+# Freetype GL - A C OpenGL Freetype engine
 
 [![Build Status](https://travis-ci.org/rougier/freetype-gl.png?branch=master)](https://travis-ci.org/rougier/freetype-gl)
 
-This code intends to show how to display fonts efficiently using regular C,
-Freetype and OpenGL. The idea is to use a single texture and a single vertex
-buffer.
+A small library for displaying Unicode in OpenGL using a single texture and
+a single vertex buffer.
 
 ![Screenshot](http://raw.github.com/rougier/freetype-gl/master/doc/images/markup.png)
 
 [Installation instructions](INSTALL.md).
 
-The code is fairly simple and organized as follow:
+## Code organization
 
-Mandatory
----------
+### Mandatory files
 
 * **texture-font**:  The texture-font structure is in charge of creating bitmap
                      glyphs and to upload them to the texture atlas.
@@ -32,8 +29,7 @@ Mandatory
                      http://www.cppreference.com/wiki/container/vector/start
 
 
-Optional
---------
+### Optional files
 
 * **markup**:        Simple structure that describes text properties (font
                      family, font size, colors, underline, etc.)
@@ -51,8 +47,7 @@ Optional
                      freetype.
 
 
-Contributors:
-=============
+## Contributors
 
 * Ryan.H.Kawicki (Initial CMake project)
 * Julian Mayer (Several bugfixes and code for demo-opengl-4.cc)
