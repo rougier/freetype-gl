@@ -54,6 +54,8 @@
  THE SOFTWARE.
  */
 
+#include "edtaa3func.h"
+
 /*
  * Compute the local gradient at edge pixels using convolution filters.
  * The gradient is computed only at edge pixels. At other places in the
