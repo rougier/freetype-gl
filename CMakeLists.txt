@@ -39,6 +39,19 @@ set(CMAKE_MODULE_PATH
     "${CMAKE_MODULE_PATH}"
 )
 
+message(STATUS "Building for ${CMAKE_SYSTEM_NAME} target system")
+message(STATUS "Building with ${CMAKE_C_COMPILER_ID} compiler")
+
+set(freetype-gl_WITH_GLEW_DEFAULT ON)
+
+if((${CMAKE_SYSTEM_NAME} MATCHES "Darwin") OR
+    (${CMAKE_SYSTEM_NAME} MATCHES "Android"))
+    set(freetype-gl_WITH_GLEW_DEFAULT OFF)
+endif()
+
+option(freetype-gl_WITH_GLEW
+    "Use the GLEW library to fetch OpenGL function pointers"
+    ${freetype-gl_WITH_GLEW_DEFAULT})
 option(freetype-gl_USE_VAO "Use a VAO to render a vertex_buffer instance (required for forward compatible OpenGL 3.0 contexts)" OFF)
 option(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
 option(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
@@ -59,7 +72,7 @@ endif()
 find_package(OpenGL REQUIRED)
 find_package(Freetype REQUIRED)
 
-if(NOT APPLE)
+if(freetype-gl_WITH_GLEW)
     find_package(GLEW REQUIRED)
 endif()
 
@@ -125,17 +138,14 @@ add_library(freetype-gl STATIC
 if(freetype-gl_BUILD_MAKEFONT)
     add_executable(makefont makefont.c)
 
-    if(NOT APPLE)
-        target_link_libraries(makefont ${GLEW_LIBRARY})
-    endif()
-
     target_link_libraries(makefont
         freetype-gl
         ${OPENGL_LIBRARY}
         ${FREETYPE_LIBRARIES}
         ${MATH_LIBRARY}
+        ${GLEW_LIBRARY}
     )
-    
+
     if(MSVC AND NOT (MSVC_VERSION LESS 1900))
         # prevent error LNK2019: unresolved external symbol _sprintf referenced in function __bdf_parse_properties
         # see http://stackoverflow.com/a/32418900/469659
