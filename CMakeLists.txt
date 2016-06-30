@@ -58,6 +58,14 @@ option(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
 option(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (experimental)" OFF)
 option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 
+include(CheckIncludeFile)
+
+check_include_file(stdbool.h HAS_MATH_H)
+
+if(NOT HAS_MATH_H)
+    message(FATAL_ERROR "Required stdbool.h file not found")
+endif()
+
 if(WIN32 OR WIN64)
     set(GLEW_ROOT_DIR
         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew)
