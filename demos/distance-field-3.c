@@ -57,6 +57,8 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+double total_time = 0.0;
+
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
@@ -206,7 +208,9 @@ load_glyph( const char *  filename,     const char* codepoint,
     }
 
     // Compute distance map
+    glfwSetTime(total_time);
     highres_data = make_distance_mapd( highres_data, highres_width, highres_height );
+    total_time += glfwGetTime();
 
     // Allocate low resolution buffer
     size_t lowres_width  = round(highres_width * lowres_size/highres_size);
@@ -429,6 +433,8 @@ int main( int argc, char **argv )
 #endif
 
     init();
+
+    fprintf(stderr, "Total time to generate distance map: %fs\n", total_time);
 
     glfwSetWindowSize( window, 512, 512 );
     glfwShowWindow( window );

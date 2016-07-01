@@ -53,6 +53,8 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+double total_time = 0.0;
+
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
@@ -89,9 +91,9 @@ void init( void )
     texture_font_load_glyphs( font, cache );
     texture_font_delete( font );
 
-    fprintf( stderr, "Generating distance map...\n" );
+    glfwSetTime(total_time);
     map = make_distance_mapb(atlas->data, atlas->width, atlas->height);
-    fprintf( stderr, "done !\n");
+    total_time += glfwGetTime();
 
     memcpy( atlas->data, map, atlas->width*atlas->height*sizeof(unsigned char) );
     free(map);
@@ -259,6 +261,8 @@ int main( int argc, char **argv )
 #endif
 
     init();
+
+    fprintf(stderr, "Total time to generate distance map: %fs\n", total_time);
 
     glfwSetWindowSize( window, 512, 512 );
     glfwShowWindow( window );
