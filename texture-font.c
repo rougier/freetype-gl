@@ -142,7 +142,7 @@ texture_glyph_new(void)
     self->codepoint  = -1;
     self->width     = 0;
     self->height    = 0;
-    self->outline_type = 0;
+    self->rendermode = RENDER_NORMAL;
     self->outline_thickness = 0.0;
     self->offset_x  = 0;
     self->offset_y  = 0;
@@ -250,7 +250,7 @@ texture_font_init(texture_font_t *self)
     self->height = 0;
     self->ascender = 0;
     self->descender = 0;
-    self->outline_type = 0;
+    self->rendermode = RENDER_NORMAL;
     self->outline_thickness = 0.0;
     self->hinting = 1;
     self->kerning = 1;
@@ -393,7 +393,7 @@ texture_font_find_glyph( texture_font_t * self,
         // If codepoint is -1, we don't care about outline type or thickness
         if( (glyph->codepoint == ucodepoint) &&
             ((ucodepoint == -1) ||
-             ((glyph->outline_type == self->outline_type) &&
+             ((glyph->rendermode == self->rendermode) &&
               (glyph->outline_thickness == self->outline_thickness)) ))
         {
             return glyph;
@@ -449,7 +449,7 @@ texture_font_load_glyphs( texture_font_t * self,
         // WARNING: We use texture-atlas depth to guess if user wants
         //          LCD subpixel rendering
 
-        if( self->outline_type > 0 )
+        if( self->rendermode != RENDER_NORMAL )
         {
             flags |= FT_LOAD_NO_BITMAP;
         }
@@ -489,7 +489,7 @@ texture_font_load_glyphs( texture_font_t * self,
         }
 
 
-        if( self->outline_type == 0 )
+        if( self->rendermode == RENDER_NORMAL )
         {
             slot            = face->glyph;
             ft_bitmap       = slot->bitmap;
@@ -526,15 +526,15 @@ texture_font_load_glyphs( texture_font_t * self,
                 return 0;
             }
 
-            if( self->outline_type == 1 )
+            if( self->rendermode == RENDER_OUTLINE_EDGE )
             {
                 error = FT_Glyph_Stroke( &ft_glyph, stroker, 1 );
             }
-            else if ( self->outline_type == 2 )
+            else if ( self->rendermode == RENDER_OUTLINE_POSITIVE )
             {
                 error = FT_Glyph_StrokeBorder( &ft_glyph, stroker, 0, 1 );
             }
-            else if ( self->outline_type == 3 )
+            else if ( self->rendermode == RENDER_OUTLINE_NEGATIVE )
             {
                 error = FT_Glyph_StrokeBorder( &ft_glyph, stroker, 1, 1 );
             }
@@ -601,7 +601,7 @@ texture_font_load_glyphs( texture_font_t * self,
         glyph->codepoint = utf8_to_utf32( codepoints + i );
         glyph->width    = w;
         glyph->height   = h;
-        glyph->outline_type = self->outline_type;
+        glyph->rendermode = self->rendermode;
         glyph->outline_thickness = self->outline_thickness;
         glyph->offset_x = ft_glyph_left;
         glyph->offset_y = ft_glyph_top;
@@ -618,7 +618,7 @@ texture_font_load_glyphs( texture_font_t * self,
 
         vector_push_back( self->glyphs, &glyph );
 
-        if( self->outline_type > 0 )
+        if( self->rendermode != RENDER_NORMAL )
         {
             FT_Done_Glyph( ft_glyph );
         }

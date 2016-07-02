@@ -113,19 +113,19 @@ void init( void )
     vec4 orange1 = {{1.0, 0.9, 0.0, 1.0}};
     vec4 orange2 = {{1.0, 0.6, 0.0, 1.0}};
 
-    font->outline_type = 2;
+    font->rendermode = RENDER_OUTLINE_POSITIVE;
     font->outline_thickness = 7;
     add_text( buffer, font, "Freetype GL", pen, black, black );
 
-    font->outline_type = 2;
+    font->rendermode = RENDER_OUTLINE_POSITIVE;
     font->outline_thickness = 5;
     add_text( buffer, font, "Freetype GL", pen, yellow, yellow );
 
-    font->outline_type = 1;
+    font->rendermode = RENDER_OUTLINE_EDGE;
     font->outline_thickness = 3;
     add_text( buffer, font, "Freetype GL", pen, black, black );
 
-    font->outline_type = 0;
+    font->rendermode = RENDER_NORMAL;
     font->outline_thickness = 0;
     add_text( buffer, font, "Freetype GL", pen, orange1, orange2 );
 

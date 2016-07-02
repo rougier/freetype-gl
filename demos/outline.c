@@ -154,7 +154,7 @@ void init( void )
 
     markup.font = texture_font_new_from_file( atlas, markup.size, "fonts/Vera.ttf" );
 
-    markup.font->outline_type = 1;
+    markup.font->rendermode = RENDER_OUTLINE_EDGE;
 
     vec2 pen;
     pen.x = 40;
@@ -169,7 +169,7 @@ void init( void )
 
     pen.x = 40;
     pen.y  = 110;
-    markup.font->outline_type = 2;
+    markup.font->rendermode = RENDER_OUTLINE_POSITIVE;
     for( i=0; i< 10; ++i)
     {
         markup.font->outline_thickness = 2*((i+1)/10.0);
@@ -180,7 +180,7 @@ void init( void )
 
     pen.x = 40;
     pen.y  = 30;
-    markup.font->outline_type = 3;
+    markup.font->rendermode = RENDER_OUTLINE_NEGATIVE;
     for( i=0; i< 10; ++i)
     {
         markup.font->outline_thickness = 1*((i+1)/10.0);

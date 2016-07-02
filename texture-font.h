@@ -70,6 +70,17 @@ namespace ftgl {
  */
 
 
+/**
+ * A list of possible ways to render a glyph.
+ */
+typedef enum rendermode_t
+{
+    RENDER_NORMAL,
+    RENDER_OUTLINE_EDGE,
+    RENDER_OUTLINE_POSITIVE,
+    RENDER_OUTLINE_NEGATIVE
+} rendermode_t;
+
 
 /**
  * A structure that hold a kerning value relatively to a Unicode
@@ -201,9 +212,9 @@ typedef struct texture_glyph_t
     vector_t * kerning;
 
     /**
-     * Glyph outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
+     * Mode this glyph was rendered
      */
-    int outline_type;
+    rendermode_t rendermode;
 
     /**
      * Glyph outline thickness
@@ -263,9 +274,9 @@ typedef struct texture_font_t
     int hinting;
 
     /**
-     * Outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
+     * Mode the font is rendering its next glyph
      */
-    int outline_type;
+    rendermode_t rendermode;
 
     /**
      * Outline thickness
