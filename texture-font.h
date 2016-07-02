@@ -420,6 +420,18 @@ typedef struct texture_font_t
 
 
 /**
+ * Request the loading of a given glyph.
+ *
+ * @param self       A valid texture font
+ * @param codepoints Character codepoint to be loaded in UTF-8 encoding.
+ *
+ * @return One if the glyph could be loaded, zero if not.
+ */
+  int
+  texture_font_load_glyph( texture_font_t * self,
+                           const char * codepoint );
+
+/**
  * Request the loading of several glyphs at once.
  *
  * @param self       A valid texture font
