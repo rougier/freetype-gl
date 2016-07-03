@@ -80,7 +80,7 @@ texture_font_load_face(texture_font_t *self, float size,
     if(error) {
         fprintf(stderr, "FT_Error (0x%02x) : %s\n",
                 FT_Errors[error].code, FT_Errors[error].message);
-        return 0;
+        goto cleanup;
     }
 
     /* Load face */
@@ -98,8 +98,7 @@ texture_font_load_face(texture_font_t *self, float size,
     if(error) {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
                 __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-        FT_Done_FreeType(*library);
-        return 0;
+        goto cleanup_library;
     }
 
     /* Select charmap */
@@ -107,9 +106,7 @@ texture_font_load_face(texture_font_t *self, float size,
     if(error) {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
                 __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-        FT_Done_Face(*face);
-        FT_Done_FreeType(*library);
-        return 0;
+        goto cleanup_face;
     }
 
     /* Set char size */
@@ -118,15 +115,20 @@ texture_font_load_face(texture_font_t *self, float size,
     if(error) {
         fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
                 __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-        FT_Done_Face(*face);
-        FT_Done_FreeType(*library);
-        return 0;
+        goto cleanup_face;
     }
 
     /* Set transform matrix */
     FT_Set_Transform(*face, &matrix, NULL);
 
     return 1;
+
+cleanup_face:
+    FT_Done_Face( *face );
+cleanup_library:
+    FT_Done_FreeType( *library );
+cleanup:
+    return 0;
 }
 
 // ------------------------------------------------------ texture_glyph_new ---
@@ -516,86 +518,71 @@ texture_font_load_glyph( texture_font_t * self,
     {
         FT_Stroker stroker;
         FT_BitmapGlyph ft_bitmap_glyph;
+
         error = FT_Stroker_New( library, &stroker );
+
         if( error )
         {
             fprintf(stderr, "FT_Error (0x%02x) : %s\n",
                     FT_Errors[error].code, FT_Errors[error].message);
-            FT_Done_Face( face );
-            FT_Stroker_Done( stroker );
-            FT_Done_FreeType( library );
-            return 0;
+            goto cleanup_stroker;
         }
+
         FT_Stroker_Set(stroker,
                         (int)(self->outline_thickness * HRES),
                         FT_STROKER_LINECAP_ROUND,
                         FT_STROKER_LINEJOIN_ROUND,
                         0);
+
         error = FT_Get_Glyph( face->glyph, &ft_glyph);
+
         if( error )
         {
             fprintf(stderr, "FT_Error (0x%02x) : %s\n",
                     FT_Errors[error].code, FT_Errors[error].message);
-            FT_Done_Face( face );
-            FT_Stroker_Done( stroker );
-            FT_Done_FreeType( library );
-            return 0;
+            goto cleanup_stroker;
         }
 
         if( self->rendermode == RENDER_OUTLINE_EDGE )
-        {
             error = FT_Glyph_Stroke( &ft_glyph, stroker, 1 );
-        }
         else if ( self->rendermode == RENDER_OUTLINE_POSITIVE )
-        {
             error = FT_Glyph_StrokeBorder( &ft_glyph, stroker, 0, 1 );
-        }
         else if ( self->rendermode == RENDER_OUTLINE_NEGATIVE )
-        {
             error = FT_Glyph_StrokeBorder( &ft_glyph, stroker, 1, 1 );
-        }
+
         if( error )
         {
             fprintf(stderr, "FT_Error (0x%02x) : %s\n",
                     FT_Errors[error].code, FT_Errors[error].message);
-            FT_Done_Face( face );
-            FT_Stroker_Done( stroker );
-            FT_Done_FreeType( library );
-            return 0;
+            goto cleanup_stroker;
         }
 
         if( depth == 1 )
-        {
             error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_NORMAL, 0, 1);
-            if( error )
-            {
-                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
-                        FT_Errors[error].code, FT_Errors[error].message);
-                FT_Done_Face( face );
-                FT_Stroker_Done( stroker );
-                FT_Done_FreeType( library );
-                return 0;
-            }
-        }
         else
-        {
             error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_LCD, 0, 1);
-            if( error )
-            {
-                fprintf(stderr, "FT_Error (0x%02x) : %s\n",
-                        FT_Errors[error].code, FT_Errors[error].message);
-                FT_Done_Face( face );
-                FT_Stroker_Done( stroker );
-                FT_Done_FreeType( library );
-                return 0;
-            }
+
+        if( error )
+        {
+            fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+                    FT_Errors[error].code, FT_Errors[error].message);
+            goto cleanup_stroker;
         }
 
         ft_bitmap_glyph = (FT_BitmapGlyph) ft_glyph;
         ft_bitmap       = ft_bitmap_glyph->bitmap;
         ft_glyph_top    = ft_bitmap_glyph->top;
         ft_glyph_left   = ft_bitmap_glyph->left;
-        FT_Stroker_Done(stroker);
+
+cleanup_stroker:
+        FT_Stroker_Done( stroker );
+
+        if( error )
+        {
+            FT_Done_Face( face );
+            FT_Done_FreeType( library );
+            return 0;
+        }
     }
 
     struct {
@@ -668,9 +655,7 @@ texture_font_load_glyph( texture_font_t * self,
     vector_push_back( self->glyphs, &glyph );
 
     if( self->rendermode != RENDER_NORMAL && self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )
-    {
         FT_Done_Glyph( ft_glyph );
-    }
 
     texture_font_generate_kerning( self, &library, &face );
 
