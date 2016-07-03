@@ -190,34 +190,29 @@ texture_glyph_get_kerning( const texture_glyph_t * self,
 
 // ------------------------------------------ texture_font_generate_kerning ---
 void
-texture_font_generate_kerning( texture_font_t *self )
+texture_font_generate_kerning( texture_font_t *self,
+                               FT_Library *library, FT_Face *face )
 {
     size_t i, j;
-    FT_Library library;
-    FT_Face face;
     FT_UInt glyph_index, prev_index;
     texture_glyph_t *glyph, *prev_glyph;
     FT_Vector kerning;
 
     assert( self );
 
-    /* Load font */
-    if(!texture_font_load_face(self, self->size, &library, &face))
-        return;
-
     /* For each glyph couple combination, check if kerning is necessary */
     /* Starts at index 1 since 0 is for the special backgroudn glyph */
     for( i=1; i<self->glyphs->size; ++i )
     {
         glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
-        glyph_index = FT_Get_Char_Index( face, glyph->codepoint );
+        glyph_index = FT_Get_Char_Index( *face, glyph->codepoint );
         vector_clear( glyph->kerning );
 
         for( j=1; j<self->glyphs->size; ++j )
         {
             prev_glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
-            prev_index = FT_Get_Char_Index( face, prev_glyph->codepoint );
-            FT_Get_Kerning( face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
+            prev_index = FT_Get_Char_Index( *face, prev_glyph->codepoint );
+            FT_Get_Kerning( *face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
             // printf("%c(%d)-%c(%d): %ld\n",
             //       prev_glyph->codepoint, prev_glyph->codepoint,
             //       glyph_index, glyph_index, kerning.x);
@@ -228,9 +223,6 @@ texture_font_generate_kerning( texture_font_t *self )
             }
         }
     }
-
-    FT_Done_Face( face );
-    FT_Done_FreeType( library );
 }
 
 // ------------------------------------------------------ texture_font_init ---
@@ -680,9 +672,10 @@ texture_font_load_glyph( texture_font_t * self,
         FT_Done_Glyph( ft_glyph );
     }
 
+    texture_font_generate_kerning( self, &library, &face );
+
     FT_Done_Face( face );
     FT_Done_FreeType( library );
-    texture_font_generate_kerning( self );
 
     return 1;
 }
