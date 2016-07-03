@@ -35,7 +35,6 @@
 #include <string.h>
 
 #include "freetype-gl.h"
-#include "distance-field.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
 #include "markup.h"
@@ -79,7 +78,6 @@ viewport_t viewport = {0,0,1};
 // ------------------------------------------------------------------- init ---
 void init( void )
 {
-    unsigned char *map;
     texture_font_t * font;
     const char *filename = "fonts/Vera.ttf";
     const char * cache = " !\"#$%&'()*+,-./0123456789:;<=>?"
@@ -88,15 +86,14 @@ void init( void )
 
     atlas = texture_atlas_new( 512, 512, 1 );
     font = texture_font_new_from_file( atlas, 72, filename );
-    texture_font_load_glyphs( font, cache );
-    texture_font_delete( font );
+    font->rendermode = RENDER_SIGNED_DISTANCE_FIELD;
 
     glfwSetTime(total_time);
-    map = make_distance_mapb(atlas->data, atlas->width, atlas->height);
+    texture_font_load_glyphs( font, cache );
     total_time += glfwGetTime();
 
-    memcpy( atlas->data, map, atlas->width*atlas->height*sizeof(unsigned char) );
-    free(map);
+    texture_font_delete( font );
+
     texture_atlas_upload( atlas );
 
     GLuint indices[6] = {0,1,2, 0,2,3};

@@ -36,7 +36,6 @@
 #include <string.h>
 
 #include "freetype-gl.h"
-#include "distance-field.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
 #include "markup.h"
@@ -82,7 +81,9 @@ add_text( vertex_buffer_t * buffer, texture_font_t * font,
     float r = color->red, g = color->green, b = color->blue, a = color->alpha;
     for( i = 0; i < strlen(text); ++i )
     {
+        glfwSetTime(total_time);
         texture_glyph_t *glyph = texture_font_get_glyph( font, text + i );
+        total_time += glfwGetTime();
         if( glyph != NULL )
         {
             float kerning = 0.0f;
@@ -128,8 +129,8 @@ void init( void )
     vec2 pen = {{0,0}};
     vec4 black = {{1,1,1,1}};
     font = texture_font_new_from_file( atlas, 48, filename );
+    font->rendermode = RENDER_SIGNED_DISTANCE_FIELD;
     vec4 bbox = add_text( buffer, font, text, &black, &pen );
-    texture_atlas_upload( font->atlas );
     size_t i;
     vector_t * vertices = buffer->vertices;
     for( i=0; i< vector_size(vertices); ++i )
@@ -142,12 +143,6 @@ void init( void )
 
     glBindTexture( GL_TEXTURE_2D, atlas->id );
 
-    glfwSetTime(total_time);
-    unsigned char *map = make_distance_mapb(atlas->data, atlas->width, atlas->height);
-    total_time += glfwGetTime();
-
-    memcpy( atlas->data, map, atlas->width*atlas->height*sizeof(unsigned char) );
-    free(map);
     texture_atlas_upload( atlas );
 
     shader = shader_load( "shaders/distance-field.vert",

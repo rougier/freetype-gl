@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include "distance-field.h"
 #include "texture-font.h"
 #include "platform.h"
 #include "utf8-utils.h"
@@ -408,7 +409,7 @@ int
 texture_font_load_glyph( texture_font_t * self,
                          const char * codepoint )
 {
-    size_t x, y, width, height, depth, w, h;
+    size_t i, x, y, width, height, depth, w, h;
 
     FT_Library library;
     FT_Error error;
@@ -473,7 +474,7 @@ texture_font_load_glyph( texture_font_t * self,
     // WARNING: We use texture-atlas depth to guess if user wants
     //          LCD subpixel rendering
 
-    if( self->rendermode != RENDER_NORMAL )
+    if( self->rendermode != RENDER_NORMAL && self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )
     {
         flags |= FT_LOAD_NO_BITMAP;
     }
@@ -512,7 +513,7 @@ texture_font_load_glyph( texture_font_t * self,
         return 0;
     }
 
-    if( self->rendermode == RENDER_NORMAL )
+    if( self->rendermode == RENDER_NORMAL || self->rendermode == RENDER_SIGNED_DISTANCE_FIELD )
     {
         slot            = face->glyph;
         ft_bitmap       = slot->bitmap;
@@ -614,10 +615,38 @@ texture_font_load_glyph( texture_font_t * self,
         fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
         return 0;
     }
+
     x = region.x;
     y = region.y;
-    texture_atlas_set_region( self->atlas, x, y, w, h,
-                              ft_bitmap.buffer, ft_bitmap.pitch );
+
+    if( self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )
+    {
+        texture_atlas_set_region( self->atlas, x, y, w, h,
+                                  ft_bitmap.buffer, ft_bitmap.pitch );
+    }
+    else
+    {
+        unsigned char *buffer = ft_bitmap.buffer;
+        if( ft_bitmap.pitch != w )
+        {
+            buffer = malloc( w * h );
+
+            for( i = 0; i < h; i++ )
+            {
+                memcpy( buffer + i * w, ft_bitmap.buffer + i * ft_bitmap.pitch, w );
+            }
+        }
+
+        unsigned char *sdf = make_distance_mapb( buffer, w, h );
+        texture_atlas_set_region( self->atlas, x, y, w, h, sdf, w );
+        free( sdf );
+
+        if( ft_bitmap.pitch != w )
+        {
+            free( buffer );
+        }
+    }
+
 
     glyph = texture_glyph_new( );
     glyph->codepoint = utf8_to_utf32( codepoint );
@@ -640,7 +669,7 @@ texture_font_load_glyph( texture_font_t * self,
 
     vector_push_back( self->glyphs, &glyph );
 
-    if( self->rendermode != RENDER_NORMAL )
+    if( self->rendermode != RENDER_NORMAL && self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )
     {
         FT_Done_Glyph( ft_glyph );
     }
