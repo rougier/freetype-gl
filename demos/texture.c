@@ -49,6 +49,7 @@
 
 // ------------------------------------------------------- global variables ---
 GLuint shader;
+texture_atlas_t *atlas;
 vertex_buffer_t * buffer;
 mat4 model, view, projection;
 
@@ -56,7 +57,7 @@ mat4 model, view, projection;
 // ------------------------------------------------------------------- init ---
 void init( void )
 {
-    texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
+    atlas = texture_atlas_new( 512, 512, 1 );
     const char *filename = "fonts/Vera.ttf";
     const char * cache = " !\"#$%&'()*+,-./0123456789:;<=>?"
                          "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
@@ -69,7 +70,6 @@ void init( void )
     {
         texture_font_t * font = texture_font_new_from_file( atlas, i, filename );
         missed += texture_font_load_glyphs( font, cache );
-        texture_atlas_upload( font->atlas );
         texture_font_delete( font );
     }
 
@@ -86,8 +86,15 @@ void init( void )
     glClearColor(1,1,1,1);
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_TEXTURE_2D );
+
+    glGenTextures( 1, &atlas->id );
     glBindTexture( GL_TEXTURE_2D, atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, atlas->width, atlas->height,
+                  0, GL_RED, GL_UNSIGNED_BYTE, atlas->data );
 
     typedef struct { float x,y,z, u,v, r,g,b,a; } vertex_t;
     vertex_t vertices[4] =  {
@@ -205,6 +212,10 @@ int main( int argc, char **argv )
         display( window );
         glfwPollEvents( );
     }
+
+    glDeleteTextures( 1, &atlas->id );
+    atlas->id = 0;
+    texture_atlas_delete( atlas );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

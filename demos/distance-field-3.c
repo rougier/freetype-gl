@@ -73,7 +73,7 @@ float angle = 0;
 GLuint program = 0;
 vertex_buffer_t *buffer;
 texture_font_t * font = 0;
-texture_atlas_t * atlas = 0;
+texture_atlas_t *atlas;
 mat4  model, view, projection;
 
 
@@ -295,8 +295,6 @@ void init( void )
     glyph = load_glyph( "fonts/Vera.ttf", "@", 512, 64, 0.1);
     vector_push_back( font->glyphs, &glyph );
 
-    texture_atlas_upload( atlas );
-
     glyph = texture_font_get_glyph( font, "@");
 
     GLuint indices[6] = {0,1,2, 0,2,3};
@@ -306,6 +304,16 @@ void init( void )
                              {  .5,-.5,0,  glyph->s1,glyph->t1,  0,0,0,1 } };
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
     vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
+
+    glActiveTexture( GL_TEXTURE0 );
+    glGenTextures( 1, &atlas->id );
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, atlas->width, atlas->height,
+                  0, GL_RED, GL_UNSIGNED_BYTE, atlas->data );
 
     program = shader_load( "shaders/distance-field.vert",
                            "shaders/distance-field-2.frag" );
@@ -321,9 +329,6 @@ void display( GLFWwindow* window )
     glClearColor(1.0,1.0,1.0,1.0);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, atlas->id);
-    glEnable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
@@ -450,6 +455,10 @@ int main( int argc, char **argv )
 
         glfwPollEvents( );
     }
+
+    glDeleteTextures( 1, &atlas->id );
+    atlas->id = 0;
+    texture_atlas_delete( atlas );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

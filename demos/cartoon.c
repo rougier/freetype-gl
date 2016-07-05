@@ -94,8 +94,6 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
         vertex_buffer_push_back_vertices( buffer, vertices, 4 );
         pen.x += glyph->advance_x;
     }
-
-    texture_atlas_upload( font->atlas );
 }
 
 
@@ -128,6 +126,15 @@ void init( void )
     font->rendermode = RENDER_NORMAL;
     font->outline_thickness = 0;
     add_text( buffer, font, "Freetype GL", pen, orange1, orange2 );
+
+    glGenTextures( 1, &atlas->id );
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, atlas->width, atlas->height,
+                  0, GL_RED, GL_UNSIGNED_BYTE, atlas->data );
 
     shader = shader_load("shaders/v3f-t2f-c4f.vert",
                          "shaders/v3f-t2f-c4f.frag");
@@ -239,6 +246,10 @@ int main( int argc, char **argv )
         display( window );
         glfwPollEvents( );
     }
+
+    glDeleteTextures( 1, &atlas->id );
+    atlas->id = 0;
+    texture_atlas_delete( atlas );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

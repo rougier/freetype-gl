@@ -67,7 +67,7 @@ typedef struct {
 // ------------------------------------------------------- global variables ---
 GLuint shader;
 vertex_buffer_t *buffer;
-texture_atlas_t * atlas = 0;
+texture_atlas_t *atlas;
 mat4  model, view, projection;
 
 
@@ -122,7 +122,7 @@ add_text( vertex_buffer_t * buffer, texture_font_t * font,
 void init( void )
 {
     texture_font_t *font = 0;
-    texture_atlas_t *atlas = texture_atlas_new( 512, 512, 1 );
+    atlas = texture_atlas_new( 512, 512, 1 );
     const char * filename = "fonts/Vera.ttf";
     char *text = "A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
@@ -140,10 +140,14 @@ void init( void )
         vertex->y -= (int)(bbox.y + bbox.height/2);
     }
 
-
+    glGenTextures( 1, &atlas->id );
     glBindTexture( GL_TEXTURE_2D, atlas->id );
-
-    texture_atlas_upload( atlas );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, atlas->width, atlas->height,
+                  0, GL_RED, GL_UNSIGNED_BYTE, atlas->data );
 
     shader = shader_load( "shaders/distance-field.vert",
                           "shaders/distance-field-2.frag" );
@@ -277,11 +281,17 @@ int main( int argc, char **argv )
     glfwSetWindowSize( window, 800, 600 );
     glfwShowWindow( window );
 
+    glfwSetTime(0.0);
+
     while(!glfwWindowShouldClose( window ))
     {
         display( window );
         glfwPollEvents( );
     }
+
+    glDeleteTextures( 1, &atlas->id );
+    atlas->id = 0;
+    texture_atlas_delete( atlas );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

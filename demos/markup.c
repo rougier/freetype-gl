@@ -168,7 +168,15 @@ void init()
                         &math,      "ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ",
                         NULL );
 
-    texture_atlas_upload( buffer->manager->atlas );
+    glGenTextures( 1, &buffer->manager->atlas->id );
+    glBindTexture( GL_TEXTURE_2D, buffer->manager->atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, buffer->manager->atlas->width,
+                  buffer->manager->atlas->height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                  buffer->manager->atlas->data );
 
     text_buffer_align( buffer, &pen, ALIGN_CENTER );
 
@@ -312,6 +320,10 @@ int main( int argc, char **argv )
         display( window );
         glfwPollEvents( );
     }
+
+    glDeleteTextures( 1, &buffer->manager->atlas->id );
+    buffer->manager->atlas->id = 0;
+    text_buffer_delete( buffer );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

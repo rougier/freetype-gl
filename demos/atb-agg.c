@@ -218,7 +218,12 @@ build_buffer( void )
         v3->shift = fmod(v3->shift + dx-(int)(dx),1.0);
     }
 
-    texture_atlas_upload( atlas);
+    glBindTexture( GL_TEXTURE_2D, buffer->manager->atlas->id );
+    GLenum gl_format = (buffer->manager->atlas->depth == LCD_FILTERING_OFF) ?
+        GL_RED : GL_RGB;
+    glTexImage2D( GL_TEXTURE_2D, 0, gl_format, buffer->manager->atlas->width,
+        buffer->manager->atlas->height, 0, gl_format, GL_UNSIGNED_BYTE,
+        buffer->manager->atlas->data );
 
     texture_font_delete( font );
 }
@@ -571,6 +576,21 @@ void init( GLFWwindow* window )
     buffer_rgb = text_buffer_new( LCD_FILTERING_ON,
                                   "shaders/text.vert",
                                   "shaders/text.frag" );
+
+    glGenTextures( 1, &buffer_a->manager->atlas->id );
+    glBindTexture( GL_TEXTURE_2D, buffer_a->manager->atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+
+    glGenTextures( 1, &buffer_rgb->manager->atlas->id );
+    glBindTexture( GL_TEXTURE_2D, buffer_rgb->manager->atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+
     buffer = buffer_rgb;
     reset();
 
@@ -811,6 +831,13 @@ int main( int argc, char **argv )
     }
 
     TwTerminate();
+
+    glDeleteTextures( 1, &buffer_a->manager->atlas->id );
+    glDeleteTextures( 1, &buffer_rgb->manager->atlas->id );
+    buffer_a->manager->atlas->id = 0;
+    buffer_rgb->manager->atlas->id = 0;
+    text_buffer_delete( buffer_a );
+    text_buffer_delete( buffer_rgb );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

@@ -78,6 +78,7 @@ struct _console_t {
     size_t         cursor;
     markup_t       markup[MARKUP_COUNT];
     vertex_buffer_t * buffer;
+    texture_atlas_t *atlas;
     vec2           pen;
     void (*handlers[4])( struct _console_t *, char * );
 };
@@ -112,7 +113,8 @@ console_new( void )
     self->handlers[__SIGNAL_HISTORY_PREV__] = 0;
     self->pen.x = self->pen.y = 0;
 
-    texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
+    self->atlas = texture_atlas_new( 512, 512, 1 );
+    glGenTextures( 1, &self->atlas->id );
 
     vec4 white = {{1,1,1,1}};
     vec4 black = {{0,0,0,1}};
@@ -135,20 +137,20 @@ console_new( void )
     normal.strikethrough       = 0;
     normal.strikethrough_color = white;
 
-    normal.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMono.ttf" );
+    normal.font = texture_font_new_from_file( self->atlas, 13, "fonts/VeraMono.ttf" );
 
     markup_t bold = normal;
     bold.bold = 1;
-    bold.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMoBd.ttf" );
+    bold.font = texture_font_new_from_file( self->atlas, 13, "fonts/VeraMoBd.ttf" );
 
     markup_t italic = normal;
     italic.italic = 1;
-    bold.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMoIt.ttf" );
+    bold.font = texture_font_new_from_file( self->atlas, 13, "fonts/VeraMoIt.ttf" );
 
     markup_t bold_italic = normal;
     bold.bold = 1;
     italic.italic = 1;
-    italic.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMoBI.ttf" );
+    italic.font = texture_font_new_from_file( self->atlas, 13, "fonts/VeraMoBI.ttf" );
 
     markup_t faint = normal;
     faint.foreground_color.r = 0.35;
@@ -187,7 +189,11 @@ console_new( void )
 // -------------------------------------------------------- console_delete ---
 void
 console_delete( console_t *self )
-{ }
+{
+    glDeleteTextures( 1, &self->atlas->id );
+    self->atlas->id = 0;
+    texture_atlas_delete( self->atlas );
+}
 
 
 
@@ -273,7 +279,6 @@ console_render( console_t *self )
         self->pen.x = 0;
         cursor_x = self->pen.x;
         cursor_y = self->pen.y;
-        texture_atlas_upload( markup.font->atlas );
     }
 
     // Prompt
@@ -290,8 +295,6 @@ console_render( console_t *self )
             console_add_glyph( console, cur_char, prev_char, &markup );
             prev_char = cur_char;
         }
-
-        texture_atlas_upload( markup.font->atlas );
     }
     cursor_x = (int) self->pen.x;
 
@@ -317,8 +320,18 @@ console_render( console_t *self )
                 cursor_x = (int) self->pen.x;
             }
         }
+    }
 
-        texture_atlas_upload( markup.font->atlas );
+    if( self->lines->size || self->prompt[0] != '\0' || self->input[0] != '\0' )
+    {
+        glBindTexture( GL_TEXTURE_2D, self->atlas->id );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, self->atlas->width,
+                      self->atlas->height, 0, GL_RED, GL_UNSIGNED_BYTE,
+                      self->atlas->data );
     }
 
     // Cursor (we use the black character (NULL) as texture )
@@ -785,6 +798,8 @@ int main( int argc, char **argv )
         display( window );
         glfwPollEvents( );
     }
+
+    console_delete( console );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

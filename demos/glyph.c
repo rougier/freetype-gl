@@ -58,6 +58,7 @@ typedef struct {
 
 
 // ------------------------------------------------------- global variables ---
+texture_atlas_t *atlas;
 vertex_buffer_t * text_buffer;
 vertex_buffer_t * line_buffer;
 vertex_buffer_t * point_buffer;
@@ -110,7 +111,7 @@ void init( void )
     vec4 blue  = {{0,0,1,1}};
     vec4 black = {{0,0,0,1}};
 
-    texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1);
+    atlas = texture_atlas_new( 512, 512, 1 );
     texture_font_t * big = texture_font_new_from_file( atlas, 400, "fonts/Vera.ttf");
     texture_font_t * small = texture_font_new_from_file( atlas, 18, "fonts/Vera.ttf");
     texture_font_t * title = texture_font_new_from_file( atlas, 32, "fonts/Vera.ttf");
@@ -125,13 +126,11 @@ void init( void )
     origin.x = width/2  - glyph->offset_x - glyph->width/2;
     origin.y = height/2 - glyph->offset_y + glyph->height/2;
     add_text( text_buffer, big, "g", &black, &origin );
-    texture_atlas_upload( big->atlas );
 
     // title
     pen.x = 50;
     pen.y = 560;
     add_text( text_buffer, title, "Glyph metrics", &black, &pen );
-    texture_atlas_upload( title->atlas );
 
     point_t vertices[] =
         {   // Baseline
@@ -213,7 +212,14 @@ void init( void )
     pen.y = height/2 - glyph->offset_y + glyph->height/2 - 20;
     add_text( text_buffer, small, "Origin", &black, &pen );
 
-    texture_atlas_upload( small->atlas );
+    glGenTextures( 1, &atlas->id );
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, atlas->width, atlas->height,
+                  0, GL_RED, GL_UNSIGNED_BYTE, atlas->data );
 
     GLuint i = 0;
     point_t p;
@@ -363,6 +369,10 @@ int main( int argc, char **argv )
         display( window );
         glfwPollEvents( );
     }
+
+    glDeleteTextures( 1, &atlas->id );
+    atlas->id = 0;
+    texture_atlas_delete( atlas );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

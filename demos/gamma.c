@@ -99,7 +99,6 @@ void init( void )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
         text_buffer_add_text( buffer, &pen, &markup, text, 0 );
-        texture_atlas_upload( markup.font->atlas );
     }
     pen.x = 32;
     pen.y = 252;
@@ -108,8 +107,17 @@ void init( void )
     {
         markup.gamma = 0.75 + 1.5*i*(1.0/14);
         text_buffer_add_text( buffer, &pen, &markup, text, 0 );
-        texture_atlas_upload( markup.font->atlas );
     }
+
+    glGenTextures( 1, &buffer->manager->atlas->id );
+    glBindTexture( GL_TEXTURE_2D, buffer->manager->atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, buffer->manager->atlas->width,
+        buffer->manager->atlas->height, 0, GL_RED, GL_UNSIGNED_BYTE,
+        buffer->manager->atlas->data );
 
     background = vertex_buffer_new( "vertex:3f,color:4f" );
     vertex_t vertices[4*2] = { {  0,  0,0, 1,1,1,1}, {  0,256,0, 1,1,1,1},
@@ -236,6 +244,10 @@ int main( int argc, char **argv )
         display( window );
         glfwPollEvents( );
     }
+
+    glDeleteTextures( 1, &buffer->manager->atlas->id );
+    buffer->manager->atlas->id = 0;
+    text_buffer_delete( buffer );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

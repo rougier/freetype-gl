@@ -102,7 +102,15 @@ void init()
         pen.x += i*0.1;
     }
 
-    texture_atlas_upload( text_buffer->manager->atlas );
+    glGenTextures( 1, &text_buffer->manager->atlas->id );
+    glBindTexture( GL_TEXTURE_2D, text_buffer->manager->atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, text_buffer->manager->atlas->width,
+        text_buffer->manager->atlas->height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+        text_buffer->manager->atlas->data );
 
     shader = shader_load("shaders/v3f-c4f.vert",
                          "shaders/v3f-c4f.frag");
@@ -229,6 +237,10 @@ int main( int argc, char **argv )
         display( window );
         glfwPollEvents( );
     }
+
+    glDeleteTextures( 1, &text_buffer->manager->atlas->id );
+    text_buffer->manager->atlas->id = 0;
+    text_buffer_delete( text_buffer );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

@@ -166,16 +166,6 @@ typedef struct texture_atlas_t
 
 
 /**
- *  Upload atlas to video memory.
- *
- *  @param self a texture atlas structure
- *
- */
-  void
-  texture_atlas_upload( texture_atlas_t * self );
-
-
-/**
  *  Allocate a new region in the atlas.
  *
  *  @param self   a texture atlas structure

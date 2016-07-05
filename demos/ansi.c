@@ -268,7 +268,6 @@ print( text_buffer_t * buffer, vec2 * pen,
             ansi_to_markup(seq_start, seq_size, markup );
             markup->font = font_manager_get_from_markup( buffer->manager, markup );
             text_buffer_add_text( buffer, pen, markup, text_start, text_size );
-            texture_atlas_upload( markup->font->atlas );
         }
     }
 }
@@ -312,6 +311,16 @@ void init( void )
         }
         fclose ( file );
     }
+
+    glGenTextures( 1, &buffer->manager->atlas->id );
+    glBindTexture( GL_TEXTURE_2D, buffer->manager->atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, buffer->manager->atlas->width,
+        buffer->manager->atlas->height, 0, GL_RED, GL_UNSIGNED_BYTE,
+        buffer->manager->atlas->data );
 
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
@@ -418,6 +427,10 @@ int main( int argc, char **argv )
         display( window );
         glfwPollEvents( );
     }
+
+    glDeleteTextures( 1, &buffer->manager->atlas->id );
+    buffer->manager->atlas->id = 0;
+    text_buffer_delete( buffer );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

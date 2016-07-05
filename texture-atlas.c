@@ -36,7 +36,6 @@
 #include <string.h>
 #include <assert.h>
 #include <limits.h>
-#include "opengl.h"
 #include "texture-atlas.h"
 
 
@@ -90,10 +89,6 @@ texture_atlas_delete( texture_atlas_t *self )
     if( self->data )
     {
         free( self->data );
-    }
-    if( self->id )
-    {
-        glDeleteTextures( 1, &self->id );
     }
     free( self );
 }
@@ -302,49 +297,3 @@ texture_atlas_clear( texture_atlas_t * self )
     vector_push_back( self->nodes, &node );
     memset( self->data, 0, self->width*self->height*self->depth );
 }
-
-
-// --------------------------------------------------- texture_atlas_upload ---
-void
-texture_atlas_upload( texture_atlas_t * self )
-{
-    assert( self );
-    assert( self->data );
-
-    if( !self->id )
-    {
-        glGenTextures( 1, &self->id );
-    }
-
-    glBindTexture( GL_TEXTURE_2D, self->id );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    if( self->depth == 4 )
-    {
-#ifdef GL_UNSIGNED_INT_8_8_8_8_REV
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self->width, self->height,
-                      0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, self->data );
-#else
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self->width, self->height,
-                      0, GL_RGBA, GL_UNSIGNED_BYTE, self->data );
-#endif
-    }
-    else if( self->depth == 3 )
-    {
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, self->width, self->height,
-                      0, GL_RGB, GL_UNSIGNED_BYTE, self->data );
-    }
-    else
-    {
-#if defined(GL_ES_VERSION_2_0) || defined(GL_ES_VERSION_3_0)
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE, self->width, self->height,
-                      0, GL_LUMINANCE, GL_UNSIGNED_BYTE, self->data );
-#else
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, self->width, self->height,
-                     0, GL_RED, GL_UNSIGNED_BYTE, self->data );
-#endif
-    }
-}
-

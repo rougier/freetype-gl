@@ -120,13 +120,20 @@ void init( void )
         pen.y += font->height - font->linegap;
     }
 
-    texture_atlas_upload( atlas );
-
     glClearColor( 1.0, 1.0, 1.0, 1.0 );
     glDisable( GL_DEPTH_TEST );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glEnable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );
+
+    glGenTextures( 1, &atlas->id );
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, atlas->width, atlas->height,
+                  0, GL_RED, GL_UNSIGNED_BYTE, atlas->data );
 
     shader = shader_load("shaders/v3f-t2f-c4f.vert",
                          "shaders/v3f-t2f-c4f.frag");
@@ -286,6 +293,10 @@ int main( int argc, char **argv )
         display( window );
         glfwPollEvents( );
     }
+
+    glDeleteTextures( 1, &atlas->id );
+    atlas->id = 0;
+    texture_atlas_delete( atlas );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

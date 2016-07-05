@@ -54,6 +54,7 @@
 
 // ------------------------------------------------------- global variables ---
 GLuint shader;
+texture_atlas_t *atlas;
 vertex_buffer_t * vbuffer;
 mat4 model, view, projection;
 
@@ -69,7 +70,7 @@ void init( void )
 {
     size_t i, j;
 
-    texture_atlas_t * atlas = texture_atlas_new( 512, 512, 3 );
+    atlas = texture_atlas_new( 512, 512, 3 );
     texture_font_t *fonts[20];
     for ( i=0; i< 20; ++i )
     {
@@ -159,9 +160,14 @@ void init( void )
     glClearColor(1,1,1,1);
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( GL_TEXTURE_2D );
+    glGenTextures( 1, &atlas->id );
     glBindTexture( GL_TEXTURE_2D, atlas->id );
-    texture_atlas_upload( atlas );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, atlas->width, atlas->height,
+                  0, GL_RGB, GL_UNSIGNED_BYTE, atlas->data );
     vertex_buffer_upload( vbuffer );
     shader = shader_load("shaders/text.vert", "shaders/text.frag");
     mat4_set_identity( &projection );
@@ -271,6 +277,10 @@ int main( int argc, char **argv )
         display( window );
         glfwPollEvents( );
     }
+
+    glDeleteTextures( 1, &atlas->id );
+    atlas->id = 0;
+    texture_atlas_delete( atlas );
 
     glfwDestroyWindow( window );
     glfwTerminate( );
