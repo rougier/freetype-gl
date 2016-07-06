@@ -409,7 +409,7 @@ int
 texture_font_load_glyph( texture_font_t * self,
                          const char * codepoint )
 {
-    size_t i, x, y, width, height, depth, w, h;
+    size_t i, x, y, width, height, depth;
 
     FT_Library library;
     FT_Error error;
@@ -606,10 +606,27 @@ texture_font_load_glyph( texture_font_t * self,
         FT_Stroker_Done(stroker);
     }
 
-    // We want each glyph to be separated by at least one black pixel
-    w = ft_bitmap.width/depth;
-    h = ft_bitmap.rows;
-    region = texture_atlas_get_region( self->atlas, w+1, h+1 );
+    struct {
+        int left;
+        int top;
+        int right;
+        int bottom;
+    } padding = { 0, 0, 1, 1 };
+
+    if( self->rendermode == RENDER_SIGNED_DISTANCE_FIELD )
+    {
+        padding.top = 1;
+        padding.left = 1;
+    }
+
+    size_t src_w = ft_bitmap.width/depth;
+    size_t src_h = ft_bitmap.rows;
+
+    size_t tgt_w = src_w + padding.left + padding.right;
+    size_t tgt_h = src_h + padding.top + padding.bottom;
+
+    region = texture_atlas_get_region( self->atlas, tgt_w, tgt_h );
+
     if ( region.x < 0 )
     {
         fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
@@ -619,39 +636,28 @@ texture_font_load_glyph( texture_font_t * self,
     x = region.x;
     y = region.y;
 
-    if( self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )
+    unsigned char *buffer = calloc( tgt_w * tgt_h, sizeof(unsigned char) );
+
+    for( i = 0; i < src_h; i++ )
     {
-        texture_atlas_set_region( self->atlas, x, y, w, h,
-                                  ft_bitmap.buffer, ft_bitmap.pitch );
-    }
-    else
-    {
-        unsigned char *buffer = ft_bitmap.buffer;
-        if( ft_bitmap.pitch != w )
-        {
-            buffer = malloc( w * h );
-
-            for( i = 0; i < h; i++ )
-            {
-                memcpy( buffer + i * w, ft_bitmap.buffer + i * ft_bitmap.pitch, w );
-            }
-        }
-
-        unsigned char *sdf = make_distance_mapb( buffer, w, h );
-        texture_atlas_set_region( self->atlas, x, y, w, h, sdf, w );
-        free( sdf );
-
-        if( ft_bitmap.pitch != w )
-        {
-            free( buffer );
-        }
+        memcpy( buffer + (i + padding.top) * tgt_w + padding.left, ft_bitmap.buffer + i * ft_bitmap.pitch, src_w );
     }
 
+    if( self->rendermode == RENDER_SIGNED_DISTANCE_FIELD )
+    {
+        unsigned char *sdf = make_distance_mapb( buffer, tgt_w, tgt_h );
+        free( buffer );
+        buffer = sdf;
+    }
+
+    texture_atlas_set_region( self->atlas, x, y, tgt_w, tgt_h, buffer, tgt_w );
+
+    free( buffer );
 
     glyph = texture_glyph_new( );
     glyph->codepoint = utf8_to_utf32( codepoint );
-    glyph->width    = w;
-    glyph->height   = h;
+    glyph->width    = tgt_w;
+    glyph->height   = tgt_h;
     glyph->rendermode = self->rendermode;
     glyph->outline_thickness = self->outline_thickness;
     glyph->offset_x = ft_glyph_left;
