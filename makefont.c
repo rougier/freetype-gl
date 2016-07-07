@@ -152,7 +152,7 @@ int main( int argc, char **argv )
             continue;
         }
 
-        if ( 0 == strcmp( "--variable", argv[arg] ) || 0 == strcmp( "-arg", argv[arg] )  )
+        if ( 0 == strcmp( "--variable", argv[arg] ) || 0 == strcmp( "-a", argv[arg] )  )
         {
             ++arg;
 
