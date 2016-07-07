@@ -45,7 +45,9 @@
 void print_help()
 {
     fprintf( stderr, "Usage: makefont [--help] --font <font file> "
-             "--header <header file> --size <font size> --variable <variable name> --texture <texture size>\n" );
+             "--header <header file> --size <font size> "
+             "--variable <variable name> --texture <texture size>"
+             "--rendermode <one of 'normal', 'outline_edge', 'outline_positive', 'outline_negative' or 'sdf'>\n" );
 }
 
 
@@ -67,6 +69,13 @@ int main( int argc, char **argv )
     const char * variable_name   = "font";
     int show_help = 0;
     size_t texture_width = 128;
+    rendermode_t rendermode = RENDER_NORMAL;
+    const char *rendermodes[5];
+    rendermodes[RENDER_NORMAL] = "normal";
+    rendermodes[RENDER_OUTLINE_EDGE] = "outline edge";
+    rendermodes[RENDER_OUTLINE_POSITIVE] = "outline added";
+    rendermodes[RENDER_OUTLINE_NEGATIVE] = "outline removed";
+    rendermodes[RENDER_SIGNED_DISTANCE_FIELD] = "signed distance field";
 
     for ( arg = 1; arg < argc; ++arg )
     {
@@ -206,6 +215,56 @@ int main( int argc, char **argv )
             continue;
         }
 
+        if ( 0 == strcmp( "--rendermode", argv[arg] ) || 0 == strcmp( "-r", argv[arg] ) )
+        {
+            ++arg;
+
+            if ( 128.0 != texture_width )
+            {
+                fprintf( stderr, "Multiple --texture parameters.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            if ( arg >= argc )
+            {
+                fprintf( stderr, "No texture size given.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            errno = 0;
+
+            if( 0 == strcmp( "normal", argv[arg] ) )
+            {
+                rendermode = RENDER_NORMAL;
+            }
+            else if( 0 == strcmp( "outline_edge", argv[arg] ) )
+            {
+                rendermode = RENDER_OUTLINE_EDGE;
+            }
+            else if( 0 == strcmp( "outline_positive", argv[arg] ) )
+            {
+                rendermode = RENDER_OUTLINE_POSITIVE;
+            }
+            else if( 0 == strcmp( "outline_negative", argv[arg] ) )
+            {
+                rendermode = RENDER_OUTLINE_NEGATIVE;
+            }
+            else if( 0 == strcmp( "sdf", argv[arg] ) )
+            {
+                rendermode = RENDER_SIGNED_DISTANCE_FIELD;
+            }
+            else
+            {
+                fprintf( stderr, "No valid render mode given.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            continue;
+        }
+
         fprintf( stderr, "Unknown parameter %s\n", argv[arg] );
         print_help();
         exit( 1 );
@@ -247,6 +306,7 @@ int main( int argc, char **argv )
 
     texture_atlas_t * atlas = texture_atlas_new( texture_width, texture_width, 1 );
     texture_font_t  * font  = texture_font_new_from_file( atlas, font_size, font_filename );
+    font->rendermode = rendermode;
 
     size_t missed = texture_font_load_glyphs( font, font_cache );
 
@@ -258,7 +318,8 @@ int main( int argc, char **argv )
             "Texture occupancy       : %.2f%%\n"
             "\n"
             "Header filename         : %s\n"
-            "Variable name           : %s\n",
+            "Variable name           : %s\n"
+            "Render mode             : %s\n",
             font_filename,
             font_size,
             strlen(font_cache),
@@ -266,7 +327,8 @@ int main( int argc, char **argv )
             atlas->width, atlas->height, atlas->depth,
             100.0 * atlas->used / (float)(atlas->width * atlas->height),
             header_filename,
-            variable_name );
+            variable_name,
+            rendermodes[rendermode] );
 
     size_t texture_size = atlas->width * atlas->height *atlas->depth;
     size_t glyph_count = font->glyphs->size;
