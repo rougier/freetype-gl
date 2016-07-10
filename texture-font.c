@@ -403,7 +403,7 @@ int
 texture_font_load_glyph( texture_font_t * self,
                          const char * codepoint )
 {
-    size_t i, x, y, width, height, depth;
+    size_t i, x, y;
 
     FT_Library library;
     FT_Error error;
@@ -432,17 +432,11 @@ texture_font_load_glyph( texture_font_t * self,
         return 1;
     }
 
-    width  = self->atlas->width;
-    height = self->atlas->height;
-    depth  = self->atlas->depth;
-
     /* codepoint NULL is special : it is used for line drawing (overline,
      * underline, strikethrough) and background.
      */
     if( !codepoint )
     {
-        size_t width  = self->atlas->width;
-        size_t height = self->atlas->height;
         ivec4 region = texture_atlas_get_region( self->atlas, 5, 5 );
         texture_glyph_t * glyph = texture_glyph_new( );
         static unsigned char data[4*4*3] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
@@ -456,10 +450,10 @@ texture_font_load_glyph( texture_font_t * self,
         }
         texture_atlas_set_region( self->atlas, region.x, region.y, 4, 4, data, 0 );
         glyph->codepoint = -1;
-        glyph->s0 = (region.x+2)/(float)width;
-        glyph->t0 = (region.y+2)/(float)height;
-        glyph->s1 = (region.x+3)/(float)width;
-        glyph->t1 = (region.y+3)/(float)height;
+        glyph->s0 = (region.x+2)/(float)self->atlas->width;
+        glyph->t0 = (region.y+2)/(float)self->atlas->height;
+        glyph->s1 = (region.x+3)/(float)self->atlas->width;
+        glyph->t1 = (region.y+3)/(float)self->atlas->height;
         vector_push_back( self->glyphs, &glyph );
 
         FT_Done_Face(face);
@@ -492,7 +486,7 @@ texture_font_load_glyph( texture_font_t * self,
         flags |= FT_LOAD_FORCE_AUTOHINT;
     }
 
-    if( depth == 3 )
+    if( self->atlas->depth == 3 )
     {
         FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
         flags |= FT_LOAD_TARGET_LCD;
@@ -563,7 +557,7 @@ texture_font_load_glyph( texture_font_t * self,
             goto cleanup_stroker;
         }
 
-        if( depth == 1 )
+        if( self->atlas->depth == 1 )
             error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_NORMAL, 0, 1);
         else
             error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_LCD, 0, 1);
@@ -604,7 +598,7 @@ cleanup_stroker:
         padding.left = 1;
     }
 
-    size_t src_w = ft_bitmap.width/depth;
+    size_t src_w = ft_bitmap.width/self->atlas->depth;
     size_t src_h = ft_bitmap.rows;
 
     size_t tgt_w = src_w + padding.left + padding.right;
@@ -647,10 +641,10 @@ cleanup_stroker:
     glyph->outline_thickness = self->outline_thickness;
     glyph->offset_x = ft_glyph_left;
     glyph->offset_y = ft_glyph_top;
-    glyph->s0       = x/(float)width;
-    glyph->t0       = y/(float)height;
-    glyph->s1       = (x + glyph->width)/(float)width;
-    glyph->t1       = (y + glyph->height)/(float)height;
+    glyph->s0       = x/(float)self->atlas->width;
+    glyph->t0       = y/(float)self->atlas->height;
+    glyph->s1       = (x + glyph->width)/(float)self->atlas->width;
+    glyph->t1       = (y + glyph->height)/(float)self->atlas->height;
 
     // Discard hinting to get advance
     FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
