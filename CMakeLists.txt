@@ -60,9 +60,9 @@ option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 
 include(CheckIncludeFile)
 
-check_include_file(stdbool.h HAS_MATH_H)
+check_include_file(stdbool.h HAS_STDBOOL_H)
 
-if(NOT HAS_MATH_H)
+if(NOT HAS_STDBOOL_H)
     message(FATAL_ERROR "Required stdbool.h file not found")
 endif()
 
