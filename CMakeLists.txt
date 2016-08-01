@@ -61,9 +61,14 @@ option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 include(CheckIncludeFile)
 
 check_include_file(stdbool.h HAS_STDBOOL_H)
+check_include_file(stdint.h HAS_STDINT_H)
 
 if(NOT HAS_STDBOOL_H)
     message(FATAL_ERROR "Required stdbool.h file not found")
+endif()
+
+if(NOT HAS_STDINT_H)
+    message(FATAL_ERROR "Required stdint.h file not found")
 endif()
 
 if(WIN32 OR WIN64)
@@ -71,8 +76,6 @@ if(WIN32 OR WIN64)
         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew)
     set(ENV{FREETYPE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype)
-    set(VS789FIX_INCLUDE_DIR
-        ${CMAKE_CURRENT_SOURCE_DIR}/windows/include)
 else()
     find_library(MATH_LIBRARY m)
 endif()
@@ -88,7 +91,6 @@ include_directories(
     ${OPENGL_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${VS789FIX_INCLUDE_DIR}
     ${GLEW_INCLUDE_PATH}
 )
 
