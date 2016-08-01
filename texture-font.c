@@ -426,8 +426,11 @@ texture_font_load_glyph( texture_font_t * self,
         return 0;
 
     /* Check if codepoint has been already loaded */
-    if( texture_font_find_glyph( self, codepoint ) )
+    if (texture_font_find_glyph(self, codepoint)) {
+        FT_Done_Face(face);
+        FT_Done_FreeType(library);
         return 1;
+    }
 
     width  = self->atlas->width;
     height = self->atlas->height;
@@ -458,6 +461,9 @@ texture_font_load_glyph( texture_font_t * self,
         glyph->s1 = (region.x+3)/(float)width;
         glyph->t1 = (region.y+3)/(float)height;
         vector_push_back( self->glyphs, &glyph );
+
+        FT_Done_Face(face);
+        FT_Done_FreeType(library);
         return 1;
     }
 
