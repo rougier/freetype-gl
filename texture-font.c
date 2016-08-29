@@ -621,7 +621,7 @@ cleanup_stroker:
     unsigned char *src_ptr = ft_bitmap.buffer;
     for( i = 0; i < src_h; i++ )
     {
-        memcpy( dst_ptr, src_ptr, ft_bitmap.pitch);
+        memcpy( dst_ptr, src_ptr, ft_bitmap.width);
         dst_ptr += tgt_w * self->atlas->depth;
         src_ptr += ft_bitmap.pitch;
     }
