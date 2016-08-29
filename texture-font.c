@@ -615,11 +615,15 @@ cleanup_stroker:
     x = region.x;
     y = region.y;
 
-    unsigned char *buffer = calloc( tgt_w * tgt_h, sizeof(unsigned char) );
+    unsigned char *buffer = calloc( tgt_w * tgt_h * self->atlas->depth, sizeof(unsigned char) );
 
+    unsigned char *dst_ptr = buffer + (padding.top * tgt_w + padding.left) * self->atlas->depth;
+    unsigned char *src_ptr = ft_bitmap.buffer;
     for( i = 0; i < src_h; i++ )
     {
-        memcpy( buffer + (i + padding.top) * tgt_w + padding.left, ft_bitmap.buffer + i * ft_bitmap.pitch, src_w );
+        memcpy( dst_ptr, src_ptr, ft_bitmap.pitch);
+        dst_ptr += tgt_w * self->atlas->depth;
+        src_ptr += ft_bitmap.pitch;
     }
 
     if( self->rendermode == RENDER_SIGNED_DISTANCE_FIELD )
@@ -629,7 +633,7 @@ cleanup_stroker:
         buffer = sdf;
     }
 
-    texture_atlas_set_region( self->atlas, x, y, tgt_w, tgt_h, buffer, tgt_w );
+    texture_atlas_set_region( self->atlas, x, y, tgt_w, tgt_h, buffer, tgt_w * self->atlas->depth);
 
     free( buffer );
 
