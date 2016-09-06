@@ -77,11 +77,18 @@ if(WIN32 OR WIN64)
     set(ENV{FREETYPE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype)
 else()
+    find_library(BZ_LIBRARY bz2)
+    find_library(Z_LIBRARY z)
     find_library(MATH_LIBRARY m)
 endif()
 
-find_package(OpenGL REQUIRED)
-find_package(Freetype REQUIRED)
+find_package(Freetype)
+
+if(DEFINED ANDROID_ABI)
+  set(OPENGL_LIBRARY  ${OPENGL_gl_LIBRARY} )
+else()
+  find_package(OpenGL REQUIRED)
+endif()
 
 if(freetype-gl_WITH_GLEW)
     find_package(GLEW REQUIRED)
@@ -140,10 +147,37 @@ set(FREETYPE_GL_SRC
     vertex-buffer.c
 )
 
-add_library(freetype-gl STATIC
+add_library(freetype-gl SHARED
     ${FREETYPE_GL_SRC}
     ${FREETYPE_GL_HDR}
 )
+if(NOT DEFINED ANDROID_ABI)
+  target_link_libraries( freetype-gl
+    ${OPENGL_LIBRARY}
+    ${FREETYPE_LIBRARIES}
+    ${Z_LIBRARY}
+    ${BZ_LIBRARY}
+    ${MATH_LIBRARY}
+  )
+else()
+  target_link_libraries( freetype-gl
+    ${FREETYPE_LIBRARIES}
+    ${OPENGL_LIBRARY}
+    ${Z_LIBRARY}
+    ${BZ_LIBRARY}
+    ${MATH_LIBRARY}
+  )
+
+endif()
+add_library(freetype-gl-a STATIC
+    ${FREETYPE_GL_SRC}
+    ${FREETYPE_GL_HDR}
+)
+target_link_libraries( freetype-gl-a
+${FREETYPE_LIBRARIES}
+)
+
+set_target_properties(freetype-gl-a PROPERTIES OUTPUT_NAME freetype-gl)
 
 if(freetype-gl_BUILD_MAKEFONT)
     add_executable(makefont makefont.c)
@@ -152,10 +186,11 @@ if(freetype-gl_BUILD_MAKEFONT)
         freetype-gl
         ${OPENGL_LIBRARY}
         ${FREETYPE_LIBRARIES}
+        ${Z_LIBRARY}
+        ${BZ_LIBRARY}
         ${MATH_LIBRARY}
         ${GLEW_LIBRARY}
     )
-
     if(MSVC AND NOT (MSVC_VERSION LESS 1900))
         # prevent error LNK2019: unresolved external symbol _sprintf referenced in function __bdf_parse_properties
         # see http://stackoverflow.com/a/32418900/469659
