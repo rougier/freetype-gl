@@ -37,7 +37,7 @@ macro(CREATE_DEMO _target _sources)
     target_link_libraries(${_target}
         freetype-gl
         ${OPENGL_LIBRARY}
-        ${GLFW3_LIBRARY}
+        glfw ${GLFW_LIBRARIES}
         ${FREETYPE_LIBRARIES}
         ${GLEW_LIBRARY}
     )
@@ -69,9 +69,6 @@ include_directories(
     ${FONTCONFIG_INCLUDE_DIR}
 )
 
-link_directories(
-    ${GLFW3_LIBRARY_DIR}
-)
 
 add_custom_command(
     DEPENDS
@@ -111,6 +108,7 @@ create_demo(distance-field distance-field.c)
 create_demo(distance-field-2 distance-field-2.c)
 create_demo(distance-field-3 distance-field-3.c)
 
+
 if(FONTCONFIG_FOUND)
    create_demo(markup markup.c)
    target_link_libraries(markup ${FONTCONFIG_LIBRARY})
@@ -118,7 +116,7 @@ endif()
 
 if(ANT_TWEAK_BAR_FOUND)
     create_demo(atb-agg atb-agg.c)
-    target_link_libraries(atb-agg ${ANT_TWEAK_BAR_LIBRARY})
+    target_link_libraries(atb-agg ${ANT_TWEAK_BAR_LIBRARY} stdc++)
 endif()
 
 # Copy font and shaders into build directory for in-place testing
