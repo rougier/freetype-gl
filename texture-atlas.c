@@ -115,7 +115,10 @@ texture_atlas_set_region( texture_atlas_t * self,
     assert( (x + width) <= (self->width-1));
     assert( y < (self->height-1));
     assert( (y + height) <= (self->height-1));
-    assert( data );
+	
+    //prevent copying data from undefined position 
+    //and prevent memcpy's undefined behavior when count is zero
+    assert(height == 0 || (data != NULL && width > 0));
 
     depth = self->depth;
     charsize = sizeof(char);
