@@ -32,7 +32,7 @@
 # =========================================================================
 cmake_minimum_required(VERSION 2.8.5)
 
-find_package(Doxygen)
+find_package(Doxygen REQUIRED)
 
 set(FREETYPE_GL_APIDOC_SRC
     Doxyfile.in
