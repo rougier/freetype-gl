@@ -17,6 +17,7 @@
 #include "shader.h"
 #include "vertex-buffer.h"
 #include "utf8-utils.h"
+#include "screenshot-util.h"
 
 #include <GLFW/glfw3.h>
 
@@ -138,6 +139,18 @@ void error_callback( int error, const char* description )
 int main( int argc, char **argv )
 {
     GLFWwindow* window;
+    char* screenshot_path = NULL;
+
+    if (argc > 1)
+    {
+        if (argc == 3 && 0 == strcmp( "--screenshot", argv[1] ))
+            screenshot_path = argv[2];
+        else
+        {
+            fprintf( stderr, "Unknown or incomplete parameters given\n" );
+            exit( EXIT_FAILURE );
+        }
+    }
 
     glfwSetErrorCallback( error_callback );
 
@@ -149,7 +162,7 @@ int main( int argc, char **argv )
     glfwWindowHint( GLFW_VISIBLE, GL_FALSE );
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
-    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
+    window = glfwCreateWindow( 512, 512, argv[0], NULL, NULL );
 
     if (!window)
     {
@@ -178,13 +191,19 @@ int main( int argc, char **argv )
 
     init();
 
-    glfwSetWindowSize( window, 512, 512 );
     glfwShowWindow( window );
+    reshape( window, 512, 512 );
 
-    while(!glfwWindowShouldClose( window ))
+    while (!glfwWindowShouldClose( window ))
     {
         display( window );
         glfwPollEvents( );
+
+        if (screenshot_path)
+        {
+            screenshot( window, screenshot_path );
+            glfwSetWindowShouldClose( window, 1 );
+        }
     }
 
     glDeleteTextures( 1, &atlas->id );

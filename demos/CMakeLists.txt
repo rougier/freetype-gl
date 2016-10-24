@@ -44,8 +44,14 @@ find_package(FontConfig)
 add_library(demo-utils OBJECT
     mat4.h
     mat4.c
+    screenshot-util.h
+    screenshot-util.c
     shader.h
     shader.c
+)
+
+target_include_directories(demo-utils
+    PUBLIC $<TARGET_PROPERTY:glfw,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 add_custom_command(

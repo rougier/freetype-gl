@@ -4,8 +4,7 @@
  * file `LICENSE` for more details.
  */
 #include <stdio.h>
-#include <ft2build.h>
-#include FT_CONFIG_OPTIONS_H
+#include <string.h>
 
 #include "freetype-gl.h"
 #include "font-manager.h"
@@ -14,8 +13,11 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+#include "screenshot-util.h"
 
 #include <GLFW/glfw3.h>
+#include <ft2build.h>
+#include FT_CONFIG_OPTIONS_H
 
 
 // ------------------------------------------------------- typedef & struct ---
@@ -178,6 +180,18 @@ void error_callback( int error, const char* description )
 int main( int argc, char **argv )
 {
     GLFWwindow* window;
+    char* screenshot_path = NULL;
+
+    if (argc > 1)
+    {
+        if (argc == 3 && 0 == strcmp( "--screenshot", argv[1] ))
+            screenshot_path = argv[2];
+        else
+        {
+            fprintf( stderr, "Unknown or incomplete parameters given\n" );
+            exit( EXIT_FAILURE );
+        }
+    }
 
 #ifndef FT_CONFIG_OPTION_SUBPIXEL_RENDERING
     fprintf(stderr,
@@ -196,7 +210,7 @@ int main( int argc, char **argv )
     glfwWindowHint( GLFW_VISIBLE, GL_FALSE );
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
-    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
+    window = glfwCreateWindow( 260, 330, argv[0], NULL, NULL );
 
     if (!window)
     {
@@ -225,13 +239,19 @@ int main( int argc, char **argv )
 
     init();
 
-    glfwSetWindowSize( window, 260, 330 );
     glfwShowWindow( window );
+    reshape( window, 260, 330 );
 
-    while(!glfwWindowShouldClose( window ))
+    while (!glfwWindowShouldClose( window ))
     {
         display( window );
         glfwPollEvents( );
+
+        if (screenshot_path)
+        {
+            screenshot( window, screenshot_path );
+            glfwSetWindowShouldClose( window, 1 );
+        }
     }
 
     glDeleteProgram( bounds_shader );
