@@ -100,7 +100,7 @@ if(NOT HAVE_M_PI)
     endif()
 endif()
 
-if(WIN32 OR WIN64)
+if(NOT MINGW AND (WIN32 OR WIN64))
     set(GLEW_ROOT_DIR
         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew)
     set(ENV{FREETYPE_DIR}
