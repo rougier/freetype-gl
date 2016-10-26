@@ -119,6 +119,7 @@ endif()
 if(ANT_TWEAK_BAR_FOUND)
     create_demo(atb-agg atb-agg.c)
     target_link_libraries(atb-agg ${ANT_TWEAK_BAR_LIBRARY})
+    set_target_properties(atb-agg PROPERTIES LINKER_LANGUAGE CXX)
 endif()
 
 # Copy font and shaders into build directory for in-place testing
