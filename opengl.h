@@ -48,9 +48,12 @@
 #elif defined(_WIN32) || defined(_WIN64)
 #  include <GL/glew.h>
 #  include <GL/wglew.h>
-#else
+#elif !defined(ANDROID)
 #  include <GL/glew.h>
 #  include <GL/gl.h>
+#else
+#  include <GLES3/gl3.h>
+#  include <GLES3/gl3ext.h>
 #endif
 
 #endif /* OPEN_GL_H */
