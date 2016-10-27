@@ -36,8 +36,8 @@ macro(CREATE_DEMO _target _sources)
     add_executable(${_target} ${_sources})
     target_link_libraries(${_target}
         freetype-gl
+        glfw
         ${OPENGL_LIBRARY}
-        ${GLFW3_LIBRARY}
         ${FREETYPE_LIBRARIES}
         ${MATH_LIBRARY}
         ${GLEW_LIBRARY}
@@ -60,14 +60,6 @@ endif()
 find_package(glfw3 REQUIRED)
 find_package(AntTweakBar)
 find_package(FontConfig)
-
-include_directories(
-    ${GLFW3_INCLUDE_DIR}
-)
-
-link_directories(
-    ${GLFW3_LIBRARY_DIR}
-)
 
 add_custom_command(
     DEPENDS
