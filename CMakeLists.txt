@@ -96,7 +96,7 @@ if(NOT HAVE_M_PI)
     if(NOT HAVE_M_PI)
         message(FATAL_ERROR "`M_PI` not defined in `math.h`.")
     else()
-        add_defines(-D_USE_MATH_DEFINES)
+        add_definitions(-D_USE_MATH_DEFINES)
     endif()
 endif()
 
