@@ -58,18 +58,11 @@ option(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
 option(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (experimental)" OFF)
 option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 
-include(CheckIncludeFile)
+include(RequireIncludeFile)
 
-check_include_file(stdbool.h HAS_STDBOOL_H)
-check_include_file(stdint.h HAS_STDINT_H)
-
-if(NOT HAS_STDBOOL_H)
-    message(FATAL_ERROR "Required stdbool.h file not found")
-endif()
-
-if(NOT HAS_STDINT_H)
-    message(FATAL_ERROR "Required stdint.h file not found")
-endif()
+require_include_file(stdbool.h HAVE_STDBOOL_H)
+require_include_file(stdint.h HAVE_STDINT_H)
+require_include_file(math.h HAVE_MATH_H)
 
 if(WIN32 OR WIN64)
     set(GLEW_ROOT_DIR
