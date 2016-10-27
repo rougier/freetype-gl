@@ -1,0 +1,15 @@
+version: ci-{build}
+init:
+  - git config --global core.eol native
+  - git config --global core.autocrlf true
+install:
+  - '"C:\Program Files (X86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"'
+  # Remove the VS Xamarin targets to reduce AppVeyor specific noise in build
+  # logs.  See also http://help.appveyor.com/discussions/problems/4569
+  - del "C:\Program Files (x86)\MSBuild\12.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
+before_build:
+  - if not exist build\NUL mkdir build
+  - cd build
+build_script:
+  - cmake -G "Visual Studio 12" ..
+  - cmake --build . --config RelWithDebInfo -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
