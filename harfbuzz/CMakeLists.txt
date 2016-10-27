@@ -40,11 +40,9 @@ macro(CREATE_DEMO _target _sources)
         ${GLFW3_LIBRARY}
         ${FREETYPE_LIBRARIES}
         ${HARFBUZZ_LIBRARIES}
+        ${MATH_LIBRARY}
         ${GLEW_LIBRARY}
      )
-     if(MATH_LIBRARY)
-         target_link_libraries(${_target} ${MATH_LIBRARY})
-     endif()
     if(MSVC)
       # Compile demos as C++
       set_source_files_properties(${_sources} PROPERTIES LANGUAGE CXX)

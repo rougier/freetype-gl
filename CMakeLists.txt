@@ -59,18 +59,24 @@ option(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (exper
 option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 
 include(RequireIncludeFile)
+include(CheckLibraryExists)
 
 require_include_file(stdbool.h HAVE_STDBOOL_H)
 require_include_file(stdint.h HAVE_STDINT_H)
 require_include_file(math.h HAVE_MATH_H)
+
+check_library_exists(m cos "" HAVE_MATH_LIBRARY)
+
+if(HAVE_MATH_LIBRARY)
+    list(APPEND CMAKE_REQUIRED_LIBRARIES m)
+    set(MATH_LIBRARY m)
+endif()
 
 if(WIN32 OR WIN64)
     set(GLEW_ROOT_DIR
         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew)
     set(ENV{FREETYPE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype)
-else()
-    find_library(MATH_LIBRARY m)
 endif()
 
 find_package(OpenGL REQUIRED)
