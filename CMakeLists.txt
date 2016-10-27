@@ -61,6 +61,7 @@ option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 include(RequireIncludeFile)
 include(RequireFunctionExists)
 include(CheckLibraryExists)
+include(CheckSymbolExists)
 
 require_include_file(stdbool.h HAVE_STDBOOL_H)
 require_include_file(stdint.h HAVE_STDINT_H)
@@ -84,6 +85,20 @@ require_function_exists(sin HAVE_SIN)
 require_function_exists(sqrt HAVE_SQRT)
 require_function_exists(tan HAVE_TAN)
 
+check_symbol_exists(M_PI "math.h" HAVE_M_PI)
+
+if(NOT HAVE_M_PI)
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS -D_USE_MATH_DEFINES)
+
+    check_symbol_exists(M_PI "math.h" HAVE_M_PI)
+
+    if(NOT HAVE_M_PI)
+        message(FATAL_ERROR "`M_PI` not defined in `math.h`.")
+    else()
+        add_defines(-D_USE_MATH_DEFINES)
+    endif()
+endif()
+
 if(WIN32 OR WIN64)
     set(GLEW_ROOT_DIR
         ${CMAKE_CURRENT_SOURCE_DIR}/windows/glew)
@@ -106,9 +121,8 @@ include_directories(
 )
 
 if(MSVC)
-    # _USE_MATH_DEFINES -> define M_PI
-    # _CRT_NONSTDC_NO_DEPRECATE -> remove warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup.
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_USE_MATH_DEFINES -D_CRT_NONSTDC_NO_DEPRECATE)
+    # _CRT_NONSTDC_NO_DEPRECATE -> remove warning C4996
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE)
 endif(MSVC)
 
 if(freetype-gl_USE_VAO)
