@@ -59,6 +59,7 @@ option(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (exper
 option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 
 include(RequireIncludeFile)
+include(RequireFunctionExists)
 include(CheckLibraryExists)
 
 require_include_file(stdbool.h HAVE_STDBOOL_H)
@@ -71,6 +72,17 @@ if(HAVE_MATH_LIBRARY)
     list(APPEND CMAKE_REQUIRED_LIBRARIES m)
     set(MATH_LIBRARY m)
 endif()
+
+require_function_exists(cos HAVE_COS)
+require_function_exists(fabs HAVE_FABS)
+require_function_exists(floor HAVE_FLOOR)
+require_function_exists(fmod HAVE_FMOD)
+require_function_exists(pow HAVE_POW)
+require_function_exists(roundf HAVE_ROUNDF)
+require_function_exists(round HAVE_ROUND)
+require_function_exists(sin HAVE_SIN)
+require_function_exists(sqrt HAVE_SQRT)
+require_function_exists(tan HAVE_TAN)
 
 if(WIN32 OR WIN64)
     set(GLEW_ROOT_DIR
