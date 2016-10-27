@@ -36,10 +36,10 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <math.h>
 #include "opengl.h"
 #include "text-buffer.h"
 #include "utf8-utils.h"
-#include "math.h"
 
 #define SET_GLYPH_VERTEX(value,x0,y0,z0,s0,t0,r,g,b,a,sh,gm) { \
 	glyph_vertex_t *gv=&value;                                 \
@@ -608,7 +608,7 @@ text_buffer_align( text_buffer_t * self, vec2 * pen,
             dx = self_center - line_center;
         }
 
-        dx = (float)round( dx );
+        dx = roundf( dx );
 
         for( j=line_info->line_start; j < line_end; ++j )
         {

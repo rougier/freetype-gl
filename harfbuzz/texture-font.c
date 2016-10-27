@@ -38,7 +38,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include <math.h>
 #include "texture-font.h"
 #include "platform.h"
 

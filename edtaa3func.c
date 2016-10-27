@@ -54,6 +54,7 @@
  THE SOFTWARE.
  */
 
+#include <math.h>
 #include "edtaa3func.h"
 
 /*

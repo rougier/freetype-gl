@@ -31,6 +31,7 @@
  * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  */
+#include <math.h>
 #include <float.h>
 #include <stdlib.h>
 #include <string.h>

@@ -263,14 +263,14 @@ texture_font_init(texture_font_t *self)
         return -1;
 
     self->underline_position = face->underline_position / (float)(HRESf*HRESf) * self->size;
-    self->underline_position = round( self->underline_position );
+    self->underline_position = roundf( self->underline_position );
     if( self->underline_position > -2 )
     {
         self->underline_position = -2.0;
     }
 
     self->underline_thickness = face->underline_thickness / (float)(HRESf*HRESf) * self->size;
-    self->underline_thickness = round( self->underline_thickness );
+    self->underline_thickness = roundf( self->underline_thickness );
     if( self->underline_thickness < 1 )
     {
         self->underline_thickness = 1.0;
