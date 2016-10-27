@@ -85,12 +85,13 @@ require_function_exists(sin HAVE_SIN)
 require_function_exists(sqrt HAVE_SQRT)
 require_function_exists(tan HAVE_TAN)
 
-check_symbol_exists(M_PI "math.h" HAVE_M_PI)
+check_symbol_exists(M_PI math.h HAVE_M_PI)
 
 if(NOT HAVE_M_PI)
     list(APPEND CMAKE_REQUIRED_DEFINITIONS -D_USE_MATH_DEFINES)
+    unset(HAVE_M_PI CACHE)
 
-    check_symbol_exists(M_PI "math.h" HAVE_M_PI)
+    check_symbol_exists(M_PI math.h HAVE_M_PI)
 
     if(NOT HAVE_M_PI)
         message(FATAL_ERROR "`M_PI` not defined in `math.h`.")
