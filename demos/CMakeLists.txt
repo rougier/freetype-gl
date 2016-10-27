@@ -63,8 +63,6 @@ find_package(FontConfig)
 
 include_directories(
     ${GLFW3_INCLUDE_DIR}
-    ${ANT_TWEAK_BAR_INCLUDE_PATH}
-    ${FONTCONFIG_INCLUDE_DIR}
 )
 
 link_directories(
@@ -110,11 +108,13 @@ create_demo(distance-field-2 distance-field-2.c)
 create_demo(distance-field-3 distance-field-3.c)
 
 if(FONTCONFIG_FOUND)
-   create_demo(markup markup.c)
-   target_link_libraries(markup ${FONTCONFIG_LIBRARY})
+    include_directories(${FONTCONFIG_INCLUDE_DIR})
+    create_demo(markup markup.c)
+    target_link_libraries(markup ${FONTCONFIG_LIBRARY})
 endif()
 
 if(ANT_TWEAK_BAR_FOUND)
+    include_directories(${ANT_TWEAK_BAR_INCLUDE_PATH})
     create_demo(atb-agg atb-agg.c)
     target_link_libraries(atb-agg ${ANT_TWEAK_BAR_LIBRARY})
     set_target_properties(atb-agg PROPERTIES LINKER_LANGUAGE CXX)
