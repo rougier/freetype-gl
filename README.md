@@ -1,6 +1,7 @@
 # Freetype GL - A C OpenGL Freetype engine
 
-[![Build Status](https://travis-ci.org/rougier/freetype-gl.png?branch=master)](https://travis-ci.org/rougier/freetype-gl)
+[![Build Status Travis](https://travis-ci.org/rougier/freetype-gl.png?branch=master)](https://travis-ci.org/rougier/freetype-gl)
+[![Build Status Appveyor](https://ci.appveyor.com/api/projects/status/github/rougier/freetype-gl?branch=master)](https://ci.appveyor.com/project/rougier/freetype-gl)
 
 A small library for displaying Unicode in OpenGL using a single texture and
 a single vertex buffer.
