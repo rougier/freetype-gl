@@ -41,6 +41,13 @@
 #include <string.h>
 
 
+#ifndef WIN32
+#   define PRIzu "zu"
+#else
+#   define PRIzu "Iu"
+#endif
+
+
 // ------------------------------------------------------------- print help ---
 void print_help()
 {
@@ -411,7 +418,7 @@ int main( int argc, char **argv )
         "    float advance_x, advance_y;\n"
         "    float s0, t0, s1, t1;\n"
         "    size_t kerning_count;\n"
-        "    kerning_t kerning[%zu];\n"
+        "    kerning_t kerning[%" PRIzu "];\n"
         "} texture_glyph_t;\n\n", max_kerning_count );
 
     fprintf( file,
@@ -420,14 +427,14 @@ int main( int argc, char **argv )
         "    size_t tex_width;\n"
         "    size_t tex_height;\n"
         "    size_t tex_depth;\n"
-        "    char tex_data[%zu];\n"
+        "    char tex_data[%" PRIzu "];\n"
         "    float size;\n"
         "    float height;\n"
         "    float linegap;\n"
         "    float ascender;\n"
         "    float descender;\n"
         "    size_t glyphs_count;\n"
-        "    texture_glyph_t glyphs[%zu];\n"
+        "    texture_glyph_t glyphs[%" PRIzu "];\n"
         "} texture_font_t;\n\n", texture_size, glyph_count );
 
 
@@ -438,7 +445,7 @@ int main( int argc, char **argv )
     // ------------
     // Texture data
     // ------------
-    fprintf( file, " %zu, %zu, %zu, \n", atlas->width, atlas->height, atlas->depth );
+    fprintf( file, " %" PRIzu ", %" PRIzu ", %" PRIzu ", \n", atlas->width, atlas->height, atlas->depth );
     fprintf( file, " {" );
     for( i=0; i < texture_size; i+= 32 )
     {
@@ -464,7 +471,7 @@ int main( int argc, char **argv )
     // -------------------
     // Texture information
     // -------------------
-    fprintf( file, " %ff, %ff, %ff, %ff, %ff, %zu, \n",
+    fprintf( file, " %ff, %ff, %ff, %ff, %ff, %" PRIzu ", \n",
              font->size, font->height,
              font->linegap,font->ascender, font->descender,
              glyph_count );
@@ -513,11 +520,11 @@ int main( int argc, char **argv )
 
         // TextureFont
         fprintf( file, "  {%u, ", glyph->codepoint );
-        fprintf( file, "%zu, %zu, ", glyph->width, glyph->height );
+        fprintf( file, "%" PRIzu ", %" PRIzu ", ", glyph->width, glyph->height );
         fprintf( file, "%d, %d, ", glyph->offset_x, glyph->offset_y );
         fprintf( file, "%ff, %ff, ", glyph->advance_x, glyph->advance_y );
         fprintf( file, "%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
-        fprintf( file, "%zu, ", vector_size(glyph->kerning) );
+        fprintf( file, "%" PRIzu ", ", vector_size(glyph->kerning) );
         if (vector_size(glyph->kerning) == 0) {
             fprintf( file, "0" );
         }
