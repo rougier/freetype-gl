@@ -70,7 +70,7 @@ char *
 match_description( char * description )
 {
 
-#if defined _WIN32 || defined _WIN64
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(__MINGW32__)
     fprintf( stderr, "\"font_manager_match_description\" "
                      "not implemented for windows.\n" );
     return 0;
