@@ -36,18 +36,6 @@
 
 #include <stdlib.h>
 
-//-------------------------------------------------
-// stdint.h is not available on VS2008 or lower
-//-------------------------------------------------
-#ifdef _MSC_VER
-typedef __int32 int32_t;
-typedef unsigned __int32 uint32_t;
-typedef __int64 int64_t;
-typedef unsigned __int64 uint64_t;
-#else
-#include <stdint.h>
-#endif // _MSC_VER
-
 #ifdef __cplusplus
 extern "C" {
 namespace ftgl {
