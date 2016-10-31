@@ -3,8 +3,6 @@
 # Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
 # file `LICENSE` for more details.
 
-cmake_minimum_required(VERSION 2.8.5)
-
 find_package(Doxygen REQUIRED)
 
 set(FREETYPE_GL_APIDOC_SRC

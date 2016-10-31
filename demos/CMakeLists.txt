@@ -3,8 +3,6 @@
 # Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
 # file `LICENSE` for more details.
 
-cmake_minimum_required(VERSION 2.8.5)
-
 macro(CREATE_DEMO _target _sources)
     add_executable(${_target} ${_sources} $<TARGET_OBJECTS:demo-utils>)
     if(${_target} MATCHES "^harfbuzz")
