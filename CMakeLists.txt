@@ -191,10 +191,10 @@ if(freetype-gl_BUILD_APIDOC)
     add_subdirectory(doc)
 endif()
 
-if(freetype-gl_BUILD_DEMOS)
-    add_subdirectory(demos)
-endif()
-
 if(freetype-gl_BUILD_HARFBUZZ)
     add_subdirectory(harfbuzz)
+endif()
+
+if(freetype-gl_BUILD_DEMOS)
+    add_subdirectory(demos)
 endif()

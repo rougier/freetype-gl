@@ -34,8 +34,17 @@ cmake_minimum_required(VERSION 2.8.5)
 
 macro(CREATE_DEMO _target _sources)
     add_executable(${_target} ${_sources} $<TARGET_OBJECTS:demo-utils>)
+    if(${_target} MATCHES "^harfbuzz")
+        target_link_libraries(${_target}
+            freetype-gl-hb
+            ${HARFBUZZ_LIBRARIES}
+        )
+    else()
+        target_link_libraries(${_target}
+            freetype-gl
+        )
+    endif()
     target_link_libraries(${_target}
-        freetype-gl
         glfw
         ${OPENGL_LIBRARY}
         ${FREETYPE_LIBRARIES}
@@ -115,6 +124,21 @@ if(ANT_TWEAK_BAR_FOUND)
     create_demo(atb-agg atb-agg.c)
     target_link_libraries(atb-agg ${ANT_TWEAK_BAR_LIBRARY})
     set_target_properties(atb-agg PROPERTIES LINKER_LANGUAGE CXX)
+endif()
+
+if(TARGET freetype-gl-hb)
+    create_demo(harfbuzz harfbuzz.c)
+    create_demo(harfbuzz-texture harfbuzz-texture.c)
+    target_include_directories(harfbuzz
+        BEFORE
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../harfbuzz
+        PRIVATE ${HARFBUZZ_INCLUDE_DIRS}
+    )
+    target_include_directories(harfbuzz-texture
+        BEFORE
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../harfbuzz
+        PRIVATE ${HARFBUZZ_INCLUDE_DIRS}
+    )
 endif()
 
 # Copy font and shaders into build directory for in-place testing

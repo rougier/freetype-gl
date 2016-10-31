@@ -32,24 +32,6 @@
 # =========================================================================
 cmake_minimum_required(VERSION 2.8.5)
 
-macro(CREATE_DEMO _target _sources)
-    add_executable(${_target} ${_sources} $<TARGET_OBJECTS:demo-utils>)
-    target_link_libraries(${_target}
-        freetype-gl-hb
-        glfw
-        ${OPENGL_LIBRARY}
-        ${FREETYPE_LIBRARIES}
-        ${HARFBUZZ_LIBRARIES}
-        ${MATH_LIBRARY}
-        ${GLEW_LIBRARY}
-     )
-    if(MSVC)
-      # Compile demos as C++
-      set_source_files_properties(${_sources} PROPERTIES LANGUAGE CXX)
-    endif()
-endmacro()
-
-find_package(glfw3 REQUIRED)
 find_package(HarfBuzz REQUIRED)
 
 include_directories(
@@ -81,10 +63,3 @@ add_library(freetype-gl-hb STATIC
     ${FREETYPE_GL_HB_SRC}
     ${FREETYPE_GL_HB_HDR}
 )
-
-create_demo(harfbuzz demo-harfbuzz.c)
-create_demo(hb-texture demo-texture.c)
-
-# Copy font and shaders into build directory for in-place testing
-file(COPY ../fonts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ../shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
