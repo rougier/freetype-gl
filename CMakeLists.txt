@@ -136,7 +136,6 @@ set(FREETYPE_GL_HDR
     font-manager.h
     freetype-gl.h
     markup.h
-    mat4.h
     opengl.h
     platform.h
     text-buffer.h
@@ -153,7 +152,6 @@ set(FREETYPE_GL_SRC
     distance-field.c
     edtaa3func.c
     font-manager.c
-    mat4.c
     platform.c
     text-buffer.c
     texture-atlas.c

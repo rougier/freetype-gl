@@ -40,7 +40,6 @@ include_directories(
 
 set(FREETYPE_GL_HB_HDR
     freetype-gl.h
-    mat4.h
     opengl.h
     texture-atlas.h
     texture-font.h
@@ -51,7 +50,6 @@ set(FREETYPE_GL_HB_HDR
 )
 
 set(FREETYPE_GL_HB_SRC
-    mat4.c
     texture-atlas.c
     texture-font.c
     vector.c

@@ -71,6 +71,8 @@ find_package(AntTweakBar)
 find_package(FontConfig)
 
 add_library(demo-utils OBJECT
+    mat4.h
+    mat4.c
     shader.h
     shader.c
 )
