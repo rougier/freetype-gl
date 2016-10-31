@@ -66,6 +66,8 @@ text_buffer_t * buffer;
 text_buffer_t * buffer_a;
 text_buffer_t * buffer_rgb;
 
+GLuint text_shader;
+
 mat4 model, view, projection;
 
 font_family_e p_family;
@@ -570,13 +572,11 @@ void init( GLFWwindow* window )
     TwAddButton(bar, "Quit", (TwButtonCallback) quit, window,
                 "help='Quit.'");
 
-    GLuint program = shader_load( "shaders/text.vert",
-                                  "shaders/text.frag" );
+    text_shader = shader_load( "shaders/text.vert",
+                               "shaders/text.frag" );
 
-    buffer_a = text_buffer_new( LCD_FILTERING_OFF,
-                                program );
-    buffer_rgb = text_buffer_new( LCD_FILTERING_ON,
-                                  program );
+    buffer_a = text_buffer_new( LCD_FILTERING_OFF );
+    buffer_rgb = text_buffer_new( LCD_FILTERING_ON );
 
     glGenTextures( 1, &buffer_a->manager->atlas->id );
     glBindTexture( GL_TEXTURE_2D, buffer_a->manager->atlas->id );
@@ -620,14 +620,19 @@ void display( GLFWwindow* window )
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    glUseProgram( buffer->shader );
+    glUseProgram( text_shader );
     {
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "model" ),
                             1, 0, model.data);
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "view" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "view" ),
                             1, 0, view.data);
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "projection" ),
                             1, 0, projection.data);
+        glUniform1i( glGetUniformLocation( text_shader, "tex" ), 0 );
+        glUniform3f( glGetUniformLocation( text_shader, "pixel" ),
+                     1.0f/buffer->manager->atlas->width,
+                     1.0f/buffer->manager->atlas->height,
+                     (float)buffer->manager->atlas->depth );
 
         glEnable( GL_BLEND );
 
@@ -637,12 +642,6 @@ void display( GLFWwindow* window )
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glBlendColor( 1, 1, 1, 1 );
 
-        glUseProgram( buffer->shader );
-        glUniform1i( glGetUniformLocation( buffer->shader, "tex" ), 0 );
-        glUniform3f( glGetUniformLocation( buffer->shader, "pixel" ),
-                     1.0f/buffer->manager->atlas->width,
-                     1.0f/buffer->manager->atlas->height,
-                     (float)buffer->manager->atlas->depth );
         vertex_buffer_render( buffer->buffer, GL_TRIANGLES );
         glBindTexture( GL_TEXTURE_2D, 0 );
         glBlendColor( 0, 0, 0, 0 );
@@ -851,6 +850,7 @@ int main( int argc, char **argv )
 
     TwTerminate();
 
+    glDeleteProgram( text_shader );
     glDeleteTextures( 1, &buffer_a->manager->atlas->id );
     glDeleteTextures( 1, &buffer_rgb->manager->atlas->id );
     buffer_a->manager->atlas->id = 0;

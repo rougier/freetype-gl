@@ -41,7 +41,6 @@ extern "C" {
 #include "vertex-buffer.h"
 #include "font-manager.h"
 #include "markup.h"
-#include "shader.h"
 
 #ifdef __cplusplus
 namespace ftgl {
@@ -66,7 +65,6 @@ namespace ftgl {
  *
  * <b>Example Usage</b>:
  * @code
- * #include "shader.h"
  *
  * int main( int arrgc, char *argv[] )
  * {
@@ -137,11 +135,6 @@ typedef struct  text_buffer_t {
      * Current line decender
      */
     float line_descender;
-
-    /**
-     * Shader handler
-     */
-    GLuint shader;
 } text_buffer_t;
 
 
@@ -247,19 +240,18 @@ typedef enum Align
 
 
 /**
- * Creates a new empty text buffer using custom shaders.
+ * Creates a new empty text buffer.
  *
  * @param depth          Underlying atlas bit depth (1 or 3)
- * @param program        Shader program
  *
  * @return  a new empty text buffer.
  *
  */
   text_buffer_t *
-  text_buffer_new( size_t depth, GLuint program );
+  text_buffer_new( size_t depth );
 
 /**
- * Deletes texture buffer and its associated shader and vertex buffer.
+ * Deletes texture buffer and its associated vertex buffer.
  *
  * @param  self  texture buffer to delete
  *

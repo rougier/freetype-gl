@@ -49,6 +49,7 @@
 // ------------------------------------------------------- global variables ---
 text_buffer_t * buffer;
 mat4   model, view, projection;
+GLuint text_shader;
 
 
 // ------------------------------------------------------------ init_colors ---
@@ -276,10 +277,10 @@ print( text_buffer_t * buffer, vec2 * pen,
 // ------------------------------------------------------------------- init ---
 void init( void )
 {
-    GLuint program = shader_load( "shaders/text.vert",
-                                  "shaders/text.frag" );
+    text_shader = shader_load( "shaders/text.vert",
+                               "shaders/text.frag" );
 
-    buffer = text_buffer_new( LCD_FILTERING_OFF, program );
+    buffer = text_buffer_new( LCD_FILTERING_OFF );
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
 
@@ -336,14 +337,19 @@ void display( GLFWwindow* window )
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glColor4f(1.00,1.00,1.00,1.00);
-    glUseProgram( buffer->shader );
+    glUseProgram( text_shader );
     {
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "model" ),
                             1, 0, model.data);
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "view" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "view" ),
                             1, 0, view.data);
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "projection" ),
                             1, 0, projection.data);
+        glUniform1i( glGetUniformLocation( text_shader, "tex" ), 0 );
+        glUniform3f( glGetUniformLocation( text_shader, "pixel" ),
+                     1.0f/buffer->manager->atlas->width,
+                     1.0f/buffer->manager->atlas->height,
+                     (float)buffer->manager->atlas->depth );
 
         glEnable( GL_BLEND );
 
@@ -353,12 +359,6 @@ void display( GLFWwindow* window )
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glBlendColor( 1, 1, 1, 1 );
 
-        glUseProgram( buffer->shader );
-        glUniform1i( glGetUniformLocation( buffer->shader, "tex" ), 0 );
-        glUniform3f( glGetUniformLocation( buffer->shader, "pixel" ),
-                     1.0f/buffer->manager->atlas->width,
-                     1.0f/buffer->manager->atlas->height,
-                     (float)buffer->manager->atlas->depth );
         vertex_buffer_render( buffer->buffer, GL_TRIANGLES );
         glBindTexture( GL_TEXTURE_2D, 0 );
         glBlendColor( 0, 0, 0, 0 );
@@ -447,6 +447,7 @@ int main( int argc, char **argv )
         glfwPollEvents( );
     }
 
+    glDeleteProgram( text_shader );
     glDeleteTextures( 1, &buffer->manager->atlas->id );
     buffer->manager->atlas->id = 0;
     text_buffer_delete( buffer );
