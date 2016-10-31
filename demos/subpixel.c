@@ -68,9 +68,11 @@ void init()
     GLuint indices[4*3] = { 0,1,2,3, };
     vertex_buffer_push_back( buffer, vertices, 4, indices, 4 );
 
+    GLuint program = shader_load( "shaders/text.vert",
+                                  "shaders/text.frag" );
+
     text_buffer = text_buffer_new( LCD_FILTERING_ON,
-                                   "shaders/text.vert",
-                                   "shaders/text.frag" );
+                                   program );
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     text_buffer->base_color = black;
 

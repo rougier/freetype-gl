@@ -276,9 +276,10 @@ print( text_buffer_t * buffer, vec2 * pen,
 // ------------------------------------------------------------------- init ---
 void init( void )
 {
-    buffer = text_buffer_new( LCD_FILTERING_OFF,
-                              "shaders/text.vert",
-                              "shaders/text.frag" );
+    GLuint program = shader_load( "shaders/text.vert",
+                                  "shaders/text.frag" );
+
+    buffer = text_buffer_new( LCD_FILTERING_OFF, program );
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
 

@@ -570,12 +570,13 @@ void init( GLFWwindow* window )
     TwAddButton(bar, "Quit", (TwButtonCallback) quit, window,
                 "help='Quit.'");
 
-    buffer_a = text_buffer_new( LCD_FILTERING_OFF,
-                                "shaders/text.vert",
-                                "shaders/text.frag" );
-    buffer_rgb = text_buffer_new( LCD_FILTERING_ON,
-                                  "shaders/text.vert",
+    GLuint program = shader_load( "shaders/text.vert",
                                   "shaders/text.frag" );
+
+    buffer_a = text_buffer_new( LCD_FILTERING_OFF,
+                                program );
+    buffer_rgb = text_buffer_new( LCD_FILTERING_ON,
+                                  program );
 
     glGenTextures( 1, &buffer_a->manager->atlas->id );
     glBindTexture( GL_TEXTURE_2D, buffer_a->manager->atlas->id );

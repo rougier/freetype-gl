@@ -51,22 +51,7 @@
 // ----------------------------------------------------------------------------
 
 text_buffer_t *
-text_buffer_new( size_t depth,
-                 const char * vert_filename,
-                 const char * frag_filename )
-{
-    GLuint program = shader_load( vert_filename, frag_filename );
-
-    text_buffer_t * p = text_buffer_new_with_program( depth, program );
-
-    return p;
-}
-
-// ----------------------------------------------------------------------------
-
-text_buffer_t *
-text_buffer_new_with_program( size_t depth,
-                                    GLuint program )
+text_buffer_new( size_t depth, GLuint program )
 {
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
     self->buffer = vertex_buffer_new(

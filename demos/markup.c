@@ -109,9 +109,10 @@ match_description( char * description )
 
 void init()
 {
-    buffer = text_buffer_new( LCD_FILTERING_ON,
-                              "shaders/text.vert",
-                              "shaders/text.frag" );
+    GLuint program = shader_load( "shaders/text.vert",
+                                  "shaders/text.frag" );
+
+    buffer = text_buffer_new( LCD_FILTERING_ON, program );
 
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
