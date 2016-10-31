@@ -142,17 +142,6 @@ typedef struct  text_buffer_t {
      * Shader handler
      */
     GLuint shader;
-
-    /**
-     * Shader "texture" location
-     */
-    GLuint shader_texture;
-
-    /**
-     * Shader "pixel" location
-     */
-    GLuint shader_pixel;
-
 } text_buffer_t;
 
 

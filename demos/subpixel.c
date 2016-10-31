@@ -145,8 +145,8 @@ void display( GLFWwindow* window )
         glBlendColor( 1, 1, 1, 1 );
 
         glUseProgram( text_buffer->shader );
-        glUniform1i( text_buffer->shader_texture, 0 );
-        glUniform3f( text_buffer->shader_pixel,
+        glUniform1i( glGetUniformLocation( text_buffer->shader, "tex" ), 0 );
+        glUniform3f( glGetUniformLocation( text_buffer->shader, "pixel" ),
                      1.0f/text_buffer->manager->atlas->width,
                      1.0f/text_buffer->manager->atlas->height,
                      (float)text_buffer->manager->atlas->depth );
