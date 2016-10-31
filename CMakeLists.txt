@@ -139,7 +139,6 @@ set(FREETYPE_GL_HDR
     mat4.h
     opengl.h
     platform.h
-    shader.h
     text-buffer.h
     texture-atlas.h
     texture-font.h
@@ -156,7 +155,6 @@ set(FREETYPE_GL_SRC
     font-manager.c
     mat4.c
     platform.c
-    shader.c
     text-buffer.c
     texture-atlas.c
     texture-font.c

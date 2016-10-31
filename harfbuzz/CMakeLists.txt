@@ -33,7 +33,7 @@
 cmake_minimum_required(VERSION 2.8.5)
 
 macro(CREATE_DEMO _target _sources)
-    add_executable(${_target} ${_sources})
+    add_executable(${_target} ${_sources} $<TARGET_OBJECTS:demo-utils>)
     target_link_libraries(${_target}
         freetype-gl-hb
         glfw
@@ -60,7 +60,6 @@ set(FREETYPE_GL_HB_HDR
     freetype-gl.h
     mat4.h
     opengl.h
-    shader.h
     texture-atlas.h
     texture-font.h
     vec234.h
@@ -71,7 +70,6 @@ set(FREETYPE_GL_HB_HDR
 
 set(FREETYPE_GL_HB_SRC
     mat4.c
-    shader.c
     texture-atlas.c
     texture-font.c
     vector.c

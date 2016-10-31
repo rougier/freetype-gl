@@ -33,7 +33,7 @@
 cmake_minimum_required(VERSION 2.8.5)
 
 macro(CREATE_DEMO _target _sources)
-    add_executable(${_target} ${_sources})
+    add_executable(${_target} ${_sources} $<TARGET_OBJECTS:demo-utils>)
     target_link_libraries(${_target}
         freetype-gl
         glfw
@@ -60,6 +60,11 @@ endif()
 find_package(glfw3 REQUIRED)
 find_package(AntTweakBar)
 find_package(FontConfig)
+
+add_library(demo-utils OBJECT
+    shader.h
+    shader.c
+)
 
 add_custom_command(
     DEPENDS
