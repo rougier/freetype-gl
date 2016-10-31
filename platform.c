@@ -38,13 +38,6 @@
 
 #include <math.h>
 
-#if !defined(_MSC_VER) || _MSC_VER < 1800
-double round (double v)
-{
-	return (v > 0.0) ? floor(v + 0.5) : ceil(v - 0.5);
-}
-#endif // _MSC_VER < 1800
-
 // strndup() is not available on Windows
 char *strndup( const char *s1, size_t n)
 {

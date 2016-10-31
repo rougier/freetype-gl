@@ -47,9 +47,6 @@ namespace ftgl {
 #elif defined(_WIN32) || defined(_WIN64)
     /* does not exist on windows */
     char * strndup( const char *s1, size_t n);
-#	if !defined(_MSC_VER) || _MSC_VER < 1800
-		double round(double v);
-#	endif // _MSC_VER
 #    pragma warning (disable: 4244) // suspend warnings
 #endif // _WIN32 || _WIN64
 
