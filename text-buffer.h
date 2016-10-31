@@ -294,15 +294,6 @@ typedef enum Align
   void
   text_buffer_delete( text_buffer_t * self );
 
-/**
- * Render a text buffer.
- *
- * @param self a text buffer
- *
- */
-  void
-  text_buffer_render( text_buffer_t * self );
-
 
  /**
   * Print some text to the text buffer

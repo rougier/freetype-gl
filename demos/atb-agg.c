@@ -627,7 +627,25 @@ void display( GLFWwindow* window )
                             1, 0, view.data);
         glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
                             1, 0, projection.data);
-        text_buffer_render( buffer );
+
+        glEnable( GL_BLEND );
+
+        glActiveTexture( GL_TEXTURE0 );
+        glBindTexture( GL_TEXTURE_2D, buffer->manager->atlas->id );
+
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glBlendColor( 1, 1, 1, 1 );
+
+        glUseProgram( buffer->shader );
+        glUniform1i( buffer->shader_texture, 0 );
+        glUniform3f( buffer->shader_pixel,
+                     1.0f/buffer->manager->atlas->width,
+                     1.0f/buffer->manager->atlas->height,
+                     (float)buffer->manager->atlas->depth );
+        vertex_buffer_render( buffer->buffer, GL_TRIANGLES );
+        glBindTexture( GL_TEXTURE_2D, 0 );
+        glBlendColor( 0, 0, 0, 0 );
+        glUseProgram( 0 );
     }
 
     TwDraw( );

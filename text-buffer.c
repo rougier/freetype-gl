@@ -118,49 +118,6 @@ text_buffer_clear( text_buffer_t * self )
     self->bounds.height = 0.0;
 }
 
-
-// ----------------------------------------------------------------------------
-void
-text_buffer_render( text_buffer_t * self )
-{
-    glEnable( GL_BLEND );
-
-    glActiveTexture( GL_TEXTURE0 );
-    glBindTexture( GL_TEXTURE_2D, self->manager->atlas->id );
-
-    if( self->manager->atlas->depth == 1 )
-    {
-        //glDisable( GL_COLOR_MATERIAL );
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glBlendColor( 1, 1, 1, 1 );
-    }
-    else
-    {
-        //glEnable( GL_COLOR_MATERIAL );
-        //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-        //glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-        //glBlendColor( 1.0, 1.0, 1.0, 1.0 );
-        //glBlendFunc( GL_CONSTANT_COLOR_EXT,  GL_ONE_MINUS_SRC_COLOR );
-        //glBlendColor( self->base_color.r,
-        //self->base_color.g,
-        //self->base_color.b,
-        //self->base_color.a );
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glBlendColor( 1, 1, 1, 1 );
-    }
-
-    glUseProgram( self->shader );
-    glUniform1i( self->shader_texture, 0 );
-    glUniform3f( self->shader_pixel,
-                 1.0f/self->manager->atlas->width,
-                 1.0f/self->manager->atlas->height,
-                 (float)self->manager->atlas->depth );
-    vertex_buffer_render( self->buffer, GL_TRIANGLES );
-    glBindTexture( GL_TEXTURE_2D, 0 );
-    glBlendColor( 0, 0, 0, 0 );
-    glUseProgram( 0 );
-}
-
 // ----------------------------------------------------------------------------
 void
 text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
