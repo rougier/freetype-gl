@@ -15,6 +15,7 @@
 #include <fontconfig/fontconfig.h>
 
 #include "freetype-gl.h"
+#include "font-manager.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
 #include "markup.h"
@@ -31,8 +32,8 @@ typedef struct {
     float r, g, b, a;
 } vertex_t;
 
-
 // ------------------------------------------------------- global variables ---
+font_manager_t * font_manager;
 text_buffer_t * buffer;
 mat4 model, view, projection;
 vertex_buffer_t *lines_buffer;
@@ -87,7 +88,8 @@ void init()
     text_shader = shader_load( "shaders/text.vert",
                                "shaders/text.frag" );
 
-    buffer = text_buffer_new( LCD_FILTERING_ON );
+    font_manager = font_manager_new( 512, 512, LCD_FILTERING_ON );
+    buffer = text_buffer_new( );
 
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
@@ -127,6 +129,17 @@ void init()
                                  japanese.size = 18.0;
     markup_t math      = normal; math.family = f_math;
 
+    normal.font = font_manager_get_from_markup( font_manager, &normal );
+    highlight.font = font_manager_get_from_markup( font_manager, &highlight );
+    reverse.font = font_manager_get_from_markup( font_manager, &reverse );
+    overline.font = font_manager_get_from_markup( font_manager, &overline );
+    underline.font = font_manager_get_from_markup( font_manager, &underline );
+    small.font = font_manager_get_from_markup( font_manager, &small );
+    big.font = font_manager_get_from_markup( font_manager, &big );
+    bold.font = font_manager_get_from_markup( font_manager, &bold );
+    italic.font = font_manager_get_from_markup( font_manager, &italic );
+    japanese.font = font_manager_get_from_markup( font_manager, &japanese );
+    math.font = font_manager_get_from_markup( font_manager, &math );
 
     vec2 pen = {{20, 200}};
     text_buffer_printf( buffer, &pen,
@@ -144,15 +157,15 @@ void init()
                         &math,      "ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ",
                         NULL );
 
-    glGenTextures( 1, &buffer->manager->atlas->id );
-    glBindTexture( GL_TEXTURE_2D, buffer->manager->atlas->id );
+    glGenTextures( 1, &font_manager->atlas->id );
+    glBindTexture( GL_TEXTURE_2D, font_manager->atlas->id );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, buffer->manager->atlas->width,
-                  buffer->manager->atlas->height, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                  buffer->manager->atlas->data );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, font_manager->atlas->width,
+                  font_manager->atlas->height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                  font_manager->atlas->data );
 
     text_buffer_align( buffer, &pen, ALIGN_CENTER );
 
@@ -202,14 +215,14 @@ void display( GLFWwindow* window )
                             1, 0, projection.data);
         glUniform1i( glGetUniformLocation( text_shader, "tex" ), 0 );
         glUniform3f( glGetUniformLocation( text_shader, "pixel" ),
-                     1.0f/buffer->manager->atlas->width,
-                     1.0f/buffer->manager->atlas->height,
-                     (float)buffer->manager->atlas->depth );
+                     1.0f/font_manager->atlas->width,
+                     1.0f/font_manager->atlas->height,
+                     (float)font_manager->atlas->depth );
 
         glEnable( GL_BLEND );
 
         glActiveTexture( GL_TEXTURE0 );
-        glBindTexture( GL_TEXTURE_2D, buffer->manager->atlas->id );
+        glBindTexture( GL_TEXTURE_2D, font_manager->atlas->id );
 
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glBlendColor( 1, 1, 1, 1 );
@@ -316,9 +329,10 @@ int main( int argc, char **argv )
 
     glDeleteProgram( bounds_shader );
     glDeleteProgram( text_shader );
-    glDeleteTextures( 1, &buffer->manager->atlas->id );
-    buffer->manager->atlas->id = 0;
+    glDeleteTextures( 1, &font_manager->atlas->id );
+    font_manager->atlas->id = 0;
     text_buffer_delete( buffer );
+    font_manager_delete( font_manager );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

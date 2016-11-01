@@ -19,6 +19,7 @@
 
 
 // ------------------------------------------------------- global variables ---
+font_manager_t * font_manager;
 text_buffer_t * buffer;
 mat4   model, view, projection;
 GLuint text_shader;
@@ -239,7 +240,7 @@ print( text_buffer_t * buffer, vec2 * pen,
                 p = text+strlen(text);
             }
             ansi_to_markup(seq_start, seq_size, markup );
-            markup->font = font_manager_get_from_markup( buffer->manager, markup );
+            markup->font = font_manager_get_from_markup( font_manager, markup );
             text_buffer_add_text( buffer, pen, markup, text_start, text_size );
         }
     }
@@ -252,7 +253,9 @@ void init( void )
     text_shader = shader_load( "shaders/text.vert",
                                "shaders/text.frag" );
 
-    buffer = text_buffer_new( LCD_FILTERING_OFF );
+    font_manager = font_manager_new( 512, 512, LCD_FILTERING_OFF );
+    buffer = text_buffer_new( );
+
     vec4 black = {{0.0, 0.0, 0.0, 1.0}};
     vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
 
@@ -286,15 +289,15 @@ void init( void )
         fclose ( file );
     }
 
-    glGenTextures( 1, &buffer->manager->atlas->id );
-    glBindTexture( GL_TEXTURE_2D, buffer->manager->atlas->id );
+    glGenTextures( 1, &font_manager->atlas->id );
+    glBindTexture( GL_TEXTURE_2D, font_manager->atlas->id );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, buffer->manager->atlas->width,
-        buffer->manager->atlas->height, 0, GL_RED, GL_UNSIGNED_BYTE,
-        buffer->manager->atlas->data );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, font_manager->atlas->width,
+        font_manager->atlas->height, 0, GL_RED, GL_UNSIGNED_BYTE,
+        font_manager->atlas->data );
 
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
@@ -319,14 +322,14 @@ void display( GLFWwindow* window )
                             1, 0, projection.data);
         glUniform1i( glGetUniformLocation( text_shader, "tex" ), 0 );
         glUniform3f( glGetUniformLocation( text_shader, "pixel" ),
-                     1.0f/buffer->manager->atlas->width,
-                     1.0f/buffer->manager->atlas->height,
-                     (float)buffer->manager->atlas->depth );
+                     1.0f/font_manager->atlas->width,
+                     1.0f/font_manager->atlas->height,
+                     (float)font_manager->atlas->depth );
 
         glEnable( GL_BLEND );
 
         glActiveTexture( GL_TEXTURE0 );
-        glBindTexture( GL_TEXTURE_2D, buffer->manager->atlas->id );
+        glBindTexture( GL_TEXTURE_2D, font_manager->atlas->id );
 
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glBlendColor( 1, 1, 1, 1 );
@@ -420,9 +423,10 @@ int main( int argc, char **argv )
     }
 
     glDeleteProgram( text_shader );
-    glDeleteTextures( 1, &buffer->manager->atlas->id );
-    buffer->manager->atlas->id = 0;
+    glDeleteTextures( 1, &font_manager->atlas->id );
+    font_manager->atlas->id = 0;
     text_buffer_delete( buffer );
+    font_manager_delete( font_manager );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

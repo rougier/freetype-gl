@@ -11,7 +11,6 @@ extern "C" {
 #endif
 
 #include "vertex-buffer.h"
-#include "font-manager.h"
 #include "markup.h"
 
 #ifdef __cplusplus
@@ -56,11 +55,6 @@ typedef struct  text_buffer_t {
      * Vertex buffer
      */
     vertex_buffer_t *buffer;
-
-    /**
-     * Font manager
-     */
-    font_manager_t *manager;
 
     /**
      * Base color for text
@@ -214,13 +208,11 @@ typedef enum Align
 /**
  * Creates a new empty text buffer.
  *
- * @param depth          Underlying atlas bit depth (1 or 3)
- *
  * @return  a new empty text buffer.
  *
  */
   text_buffer_t *
-  text_buffer_new( size_t depth );
+  text_buffer_new( );
 
 /**
  * Deletes texture buffer and its associated vertex buffer.

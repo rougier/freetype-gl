@@ -23,12 +23,11 @@
 // ----------------------------------------------------------------------------
 
 text_buffer_t *
-text_buffer_new( size_t depth )
+text_buffer_new( )
 {
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
     self->buffer = vertex_buffer_new(
                                      "vertex:3f,tex_coord:2f,color:4f,ashift:1f,agamma:1f" );
-    self->manager = font_manager_new( 512, 512, depth );
     self->line_start = 0;
     self->line_ascender = 0;
     self->base_color.r = 0.0;
@@ -49,7 +48,6 @@ void
 text_buffer_delete( text_buffer_t * self )
 {
     vector_delete( self->lines );
-    font_manager_delete( self->manager );
     vertex_buffer_delete( self->buffer );
     free( self );
 }
@@ -183,7 +181,6 @@ text_buffer_add_text( text_buffer_t * self,
                       vec2 * pen, markup_t * markup,
                       const char * text, size_t length )
 {
-    font_manager_t * manager = self->manager;
     size_t i;
     const char * prev_character = NULL;
 
@@ -194,12 +191,8 @@ text_buffer_add_text( text_buffer_t * self,
 
     if( !markup->font )
     {
-        markup->font = font_manager_get_from_markup( manager, markup );
-        if( ! markup->font )
-        {
-            fprintf( stderr, "Houston, we've got a problem !\n" );
-            exit( EXIT_FAILURE );
-        }
+        fprintf( stderr, "Houston, we've got a problem !\n" );
+        return;
     }
 
     if( length == 0 )
