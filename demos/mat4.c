@@ -3,7 +3,6 @@
  * Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
  * file `LICENSE` for more details.
  */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -20,7 +19,8 @@ mat4_new( void )
 void
 mat4_set_zero( mat4 *self )
 {
-    assert( self );
+    if (!self)
+        return;
 
     memset( self, 0, sizeof( mat4 ));
 }
@@ -28,7 +28,8 @@ mat4_set_zero( mat4 *self )
 void
 mat4_set_identity( mat4 *self )
 {
-    assert( self );
+    if (!self);
+        return;
 
     memset( self, 0, sizeof( mat4 ));
     self->m00 = 1.0;
@@ -43,8 +44,8 @@ mat4_multiply( mat4 *self, mat4 *other )
     mat4 m;
     size_t i;
 
-    assert( self );
-    assert( other );
+    if (!self || !other)
+        return;
 
     for( i=0; i<4; ++i )
     {
@@ -83,10 +84,11 @@ mat4_set_orthographic( mat4 *self,
                        float bottom, float top,
                        float znear,  float zfar )
 {
-    assert( self );
-    assert( right  != left );
-    assert( bottom != top  );
-    assert( znear  != zfar );
+    if (!self)
+        return;
+
+    if (left == right || bottom == top || znear == zfar)
+        return;
 
     mat4_set_zero( self );
 
@@ -106,8 +108,11 @@ mat4_set_perspective( mat4 *self,
 {
     float h, w;
 
-    assert( self );
-    assert( znear != zfar );
+    if (!self)
+        return;
+
+    if (znear == zfar)
+        return;
 
     h = (float)tan(fovy / 360.0 * M_PI) * znear;
     w = h * aspect;
@@ -122,10 +127,11 @@ mat4_set_frustum( mat4 *self,
                   float znear,  float zfar )
 {
 
-    assert( self );
-    assert( right  != left );
-    assert( bottom != top  );
-    assert( znear  != zfar );
+    if (!self)
+        return;
+
+    if (left == right || bottom == top || znear == zfar)
+        return;
 
     mat4_set_zero( self );
 
@@ -148,7 +154,8 @@ mat4_set_rotation( mat4 *self,
 {
     float c, s, norm;
 
-    assert( self );
+    if (!self)
+        return;
 
     c = (float)cos( M_PI*angle/180.0 );
     s = (float)sin( M_PI*angle/180.0 );
@@ -175,7 +182,8 @@ void
 mat4_set_translation( mat4 *self,
                       float x, float y, float z)
 {
-    assert( self );
+    if (!self)
+        return;
 
     mat4_set_identity( self );
     self-> m30 = x;
@@ -187,7 +195,8 @@ void
 mat4_set_scaling( mat4 *self,
                   float x, float y, float z)
 {
-    assert( self );
+    if (!self)
+        return;
 
     mat4_set_identity( self );
     self-> m00 = x;
@@ -202,7 +211,8 @@ mat4_rotate( mat4 *self,
 {
     mat4 m;
 
-    assert( self );
+    if (!self)
+        return;
 
     mat4_set_rotation( &m, angle, x, y, z);
     mat4_multiply( self, &m );
@@ -213,7 +223,9 @@ mat4_translate( mat4 *self,
                 float x, float y, float z)
 {
     mat4 m;
-    assert( self );
+
+    if (!self)
+        return;
 
     mat4_set_translation( &m, x, y, z);
     mat4_multiply( self, &m );
@@ -224,7 +236,9 @@ mat4_scale( mat4 *self,
             float x, float y, float z)
 {
     mat4 m;
-    assert( self );
+
+    if (!self)
+        return;
 
     mat4_set_scaling( &m, x, y, z);
     mat4_multiply( self, &m );
