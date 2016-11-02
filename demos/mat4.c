@@ -28,7 +28,7 @@ mat4_set_zero( mat4 *self )
 void
 mat4_set_identity( mat4 *self )
 {
-    if (!self);
+    if (!self)
         return;
 
     memset( self, 0, sizeof( mat4 ));
