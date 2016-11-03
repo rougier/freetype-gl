@@ -41,5 +41,7 @@ install:
   - rm -rf AntTweakBar
 #
   - cd ..
-script:
+before_script:
   - cmake -Dfreetype-gl_BUILD_HARFBUZZ=ON . && make
+script:
+  - ctest --output-on-failure
