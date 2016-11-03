@@ -37,7 +37,7 @@ if(WIN32 OR WIN64)
 endif()
 
 # Find dependencies
-find_package(glfw3 REQUIRED)
+find_package(glfw3 3.2 REQUIRED)
 find_package(AntTweakBar)
 find_package(FontConfig)
 
