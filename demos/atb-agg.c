@@ -503,7 +503,10 @@ void reshape( GLFWwindow* window, int width, int height )
 // ------------------------------------------------------------- cursor_pos ---
 void cursor_pos( GLFWwindow* window, double x, double y )
 {
-    TwMouseMotion( x, y );
+    int pixWidth, pixHeight, winWidth, winHeight;
+    glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
+    glfwGetWindowSize( window, &winWidth, &winHeight );
+    TwMouseMotion( (x * pixWidth) / winWidth, (y * pixHeight) / winHeight );
 }
 
 
