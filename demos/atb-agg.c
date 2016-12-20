@@ -345,8 +345,8 @@ void init( GLFWwindow* window )
                "label = 'Size' "
                "group = 'Font' "
                "min   = 6.0    "
-               "max   = 24.0   "
-               "step  = 0.05   "
+               "max   = 60.0   "
+               "step  = 0.2   "
                "help  = ' '    ");
     TwAddVarCB(bar, "LCD filtering", TW_TYPE_BOOL32, set_lcd_filtering, get_lcd_filtering, NULL,
                "label = 'LCD filtering' "
