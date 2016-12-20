@@ -91,3 +91,17 @@ Make sure to add your bin folder e.g. `C:\msys64\mingw64\bin`  to your PATH if y
 If you get an error when you start your application from the Windows Explorer like "The procedure entry point inflateReset2 could not be located in the dynamic link library zlib1.dll":
 This is likely a PATH related problem. In this case some other zlib1.dll existent in one of the PATH folders was shadowing the needed zlib1.dll one of the mingw64/bin folder.
 The solution is to change the order of the PATH entries so that the mingw64 folder comes first.
+
+## macOS with homebrew
+
+Install [homebrew](http://brew.sh/).
+
+Then:
+
+    brew install AntTweakBar ImageMagick cmake doxygen glfw3
+    cmake .
+    make
+
+You can then run some demos under:
+
+    cd demos
