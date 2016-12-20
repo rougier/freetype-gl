@@ -4,6 +4,7 @@
  * file `LICENSE` for more details.
  */
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -288,6 +289,18 @@ void TW_CALL get_lcd_filtering( void *value, void *data )
 // ------------------------------------------------------------------- init ---
 void init( GLFWwindow* window )
 {
+    bool is_scaled;
+    {
+        int pixWidth, pixHeight, winWidth, winHeight;
+        glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
+        glfwGetWindowSize( window, &winWidth, &winHeight );
+        is_scaled = pixWidth > winWidth || pixHeight > winHeight;
+    }
+    if (is_scaled)
+        TwDefine("GLOBAL fontscaling=2");
+
+    TwInit( TW_OPENGL, NULL );
+
     // Create a new tweak bar
     bar = TwNewBar("TweakBar");
     TwDefine("GLOBAL "
@@ -301,6 +314,10 @@ void init( GLFWwindow* window )
              "resizable     = True          "
              "fontresizable = True          "
              "iconifiable   = True          ");
+    if (is_scaled)
+        TwDefine("TweakBar                      "
+                 "size          = '560 800'     "
+                 "position      = '1000 40'     ");
 
     {
         TwEnumVal familyEV[NUM_FONTS] = {
@@ -670,8 +687,6 @@ int main( int argc, char **argv )
 
     glfwMakeContextCurrent( window );
     glfwSwapInterval( 1 );
-
-    TwInit( TW_OPENGL, NULL );
 
     glfwSetFramebufferSizeCallback( window, reshape );
     glfwSetWindowRefreshCallback( window, display );
