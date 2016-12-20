@@ -156,6 +156,13 @@ build_buffer( void )
 	if (!font)
 		return;
 
+    int pixHeight;
+    {
+        int viewport[4];
+        glGetIntegerv( GL_VIEWPORT, viewport );
+        pixHeight = viewport[3];
+    }
+
     markup.font = font;
     font->hinting = p_hinting;
     font->kerning = p_kerning;
@@ -167,7 +174,7 @@ build_buffer( void )
     font->lcd_weights[3] = (unsigned char)(p_secondary*norm*255);
     font->lcd_weights[4] = (unsigned char)(p_tertiary*norm*255);
     pen.x = 10;
-    pen.y = 600 - font->height - 10;
+    pen.y = pixHeight - font->height - 10;
     text_buffer_printf( text_buffer, &pen, &markup, text, NULL );
 
     // Post-processing for width and orientation
