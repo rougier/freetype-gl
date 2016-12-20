@@ -690,7 +690,11 @@ int main( int argc, char **argv )
     init( window );
 
     glfwShowWindow( window );
-    reshape( window, 800, 600 );
+    {
+        int pixWidth, pixHeight;
+        glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
+        reshape( window, pixWidth, pixHeight );
+    }
 
     while(!glfwWindowShouldClose( window ))
     {
