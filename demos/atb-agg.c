@@ -4,7 +4,6 @@
  * file `LICENSE` for more details.
  */
 #include <math.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -296,15 +295,18 @@ void TW_CALL get_lcd_filtering( void *value, void *data )
 // ------------------------------------------------------------------- init ---
 void init( GLFWwindow* window )
 {
-    bool is_scaled;
+    int scale_factor;
     {
         int pixWidth, pixHeight, winWidth, winHeight;
         glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
         glfwGetWindowSize( window, &winWidth, &winHeight );
-        is_scaled = pixWidth > winWidth || pixHeight > winHeight;
+        scale_factor = (pixWidth / (double) winWidth) + 0.5;
     }
-    if (is_scaled)
-        TwDefine("GLOBAL fontscaling=2");
+    {
+        char buf[256];
+        sprintf(buf, "GLOBAL fontscaling=%d", scale_factor);
+        TwDefine(buf);
+    }
 
     TwInit( TW_OPENGL, NULL );
 
@@ -313,18 +315,20 @@ void init( GLFWwindow* window )
     TwDefine("GLOBAL "
              "help = 'This example shows how to tune all font parameters.' ");
     TwDefine("TweakBar                      "
-             "size          = '280 400'     "
-             "position      = '500 20'      "
              "color         = '127 127 127' "
              "alpha         = 240           "
              "label         = 'Parameters'  "
              "resizable     = True          "
              "fontresizable = True          "
              "iconifiable   = True          ");
-    if (is_scaled)
-        TwDefine("TweakBar                      "
-                 "size          = '560 800'     "
-                 "position      = '1000 40'     ");
+    {
+        char buf[256];
+        sprintf(
+            buf, "TweakBar size = '%d %d' position = '%d %d'",
+            280*scale_factor, 400*scale_factor,
+            500*scale_factor, 20*scale_factor);
+        TwDefine(buf);
+    }
 
     {
         TwEnumVal familyEV[NUM_FONTS] = {
