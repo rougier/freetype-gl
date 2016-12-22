@@ -67,7 +67,7 @@ int control_key_handled;
 
 // ------------------------------------------------------------ console_new ---
 console_t *
-console_new( void )
+console_new( float font_size )
 {
     console_t *self = (console_t *) malloc( sizeof(console_t) );
     if( !self )
@@ -95,7 +95,7 @@ console_new( void )
 
     markup_t normal;
     normal.family  = "fonts/VeraMono.ttf";
-    normal.size    = 13.0;
+    normal.size    = font_size;
     normal.bold    = 0;
     normal.italic  = 0;
     normal.rise    = 0.0;
@@ -110,20 +110,20 @@ console_new( void )
     normal.strikethrough       = 0;
     normal.strikethrough_color = white;
 
-    normal.font = texture_font_new_from_file( self->atlas, 13, "fonts/VeraMono.ttf" );
+    normal.font = texture_font_new_from_file( self->atlas, font_size, "fonts/VeraMono.ttf" );
 
     markup_t bold = normal;
     bold.bold = 1;
-    bold.font = texture_font_new_from_file( self->atlas, 13, "fonts/VeraMoBd.ttf" );
+    bold.font = texture_font_new_from_file( self->atlas, font_size, "fonts/VeraMoBd.ttf" );
 
     markup_t italic = normal;
     italic.italic = 1;
-    bold.font = texture_font_new_from_file( self->atlas, 13, "fonts/VeraMoIt.ttf" );
+    bold.font = texture_font_new_from_file( self->atlas, font_size, "fonts/VeraMoIt.ttf" );
 
     markup_t bold_italic = normal;
     bold.bold = 1;
     italic.italic = 1;
-    italic.font = texture_font_new_from_file( self->atlas, 13, "fonts/VeraMoBI.ttf" );
+    italic.font = texture_font_new_from_file( self->atlas, font_size, "fonts/VeraMoBI.ttf" );
 
     markup_t faint = normal;
     faint.foreground_color.r = 0.35;
@@ -582,11 +582,11 @@ void console_history_next( console_t *self, char *input )
 
 
 // ------------------------------------------------------------------- init ---
-void init( void )
+void init( float font_size )
 {
     control_key_handled = 0;
 
-    console = console_new();
+    console = console_new( font_size );
     console_print( console,
                    "OpenGL Freetype console\n"
                    "Copyright 2011 Nicolas P. Rougier. All rights reserved.\n \n" );
@@ -773,10 +773,13 @@ int main( int argc, char **argv )
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
 
-    init();
-
     glfwShowWindow( window );
-    reshape( window, 600,400 );
+    int pixWidth, pixHeight;
+    glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
+
+    init( 13.0 * pixWidth / 600 );
+
+    reshape( window, pixWidth, pixHeight );
 
     while (!glfwWindowShouldClose( window ))
     {
