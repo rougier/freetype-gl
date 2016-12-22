@@ -197,7 +197,11 @@ int main( int argc, char **argv )
     init();
 
     glfwShowWindow( window );
-    reshape( window, 400, 400 );
+    {
+        int pixWidth, pixHeight;
+        glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
+        reshape( window, pixWidth, pixHeight );
+    }
 
     glfwSetTime(1.0);
 
