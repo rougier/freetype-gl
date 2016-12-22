@@ -307,12 +307,13 @@ void display( GLFWwindow* window )
 
     texture_glyph_t * glyph = texture_font_get_glyph( font, "@");
 
-    int width = 512;
-    int height = 512;
+    int width, height;
+    glfwGetFramebufferSize( window, &width, &height );
+
     float glyph_height = glyph->height * width/(float)glyph->width;
     float glyph_width  = glyph->width * height/(float)glyph->height;
-    int x = -glyph_width/2 + 512/2.;
-    int y = -glyph_height/2 + 512/2.;
+    int x = -glyph_width/2 + width/2.;
+    int y = -glyph_height/2 + height/2.;
 
     float s = .025+.975*(1+cos(angle/100.0))/2.;
 
@@ -321,7 +322,7 @@ void display( GLFWwindow* window )
     mat4_set_identity( &model );
     mat4_scale( &model, width * s, width * s, 1 );
     mat4_rotate( &model, angle, 0, 0, 1 );
-    mat4_translate( &model, 256, 256, 0 );
+    mat4_translate( &model, width/2., height/2., 0 );
 
     glUseProgram( program );
     {
@@ -427,7 +428,11 @@ int main( int argc, char **argv )
     fprintf(stderr, "Total time to generate distance map: %fs\n", total_time);
 
     glfwShowWindow( window );
-    reshape( window, 512, 512 );
+    {
+        int pixWidth, pixHeight;
+        glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
+        reshape( window, pixWidth, pixHeight );
+    }
 
     glfwSetTime(1.0);
 

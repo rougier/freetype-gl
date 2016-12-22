@@ -254,7 +254,11 @@ int main( int argc, char **argv )
     fprintf(stderr, "Total time to generate distance map: %fs\n", total_time);
 
     glfwShowWindow( window );
-    reshape( window, 512, 512 );
+    {
+        int pixWidth, pixHeight;
+        glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
+        reshape( window, pixWidth, pixHeight );
+    }
 
     while (!glfwWindowShouldClose( window ))
     {
