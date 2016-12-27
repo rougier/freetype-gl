@@ -98,7 +98,6 @@ console_new( float font_size )
     normal.size    = font_size;
     normal.bold    = 0;
     normal.italic  = 0;
-    normal.rise    = 0.0;
     normal.spacing = 0.0;
     normal.gamma   = 1.0;
     normal.foreground_color    = black;

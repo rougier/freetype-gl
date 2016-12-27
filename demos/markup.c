@@ -107,7 +107,7 @@ void init()
     markup_t normal = {
         .family  = f_normal,
         .size    = 24.0, .bold    = 0,   .italic  = 0,
-        .rise    = 0.0,  .spacing = 0.0, .gamma   = 2.,
+        .spacing = 0.0,  .gamma   = 2.,
         .foreground_color    = white, .background_color    = none,
         .underline           = 0,     .underline_color     = white,
         .overline            = 0,     .overline_color      = white,
