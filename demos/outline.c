@@ -112,7 +112,6 @@ void init( void )
     markup.size    = 80.0;
     markup.bold    = 0;
     markup.italic  = 0;
-    markup.rise    = 0.0;
     markup.spacing = 0.0;
     markup.gamma   = 1.5;
     markup.foreground_color    = white;

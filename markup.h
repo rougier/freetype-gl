@@ -40,7 +40,6 @@ namespace ftgl {
  *     .size = 24.0,
  *     .bold = 0,
  *     .italic = 0,
- *     .rise = 0.0,
  *     .spacing = 1.0,
  *     .gamma = 1.0,
  *     .foreground_color = black, .background_color    = none,
@@ -82,11 +81,6 @@ typedef struct markup_t
      * Whether text is italic.
      */
     int italic;
-
-    /**
-     * Vertical displacement from the baseline.
-     */
-    float rise;
 
     /**
      * Spacing between letters.

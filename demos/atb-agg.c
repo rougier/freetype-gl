@@ -101,7 +101,6 @@ build_buffer( void )
         .size    = 10.0,
         .bold    = 0,
         .italic  = 0,
-        .rise    = 0.0,
         .spacing = p_interval,
         .gamma   = p_gamma,
         .foreground_color    = color,
