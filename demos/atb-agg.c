@@ -160,11 +160,11 @@ build_buffer( void )
     font->kerning = p_kerning;
     font->filtering = 1;
     float norm = 1.0/(p_primary + 2*p_secondary + 2*p_tertiary);
-    font->lcd_weights[0] = (unsigned char)(p_tertiary*norm*256);
-    font->lcd_weights[1] = (unsigned char)(p_secondary*norm*256);
-    font->lcd_weights[2] = (unsigned char)(p_primary*norm*256);
-    font->lcd_weights[3] = (unsigned char)(p_secondary*norm*256);
-    font->lcd_weights[4] = (unsigned char)(p_tertiary*norm*256);
+    font->lcd_weights[0] = (unsigned char)(p_tertiary*norm*255);
+    font->lcd_weights[1] = (unsigned char)(p_secondary*norm*255);
+    font->lcd_weights[2] = (unsigned char)(p_primary*norm*255);
+    font->lcd_weights[3] = (unsigned char)(p_secondary*norm*255);
+    font->lcd_weights[4] = (unsigned char)(p_tertiary*norm*255);
     pen.x = 10;
     pen.y = 600 - font->height - 10;
     text_buffer_printf( text_buffer, &pen, &markup, text, NULL );
