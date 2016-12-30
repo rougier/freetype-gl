@@ -126,15 +126,12 @@ void display( GLFWwindow* window )
         glBindTexture( GL_TEXTURE_2D, font_manager->atlas->id );
 
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glBlendColor( 1, 1, 1, 1 );
 
         vertex_buffer_render( text_buffer->buffer, GL_TRIANGLES );
         glBindTexture( GL_TEXTURE_2D, 0 );
-        glBlendColor( 0, 0, 0, 0 );
         glUseProgram( 0 );
     }
     glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-    glBlendColor( 1.0, 1.0, 1.0, 1.0 );
     glUseProgram( bounds_shader );
     {
         glUniformMatrix4fv( glGetUniformLocation( bounds_shader, "model" ),
