@@ -448,19 +448,13 @@ void init( GLFWwindow* window )
 // ---------------------------------------------------------------- display ---
 void display( GLFWwindow* window )
 {
-    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
-    vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
-
     if( !p_invert )
     {
         glClearColor( 0, 0, 0, 1 );
-        text_buffer->base_color = white;
-
     }
     else
     {
         glClearColor( 1, 1, 1, 1 );
-        text_buffer->base_color = black;
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
