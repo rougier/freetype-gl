@@ -398,7 +398,6 @@ typedef struct texture_font_t
  * @param codepoint Character codepoint to be found in UTF-8 encoding.
  *
  * @return A pointer on the glyph or 0 if the glyph is not loaded
- *
  */
  texture_glyph_t *
  texture_font_find_glyph( texture_font_t * self,
