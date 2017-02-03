@@ -391,7 +391,19 @@ typedef struct texture_font_t
   texture_font_get_glyph( texture_font_t * self,
                           const char * codepoint );
 
-
+/** 
+ * Request an already loaded glyph from the font. 
+ * 
+ * @param self      A valid texture font
+ * @param codepoint Character codepoint to be found in UTF-8 encoding.
+ *
+ * @return A pointer on the glyph or 0 if the glyph is not loaded
+ *
+ */
+ texture_glyph_t *
+ texture_font_find_glyph( texture_font_t * self,
+                          const char * codepoint );
+    
 /**
  * Request the loading of a given glyph.
  *
