@@ -685,3 +685,51 @@ texture_font_get_glyph( texture_font_t * self,
 
     return NULL;
 }
+
+// ------------------------------------------------- texture_font_enlarge_atlas ---
+	void
+		texture_font_enlarge_atlas(texture_font_t * self, size_t width_new,
+			size_t height_new)
+	{
+		assert(self);
+		assert(self->atlas);
+		//ensure size increased
+		assert(width_new >= self->atlas->width);
+		assert(height_new >= self->atlas->height);
+		assert(width_new + height_new > self->atlas->width + self->atlas->height);
+
+		texture_atlas_t* ta = self->atlas;
+		size_t width_old = ta->width;
+		size_t height_old = ta->height;
+
+		//allocate new buffer
+		unsigned char* data_old = ta->data;
+		ta->data = calloc(1,width_new*height_new * sizeof(char)*ta->depth);
+
+		//update atlas size
+		ta->width = width_new;
+		ta->height = height_new;
+		//add node reflecting the gained space on the right
+		ivec3 node;
+		node.x = width_old - 1;
+		node.y = 1;
+		node.z = width_new - width_old;
+		vector_push_back(ta->nodes, &node);
+
+		//copy over data from the old buffer, skipping first row and column because of the margin
+		size_t pixel_size = sizeof(char) * ta->depth;
+		size_t old_row_size = width_old * pixel_size;
+		texture_atlas_set_region(ta, 1, 1, width_old - 2, height_old - 2, data_old + old_row_size + pixel_size, old_row_size);
+		free(data_old);
+
+		//change uv coordinates of existing glyphs to reflect size change
+		float mulw = (float)width_old / width_new;
+		float mulh = (float)height_old / height_new;
+		for (size_t i = 0; i < vector_size(self->glyphs); i++) {
+			texture_glyph_t* g = *(texture_glyph_t**)vector_get(self->glyphs, i);
+			g->s0 *= mulw;
+			g->s1 *= mulw;
+			g->t0 *= mulh;
+			g->t1 *= mulh;
+		}
+	}
