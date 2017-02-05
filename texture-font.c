@@ -720,7 +720,8 @@ texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
     //change uv coordinates of existing glyphs to reflect size change
     float mulw = (float)width_old / width_new;
     float mulh = (float)height_old / height_new;
-    for (size_t i = 0; i < vector_size(self->glyphs); i++) {
+    size_t i;
+    for (i = 0; i < vector_size(self->glyphs); i++) {
     	texture_glyph_t* g = *(texture_glyph_t**)vector_get(self->glyphs, i);
     	g->s0 *= mulw;
     	g->s1 *= mulw;
