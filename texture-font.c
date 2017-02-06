@@ -707,11 +707,13 @@ texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
     ta->width = width_new;
     ta->height = height_new;
     //add node reflecting the gained space on the right
-    ivec3 node;
-    node.x = width_old - 1;
-    node.y = 1;
-    node.z = width_new - width_old;
-    vector_push_back(ta->nodes, &node);    
+    if(width_new>width_old){
+    	ivec3 node;
+        node.x = width_old - 1;
+        node.y = 1;
+        node.z = width_new - width_old;
+        vector_push_back(ta->nodes, &node);    
+    }
     //copy over data from the old buffer, skipping first row and column because of the margin
     size_t pixel_size = sizeof(char) * ta->depth;
     size_t old_row_size = width_old * pixel_size;
