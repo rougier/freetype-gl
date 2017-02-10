@@ -125,12 +125,10 @@ ansi_to_markup( char *sequence, size_t length, markup_t *markup )
             else if( (set_fg == 0) && (code == 5) )
             {
                 set_fg = 1;
-                code = 0;
             }
             else if( (set_bg == 0) && (code == 5) )
             {
                 set_bg = 1;
-                code = 0;
             }
             /* Set fg color (30 + x, where x is the index of the color) */
             else if( (code >= 30) && (code < 38 ) )
@@ -210,7 +208,6 @@ print( text_buffer_t * buffer, vec2 * pen,
 {
     char *seq_start = text, *seq_end = text;
     char *p;
-    size_t i;
     for( p=text; p<(text+strlen(text)); ++p )
     {
         char *start = strstr( p, "\033[" );
