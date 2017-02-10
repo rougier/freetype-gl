@@ -125,7 +125,6 @@ texture_atlas_fit( texture_atlas_t * self,
     {
 		return -1;
     }
-	y = node->y;
 	while( width_left > 0 )
 	{
         node = (ivec3 *) (vector_get( self->nodes, i ));

@@ -305,15 +305,8 @@ void display( GLFWwindow* window )
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    texture_glyph_t * glyph = texture_font_get_glyph( font, "@");
-
     int width, height;
     glfwGetFramebufferSize( window, &width, &height );
-
-    float glyph_height = glyph->height * width/(float)glyph->width;
-    float glyph_width  = glyph->width * height/(float)glyph->height;
-    int x = -glyph_width/2 + width/2.;
-    int y = -glyph_height/2 + height/2.;
 
     float s = .025+.975*(1+cos(angle/100.0))/2.;
 
