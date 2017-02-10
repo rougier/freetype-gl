@@ -391,7 +391,6 @@ texture_font_load_glyph( texture_font_t * self,
     int ft_glyph_left = 0;
 
     ivec4 region;
-    size_t missed = 0;
 
 
     if (!texture_font_load_face(self, self->size, &library, &face))
@@ -418,6 +417,7 @@ texture_font_load_glyph( texture_font_t * self,
         if ( region.x < 0 )
         {
             fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
+            texture_glyph_delete( glyph );
             FT_Done_Face( face );
             FT_Done_FreeType( library );
             return NULL;
