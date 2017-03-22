@@ -562,13 +562,7 @@ cleanup_stroker:
         int top;
         int right;
         int bottom;
-    } padding = { 0, 0, 1, 1 };
-
-    if( self->rendermode == RENDER_SIGNED_DISTANCE_FIELD )
-    {
-        padding.top = 1;
-        padding.left = 1;
-    }
+    } padding = { 1, 1, 1, 1 };
 
     size_t src_w = ft_bitmap.width/self->atlas->depth;
     size_t src_h = ft_bitmap.rows;
