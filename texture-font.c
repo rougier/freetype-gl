@@ -604,10 +604,13 @@ cleanup_stroker:
 
     free( buffer );
 
+    x += padding.left;
+    y += padding.top;
+
     glyph = texture_glyph_new( );
     glyph->codepoint = utf8_to_utf32( codepoint );
-    glyph->width    = tgt_w;
-    glyph->height   = tgt_h;
+    glyph->width    = src_w;
+    glyph->height   = src_h;
     glyph->rendermode = self->rendermode;
     glyph->outline_thickness = self->outline_thickness;
     glyph->offset_x = ft_glyph_left;
