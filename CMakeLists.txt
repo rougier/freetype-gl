@@ -70,11 +70,10 @@ check_symbol_exists(M_PI math.h HAVE_M_PI)
 
 if(NOT HAVE_M_PI)
     list(APPEND CMAKE_REQUIRED_DEFINITIONS -D_USE_MATH_DEFINES)
-    unset(HAVE_M_PI CACHE)
 
-    check_symbol_exists(M_PI math.h HAVE_M_PI)
+    check_symbol_exists(M_PI math.h HAVE_M_PI2)
 
-    if(NOT HAVE_M_PI)
+    if(NOT HAVE_M_PI2)
         message(FATAL_ERROR "`M_PI` not defined in `math.h`.")
     else()
         add_definitions(-D_USE_MATH_DEFINES)
