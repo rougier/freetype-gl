@@ -32,6 +32,13 @@ option(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (exper
 option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 option(freetype-gl_BUILD_TESTS "Build the tests" ON)
 
+if(${freetype-gl_BUILD_TESTS})
+    find_package(ImageMagick QUIET COMPONENTS compare)
+    if(NOT ${ImageMagick_EXECUTABLE_DIR})
+        message(FATAL_ERROR "ImageMagick was not found. Either provide path to ImageMagick, or disable freetype-gl_BUILD_TESTS option.")
+    endif()
+endif()
+
 include(RequireIncludeFile)
 include(RequireFunctionExists)
 include(CheckLibraryExists)
