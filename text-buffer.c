@@ -218,7 +218,7 @@ text_buffer_add_text( text_buffer_t * self,
         }
     }
 
-    for( i = 0; utf8_strlen( text + i ) && length; i += utf8_surrogate_len( text + i ) )
+    for( i = 0; length; i += utf8_surrogate_len( text + i ) )
     {
         text_buffer_add_char( self, pen, markup, text + i, prev_character );
         prev_character = text + i;
