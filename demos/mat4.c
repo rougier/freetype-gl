@@ -1,37 +1,8 @@
-/* ============================================================================
- * Freetype GL - A C OpenGL Freetype engine
- * Platform:    Any
- * WWW:         https://github.com/rougier/freetype-gl
- * ----------------------------------------------------------------------------
- * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+/* Freetype GL - A C OpenGL Freetype engine
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of Nicolas P. Rougier.
- * ============================================================================
+ * Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
+ * file `LICENSE` for more details.
  */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -48,7 +19,8 @@ mat4_new( void )
 void
 mat4_set_zero( mat4 *self )
 {
-    assert( self );
+    if (!self)
+        return;
 
     memset( self, 0, sizeof( mat4 ));
 }
@@ -56,7 +28,8 @@ mat4_set_zero( mat4 *self )
 void
 mat4_set_identity( mat4 *self )
 {
-    assert( self );
+    if (!self)
+        return;
 
     memset( self, 0, sizeof( mat4 ));
     self->m00 = 1.0;
@@ -71,8 +44,8 @@ mat4_multiply( mat4 *self, mat4 *other )
     mat4 m;
     size_t i;
 
-    assert( self );
-    assert( other );
+    if (!self || !other)
+        return;
 
     for( i=0; i<4; ++i )
     {
@@ -111,10 +84,11 @@ mat4_set_orthographic( mat4 *self,
                        float bottom, float top,
                        float znear,  float zfar )
 {
-    assert( self );
-    assert( right  != left );
-    assert( bottom != top  );
-    assert( znear  != zfar );
+    if (!self)
+        return;
+
+    if (left == right || bottom == top || znear == zfar)
+        return;
 
     mat4_set_zero( self );
 
@@ -134,8 +108,11 @@ mat4_set_perspective( mat4 *self,
 {
     float h, w;
 
-    assert( self );
-    assert( znear != zfar );
+    if (!self)
+        return;
+
+    if (znear == zfar)
+        return;
 
     h = (float)tan(fovy / 360.0 * M_PI) * znear;
     w = h * aspect;
@@ -150,10 +127,11 @@ mat4_set_frustum( mat4 *self,
                   float znear,  float zfar )
 {
 
-    assert( self );
-    assert( right  != left );
-    assert( bottom != top  );
-    assert( znear  != zfar );
+    if (!self)
+        return;
+
+    if (left == right || bottom == top || znear == zfar)
+        return;
 
     mat4_set_zero( self );
 
@@ -176,7 +154,8 @@ mat4_set_rotation( mat4 *self,
 {
     float c, s, norm;
 
-    assert( self );
+    if (!self)
+        return;
 
     c = (float)cos( M_PI*angle/180.0 );
     s = (float)sin( M_PI*angle/180.0 );
@@ -203,7 +182,8 @@ void
 mat4_set_translation( mat4 *self,
                       float x, float y, float z)
 {
-    assert( self );
+    if (!self)
+        return;
 
     mat4_set_identity( self );
     self-> m30 = x;
@@ -215,7 +195,8 @@ void
 mat4_set_scaling( mat4 *self,
                   float x, float y, float z)
 {
-    assert( self );
+    if (!self)
+        return;
 
     mat4_set_identity( self );
     self-> m00 = x;
@@ -230,7 +211,8 @@ mat4_rotate( mat4 *self,
 {
     mat4 m;
 
-    assert( self );
+    if (!self)
+        return;
 
     mat4_set_rotation( &m, angle, x, y, z);
     mat4_multiply( self, &m );
@@ -241,7 +223,9 @@ mat4_translate( mat4 *self,
                 float x, float y, float z)
 {
     mat4 m;
-    assert( self );
+
+    if (!self)
+        return;
 
     mat4_set_translation( &m, x, y, z);
     mat4_multiply( self, &m );
@@ -252,7 +236,9 @@ mat4_scale( mat4 *self,
             float x, float y, float z)
 {
     mat4 m;
-    assert( self );
+
+    if (!self)
+        return;
 
     mat4_set_scaling( &m, x, y, z);
     mat4_multiply( self, &m );

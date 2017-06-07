@@ -1,42 +1,13 @@
-/* ============================================================================
- * Freetype GL - A C OpenGL Freetype engine
- * Platform:    Any
- * WWW:         https://github.com/rougier/freetype-gl
- * ----------------------------------------------------------------------------
- * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+/* Freetype GL - A C OpenGL Freetype engine
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of Nicolas P. Rougier.
- * ============================================================================
+ * Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
+ * file `LICENSE` for more details.
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <limits.h>
-#include "opengl.h"
 #include "texture-atlas.h"
 
 #ifdef __ANDROID__
@@ -98,10 +69,6 @@ texture_atlas_delete( texture_atlas_t *self )
     {
         free( self->data );
     }
-    if( self->id )
-    {
-        glDeleteTextures( 1, &self->id );
-    }
     free( self );
 }
 
@@ -127,6 +94,10 @@ texture_atlas_set_region( texture_atlas_t * self,
     assert( (x + width) <= (self->width-1));
     assert( y < (self->height-1));
     assert( (y + height) <= (self->height-1));
+	
+    //prevent copying data from undefined position 
+    //and prevent memcpy's undefined behavior when count is zero
+    assert(height == 0 || (data != NULL && width > 0));
 
     depth = self->depth;
     charsize = sizeof(char);
@@ -308,45 +279,3 @@ texture_atlas_clear( texture_atlas_t * self )
     vector_push_back( self->nodes, &node );
     memset( self->data, 0, self->width*self->height*self->depth );
 }
-
-
-// --------------------------------------------------- texture_atlas_upload ---
-void
-texture_atlas_upload( texture_atlas_t * self )
-{
-    assert( self );
-    assert( self->data );
-
-    if( !self->id )
-    {
-        glGenTextures( 1, &self->id );
-    }
-
-    glBindTexture( GL_TEXTURE_2D, self->id );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    if( self->depth == 4 )
-    {
-#ifdef GL_UNSIGNED_INT_8_8_8_8_REV
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self->width, self->height,
-                      0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, self->data );
-#else
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, self->width, self->height,
-                      0, GL_RGBA, GL_UNSIGNED_BYTE, self->data );
-#endif
-    }
-    else if( self->depth == 3 )
-    {
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, self->width, self->height,
-                      0, GL_RGB, GL_UNSIGNED_BYTE, self->data );
-    }
-    else
-    {
-      /* Bernd: keep GL_ALPHA here for all versions of OpenGL */
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, self->width, self->height,
-                      0, GL_ALPHA, GL_UNSIGNED_BYTE, self->data );
-    }
-}
-

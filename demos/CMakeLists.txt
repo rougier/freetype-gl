@@ -1,52 +1,28 @@
-# =========================================================================
 # Freetype GL - A C OpenGL Freetype engine
-# Platform:    Any
-# WWW:         https://github.com/rougier/freetype-gl
-# -------------------------------------------------------------------------
-# Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-#  1. Redistributions of source code must retain the above copyright notice,
-#     this list of conditions and the following disclaimer.
-#
-#  2. Redistributions in binary form must reproduce the above copyright
-#     notice, this list of conditions and the following disclaimer in the
-#     documentation and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-# EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# The views and conclusions contained in the software and documentation are
-# those of the authors and should not be interpreted as representing official
-# policies, either expressed or implied, of Nicolas P. Rougier.
-# =========================================================================
-cmake_minimum_required(VERSION 2.8.5)
+# Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
+# file `LICENSE` for more details.
 
 macro(CREATE_DEMO _target _sources)
-    add_executable(${_target} ${_sources})
-    if(NOT APPLE)
-        target_link_libraries(${_target} ${GLEW_LIBRARY})
+    add_executable(${_target} ${_sources} $<TARGET_OBJECTS:demo-utils>)
+    if(${_target} MATCHES "^harfbuzz")
+        target_link_libraries(${_target}
+            freetype-gl-hb
+            ${HARFBUZZ_LIBRARIES}
+        )
+    else()
+        target_link_libraries(${_target}
+            freetype-gl
+        )
     endif()
     target_link_libraries(${_target}
-        freetype-gl
+        glfw
         ${OPENGL_LIBRARY}
-        ${GLFW3_LIBRARY}
         ${FREETYPE_LIBRARIES}
+        ${MATH_LIBRARY}
+        ${GLEW_LIBRARY}
     )
-    if(MATH_LIBRARY)
-        target_link_libraries(${_target} ${MATH_LIBRARY})
-    endif()
-     
+
     if(MSVC AND NOT (MSVC_VERSION LESS 1900))
         # prevent error LNK2019: unresolved external symbol _sprintf referenced in function __bdf_parse_properties
         # see http://stackoverflow.com/a/32418900/469659
@@ -61,18 +37,21 @@ if(WIN32 OR WIN64)
 endif()
 
 # Find dependencies
-find_package(glfw3 REQUIRED)
+find_package(glfw3 3.2 REQUIRED)
 find_package(AntTweakBar)
 find_package(FontConfig)
 
-include_directories(
-    ${GLFW3_INCLUDE_DIR}
-    ${ANT_TWEAK_BAR_INCLUDE_PATH}
-    ${FONTCONFIG_INCLUDE_DIR}
+add_library(demo-utils OBJECT
+    mat4.h
+    mat4.c
+    screenshot-util.h
+    screenshot-util.c
+    shader.h
+    shader.c
 )
 
-link_directories(
-    ${GLFW3_LIBRARY_DIR}
+target_include_directories(demo-utils
+    PUBLIC $<TARGET_PROPERTY:glfw,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 add_custom_command(
@@ -114,13 +93,31 @@ create_demo(distance-field-2 distance-field-2.c)
 create_demo(distance-field-3 distance-field-3.c)
 
 if(FONTCONFIG_FOUND)
-   create_demo(markup markup.c)
-   target_link_libraries(markup ${FONTCONFIG_LIBRARY})
+    include_directories(${FONTCONFIG_INCLUDE_DIR})
+    create_demo(markup markup.c)
+    target_link_libraries(markup ${FONTCONFIG_LIBRARY})
 endif()
 
 if(ANT_TWEAK_BAR_FOUND)
+    include_directories(${ANT_TWEAK_BAR_INCLUDE_PATH})
     create_demo(atb-agg atb-agg.c)
     target_link_libraries(atb-agg ${ANT_TWEAK_BAR_LIBRARY})
+    set_target_properties(atb-agg PROPERTIES LINKER_LANGUAGE CXX)
+endif()
+
+if(TARGET freetype-gl-hb)
+    create_demo(harfbuzz harfbuzz.c)
+    create_demo(harfbuzz-texture harfbuzz-texture.c)
+    target_include_directories(harfbuzz
+        BEFORE
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../harfbuzz
+        PRIVATE ${HARFBUZZ_INCLUDE_DIRS}
+    )
+    target_include_directories(harfbuzz-texture
+        BEFORE
+        PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../harfbuzz
+        PRIVATE ${HARFBUZZ_INCLUDE_DIRS}
+    )
 endif()
 
 # Copy font and shaders into build directory for in-place testing

@@ -1,35 +1,7 @@
-/* ============================================================================
- * Freetype GL - A C OpenGL Freetype engine
- * Platform:    Any
- * WWW:         https://github.com/rougier/freetype-gl
- * ----------------------------------------------------------------------------
- * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+/* Freetype GL - A C OpenGL Freetype engine
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of Nicolas P. Rougier.
- * ============================================================================
+ * Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
+ * file `LICENSE` for more details.
  */
 #include <stdio.h>
 #include <string.h>
@@ -40,6 +12,7 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+#include "screenshot-util.h"
 
 #include <GLFW/glfw3.h>
 
@@ -58,6 +31,7 @@ typedef struct {
 
 
 // ------------------------------------------------------- global variables ---
+texture_atlas_t *atlas;
 vertex_buffer_t * text_buffer;
 vertex_buffer_t * line_buffer;
 vertex_buffer_t * point_buffer;
@@ -110,7 +84,7 @@ void init( void )
     vec4 blue  = {{0,0,1,1}};
     vec4 black = {{0,0,0,1}};
 
-    texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1);
+    atlas = texture_atlas_new( 512, 512, 1 );
     texture_font_t * big = texture_font_new_from_file( atlas, 400, "fonts/Vera.ttf");
     texture_font_t * small = texture_font_new_from_file( atlas, 18, "fonts/Vera.ttf");
     texture_font_t * title = texture_font_new_from_file( atlas, 32, "fonts/Vera.ttf");
@@ -125,13 +99,11 @@ void init( void )
     origin.x = width/2  - glyph->offset_x - glyph->width/2;
     origin.y = height/2 - glyph->offset_y + glyph->height/2;
     add_text( text_buffer, big, "g", &black, &origin );
-    texture_atlas_upload( big->atlas );
 
     // title
     pen.x = 50;
     pen.y = 560;
     add_text( text_buffer, title, "Glyph metrics", &black, &pen );
-    texture_atlas_upload( title->atlas );
 
     point_t vertices[] =
         {   // Baseline
@@ -213,7 +185,14 @@ void init( void )
     pen.y = height/2 - glyph->offset_y + glyph->height/2 - 20;
     add_text( text_buffer, small, "Origin", &black, &pen );
 
-    texture_atlas_upload( small->atlas );
+    glGenTextures( 1, &atlas->id );
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, atlas->width, atlas->height,
+                  0, GL_RED, GL_UNSIGNED_BYTE, atlas->data );
 
     GLuint i = 0;
     point_t p;
@@ -315,6 +294,18 @@ void error_callback( int error, const char* description )
 int main( int argc, char **argv )
 {
     GLFWwindow* window;
+    char* screenshot_path = NULL;
+
+    if (argc > 1)
+    {
+        if (argc == 3 && 0 == strcmp( "--screenshot", argv[1] ))
+            screenshot_path = argv[2];
+        else
+        {
+            fprintf( stderr, "Unknown or incomplete parameters given\n" );
+            exit( EXIT_FAILURE );
+        }
+    }
 
     glfwSetErrorCallback( error_callback );
 
@@ -326,7 +317,7 @@ int main( int argc, char **argv )
     glfwWindowHint( GLFW_VISIBLE, GL_FALSE );
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
-    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
+    window = glfwCreateWindow( width, height, argv[0], NULL, NULL );
 
     if (!window)
     {
@@ -355,14 +346,24 @@ int main( int argc, char **argv )
 
     init();
 
-    glfwSetWindowSize( window, width, height );
     glfwShowWindow( window );
+    reshape( window, width, height );
 
-    while(!glfwWindowShouldClose( window ))
+    while (!glfwWindowShouldClose( window ))
     {
         display( window );
         glfwPollEvents( );
+
+        if (screenshot_path)
+        {
+            screenshot( window, screenshot_path );
+            glfwSetWindowShouldClose( window, 1 );
+        }
     }
+
+    glDeleteTextures( 1, &atlas->id );
+    atlas->id = 0;
+    texture_atlas_delete( atlas );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

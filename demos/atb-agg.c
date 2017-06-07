@@ -1,47 +1,22 @@
-/* ============================================================================
- * Freetype GL - A C OpenGL Freetype engine
- * Platform:    Any
- * WWW:         https://github.com/rougier/freetype-gl
- * ----------------------------------------------------------------------------
- * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+/* Freetype GL - A C OpenGL Freetype engine
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of Nicolas P. Rougier.
- * ============================================================================
+ * Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
+ * file `LICENSE` for more details.
  */
 #include <math.h>
 #include <stdio.h>
-#include <AntTweakBar.h>
+#include <string.h>
 
 #include "freetype-gl.h"
+#include "font-manager.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+#include "screenshot-util.h"
 
+#include <AntTweakBar.h>
 #include <GLFW/glfw3.h>
 
 
@@ -62,9 +37,13 @@ typedef enum {
 // ------------------------------------------------------- global variables ---
 TwBar *bar;
 
-text_buffer_t * buffer;
-text_buffer_t * buffer_a;
-text_buffer_t * buffer_rgb;
+font_manager_t * font_manager;
+font_manager_t * font_manager_a;
+font_manager_t * font_manager_rgb;
+
+text_buffer_t * text_buffer;
+
+GLuint text_shader;
 
 mat4 model, view, projection;
 
@@ -122,7 +101,6 @@ build_buffer( void )
         .size    = 10.0,
         .bold    = 0,
         .italic  = 0,
-        .rise    = 0.0,
         .spacing = p_interval,
         .gamma   = p_gamma,
         .foreground_color    = color,
@@ -136,8 +114,8 @@ build_buffer( void )
         .font = 0,
     };
 
-    text_buffer_clear( buffer );
-    texture_atlas_t * atlas = buffer->manager->atlas;
+    text_buffer_clear( text_buffer );
+    texture_atlas_t * atlas = font_manager->atlas;
     texture_atlas_clear( atlas );
 
     if( p_family == VERA)
@@ -182,17 +160,17 @@ build_buffer( void )
     font->kerning = p_kerning;
     font->filtering = 1;
     float norm = 1.0/(p_primary + 2*p_secondary + 2*p_tertiary);
-    font->lcd_weights[0] = (unsigned char)(p_tertiary*norm*256);
-    font->lcd_weights[1] = (unsigned char)(p_secondary*norm*256);
-    font->lcd_weights[2] = (unsigned char)(p_primary*norm*256);
-    font->lcd_weights[3] = (unsigned char)(p_secondary*norm*256);
-    font->lcd_weights[4] = (unsigned char)(p_tertiary*norm*256);
+    font->lcd_weights[0] = (unsigned char)(p_tertiary*norm*255);
+    font->lcd_weights[1] = (unsigned char)(p_secondary*norm*255);
+    font->lcd_weights[2] = (unsigned char)(p_primary*norm*255);
+    font->lcd_weights[3] = (unsigned char)(p_secondary*norm*255);
+    font->lcd_weights[4] = (unsigned char)(p_tertiary*norm*255);
     pen.x = 10;
     pen.y = 600 - font->height - 10;
-    text_buffer_printf( buffer, &pen, &markup, text, NULL );
+    text_buffer_printf( text_buffer, &pen, &markup, text, NULL );
 
     // Post-processing for width and orientation
-    vertex_buffer_t * vbuffer = buffer->buffer;
+    vertex_buffer_t * vbuffer = text_buffer->buffer;
     size_t i;
     for( i=0; i < vector_size( vbuffer->items ); ++i )
     {
@@ -218,7 +196,12 @@ build_buffer( void )
         v3->shift = fmod(v3->shift + dx-(int)(dx),1.0);
     }
 
-    texture_atlas_upload( atlas);
+    glBindTexture( GL_TEXTURE_2D, font_manager->atlas->id );
+    GLenum gl_format = (font_manager->atlas->depth == LCD_FILTERING_OFF) ?
+        GL_RED : GL_RGB;
+    glTexImage2D( GL_TEXTURE_2D, 0, gl_format, font_manager->atlas->width,
+        font_manager->atlas->height, 0, gl_format, GL_UNSIGNED_BYTE,
+        font_manager->atlas->data );
 
     texture_font_delete( font );
 }
@@ -260,37 +243,26 @@ void quit( void* client_data )
     glfwSetWindowShouldClose( window, GL_TRUE );
 }
 
-// --------------------------------------------------------- get/set invert ---
-void TW_CALL set_invert( const void *value, void *data )
+// ------------------------------------------------------------ get/set int ---
+void TW_CALL set_int( const void *value, void *data )
 {
-    p_invert = *(const int *) value;
+    *(int *)data = *(const int *) value;
     build_buffer();
 }
-void TW_CALL get_invert( void *value, void *data )
+void TW_CALL get_int( void *value, void *data )
 {
-    *(int *)value = p_invert;
+    *(int *)value = *(int *)data;
 }
 
-// -------------------------------------------------------- get/set kerning ---
-void TW_CALL set_kerning( const void *value, void *data )
+// ---------------------------------------------------------- get/set float ---
+void TW_CALL set_float( const void *value, void *data )
 {
-    p_kerning = *(const int *) value;
+    *(float *) data = *(const float *) value;
     build_buffer();
 }
-void TW_CALL get_kerning( void *value, void *data )
+void TW_CALL get_float( void *value, void *data )
 {
-    *(int *)value = p_kerning;
-}
-
-// -------------------------------------------------------- get/set hinting ---
-void TW_CALL set_hinting( const void *value, void *data )
-{
-    p_hinting = *(const int *) value;
-    build_buffer();
-}
-void TW_CALL get_hinting( void *value, void *data )
-{
-    *(int *)value = p_hinting;
+    *(float *) value = *(const float *) data;
 }
 
 // -------------------------------------------------- get/set lcd_filtering ---
@@ -299,140 +271,17 @@ void TW_CALL set_lcd_filtering( const void *value, void *data )
     p_lcd_filtering = *(const int *) value;
     if( p_lcd_filtering )
     {
-        buffer = buffer_rgb;
+        font_manager = font_manager_rgb;
     }
     else
     {
-        buffer = buffer_a;
+        font_manager = font_manager_a;
     }
     build_buffer();
 }
 void TW_CALL get_lcd_filtering( void *value, void *data )
 {
     *(int *)value = p_lcd_filtering;
-}
-
-// --------------------------------------------------------- get/set weight ---
-void TW_CALL set_weight( const void *value, void *data )
-{
-    p_weight = *(const float *) value;
-}
-void TW_CALL get_weight( void *value, void *data )
-{
-    *(float *)value = p_weight;
-}
-
-// ---------------------------------------------------------- get/set gamma ---
-void TW_CALL set_gamma( const void *value, void *data )
-{
-    p_gamma = *(const float *) value;
-    build_buffer();
-}
-void TW_CALL get_gamma( void *value, void *data )
-{
-   *(float *)value = p_gamma;
-}
-
-// ---------------------------------------------------------- get/set width ---
-void TW_CALL set_width( const void *value, void *data )
-{
-    p_width = *(const float *) value;
-    build_buffer();
-}
-void TW_CALL get_width( void *value, void *data )
-{
-    *(float *)value = p_width;
-}
-
-// ------------------------------------------------------- get/set interval ---
-void TW_CALL set_interval( const void *value, void *data )
-{
-    p_interval = *(const float *) value;
-    build_buffer();
-}
-void TW_CALL get_interval( void *value, void *data )
-{
-    *(float *)value = p_interval;
-}
-
-// ---------------------------------------------------- get/set faux_weight ---
-void TW_CALL set_faux_weight( const void *value, void *data )
-{
-    p_faux_weight = *(const float *) value;
-}
-void TW_CALL get_faux_weight( void *value, void *data )
-{
-    *(float *)value = p_faux_weight;
-}
-
-// ---------------------------------------------------- get/set faux_italic ---
-void TW_CALL set_faux_italic( const void *value, void *data )
-{
-    p_faux_italic = *(const float *) value;
-    build_buffer();
-}
-void TW_CALL get_faux_italic( void *value, void *data )
-{
-    *(float *)value = p_faux_italic;
-}
-
-// ----------------------------------------------------------- get/set size ---
-void TW_CALL set_size( const void *value, void *data )
-{
-    p_size = *(const float *) value;
-    build_buffer();
-
-}
-void TW_CALL get_size( void *value, void *data )
-{
-    *(float *)value = p_size;
-}
-
-// --------------------------------------------------------- get/set family ---
-void TW_CALL set_family( const void *value, void *data )
-{
-    p_family = *(const font_family_e *) value;
-    build_buffer();
-}
-void TW_CALL get_family( void *value, void *data )
-{
-    *(font_family_e *)value = p_family;
-}
-
-// ----------------------------------------------------------- get/set primary ---
-void TW_CALL set_primary( const void *value, void *data )
-{
-    p_primary = *(const float *) value;
-    build_buffer();
-
-}
-void TW_CALL get_primary( void *value, void *data )
-{
-    *(float *)value = p_primary;
-}
-
-// ----------------------------------------------------------- get/set secondary ---
-void TW_CALL set_secondary( const void *value, void *data )
-{
-    p_secondary = *(const float *) value;
-    build_buffer();
-
-}
-void TW_CALL get_secondary( void *value, void *data )
-{
-    *(float *)value = p_secondary;
-}
-
-// ----------------------------------------------------------- get/set tertiary ---
-void TW_CALL set_tertiary( const void *value, void *data )
-{
-    p_tertiary = *(const float *) value;
-    build_buffer();
-
-}
-void TW_CALL get_tertiary( void *value, void *data )
-{
-    *(float *)value = p_tertiary;
 }
 
 
@@ -463,12 +312,12 @@ void init( GLFWwindow* window )
             {OLD_STANDARD, "Old Standard TT"},
             {LOBSTER,      "Lobster"} };
         TwType family_type = TwDefineEnum("Family", familyEV, NUM_FONTS);
-        TwAddVarCB(bar, "Family", family_type, set_family, get_family, NULL,
+        TwAddVarCB(bar, "Family", family_type, set_int, get_int, &p_family,
                    "label = 'Family'      "
                    "group = 'Font'        "
                    "help  = ' '           ");
     }
-    TwAddVarCB(bar, "Size", TW_TYPE_FLOAT, set_size, get_size, NULL,
+    TwAddVarCB(bar, "Size", TW_TYPE_FLOAT, set_float, get_float, &p_size,
                "label = 'Size' "
                "group = 'Font' "
                "min   = 6.0    "
@@ -482,23 +331,23 @@ void init( GLFWwindow* window )
 
 
     // Rendering
-    TwAddVarCB(bar, "Kerning", TW_TYPE_BOOL32, set_kerning, get_kerning, NULL,
+    TwAddVarCB(bar, "Kerning", TW_TYPE_BOOL32, set_int, get_int, &p_kerning,
                "label = 'Kerning'   "
                "group = 'Rendering' "
                "help  = ' '         ");
-    TwAddVarCB(bar, "Hinting", TW_TYPE_BOOL32, set_hinting, get_hinting, NULL,
+    TwAddVarCB(bar, "Hinting", TW_TYPE_BOOL32, set_int, get_int, &p_hinting,
                "label = 'Hinting'   "
                "group = 'Rendering' "
                "help  = ' '         ");
 
     // Color
-    TwAddVarCB(bar, "Invert", TW_TYPE_BOOL32, set_invert, get_invert, NULL,
+    TwAddVarCB(bar, "Invert", TW_TYPE_BOOL32, set_int, get_int, &p_invert,
                "label = 'Invert' "
                "group = 'Color'  "
                "help  = ' '      ");
 
     // Glyph
-    TwAddVarCB(bar, "Width", TW_TYPE_FLOAT, set_width, get_width, NULL,
+    TwAddVarCB(bar, "Width", TW_TYPE_FLOAT, set_float, get_float, &p_width,
                "label = 'Width' "
                "group = 'Glyph' "
                "min   = 0.75    "
@@ -506,7 +355,7 @@ void init( GLFWwindow* window )
                "step  = 0.01    "
                "help  = ' '     ");
 
-    TwAddVarCB(bar, "Interval", TW_TYPE_FLOAT, set_interval, get_interval, NULL,
+    TwAddVarCB(bar, "Interval", TW_TYPE_FLOAT, set_float, get_float, &p_interval,
                "label = 'Spacing' "
                "group = 'Glyph'   "
                "min   = -0.2      "
@@ -514,7 +363,7 @@ void init( GLFWwindow* window )
                "step  = 0.01      "
                "help  = ' '       " );
 
-    TwAddVarCB(bar, "Faux italic", TW_TYPE_FLOAT, set_faux_italic, get_faux_italic, NULL,
+    TwAddVarCB(bar, "Faux italic", TW_TYPE_FLOAT, set_float, get_float, &p_faux_italic,
                "label = 'Faux italic' "
                "group = 'Glyph'       "
                "min   = -30.0         "
@@ -523,7 +372,7 @@ void init( GLFWwindow* window )
                "help  = ' '           ");
 
     // Energy distribution
-    TwAddVarCB(bar, "Primary", TW_TYPE_FLOAT, set_primary, get_primary, NULL,
+    TwAddVarCB(bar, "Primary", TW_TYPE_FLOAT, set_float, get_float, &p_primary,
                "label = 'Primary weight'      "
                "group = 'Energy distribution' "
                "min   = 0                     "
@@ -531,7 +380,7 @@ void init( GLFWwindow* window )
                "step  = 0.01                  "
                "help  = ' '                   " );
 
-    TwAddVarCB(bar, "Secondary", TW_TYPE_FLOAT, set_secondary, get_secondary, NULL,
+    TwAddVarCB(bar, "Secondary", TW_TYPE_FLOAT, set_float, get_float, &p_secondary,
                "label = 'Secondy weight'      "
                "group = 'Energy distribution' "
                "min   = 0                     "
@@ -539,7 +388,7 @@ void init( GLFWwindow* window )
                "step  = 0.01                  "
                "help  = ' '                   " );
 
-    TwAddVarCB(bar, "Tertiary", TW_TYPE_FLOAT, set_tertiary, get_tertiary, NULL,
+    TwAddVarCB(bar, "Tertiary", TW_TYPE_FLOAT, set_float, get_float, &p_tertiary,
                "label = 'Tertiary weight'      "
                "group = 'Energy distribution' "
                "min   = 0                     "
@@ -550,7 +399,7 @@ void init( GLFWwindow* window )
     TwAddSeparator(bar, "",
                    "group = 'Energy distribution' " );
 
-    TwAddVarCB(bar, "Gamma", TW_TYPE_FLOAT, set_gamma, get_gamma, NULL,
+    TwAddVarCB(bar, "Gamma", TW_TYPE_FLOAT, set_float, get_float, &p_gamma,
                "label = 'Gamma correction'    "
                "group = 'Energy distribution' "
                "min   = 0.50                  "
@@ -565,13 +414,29 @@ void init( GLFWwindow* window )
     TwAddButton(bar, "Quit", (TwButtonCallback) quit, window,
                 "help='Quit.'");
 
-    buffer_a = text_buffer_new( LCD_FILTERING_OFF,
-                                "shaders/text.vert",
-                                "shaders/text.frag" );
-    buffer_rgb = text_buffer_new( LCD_FILTERING_ON,
-                                  "shaders/text.vert",
-                                  "shaders/text.frag" );
-    buffer = buffer_rgb;
+    text_shader = shader_load( "shaders/text.vert",
+                               "shaders/text.frag" );
+
+    font_manager_a = font_manager_new( 512, 512, LCD_FILTERING_OFF );
+    font_manager_rgb = font_manager_new( 512, 512, LCD_FILTERING_ON );
+    font_manager = font_manager_rgb;
+
+    text_buffer = text_buffer_new( );
+
+    glGenTextures( 1, &font_manager_a->atlas->id );
+    glBindTexture( GL_TEXTURE_2D, font_manager_a->atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+
+    glGenTextures( 1, &font_manager_rgb->atlas->id );
+    glBindTexture( GL_TEXTURE_2D, font_manager_rgb->atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+
     reset();
 
     mat4_set_identity( &projection );
@@ -583,31 +448,42 @@ void init( GLFWwindow* window )
 // ---------------------------------------------------------------- display ---
 void display( GLFWwindow* window )
 {
-    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
-    vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
-
     if( !p_invert )
     {
         glClearColor( 0, 0, 0, 1 );
-        buffer->base_color = white;
-
     }
     else
     {
         glClearColor( 1, 1, 1, 1 );
-        buffer->base_color = black;
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    glUseProgram( buffer->shader );
+    glUseProgram( text_shader );
     {
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "model" ),
                             1, 0, model.data);
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "view" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "view" ),
                             1, 0, view.data);
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "projection" ),
                             1, 0, projection.data);
-        text_buffer_render( buffer );
+        glUniform1i( glGetUniformLocation( text_shader, "tex" ), 0 );
+        glUniform3f( glGetUniformLocation( text_shader, "pixel" ),
+                     1.0f/font_manager->atlas->width,
+                     1.0f/font_manager->atlas->height,
+                     (float)font_manager->atlas->depth );
+
+        glEnable( GL_BLEND );
+
+        glActiveTexture( GL_TEXTURE0 );
+        glBindTexture( GL_TEXTURE_2D, font_manager->atlas->id );
+
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glBlendColor( 1, 1, 1, 1 );
+
+        vertex_buffer_render( text_buffer->buffer, GL_TRIANGLES );
+        glBindTexture( GL_TEXTURE_2D, 0 );
+        glBlendColor( 0, 0, 0, 0 );
+        glUseProgram( 0 );
     }
 
     TwDraw( );
@@ -758,6 +634,18 @@ void error_callback( int error, const char* description )
 int main( int argc, char **argv )
 {
     GLFWwindow* window;
+    char* screenshot_path = NULL;
+
+    if (argc > 1)
+    {
+        if (argc == 3 && 0 == strcmp( "--screenshot", argv[1] ))
+            screenshot_path = argv[2];
+        else
+        {
+            fprintf( stderr, "Unknown or incomplete parameters given\n" );
+            exit( EXIT_FAILURE );
+        }
+    }
 
     glfwSetErrorCallback( error_callback );
 
@@ -769,7 +657,7 @@ int main( int argc, char **argv )
     glfwWindowHint( GLFW_VISIBLE, GL_FALSE );
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
-    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
+    window = glfwCreateWindow( 800, 600, argv[0], NULL, NULL );
 
     if (!window)
     {
@@ -801,16 +689,31 @@ int main( int argc, char **argv )
 
     init( window );
 
-    glfwSetWindowSize( window, 800, 600 );
     glfwShowWindow( window );
+    reshape( window, 800, 600 );
 
     while(!glfwWindowShouldClose( window ))
     {
         display( window );
         glfwPollEvents( );
+
+        if (screenshot_path)
+        {
+            screenshot( window, screenshot_path );
+            glfwSetWindowShouldClose( window, 1 );
+        }
     }
 
     TwTerminate();
+
+    glDeleteProgram( text_shader );
+    glDeleteTextures( 1, &font_manager_a->atlas->id );
+    glDeleteTextures( 1, &font_manager_rgb->atlas->id );
+    font_manager_a->atlas->id = 0;
+    font_manager_rgb->atlas->id = 0;
+    font_manager_delete( font_manager_rgb );
+    font_manager_delete( font_manager_a );
+    text_buffer_delete( text_buffer );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

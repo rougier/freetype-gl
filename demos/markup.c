@@ -1,34 +1,8 @@
-/* ============================================================================
- * Freetype GL - A C OpenGL Freetype engine
- * Platform:    Any
- * WWW:         https://github.com/rougier/freetype-gl
- * ----------------------------------------------------------------------------
- * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+/* Freetype GL - A C OpenGL Freetype engine
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
+ * file `LICENSE` for more details.
  *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of Nicolas P. Rougier.
  * ============================================================================
  *
  * Example demonstrating markup usage
@@ -41,11 +15,13 @@
 #include <fontconfig/fontconfig.h>
 
 #include "freetype-gl.h"
+#include "font-manager.h"
 #include "vertex-buffer.h"
 #include "text-buffer.h"
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+#include "screenshot-util.h"
 
 #include <GLFW/glfw3.h>
 #include <vec234.h>
@@ -57,12 +33,13 @@ typedef struct {
     float r, g, b, a;
 } vertex_t;
 
-
 // ------------------------------------------------------- global variables ---
+font_manager_t * font_manager;
 text_buffer_t * buffer;
 mat4 model, view, projection;
 vertex_buffer_t *lines_buffer;
-GLuint shader;
+GLuint bounds_shader;
+GLuint text_shader;
 
 
 // ------------------------------------------------------ match_description ---
@@ -70,7 +47,7 @@ char *
 match_description( char * description )
 {
 
-#if defined _WIN32 || defined _WIN64
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(__MINGW32__)
     fprintf( stderr, "\"font_manager_match_description\" "
                      "not implemented for windows.\n" );
     return 0;
@@ -109,9 +86,11 @@ match_description( char * description )
 
 void init()
 {
-    buffer = text_buffer_new( LCD_FILTERING_ON,
-                              "shaders/text.vert",
-                              "shaders/text.frag" );
+    text_shader = shader_load( "shaders/text.vert",
+                               "shaders/text.frag" );
+
+    font_manager = font_manager_new( 512, 512, LCD_FILTERING_ON );
+    buffer = text_buffer_new( );
 
     vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
@@ -128,7 +107,7 @@ void init()
     markup_t normal = {
         .family  = f_normal,
         .size    = 24.0, .bold    = 0,   .italic  = 0,
-        .rise    = 0.0,  .spacing = 0.0, .gamma   = 2.,
+        .spacing = 0.0,  .gamma   = 2.,
         .foreground_color    = white, .background_color    = none,
         .underline           = 0,     .underline_color     = white,
         .overline            = 0,     .overline_color      = white,
@@ -151,6 +130,17 @@ void init()
                                  japanese.size = 18.0;
     markup_t math      = normal; math.family = f_math;
 
+    normal.font = font_manager_get_from_markup( font_manager, &normal );
+    highlight.font = font_manager_get_from_markup( font_manager, &highlight );
+    reverse.font = font_manager_get_from_markup( font_manager, &reverse );
+    overline.font = font_manager_get_from_markup( font_manager, &overline );
+    underline.font = font_manager_get_from_markup( font_manager, &underline );
+    small.font = font_manager_get_from_markup( font_manager, &small );
+    big.font = font_manager_get_from_markup( font_manager, &big );
+    bold.font = font_manager_get_from_markup( font_manager, &bold );
+    italic.font = font_manager_get_from_markup( font_manager, &italic );
+    japanese.font = font_manager_get_from_markup( font_manager, &japanese );
+    math.font = font_manager_get_from_markup( font_manager, &math );
 
     vec2 pen = {{20, 200}};
     text_buffer_printf( buffer, &pen,
@@ -168,7 +158,15 @@ void init()
                         &math,      "ℕ ⊆ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ",
                         NULL );
 
-    texture_atlas_upload( buffer->manager->atlas );
+    glGenTextures( 1, &font_manager->atlas->id );
+    glBindTexture( GL_TEXTURE_2D, font_manager->atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, font_manager->atlas->width,
+                  font_manager->atlas->height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                  font_manager->atlas->data );
 
     text_buffer_align( buffer, &pen, ALIGN_CENTER );
 
@@ -178,8 +176,8 @@ void init()
     float top = bounds.top;
     float bottom = bounds.top - bounds.height;
 
-    shader = shader_load("shaders/v3f-c4f.vert",
-                         "shaders/v3f-c4f.frag");
+    bounds_shader = shader_load( "shaders/v3f-c4f.vert",
+                                 "shaders/v3f-c4f.frag" );
 
     lines_buffer = vertex_buffer_new( "vertex:3f,color:4f" );
     vertex_t vertices[] = { { left - 10,         top, 0, 0,0,0,1}, // top
@@ -208,26 +206,43 @@ void display( GLFWwindow* window )
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glColor4f(1.00,1.00,1.00,1.00);
-    glUseProgram( buffer->shader );
+    glUseProgram( text_shader );
     {
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "model" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "model" ),
                             1, 0, model.data);
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "view" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "view" ),
                             1, 0, view.data);
-        glUniformMatrix4fv( glGetUniformLocation( buffer->shader, "projection" ),
+        glUniformMatrix4fv( glGetUniformLocation( text_shader, "projection" ),
                             1, 0, projection.data);
-        text_buffer_render( buffer );
+        glUniform1i( glGetUniformLocation( text_shader, "tex" ), 0 );
+        glUniform3f( glGetUniformLocation( text_shader, "pixel" ),
+                     1.0f/font_manager->atlas->width,
+                     1.0f/font_manager->atlas->height,
+                     (float)font_manager->atlas->depth );
+
+        glEnable( GL_BLEND );
+
+        glActiveTexture( GL_TEXTURE0 );
+        glBindTexture( GL_TEXTURE_2D, font_manager->atlas->id );
+
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glBlendColor( 1, 1, 1, 1 );
+
+        vertex_buffer_render( buffer->buffer, GL_TRIANGLES );
+        glBindTexture( GL_TEXTURE_2D, 0 );
+        glBlendColor( 0, 0, 0, 0 );
+        glUseProgram( 0 );
     }
 
     glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
     glBlendColor( 1.0, 1.0, 1.0, 1.0 );
-    glUseProgram( shader );
+    glUseProgram( bounds_shader );
     {
-        glUniformMatrix4fv( glGetUniformLocation( shader, "model" ),
+        glUniformMatrix4fv( glGetUniformLocation( bounds_shader, "model" ),
                             1, 0, model.data);
-        glUniformMatrix4fv( glGetUniformLocation( shader, "view" ),
+        glUniformMatrix4fv( glGetUniformLocation( bounds_shader, "view" ),
                             1, 0, view.data);
-        glUniformMatrix4fv( glGetUniformLocation( shader, "projection" ),
+        glUniformMatrix4fv( glGetUniformLocation( bounds_shader, "projection" ),
                             1, 0, projection.data);
         vertex_buffer_render( lines_buffer, GL_LINES );
     }
@@ -265,6 +280,18 @@ void error_callback( int error, const char* description )
 int main( int argc, char **argv )
 {
     GLFWwindow* window;
+    char* screenshot_path = NULL;
+
+    if (argc > 1)
+    {
+        if (argc == 3 && 0 == strcmp( "--screenshot", argv[1] ))
+            screenshot_path = argv[2];
+        else
+        {
+            fprintf( stderr, "Unknown or incomplete parameters given\n" );
+            exit( EXIT_FAILURE );
+        }
+    }
 
     glfwSetErrorCallback( error_callback );
 
@@ -276,7 +303,7 @@ int main( int argc, char **argv )
     glfwWindowHint( GLFW_VISIBLE, GL_FALSE );
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
-    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
+    window = glfwCreateWindow( 500, 220, argv[0], NULL, NULL );
 
     if (!window)
     {
@@ -304,14 +331,27 @@ int main( int argc, char **argv )
 
     init();
 
-    glfwSetWindowSize( window, 500, 220 );
     glfwShowWindow( window );
+    reshape( window, 500, 220 );
 
     while(!glfwWindowShouldClose( window ))
     {
         display( window );
         glfwPollEvents( );
+
+        if (screenshot_path)
+        {
+            screenshot( window, screenshot_path );
+            glfwSetWindowShouldClose( window, 1 );
+        }
     }
+
+    glDeleteProgram( bounds_shader );
+    glDeleteProgram( text_shader );
+    glDeleteTextures( 1, &font_manager->atlas->id );
+    font_manager->atlas->id = 0;
+    text_buffer_delete( buffer );
+    font_manager_delete( font_manager );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

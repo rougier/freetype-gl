@@ -1,45 +1,17 @@
-/* ============================================================================
- * Freetype GL - A C OpenGL Freetype engine
- * Platform:    Any
- * WWW:         https://github.com/rougier/freetype-gl
- * ----------------------------------------------------------------------------
- * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+/* Freetype GL - A C OpenGL Freetype engine
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of Nicolas P. Rougier.
- * ============================================================================
+ * Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
+ * file `LICENSE` for more details.
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <math.h>
 #include "opengl.h"
 #include "text-buffer.h"
 #include "utf8-utils.h"
-#include "math.h"
 
 #define SET_GLYPH_VERTEX(value,x0,y0,z0,s0,t0,r,g,b,a,sh,gm) { \
 	glyph_vertex_t *gv=&value;                                 \
@@ -51,30 +23,11 @@
 // ----------------------------------------------------------------------------
 
 text_buffer_t *
-text_buffer_new( size_t depth,
-                 const char * vert_filename,
-                 const char * frag_filename )
-{
-    GLuint program = shader_load( vert_filename, frag_filename );
-
-    text_buffer_t * p = text_buffer_new_with_program( depth, program );
-
-    return p;
-}
-
-// ----------------------------------------------------------------------------
-
-text_buffer_t *
-text_buffer_new_with_program( size_t depth,
-                                    GLuint program )
+text_buffer_new( )
 {
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
     self->buffer = vertex_buffer_new(
                                      "vertex:3f,tex_coord:2f,color:4f,ashift:1f,agamma:1f" );
-    self->manager = font_manager_new( 512, 512, depth );
-    self->shader = program;
-    self->shader_texture = glGetUniformLocation(self->shader, "tex");
-    self->shader_pixel = glGetUniformLocation(self->shader, "pixel");
     self->line_start = 0;
     self->line_ascender = 0;
     self->base_color.r = 0.0;
@@ -95,9 +48,7 @@ void
 text_buffer_delete( text_buffer_t * self )
 {
     vector_delete( self->lines );
-    font_manager_delete( self->manager );
     vertex_buffer_delete( self->buffer );
-    glDeleteProgram( self->shader );
     free( self );
 }
 
@@ -116,49 +67,6 @@ text_buffer_clear( text_buffer_t * self )
     self->bounds.top    = 0.0;
     self->bounds.width  = 0.0;
     self->bounds.height = 0.0;
-}
-
-
-// ----------------------------------------------------------------------------
-void
-text_buffer_render( text_buffer_t * self )
-{
-    glEnable( GL_BLEND );
-
-    glActiveTexture( GL_TEXTURE0 );
-    glBindTexture( GL_TEXTURE_2D, self->manager->atlas->id );
-
-    if( self->manager->atlas->depth == 1 )
-    {
-        //glDisable( GL_COLOR_MATERIAL );
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glBlendColor( 1, 1, 1, 1 );
-    }
-    else
-    {
-        //glEnable( GL_COLOR_MATERIAL );
-        //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-        //glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-        //glBlendColor( 1.0, 1.0, 1.0, 1.0 );
-        //glBlendFunc( GL_CONSTANT_COLOR_EXT,  GL_ONE_MINUS_SRC_COLOR );
-        //glBlendColor( self->base_color.r,
-        //self->base_color.g,
-        //self->base_color.b,
-        //self->base_color.a );
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glBlendColor( 1, 1, 1, 1 );
-    }
-
-    glUseProgram( self->shader );
-    glUniform1i( self->shader_texture, 0 );
-    glUniform3f( self->shader_pixel,
-                 1.0f/self->manager->atlas->width,
-                 1.0f/self->manager->atlas->height,
-                 (float)self->manager->atlas->depth );
-    vertex_buffer_render( self->buffer, GL_TRIANGLES );
-    glBindTexture( GL_TEXTURE_2D, 0 );
-    glBlendColor( 0, 0, 0, 0 );
-    glUseProgram( 0 );
 }
 
 // ----------------------------------------------------------------------------
@@ -273,7 +181,6 @@ text_buffer_add_text( text_buffer_t * self,
                       vec2 * pen, markup_t * markup,
                       const char * text, size_t length )
 {
-    font_manager_t * manager = self->manager;
     size_t i;
     const char * prev_character = NULL;
 
@@ -284,12 +191,8 @@ text_buffer_add_text( text_buffer_t * self,
 
     if( !markup->font )
     {
-        markup->font = font_manager_get_from_markup( manager, markup );
-        if( ! markup->font )
-        {
-            fprintf( stderr, "Houston, we've got a problem !\n" );
-            exit( EXIT_FAILURE );
-        }
+        fprintf( stderr, "Houston, we've got a problem !\n" );
+        return;
     }
 
     if( length == 0 )
@@ -315,7 +218,7 @@ text_buffer_add_text( text_buffer_t * self,
         }
     }
 
-    for( i = 0; utf8_strlen( text + i ) && length; i += utf8_surrogate_len( text + i ) )
+    for( i = 0; length; i += utf8_surrogate_len( text + i ) )
     {
         text_buffer_add_char( self, pen, markup, text + i, prev_character );
         prev_character = text + i;
@@ -608,7 +511,7 @@ text_buffer_align( text_buffer_t * self, vec2 * pen,
             dx = self_center - line_center;
         }
 
-        dx = (float)round( dx );
+        dx = roundf( dx );
 
         for( j=line_info->line_start; j < line_end; ++j )
         {

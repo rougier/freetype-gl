@@ -1,35 +1,7 @@
-/* ============================================================================
- * Freetype GL - A C OpenGL Freetype engine
- * Platform:    Any
- * WWW:         https://github.com/rougier/freetype-gl
- * ----------------------------------------------------------------------------
- * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+/* Freetype GL - A C OpenGL Freetype engine
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of Nicolas P. Rougier.
- * ============================================================================
+ * Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
+ * file `LICENSE` for more details.
  */
 #include <math.h>
 
@@ -42,6 +14,7 @@
 #include "texture-atlas.h"
 #include "platform.h"
 #include "utf8-utils.h"
+#include "screenshot-util.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -57,6 +30,8 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+double total_time = 0.0;
+
 
 // ------------------------------------------------------- typedef & struct ---
 typedef struct {
@@ -71,7 +46,7 @@ float angle = 0;
 GLuint program = 0;
 vertex_buffer_t *buffer;
 texture_font_t * font = 0;
-texture_atlas_t * atlas = 0;
+texture_atlas_t *atlas;
 mat4  model, view, projection;
 
 
@@ -206,7 +181,9 @@ load_glyph( const char *  filename,     const char* codepoint,
     }
 
     // Compute distance map
+    glfwSetTime(total_time);
     highres_data = make_distance_mapd( highres_data, highres_width, highres_height );
+    total_time += glfwGetTime();
 
     // Allocate low resolution buffer
     size_t lowres_width  = round(highres_width * lowres_size/highres_size);
@@ -291,8 +268,6 @@ void init( void )
     glyph = load_glyph( "fonts/Vera.ttf", "@", 512, 64, 0.1);
     vector_push_back( font->glyphs, &glyph );
 
-    texture_atlas_upload( atlas );
-
     glyph = texture_font_get_glyph( font, "@");
 
     GLuint indices[6] = {0,1,2, 0,2,3};
@@ -302,6 +277,16 @@ void init( void )
                              {  .5,-.5,0,  glyph->s1,glyph->t1,  0,0,0,1 } };
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
     vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
+
+    glActiveTexture( GL_TEXTURE0 );
+    glGenTextures( 1, &atlas->id );
+    glBindTexture( GL_TEXTURE_2D, atlas->id );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, atlas->width, atlas->height,
+                  0, GL_RED, GL_UNSIGNED_BYTE, atlas->data );
 
     program = shader_load( "shaders/distance-field.vert",
                            "shaders/distance-field-2.frag" );
@@ -317,20 +302,18 @@ void display( GLFWwindow* window )
     glClearColor(1.0,1.0,1.0,1.0);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, atlas->id);
-    glEnable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     texture_glyph_t * glyph = texture_font_get_glyph( font, "@");
 
-    int width = 512;
-    int height = 512;
+    int width, height;
+    glfwGetFramebufferSize( window, &width, &height );
+
     float glyph_height = glyph->height * width/(float)glyph->width;
     float glyph_width  = glyph->width * height/(float)glyph->height;
-    int x = -glyph_width/2 + 512/2.;
-    int y = -glyph_height/2 + 512/2.;
+    int x = -glyph_width/2 + width/2.;
+    int y = -glyph_height/2 + height/2.;
 
     float s = .025+.975*(1+cos(angle/100.0))/2.;
 
@@ -339,7 +322,7 @@ void display( GLFWwindow* window )
     mat4_set_identity( &model );
     mat4_scale( &model, width * s, width * s, 1 );
     mat4_rotate( &model, angle, 0, 0, 1 );
-    mat4_translate( &model, 256, 256, 0 );
+    mat4_translate( &model, width/2., height/2., 0 );
 
     glUseProgram( program );
     {
@@ -390,6 +373,18 @@ void error_callback( int error, const char* description )
 int main( int argc, char **argv )
 {
     GLFWwindow* window;
+    char* screenshot_path = NULL;
+
+    if (argc > 1)
+    {
+        if (argc == 3 && 0 == strcmp( "--screenshot", argv[1] ))
+            screenshot_path = argv[2];
+        else
+        {
+            fprintf( stderr, "Unknown or incomplete parameters given\n" );
+            exit( EXIT_FAILURE );
+        }
+    }
 
     glfwSetErrorCallback( error_callback );
 
@@ -401,7 +396,7 @@ int main( int argc, char **argv )
     glfwWindowHint( GLFW_VISIBLE, GL_FALSE );
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
-    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
+    window = glfwCreateWindow( 512, 512, argv[0], NULL, NULL );
 
     if (!window)
     {
@@ -430,12 +425,18 @@ int main( int argc, char **argv )
 
     init();
 
-    glfwSetWindowSize( window, 512, 512 );
+    fprintf(stderr, "Total time to generate distance map: %fs\n", total_time);
+
     glfwShowWindow( window );
+    {
+        int pixWidth, pixHeight;
+        glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
+        reshape( window, pixWidth, pixHeight );
+    }
 
-    glfwSetTime(0.0);
+    glfwSetTime(1.0);
 
-    while(!glfwWindowShouldClose( window ))
+    while (!glfwWindowShouldClose( window ))
     {
         display( window );
 
@@ -443,7 +444,17 @@ int main( int argc, char **argv )
         glfwSetTime(0.0);
 
         glfwPollEvents( );
+
+        if (screenshot_path)
+        {
+            screenshot( window, screenshot_path );
+            glfwSetWindowShouldClose( window, 1 );
+        }
     }
+
+    glDeleteTextures( 1, &atlas->id );
+    atlas->id = 0;
+    texture_atlas_delete( atlas );
 
     glfwDestroyWindow( window );
     glfwTerminate( );

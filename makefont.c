@@ -1,35 +1,7 @@
-/* ============================================================================
- * Freetype GL - A C OpenGL Freetype engine
- * Platform:    Any
- * WWW:         https://github.com/rougier/freetype-gl
- * ----------------------------------------------------------------------------
- * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+/* Freetype GL - A C OpenGL Freetype engine
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of Nicolas P. Rougier.
- * ============================================================================
+ * Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
+ * file `LICENSE` for more details.
  */
 #include "opengl.h"
 #include "vec234.h"
@@ -41,11 +13,20 @@
 #include <string.h>
 
 
+#ifndef WIN32
+#   define PRIzu "zu"
+#else
+#   define PRIzu "Iu"
+#endif
+
+
 // ------------------------------------------------------------- print help ---
 void print_help()
 {
     fprintf( stderr, "Usage: makefont [--help] --font <font file> "
-             "--header <header file> --size <font size> --variable <variable name> --texture <texture size>\n" );
+             "--header <header file> --size <font size> "
+             "--variable <variable name> --texture <texture size>"
+             "--rendermode <one of 'normal', 'outline_edge', 'outline_positive', 'outline_negative' or 'sdf'>\n" );
 }
 
 
@@ -67,6 +48,13 @@ int main( int argc, char **argv )
     const char * variable_name   = "font";
     int show_help = 0;
     size_t texture_width = 128;
+    rendermode_t rendermode = RENDER_NORMAL;
+    const char *rendermodes[5];
+    rendermodes[RENDER_NORMAL] = "normal";
+    rendermodes[RENDER_OUTLINE_EDGE] = "outline edge";
+    rendermodes[RENDER_OUTLINE_POSITIVE] = "outline added";
+    rendermodes[RENDER_OUTLINE_NEGATIVE] = "outline removed";
+    rendermodes[RENDER_SIGNED_DISTANCE_FIELD] = "signed distance field";
 
     for ( arg = 1; arg < argc; ++arg )
     {
@@ -152,7 +140,7 @@ int main( int argc, char **argv )
             continue;
         }
 
-        if ( 0 == strcmp( "--variable", argv[arg] ) || 0 == strcmp( "-arg", argv[arg] )  )
+        if ( 0 == strcmp( "--variable", argv[arg] ) || 0 == strcmp( "-a", argv[arg] )  )
         {
             ++arg;
 
@@ -206,6 +194,56 @@ int main( int argc, char **argv )
             continue;
         }
 
+        if ( 0 == strcmp( "--rendermode", argv[arg] ) || 0 == strcmp( "-r", argv[arg] ) )
+        {
+            ++arg;
+
+            if ( 128.0 != texture_width )
+            {
+                fprintf( stderr, "Multiple --texture parameters.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            if ( arg >= argc )
+            {
+                fprintf( stderr, "No texture size given.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            errno = 0;
+
+            if( 0 == strcmp( "normal", argv[arg] ) )
+            {
+                rendermode = RENDER_NORMAL;
+            }
+            else if( 0 == strcmp( "outline_edge", argv[arg] ) )
+            {
+                rendermode = RENDER_OUTLINE_EDGE;
+            }
+            else if( 0 == strcmp( "outline_positive", argv[arg] ) )
+            {
+                rendermode = RENDER_OUTLINE_POSITIVE;
+            }
+            else if( 0 == strcmp( "outline_negative", argv[arg] ) )
+            {
+                rendermode = RENDER_OUTLINE_NEGATIVE;
+            }
+            else if( 0 == strcmp( "sdf", argv[arg] ) )
+            {
+                rendermode = RENDER_SIGNED_DISTANCE_FIELD;
+            }
+            else
+            {
+                fprintf( stderr, "No valid render mode given.\n" );
+                print_help();
+                exit( 1 );
+            }
+
+            continue;
+        }
+
         fprintf( stderr, "Unknown parameter %s\n", argv[arg] );
         print_help();
         exit( 1 );
@@ -247,6 +285,7 @@ int main( int argc, char **argv )
 
     texture_atlas_t * atlas = texture_atlas_new( texture_width, texture_width, 1 );
     texture_font_t  * font  = texture_font_new_from_file( atlas, font_size, font_filename );
+    font->rendermode = rendermode;
 
     size_t missed = texture_font_load_glyphs( font, font_cache );
 
@@ -258,7 +297,8 @@ int main( int argc, char **argv )
             "Texture occupancy       : %.2f%%\n"
             "\n"
             "Header filename         : %s\n"
-            "Variable name           : %s\n",
+            "Variable name           : %s\n"
+            "Render mode             : %s\n",
             font_filename,
             font_size,
             strlen(font_cache),
@@ -266,7 +306,8 @@ int main( int argc, char **argv )
             atlas->width, atlas->height, atlas->depth,
             100.0 * atlas->used / (float)(atlas->width * atlas->height),
             header_filename,
-            variable_name );
+            variable_name,
+            rendermodes[rendermode] );
 
     size_t texture_size = atlas->width * atlas->height *atlas->depth;
     size_t glyph_count = font->glyphs->size;
@@ -349,7 +390,7 @@ int main( int argc, char **argv )
         "    float advance_x, advance_y;\n"
         "    float s0, t0, s1, t1;\n"
         "    size_t kerning_count;\n"
-        "    kerning_t kerning[%zu];\n"
+        "    kerning_t kerning[%" PRIzu "];\n"
         "} texture_glyph_t;\n\n", max_kerning_count );
 
     fprintf( file,
@@ -358,14 +399,14 @@ int main( int argc, char **argv )
         "    size_t tex_width;\n"
         "    size_t tex_height;\n"
         "    size_t tex_depth;\n"
-        "    char tex_data[%zu];\n"
+        "    char tex_data[%" PRIzu "];\n"
         "    float size;\n"
         "    float height;\n"
         "    float linegap;\n"
         "    float ascender;\n"
         "    float descender;\n"
         "    size_t glyphs_count;\n"
-        "    texture_glyph_t glyphs[%zu];\n"
+        "    texture_glyph_t glyphs[%" PRIzu "];\n"
         "} texture_font_t;\n\n", texture_size, glyph_count );
 
 
@@ -376,7 +417,7 @@ int main( int argc, char **argv )
     // ------------
     // Texture data
     // ------------
-    fprintf( file, " %zu, %zu, %zu, \n", atlas->width, atlas->height, atlas->depth );
+    fprintf( file, " %" PRIzu ", %" PRIzu ", %" PRIzu ", \n", atlas->width, atlas->height, atlas->depth );
     fprintf( file, " {" );
     for( i=0; i < texture_size; i+= 32 )
     {
@@ -402,7 +443,7 @@ int main( int argc, char **argv )
     // -------------------
     // Texture information
     // -------------------
-    fprintf( file, " %ff, %ff, %ff, %ff, %ff, %zu, \n",
+    fprintf( file, " %ff, %ff, %ff, %ff, %ff, %" PRIzu ", \n",
              font->size, font->height,
              font->linegap,font->ascender, font->descender,
              glyph_count );
@@ -451,11 +492,11 @@ int main( int argc, char **argv )
 
         // TextureFont
         fprintf( file, "  {%u, ", glyph->codepoint );
-        fprintf( file, "%zu, %zu, ", glyph->width, glyph->height );
+        fprintf( file, "%" PRIzu ", %" PRIzu ", ", glyph->width, glyph->height );
         fprintf( file, "%d, %d, ", glyph->offset_x, glyph->offset_y );
         fprintf( file, "%ff, %ff, ", glyph->advance_x, glyph->advance_y );
         fprintf( file, "%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
-        fprintf( file, "%zu, ", vector_size(glyph->kerning) );
+        fprintf( file, "%" PRIzu ", ", vector_size(glyph->kerning) );
         if (vector_size(glyph->kerning) == 0) {
             fprintf( file, "0" );
         }

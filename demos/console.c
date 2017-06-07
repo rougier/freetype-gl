@@ -1,35 +1,7 @@
-/* ============================================================================
- * Freetype GL - A C OpenGL Freetype engine
- * Platform:    Any
- * WWW:         https://github.com/rougier/freetype-gl
- * ----------------------------------------------------------------------------
- * Copyright 2011,2012 Nicolas P. Rougier. All rights reserved.
+/* Freetype GL - A C OpenGL Freetype engine
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  1. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY NICOLAS P. ROUGIER ''AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL NICOLAS P. ROUGIER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of Nicolas P. Rougier.
- * ============================================================================
+ * Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
+ * file `LICENSE` for more details.
  */
 #include <stdio.h>
 #include <string.h>
@@ -39,6 +11,7 @@
 #include "markup.h"
 #include "shader.h"
 #include "mat4.h"
+#include "screenshot-util.h"
 
 #include <GLFW/glfw3.h>
 
@@ -78,6 +51,7 @@ struct _console_t {
     size_t         cursor;
     markup_t       markup[MARKUP_COUNT];
     vertex_buffer_t * buffer;
+    texture_atlas_t *atlas;
     vec2           pen;
     void (*handlers[4])( struct _console_t *, char * );
 };
@@ -93,7 +67,7 @@ int control_key_handled;
 
 // ------------------------------------------------------------ console_new ---
 console_t *
-console_new( void )
+console_new( float font_size )
 {
     console_t *self = (console_t *) malloc( sizeof(console_t) );
     if( !self )
@@ -112,7 +86,8 @@ console_new( void )
     self->handlers[__SIGNAL_HISTORY_PREV__] = 0;
     self->pen.x = self->pen.y = 0;
 
-    texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
+    self->atlas = texture_atlas_new( 512, 512, 1 );
+    glGenTextures( 1, &self->atlas->id );
 
     vec4 white = {{1,1,1,1}};
     vec4 black = {{0,0,0,1}};
@@ -120,10 +95,9 @@ console_new( void )
 
     markup_t normal;
     normal.family  = "fonts/VeraMono.ttf";
-    normal.size    = 13.0;
+    normal.size    = font_size;
     normal.bold    = 0;
     normal.italic  = 0;
-    normal.rise    = 0.0;
     normal.spacing = 0.0;
     normal.gamma   = 1.0;
     normal.foreground_color    = black;
@@ -135,20 +109,20 @@ console_new( void )
     normal.strikethrough       = 0;
     normal.strikethrough_color = white;
 
-    normal.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMono.ttf" );
+    normal.font = texture_font_new_from_file( self->atlas, font_size, "fonts/VeraMono.ttf" );
 
     markup_t bold = normal;
     bold.bold = 1;
-    bold.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMoBd.ttf" );
+    bold.font = texture_font_new_from_file( self->atlas, font_size, "fonts/VeraMoBd.ttf" );
 
     markup_t italic = normal;
     italic.italic = 1;
-    bold.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMoIt.ttf" );
+    bold.font = texture_font_new_from_file( self->atlas, font_size, "fonts/VeraMoIt.ttf" );
 
     markup_t bold_italic = normal;
     bold.bold = 1;
     italic.italic = 1;
-    italic.font = texture_font_new_from_file( atlas, 13, "fonts/VeraMoBI.ttf" );
+    italic.font = texture_font_new_from_file( self->atlas, font_size, "fonts/VeraMoBI.ttf" );
 
     markup_t faint = normal;
     faint.foreground_color.r = 0.35;
@@ -187,7 +161,11 @@ console_new( void )
 // -------------------------------------------------------- console_delete ---
 void
 console_delete( console_t *self )
-{ }
+{
+    glDeleteTextures( 1, &self->atlas->id );
+    self->atlas->id = 0;
+    texture_atlas_delete( self->atlas );
+}
 
 
 
@@ -273,7 +251,6 @@ console_render( console_t *self )
         self->pen.x = 0;
         cursor_x = self->pen.x;
         cursor_y = self->pen.y;
-        texture_atlas_upload( markup.font->atlas );
     }
 
     // Prompt
@@ -290,8 +267,6 @@ console_render( console_t *self )
             console_add_glyph( console, cur_char, prev_char, &markup );
             prev_char = cur_char;
         }
-
-        texture_atlas_upload( markup.font->atlas );
     }
     cursor_x = (int) self->pen.x;
 
@@ -317,8 +292,18 @@ console_render( console_t *self )
                 cursor_x = (int) self->pen.x;
             }
         }
+    }
 
-        texture_atlas_upload( markup.font->atlas );
+    if( self->lines->size || self->prompt[0] != '\0' || self->input[0] != '\0' )
+    {
+        glBindTexture( GL_TEXTURE_2D, self->atlas->id );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+        glTexImage2D( GL_TEXTURE_2D, 0, GL_RED, self->atlas->width,
+                      self->atlas->height, 0, GL_RED, GL_UNSIGNED_BYTE,
+                      self->atlas->data );
     }
 
     // Cursor (we use the black character (NULL) as texture )
@@ -596,11 +581,11 @@ void console_history_next( console_t *self, char *input )
 
 
 // ------------------------------------------------------------------- init ---
-void init( void )
+void init( float font_size )
 {
     control_key_handled = 0;
 
-    console = console_new();
+    console = console_new( font_size );
     console_print( console,
                    "OpenGL Freetype console\n"
                    "Copyright 2011 Nicolas P. Rougier. All rights reserved.\n \n" );
@@ -736,6 +721,18 @@ void error_callback( int error, const char* description )
 int main( int argc, char **argv )
 {
     GLFWwindow* window;
+    char* screenshot_path = NULL;
+
+    if (argc > 1)
+    {
+        if (argc == 3 && 0 == strcmp( "--screenshot", argv[1] ))
+            screenshot_path = argv[2];
+        else
+        {
+            fprintf( stderr, "Unknown or incomplete parameters given\n" );
+            exit( EXIT_FAILURE );
+        }
+    }
 
     glfwSetErrorCallback( error_callback );
 
@@ -747,7 +744,7 @@ int main( int argc, char **argv )
     glfwWindowHint( GLFW_VISIBLE, GL_FALSE );
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
-    window = glfwCreateWindow( 1, 1, argv[0], NULL, NULL );
+    window = glfwCreateWindow( 600,400, argv[0], NULL, NULL );
 
     if (!window)
     {
@@ -775,16 +772,27 @@ int main( int argc, char **argv )
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
 
-    init();
-
-    glfwSetWindowSize( window, 600,400 );
     glfwShowWindow( window );
+    int pixWidth, pixHeight;
+    glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
 
-    while(!glfwWindowShouldClose( window ))
+    init( 13.0 * pixWidth / 600 );
+
+    reshape( window, pixWidth, pixHeight );
+
+    while (!glfwWindowShouldClose( window ))
     {
         display( window );
         glfwPollEvents( );
+
+        if (screenshot_path)
+        {
+            screenshot( window, screenshot_path );
+            glfwSetWindowShouldClose( window, 1 );
+        }
     }
+
+    console_delete( console );
 
     glfwDestroyWindow( window );
     glfwTerminate( );
