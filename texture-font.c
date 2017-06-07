@@ -414,7 +414,7 @@ texture_font_load_glyph( texture_font_t * self,
                                             -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
         if ( region.x < 0 )
         {
-            fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
+            LOGE("Texture atlas is full (line %d)\n",  __LINE__ );
             FT_Done_Face( face );
             FT_Done_FreeType( library );
             return NULL;
@@ -471,7 +471,7 @@ texture_font_load_glyph( texture_font_t * self,
     error = FT_Load_Glyph( face, glyph_index, flags );
     if( error )
     {
-        fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+        LOGE("FT_Error (line %d, code 0x%02x) : %s\n",
                  __LINE__, FT_Errors[error].code, FT_Errors[error].message );
         FT_Done_Face( face );
         FT_Done_FreeType( library );
@@ -494,7 +494,7 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+            LOGE("FT_Error (0x%02x) : %s\n",
                     FT_Errors[error].code, FT_Errors[error].message);
             goto cleanup_stroker;
         }
@@ -509,7 +509,7 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+            LOGE("FT_Error (0x%02x) : %s\n",
                     FT_Errors[error].code, FT_Errors[error].message);
             goto cleanup_stroker;
         }
@@ -523,7 +523,7 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+            LOGE("FT_Error (0x%02x) : %s\n",
                     FT_Errors[error].code, FT_Errors[error].message);
             goto cleanup_stroker;
         }
@@ -535,7 +535,7 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf(stderr, "FT_Error (0x%02x) : %s\n",
+            LOGE("FT_Error (0x%02x) : %s\n",
                     FT_Errors[error].code, FT_Errors[error].message);
             goto cleanup_stroker;
         }
