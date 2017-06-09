@@ -380,7 +380,7 @@ texture_font_load_glyph( texture_font_t * self,
     FT_Library library;
     FT_Error error;
     FT_Face face;
-    FT_Glyph ft_glyph;
+    FT_Glyph ft_glyph = NULL;
     FT_GlyphSlot slot;
     FT_Bitmap ft_bitmap;
 
