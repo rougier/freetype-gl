@@ -20,6 +20,8 @@
 #elif defined(_WIN32) || defined(_WIN64)
 #  include <GL/glew.h>
 #  include <GL/wglew.h>
+#elif defined(FREETYPE_GL_ES2_HEADER_ONLY)
+#  include <GLES2/gl2.h>
 #else
 #  include <GL/glew.h>
 #  include <GL/gl.h>
