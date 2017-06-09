@@ -564,7 +564,7 @@ cleanup_stroker:
         int top;
         int right;
         int bottom;
-    } padding = { 0, 0, 1, 1 };
+    } padding = { 1, 1, 1, 1 };
 
     if( self->rendermode == RENDER_SIGNED_DISTANCE_FIELD )
     {
