@@ -420,7 +420,7 @@ texture_font_load_glyph( texture_font_t * self,
             texture_glyph_delete( glyph );
             FT_Done_Face( face );
             FT_Done_FreeType( library );
-            return NULL;
+            return 0;
         }
         texture_atlas_set_region( self->atlas, region.x, region.y, 4, 4, data, 0 );
         glyph->codepoint = -1;
