@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "font-manager.h"
-
+#include "freetype-gl-err.h"
 
 // ------------------------------------------------------------ file_exists ---
 static int
@@ -38,9 +38,10 @@ font_manager_new( size_t width, size_t height, size_t depth )
     self = (font_manager_t *) malloc( sizeof(font_manager_t) );
     if( !self )
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
+        freetype_gl_error( Out_Of_Memory,
+			   "line %d: No more memory for allocating data\n", __LINE__ );
+	return NULL;
+        /* exit( EXIT_FAILURE ); */ /* Never ever exit from a library */
     }
     self->atlas = atlas;
     self->fonts = vector_new( sizeof(texture_font_t *) );
@@ -124,7 +125,8 @@ font_manager_get_from_filename( font_manager_t *self,
         texture_font_load_glyphs( font, self->cache );
         return font;
     }
-    fprintf( stderr, "Unable to load \"%s\" (size=%.1f)\n", filename, size );
+    freetype_gl_error( Cannot_Load_File,
+		       "Unable to load \"%s\" (size=%.1f)\n", filename, size );
     return 0;
 }
 
@@ -149,13 +151,15 @@ font_manager_get_from_description( font_manager_t *self,
     else
     {
 #if defined(_WIN32) || defined(_WIN64)
-        fprintf( stderr, "\"font_manager_get_from_description\" not implemented yet.\n" );
+        freetype_gl_error( Unimplemented_Function,
+			   "\"font_manager_get_from_description\" not implemented yet.\n" );
         return 0;
 #endif
         filename = font_manager_match_description( self, family, size, bold, italic );
         if( !filename )
         {
-            fprintf( stderr, "No \"%s (size=%.1f, bold=%d, italic=%d)\" font available.\n",
+            freetype_gl_error( Font_Unavailable,
+			       "No \"%s (size=%.1f, bold=%d, italic=%d)\" font available.\n",
                      family, size, bold, italic );
             return 0;
         }
@@ -191,7 +195,8 @@ font_manager_match_description( font_manager_t * self,
     return 0;
 #else
 #  if defined _WIN32 || defined _WIN64
-      fprintf( stderr, "\"font_manager_match_description\" not implemented for windows.\n" );
+      freetype_gl_error( Unimplemented_Function,
+			 "\"font_manager_match_description\" not implemented for windows.\n" );
       return 0;
 #  endif
     char *filename = 0;
@@ -219,7 +224,8 @@ font_manager_match_description( font_manager_t * self,
 
     if ( !match )
     {
-        fprintf( stderr, "fontconfig error: could not match family '%s'", family );
+        freetype_gl_error( Cant_Match_Family,
+			   "fontconfig error: could not match family '%s'", family );
         return 0;
     }
     else
@@ -228,7 +234,8 @@ font_manager_match_description( font_manager_t * self,
         FcResult result = FcPatternGet( match, FC_FILE, 0, &value );
         if ( result )
         {
-            fprintf( stderr, "fontconfig error: could not match family '%s'", family );
+            freetype_gl_error( Cant_Match_Family,
+			       "fontconfig error: could not match family '%s'", family );
         }
         else
         {

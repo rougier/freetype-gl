@@ -10,6 +10,7 @@
 #include "vec234.h"
 #include "platform.h"
 #include "vertex-buffer.h"
+#include "freetype-gl-err.h"
 
 /**
  * Buffer status

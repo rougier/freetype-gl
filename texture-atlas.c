@@ -9,7 +9,7 @@
 #include <assert.h>
 #include <limits.h>
 #include "texture-atlas.h"
-
+#include "freetype-gl-err.h"
 
 // ------------------------------------------------------ texture_atlas_new ---
 texture_atlas_t *
@@ -26,9 +26,10 @@ texture_atlas_new( const size_t width,
     assert( (depth == 1) || (depth == 3) || (depth == 4) );
     if( self == NULL)
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
+        freetype_gl_error( Out_Of_Memory,
+			   "line %d: No more memory for allocating data\n", __LINE__ );
+	return NULL;
+        /* exit( EXIT_FAILURE ); */ /* Never exit from a library */
     }
     self->nodes = vector_new( sizeof(ivec3) );
     self->used = 0;
@@ -43,9 +44,9 @@ texture_atlas_new( const size_t width,
 
     if( self->data == NULL)
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
+        freetype_gl_error( Out_Of_Memory,
+			   "line %d: No more memory for allocating data\n", __LINE__ );
+	return NULL;
     }
 
     return self;
@@ -214,9 +215,10 @@ texture_atlas_get_region( texture_atlas_t * self,
     node = (ivec3 *) malloc( sizeof(ivec3) );
     if( node == NULL)
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
+        freetype_gl_error( Out_Of_Memory,
+			   "line %d: No more memory for allocating data\n", __LINE__ );
+	return (ivec4){{-1,-1,0,0}};
+        /* exit( EXIT_FAILURE ); */ /* Never exit from a library */
     }
     node->x = region.x;
     node->y = region.y + height;
