@@ -11,6 +11,20 @@
 __THREAD int freetype_gl_errno=0;
 __THREAD char * freetype_gl_message=NULL;
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#define  LOG_TAG    "freetype-gl"
+void freetype_gl_errhook_default(int errno, char* message, char* fmt, ...)
+{
+  va_list myargs;
+  va_start(myargs, fmt);
+  __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,
+		      "Freetype GL Error %03x %s:\n", errno, message);
+  __android_log_vprint(ANDROID_LOG_ERROR, LOG_TAG,
+		       fmt, myargs);
+  va_end(myargs);
+}
+#else
 void freetype_gl_errhook_default(int errno, char* message, char* fmt, ...)
 {
   va_list myargs;
@@ -19,6 +33,7 @@ void freetype_gl_errhook_default(int errno, char* message, char* fmt, ...)
   vfprintf(stderr, fmt, myargs);
   va_end(myargs);
 }
+#endif
 
 extern const struct {
     int          code;
