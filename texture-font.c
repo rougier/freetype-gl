@@ -36,8 +36,12 @@ const struct {
 static int
 texture_font_unload_face(texture_font_t *self)
 {
+  if(self->face)
     FT_Done_Face( self->face );
+  if(self->library)
     FT_Done_FreeType( self->library );
+  self->face=NULL;
+  self->library=NULL;
 }
 // ------------------------------------------------- texture_font_load_face ---
 static int
@@ -101,10 +105,12 @@ texture_font_load_face(texture_font_t *self, float size)
     return 1;
 
 cleanup_face:
-    FT_Done_Face( self->face );
+    if(self->face)
+      FT_Done_Face( self->face );
     self->face = NULL;
 cleanup_library:
-    FT_Done_FreeType( self->library );
+    if(self->library)
+      FT_Done_FreeType( self->library );
     self->library = NULL;
 cleanup:
     return 0;
@@ -256,8 +262,6 @@ texture_font_init(texture_font_t *self)
     self->descender = (metrics.descender >> 6) / 100.0;
     self->height = (metrics.height >> 6) / 100.0;
     self->linegap = self->height - self->ascender + self->descender;
-
-    texture_font_unload_face(self);
 
     /* NULL is a special glyph */
     texture_font_get_glyph( self, NULL );
@@ -429,6 +433,10 @@ texture_font_load_a_glyph( texture_font_t * self,
         return 0;
     }
 
+    if (!self->face)
+      if (!texture_font_load_face(self, self->size))
+	return 2;
+
     flags = 0;
     ft_glyph_top = 0;
     ft_glyph_left = 0;
@@ -470,7 +478,7 @@ texture_font_load_a_glyph( texture_font_t * self,
     {
         LOGE("FT_Error (line %d, code 0x%02x) : %s\n",
                  __LINE__, FT_Errors[error].code, FT_Errors[error].message );
-        return 2;
+        return 3;
     }
 
     if( self->rendermode == RENDER_NORMAL || self->rendermode == RENDER_SIGNED_DISTANCE_FIELD )
@@ -547,7 +555,7 @@ cleanup_stroker:
         {
             LOGE(  "FT_Error (line %d, code 0x%02x) : %s\n",
                      __LINE__, FT_Errors[error].code, FT_Errors[error].message );
-            return 3;
+            return 4;
         }
     }
 
@@ -640,9 +648,6 @@ texture_font_load_glyph( texture_font_t * self,
 {
   int retval;
 
-  if (!texture_font_load_face(self, self->size))
-    return 0;
-
   retval=!texture_font_load_a_glyph(self, codepoint );
 
   texture_font_unload_face(self);
@@ -655,15 +660,11 @@ texture_font_load_glyphs( texture_font_t * self,
 {
     size_t i;
 
-    if (!texture_font_load_face(self, self->size))
-        return utf8_strlen( codepoints);
-
     /* Load each glyph */
-    for( i = 0; i < utf8_strlen(codepoints); i += utf8_surrogate_len(codepoints + i) ) {
+    for( i = 0; i < strlen(codepoints); i += utf8_surrogate_len(codepoints + i) ) {
       if( texture_font_load_a_glyph( self, codepoints + i ) ) {
 	texture_font_unload_face(self);
-
-	return utf8_strlen( codepoints + i );
+	return strlen( codepoints + i );
       }
     }
 
