@@ -8,6 +8,8 @@
 
 #if defined(__GNUC__) || defined(__clang__)
 #define __THREAD __thread
+#elif defined(_MSC_VER)
+#define __THREAD __declspec( thread )
 #else
 #define __THREAD
 #endif
