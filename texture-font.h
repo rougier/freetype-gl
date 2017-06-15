@@ -204,7 +204,7 @@ typedef enum loc_t {
   TEXTURE_FONT_MEMORY,
 } loc_t;
 
-#ifndef FT2BUILD_H_
+#if !defined(FT2BUILD_H_) && !defined(__FT2BUILD_H__)
  typedef void* FT_Face;
  typedef void* FT_Library;
 #endif
