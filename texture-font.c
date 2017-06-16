@@ -364,19 +364,15 @@ texture_font_find_glyph( texture_font_t * self,
     if(ucodepoint == -1)
 	return (texture_glyph_t *)self->atlas->special;
 
-    fprintf(stderr, "Lookup [%i][%i]=%s ", i, j, codepoint);
     if(self->glyphs->size <= i) {
 	return NULL;
-	fprintf(stderr, "(null)\n");
     }
 
     glyph_index1 = *(texture_glyph_t ***) vector_get( self->glyphs, i );
 
     if(!glyph_index1) {
 	return NULL;
-	fprintf(stderr, "(null)\n");
     } else {
-	fprintf(stderr, "%p\n", glyph_index1[j]);
 	return glyph_index1[j];
     }
 }
@@ -399,7 +395,6 @@ void texture_font_index_glyph( texture_font_t * self,
 	*glyph_index1 = calloc( 0x100, sizeof(texture_glyph_t*) );
     }
 
-    fprintf(stderr, "Assign glyph[%i][%i]=%p\n", i, j, glyph);
     (*glyph_index1)[j] = glyph;
 }
 
@@ -448,10 +443,8 @@ texture_font_load_glyph( texture_font_t * self,
     ucodepoint = (FT_ULong)utf8_to_utf32( codepoint );
     glyph_index = FT_Get_Char_Index( face, ucodepoint );
     if(!glyph_index) {
-	fprintf(stderr, "Invalid glyph %x detected\n", ucodepoint);
 	texture_glyph_t * glyph;
 	if ((glyph = texture_font_find_glyph(self, "\xEF\xBF\xBD"))) {
-	    fprintf(stderr, "Double invalid glyph assigned to %x\n", ucodepoint);
 	    texture_font_index_glyph( self, glyph, ucodepoint );
 	    FT_Done_Face(face);
 	    FT_Done_FreeType(library);
@@ -655,8 +648,6 @@ cleanup_stroker:
 
     texture_font_index_glyph(self, glyph, ucodepoint);
     if(!glyph_index) {
-	fprintf(stderr, "Invalid glyph assigned to %x\n", ucodepoint);
-
 	texture_font_index_glyph(self, glyph, 0xFFFD);
     }
     

@@ -401,7 +401,7 @@ int main( int argc, char **argv )
     fprintf( file,
 	     "typedef struct\n"
 	     "{\n"
-	     "   texture_glyph_t glyphs[0x100];\n"
+	     "   texture_glyph_t * glyphs[0x100];\n"
 	     "} texture_glyph_0x100_t;\n\n" );
 
     fprintf( file,
@@ -463,14 +463,10 @@ int main( int argc, char **argv )
     // Texture glyphs
     // --------------
     fprintf( file, " {\n" );
-    for( i=0; i < glyph_count; ++i )
-    {
-        texture_glyph_t ** glyph_0x100 = *(texture_glyph_t ***) vector_get( font->glyphs, i );
+    texture_glyph_t * glyph;
+    GLYPHS_ITERATOR1(i, glyph, font->glyphs) {
 	fprintf( file, " {\n" );
-	if(glyph_0x100) {
-	    for( j=0; j < 0x100; ++j) {
-		texture_glyph_t * glyph;
-		if(( glyph = glyph_0x100[j] )) {
+	GLYPHS_ITERATOR2(i, glyph, font->glyphs) {
 /*
         // Debugging information
         printf( "glyph : '%lc'\n",
@@ -533,10 +529,9 @@ int main( int argc, char **argv )
 		} else {
 		    fprintf( file, " (texture_glyph_t*)NULL,\n" );
 		}
-	    }
-	}
+	GLYPHS_ITERATOR_END1;
 	fprintf( file, " },\n" );
-    }
+    } GLYPHS_ITERATOR_END2;
     fprintf( file, " }\n};\n" );
     
     fprintf( file,

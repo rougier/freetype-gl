@@ -475,13 +475,17 @@ texture_glyph_new( void );
 
 /** @} */
 
-#define GLYPHS_ITERATOR(index, name, glyph) \
+#define GLYPHS_ITERATOR1(index, name, glyph) \
     for( index = 0; index < vector_size ( glyph ); index++ ) { \
-	texture_glyph_t ** __glyphs; \
+	texture_glyph_t ** __glyphs;
+#define GLYPHS_ITERATOR2(index, name, glyph) \
 	if(( __glyphs = *(texture_glyph_t *** ) vector_get ( glyph, index ) )) { \
 	    int __i;							\
 	    for( __i = 0; __i < 0x100; __i++ ) {			\
 		if(( name = __glyphs[__i] ))
+#define GLYPHS_ITERATOR(index, name, glyph) \
+    GLYPHS_ITERATOR1(index, name, glyph)		\
+	GLYPHS_ITERATOR2(index, name, glyph)
 
 #define GLYPHS_ITERATOR_END1 }
 #define GLYPHS_ITERATOR_END2 } }

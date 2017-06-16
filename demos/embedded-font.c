@@ -22,17 +22,11 @@
 void print_at( int pen_x, int pen_y, char *text )
 {
     size_t i, j;
-    for( i=0; i < strlen(text); ++i)
-    {
-        texture_glyph_t *glyph = 0;
-        for( j=0; j<font.glyphs_count; ++j)
-        {
-            if( font.glyphs[j].codepoint == utf8_to_utf32( text + i ) )
-            {
-                glyph = &font.glyphs[j];
-                break;
-            }
-        }
+    uint32_t codepoint;
+    for( i=0; i < strlen(text); ++i) {
+	texture_glyph_t *glyph = 0;
+	codepoint = utf8_to_utf32( text + i );
+	glyph = &(font.glyphs[j>>8].glyphs[j&0xff]);
         if( !glyph )
         {
             continue;
