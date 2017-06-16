@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "vector.h"
-
+#include "freetype-gl-err.h"
 
 
 // ------------------------------------------------------------- vector_new ---
@@ -20,9 +20,9 @@ vector_new( size_t item_size )
 
     if( !self )
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
+        freetype_gl_error( Out_Of_Memory,
+			   "line %d: No more memory for allocating data\n", __LINE__ );
+	return NULL;
     }
     self->item_size = item_size;
     self->size      = 0;

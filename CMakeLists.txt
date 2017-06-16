@@ -120,6 +120,8 @@ set(FREETYPE_GL_HDR
     vector.h
     vertex-attribute.h
     vertex-buffer.h
+    freetype-gl-err.h
+    freetype-gl-errdef.h
 )
 
 set(FREETYPE_GL_SRC
@@ -134,6 +136,7 @@ set(FREETYPE_GL_SRC
     vector.c
     vertex-attribute.c
     vertex-buffer.c
+    freetype-gl-err.c
 )
 
 add_library(freetype-gl STATIC

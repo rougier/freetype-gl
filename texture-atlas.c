@@ -10,29 +10,29 @@
 #include <limits.h>
 #include "texture-atlas.h"
 #include "texture-font.h"
+#include "freetype-gl-err.h"
 
 // -------------------------------------------------- texture_atlas_special ---
 
 void texture_atlas_special ( texture_atlas_t * self )
 {
-  ivec4 region = texture_atlas_get_region( self, 5, 5 );
-  texture_glyph_t * glyph = texture_glyph_new( );
-  static unsigned char data[4*4*3] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-				      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-				      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-				      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-  if ( region.x < 0 )
-    {
-      fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
-    }
-  texture_atlas_set_region( self, region.x, region.y, 4, 4, data, 0 );
-  glyph->codepoint = -1;
-  glyph->s0 = (region.x+2)/(float)self->width;
-  glyph->t0 = (region.y+2)/(float)self->height;
-  glyph->s1 = (region.x+3)/(float)self->width;
-  glyph->t1 = (region.y+3)/(float)self->height;
+    ivec4 region = texture_atlas_get_region( self, 5, 5 );
+    texture_glyph_t * glyph = texture_glyph_new( );
+    static unsigned char data[4*4*3] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+					-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+					-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+					-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+    if ( region.x < 0 )
+	freetype_gl_error( Texture_Atlas_Full,
+			   "Texture atlas is full (line %d)\n",  __LINE__ );
+    texture_atlas_set_region( self, region.x, region.y, 4, 4, data, 0 );
+    glyph->codepoint = -1;
+    glyph->s0 = (region.x+2)/(float)self->width;
+    glyph->t0 = (region.y+2)/(float)self->height;
+    glyph->s1 = (region.x+3)/(float)self->width;
+    glyph->t1 = (region.y+3)/(float)self->height;
 
-  self->special = (void*)glyph;
+    self->special = (void*)glyph;
 }
 
 // ------------------------------------------------------ texture_atlas_new ---
@@ -50,9 +50,10 @@ texture_atlas_new( const size_t width,
     assert( (depth == 1) || (depth == 3) || (depth == 4) );
     if( self == NULL)
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
+        freetype_gl_error( Out_Of_Memory,
+			   "line %d: No more memory for allocating data\n", __LINE__ );
+	return NULL;
+        /* exit( EXIT_FAILURE ); */ /* Never exit from a library */
     }
     self->nodes = vector_new( sizeof(ivec3) );
     self->used = 0;
@@ -67,9 +68,9 @@ texture_atlas_new( const size_t width,
 
     if( self->data == NULL)
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
+        freetype_gl_error( Out_Of_Memory,
+			   "line %d: No more memory for allocating data\n", __LINE__ );
+	return NULL;
     }
 
     texture_atlas_special( self );
@@ -241,9 +242,10 @@ texture_atlas_get_region( texture_atlas_t * self,
     node = (ivec3 *) malloc( sizeof(ivec3) );
     if( node == NULL)
     {
-        fprintf( stderr,
-                 "line %d: No more memory for allocating data\n", __LINE__ );
-        exit( EXIT_FAILURE );
+        freetype_gl_error( Out_Of_Memory,
+			   "line %d: No more memory for allocating data\n", __LINE__ );
+	return (ivec4){{-1,-1,0,0}};
+        /* exit( EXIT_FAILURE ); */ /* Never exit from a library */
     }
     node->x = region.x;
     node->y = region.y + height;

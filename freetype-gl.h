@@ -12,6 +12,7 @@
 #include "vector.h"
 #include "texture-atlas.h"
 #include "texture-font.h"
+#include "freetype-gl-err.h"
 
 #ifdef __cplusplus
 #ifndef NOT_USING_FT_GL_NAMESPACE
