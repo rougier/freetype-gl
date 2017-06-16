@@ -110,6 +110,12 @@ typedef struct texture_atlas_t
      */
     unsigned char * data;
 
+    /**
+     * Atlas special glyph, this is a void*, and will be typecasted as necessary
+     */
+
+    void * special;
+
 } texture_atlas_t;
 
 

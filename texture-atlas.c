@@ -9,7 +9,31 @@
 #include <assert.h>
 #include <limits.h>
 #include "texture-atlas.h"
+#include "texture-font.h"
 
+// -------------------------------------------------- texture_atlas_special ---
+
+void texture_atlas_special ( texture_atlas_t * self )
+{
+  ivec4 region = texture_atlas_get_region( self, 5, 5 );
+  texture_glyph_t * glyph = texture_glyph_new( );
+  static unsigned char data[4*4*3] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+				      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+				      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+				      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+  if ( region.x < 0 )
+    {
+      fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
+    }
+  texture_atlas_set_region( self, region.x, region.y, 4, 4, data, 0 );
+  glyph->codepoint = -1;
+  glyph->s0 = (region.x+2)/(float)self->width;
+  glyph->t0 = (region.y+2)/(float)self->height;
+  glyph->s1 = (region.x+3)/(float)self->width;
+  glyph->t1 = (region.y+3)/(float)self->height;
+
+  self->special = (void*)glyph;
+}
 
 // ------------------------------------------------------ texture_atlas_new ---
 texture_atlas_t *
@@ -48,6 +72,8 @@ texture_atlas_new( const size_t width,
         exit( EXIT_FAILURE );
     }
 
+    texture_atlas_special( self );
+    
     return self;
 }
 

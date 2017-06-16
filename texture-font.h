@@ -205,6 +205,7 @@ typedef struct texture_font_t
 {
     /**
      * Vector of glyphs contained in this font.
+     * This is actually a two-stage table, indexing into 256 glyphs each
      */
     vector_t * glyphs;
 
@@ -403,6 +404,16 @@ typedef struct texture_font_t
  texture_font_find_glyph( texture_font_t * self,
                           const char * codepoint );
     
+/** 
+ * Index a glyph in a font
+ * 
+ * @param self      A valid texture font
+ * @param glyph     The glyph to index in the font
+ */
+void
+ texture_font_index_glyph( texture_font_t * self,
+                           texture_glyph_t * glyph );
+    
 /**
  * Request the loading of a given glyph.
  *
@@ -463,6 +474,17 @@ texture_glyph_new( void );
 
 /** @} */
 
+#define GLYPHS_ITERATOR(index, name, glyph) \
+    for( index = 0; index < vector_size ( glyph ); index++ ) { \
+	texture_glyph_t ** __glyphs; \
+	if(( __glyphs = *(texture_glyph_t *** ) vector_get ( glyph, index ) )) { \
+	    int __i;							\
+	    for( __i = 0; __i < 0x100; __i++ ) {			\
+		if(( name = __glyphs[__i] ))
+
+#define GLYPHS_ITERATOR_END1 }
+#define GLYPHS_ITERATOR_END2 } }
+#define GLYPHS_ITERATOR_END } } }
 
 #ifdef __cplusplus
 }

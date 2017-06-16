@@ -175,28 +175,33 @@ texture_font_generate_kerning( texture_font_t *self,
     assert( self );
 
     /* For each glyph couple combination, check if kerning is necessary */
-    /* Starts at index 1 since 0 is for the special backgroudn glyph */
-    for( i=1; i<self->glyphs->size; ++i )
-    {
-        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
-        glyph_index = FT_Get_Char_Index( *face, glyph->codepoint );
-        vector_clear( glyph->kerning );
-
-        for( j=1; j<self->glyphs->size; ++j )
-        {
-            prev_glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
-            prev_index = FT_Get_Char_Index( *face, prev_glyph->codepoint );
-            FT_Get_Kerning( *face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
-            // printf("%c(%d)-%c(%d): %ld\n",
-            //       prev_glyph->codepoint, prev_glyph->codepoint,
-            //       glyph_index, glyph_index, kerning.x);
-            if( kerning.x )
-            {
-                kerning_t k = {prev_glyph->codepoint, kerning.x / (float)(HRESf*HRESf)};
-                vector_push_back( glyph->kerning, &k );
-            }
+    /* Starts at index 1 since 0 is for the special background glyph */
+    GLYPHS_ITERATOR(i, glyph, self->glyphs ) {
+	glyph_index = FT_Get_Char_Index( *face, glyph->codepoint );
+//	fprintf(stderr, "Retrieving glyph %p from index %i\n", __glyphs, __i);
+//	fprintf(stderr, "Glpyh %p: Indexing %d, kerning %p\n", glyph, glyph_index, glyph->kerning);
+	vector_clear( glyph->kerning );
+	
+	GLYPHS_ITERATOR(j, prev_glyph, self->glyphs ) {
+	    prev_index = FT_Get_Char_Index( *face, prev_glyph->codepoint );
+	    FT_Get_Kerning( *face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
+	    // printf("%c(%d)-%c(%d): %ld\n",
+	    //       prev_glyph->codepoint, prev_glyph->codepoint,
+	    //       glyph_index, glyph_index, kerning.x);
+	    if( kerning.x ) {
+		kerning_t k = {prev_glyph->codepoint, kerning.x / (float)(HRESf*HRESf)};
+		vector_push_back( glyph->kerning, &k );
+	    }
+	    // also insert kerning with the current added element
+	    FT_Get_Kerning( *face, glyph_index, prev_index, FT_KERNING_UNFITTED, &kerning );
+	    if( kerning.x ) {
+		kerning_t k = {glyph->codepoint, kerning.x / (float)(HRESf*HRESf)};
+		vector_push_back( prev_glyph->kerning, &k );
+	    }
         }
+        GLYPHS_ITERATOR_END
     }
+    GLYPHS_ITERATOR_END
 }
 
 // ------------------------------------------------------ texture_font_init ---
@@ -336,12 +341,12 @@ texture_font_delete( texture_font_t *self )
     if(self->location == TEXTURE_FONT_FILE && self->filename)
         free( self->filename );
 
-    for( i=0; i<vector_size( self->glyphs ); ++i)
-    {
-        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
-        texture_glyph_delete( glyph);
-    }
-
+    GLYPHS_ITERATOR(i, glyph, self->glyphs)
+	texture_glyph_delete( glyph );
+    GLYPHS_ITERATOR_END1
+	free( __glyphs );
+    GLYPHS_ITERATOR_END2
+	
     vector_delete( self->glyphs );
     free( self );
 }
@@ -350,24 +355,43 @@ texture_glyph_t *
 texture_font_find_glyph( texture_font_t * self,
                          const char * codepoint )
 {
-    size_t i;
-    texture_glyph_t *glyph;
     uint32_t ucodepoint = utf8_to_utf32( codepoint );
+    uint32_t i = ucodepoint >> 8;
+    uint32_t j = ucodepoint & 0xFF;
+    texture_glyph_t **glyph_index1;
 
-    for( i = 0; i < self->glyphs->size; ++i )
-    {
-        glyph = *(texture_glyph_t **) vector_get( self->glyphs, i );
-        // If codepoint is -1, we don't care about outline type or thickness
-        if( (glyph->codepoint == ucodepoint) &&
-            ((ucodepoint == -1) ||
-             ((glyph->rendermode == self->rendermode) &&
-              (glyph->outline_thickness == self->outline_thickness)) ))
-        {
-            return glyph;
-        }
+    if(ucodepoint == -1)
+	return (texture_glyph_t *)self->atlas->special;
+
+    if(self->glyphs->size <= i)
+	return NULL;
+
+    glyph_index1 = *(texture_glyph_t ***) vector_get( self->glyphs, i );
+
+    if(!glyph_index1)
+	return NULL;
+    else
+	return glyph_index1[j];
+}
+
+void texture_font_index_glyph( texture_font_t * self,
+			       texture_glyph_t *glyph )
+{
+    uint32_t i = glyph->codepoint >> 8;
+    uint32_t j = glyph->codepoint & 0xFF;
+    texture_glyph_t ***glyph_index1;
+
+    if(self->glyphs->size <= i) {
+	vector_resize( self->glyphs, i+1);
     }
 
-    return NULL;
+    glyph_index1 = (texture_glyph_t ***) vector_get( self->glyphs, i );
+
+    if(!*glyph_index1) {
+	*glyph_index1 = calloc( 0x100, sizeof(texture_glyph_t*) );
+    }
+
+    (*glyph_index1)[j] = glyph;
 }
 
 // ------------------------------------------------ texture_font_load_glyph ---
@@ -389,56 +413,39 @@ texture_font_load_glyph( texture_font_t * self,
     FT_Int32 flags = 0;
     int ft_glyph_top = 0;
     int ft_glyph_left = 0;
+    FT_ULong ucodepoint;
 
     ivec4 region;
     size_t missed = 0;
 
-
-    if (!texture_font_load_face(self, self->size, &library, &face))
-        return 0;
-
     /* Check if codepoint has been already loaded */
     if (texture_font_find_glyph(self, codepoint)) {
-        FT_Done_Face(face);
-        FT_Done_FreeType(library);
         return 1;
     }
 
     /* codepoint NULL is special : it is used for line drawing (overline,
      * underline, strikethrough) and background.
      */
-    if( !codepoint )
-    {
-        ivec4 region = texture_atlas_get_region( self->atlas, 5, 5 );
-        texture_glyph_t * glyph = texture_glyph_new( );
-        static unsigned char data[4*4*3] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-                                            -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-                                            -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-                                            -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-        if ( region.x < 0 )
-        {
-            fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
-            FT_Done_Face( face );
-            FT_Done_FreeType( library );
-            return NULL;
-        }
-        texture_atlas_set_region( self->atlas, region.x, region.y, 4, 4, data, 0 );
-        glyph->codepoint = -1;
-        glyph->s0 = (region.x+2)/(float)self->atlas->width;
-        glyph->t0 = (region.y+2)/(float)self->atlas->height;
-        glyph->s1 = (region.x+3)/(float)self->atlas->width;
-        glyph->t1 = (region.y+3)/(float)self->atlas->height;
-        vector_push_back( self->glyphs, &glyph );
-
-        FT_Done_Face(face);
-        FT_Done_FreeType(library);
-        return 1;
+    if( !codepoint ) {
+	return 1;
     }
+
+    if (!texture_font_load_face(self, self->size, &library, &face))
+        return 0;
 
     flags = 0;
     ft_glyph_top = 0;
     ft_glyph_left = 0;
-    glyph_index = FT_Get_Char_Index( face, (FT_ULong)utf8_to_utf32( codepoint ) );
+    ucodepoint = (FT_ULong)utf8_to_utf32( codepoint );
+    glyph_index = FT_Get_Char_Index( face, ucodepoint );
+    if(!glyph_index) {
+	ucodepoint = 0xFFFD; // all invalids are the same
+	if (texture_font_find_glyph(self, "\uFFFD")) {
+	    FT_Done_Face(face);
+	    FT_Done_FreeType(library);
+	    return 1;
+	}
+    }
     // WARNING: We use texture-atlas depth to guess if user wants
     //          LCD subpixel rendering
 
@@ -633,7 +640,7 @@ cleanup_stroker:
     glyph->advance_x = slot->advance.x / HRESf;
     glyph->advance_y = slot->advance.y / HRESf;
 
-    vector_push_back( self->glyphs, &glyph );
+    texture_font_index_glyph(self, glyph);
 
     if( self->rendermode != RENDER_NORMAL && self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )
         FT_Done_Glyph( ft_glyph );
@@ -654,7 +661,7 @@ texture_font_load_glyphs( texture_font_t * self,
     size_t i;
 
     /* Load each glyph */
-    for( i = 0; i < utf8_strlen(codepoints); i += utf8_surrogate_len(codepoints + i) ) {
+    for( i = 0; i < strlen(codepoints); i += utf8_surrogate_len(codepoints + i) ) {
         if( !texture_font_load_glyph( self, codepoints + i ) )
             return utf8_strlen( codepoints + i );
 
@@ -722,12 +729,18 @@ texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
     //change uv coordinates of existing glyphs to reflect size change
     float mulw = (float)width_old / width_new;
     float mulh = (float)height_old / height_new;
-    size_t i;
+    size_t i, j;
     for (i = 0; i < vector_size(self->glyphs); i++) {
-    	texture_glyph_t* g = *(texture_glyph_t**)vector_get(self->glyphs, i);
-    	g->s0 *= mulw;
-    	g->s1 *= mulw;
-    	g->t0 *= mulh;
-    	g->t1 *= mulh;
+    	texture_glyph_t** gs = *(texture_glyph_t***)vector_get(self->glyphs, i);
+	if(gs)
+	    for( j = 0; j < 0x100; j++) {
+		texture_glyph_t* g=gs[j];
+		if(g) {
+		    g->s0 *= mulw;
+		    g->s1 *= mulw;
+		    g->t0 *= mulh;
+		    g->t1 *= mulh;
+		}
+	}
     }
 }
