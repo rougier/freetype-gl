@@ -473,6 +473,14 @@ texture_glyph_get_kerning( const texture_glyph_t * self,
 texture_glyph_t *
 texture_glyph_new( void );
 
+/**
+ * Delete a glyph
+ *
+ * @param  self         A valid texture glyph
+ */
+void
+texture_glyph_delete( texture_glyph_t * );
+
 /** @} */
 
 #define GLYPHS_ITERATOR1(index, name, glyph) \

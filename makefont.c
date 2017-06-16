@@ -401,7 +401,7 @@ int main( int argc, char **argv )
     fprintf( file,
 	     "typedef struct\n"
 	     "{\n"
-	     "   texture_glyph_t * glyphs[0x100];\n"
+	     "   texture_glyph_t glyphs[0x100];\n"
 	     "} texture_glyph_0x100_t;\n\n" );
 
     fprintf( file,
@@ -527,7 +527,7 @@ int main( int argc, char **argv )
 		    }
 		    fprintf( file, " },\n" );
 		} else {
-		    fprintf( file, " (texture_glyph_t*)NULL,\n" );
+		    fprintf( file, "  { 0, },\n" );
 		}
 	GLYPHS_ITERATOR_END1;
 	fprintf( file, " },\n" );
