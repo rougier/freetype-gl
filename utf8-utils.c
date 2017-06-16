@@ -59,22 +59,22 @@ utf8_to_utf32( const char * character )
         return character[0];
     }
 
-    if( ( character[0] & 0xC0 ) == 0xC0 )
+    if( ( character[0] & 0xE0 ) == 0xC0 )
     {
         return ( ( character[0] & 0x3F ) << 6 ) | ( character[1] & 0x3F );
     }
 
-    if( ( character[0] & 0xE0 ) == 0xE0 )
+    if( ( character[0] & 0xF0 ) == 0xE0 )
     {
         return ( ( character[0] & 0x1F ) << ( 6 + 6 ) ) | ( ( character[1] & 0x3F ) << 6 ) | ( character[2] & 0x3F );
     }
 
-    if( ( character[0] & 0xF0 ) == 0xF0 )
+    if( ( character[0] & 0xF8 ) == 0xF0 )
     {
         return ( ( character[0] & 0x0F ) << ( 6 + 6 + 6 ) ) | ( ( character[1] & 0x3F ) << ( 6 + 6 ) ) | ( ( character[2] & 0x3F ) << 6 ) | ( character[3] & 0x3F );
     }
 
-    if( ( character[0] & 0xF8 ) == 0xF8 )
+    if( ( character[0] & 0xFC ) == 0xF8 )
     {
         return ( ( character[0] & 0x07 ) << ( 6 + 6 + 6 + 6 ) ) | ( ( character[1] & 0x3F ) << ( 6 + 6 + 6 ) ) | ( ( character[2] & 0x3F ) << ( 6 + 6 ) ) | ( ( character[3] & 0x3F ) << 6 ) | ( character[4] & 0x3F );
     }

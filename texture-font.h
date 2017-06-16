@@ -412,7 +412,8 @@ typedef struct texture_font_t
  */
 void
  texture_font_index_glyph( texture_font_t * self,
-                           texture_glyph_t * glyph );
+                           texture_glyph_t * glyph,
+			   uint32_t codepoint );
     
 /**
  * Request the loading of a given glyph.

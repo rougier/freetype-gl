@@ -84,6 +84,7 @@ texture_atlas_delete( texture_atlas_t *self )
 {
     assert( self );
     vector_delete( self->nodes );
+    texture_glyph_delete( self->special );
     if( self->data )
     {
         free( self->data );

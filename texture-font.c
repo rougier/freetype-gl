@@ -341,9 +341,10 @@ texture_font_delete( texture_font_t *self )
     if(self->location == TEXTURE_FONT_FILE && self->filename)
         free( self->filename );
 
-    GLYPHS_ITERATOR(i, glyph, self->glyphs)
-	texture_glyph_delete( glyph );
-    GLYPHS_ITERATOR_END1
+    GLYPHS_ITERATOR(i, glyph, self->glyphs) {
+	if((__i | i << 8) == glyph->codepoint)
+	    texture_glyph_delete( glyph );
+    } GLYPHS_ITERATOR_END1
 	free( __glyphs );
     GLYPHS_ITERATOR_END2
 	
@@ -363,22 +364,29 @@ texture_font_find_glyph( texture_font_t * self,
     if(ucodepoint == -1)
 	return (texture_glyph_t *)self->atlas->special;
 
-    if(self->glyphs->size <= i)
+    fprintf(stderr, "Lookup [%i][%i]=%s ", i, j, codepoint);
+    if(self->glyphs->size <= i) {
 	return NULL;
+	fprintf(stderr, "(null)\n");
+    }
 
     glyph_index1 = *(texture_glyph_t ***) vector_get( self->glyphs, i );
 
-    if(!glyph_index1)
+    if(!glyph_index1) {
 	return NULL;
-    else
+	fprintf(stderr, "(null)\n");
+    } else {
+	fprintf(stderr, "%p\n", glyph_index1[j]);
 	return glyph_index1[j];
+    }
 }
 
 void texture_font_index_glyph( texture_font_t * self,
-			       texture_glyph_t *glyph )
+			       texture_glyph_t *glyph,
+			       uint32_t codepoint)
 {
-    uint32_t i = glyph->codepoint >> 8;
-    uint32_t j = glyph->codepoint & 0xFF;
+    uint32_t i = codepoint >> 8;
+    uint32_t j = codepoint & 0xFF;
     texture_glyph_t ***glyph_index1;
 
     if(self->glyphs->size <= i) {
@@ -391,6 +399,7 @@ void texture_font_index_glyph( texture_font_t * self,
 	*glyph_index1 = calloc( 0x100, sizeof(texture_glyph_t*) );
     }
 
+    fprintf(stderr, "Assign glyph[%i][%i]=%p\n", i, j, glyph);
     (*glyph_index1)[j] = glyph;
 }
 
@@ -439,8 +448,11 @@ texture_font_load_glyph( texture_font_t * self,
     ucodepoint = (FT_ULong)utf8_to_utf32( codepoint );
     glyph_index = FT_Get_Char_Index( face, ucodepoint );
     if(!glyph_index) {
-	ucodepoint = 0xFFFD; // all invalids are the same
-	if (texture_font_find_glyph(self, "\uFFFD")) {
+	fprintf(stderr, "Invalid glyph %x detected\n", ucodepoint);
+	texture_glyph_t * glyph;
+	if ((glyph = texture_font_find_glyph(self, "\xEF\xBF\xBD"))) {
+	    fprintf(stderr, "Double invalid glyph assigned to %x\n", ucodepoint);
+	    texture_font_index_glyph( self, glyph, ucodepoint );
 	    FT_Done_Face(face);
 	    FT_Done_FreeType(library);
 	    return 1;
@@ -622,7 +634,8 @@ cleanup_stroker:
     free( buffer );
 
     glyph = texture_glyph_new( );
-    glyph->codepoint = utf8_to_utf32( codepoint );
+    glyph->codepoint = glyph_index ? utf8_to_utf32( codepoint ) : 0xFFFD;
+;
     glyph->width    = tgt_w;
     glyph->height   = tgt_h;
     glyph->rendermode = self->rendermode;
@@ -640,8 +653,13 @@ cleanup_stroker:
     glyph->advance_x = slot->advance.x / HRESf;
     glyph->advance_y = slot->advance.y / HRESf;
 
-    texture_font_index_glyph(self, glyph);
+    texture_font_index_glyph(self, glyph, ucodepoint);
+    if(!glyph_index) {
+	fprintf(stderr, "Invalid glyph assigned to %x\n", ucodepoint);
 
+	texture_font_index_glyph(self, glyph, 0xFFFD);
+    }
+    
     if( self->rendermode != RENDER_NORMAL && self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )
         FT_Done_Glyph( ft_glyph );
 
