@@ -401,7 +401,7 @@ int main( int argc, char **argv )
     fprintf( file,
 	     "typedef struct\n"
 	     "{\n"
-	     "   texture_glyph_t glyphs[0x100];\n"
+	     "   texture_glyph_t *glyphs[0x100];\n"
 	     "} texture_glyph_0x100_t;\n\n" );
 
     fprintf( file,
@@ -420,54 +420,11 @@ int main( int argc, char **argv )
         "    texture_glyph_0x100_t glyphs[%" PRIzu "];\n"
         "} texture_font_t;\n\n", texture_size, glyph_count );
 
-
-
-    fprintf( file, "texture_font_t %s = {\n", variable_name );
-
-
-    // ------------
-    // Texture data
-    // ------------
-    fprintf( file, " %" PRIzu ", %" PRIzu ", %" PRIzu ", \n", atlas->width, atlas->height, atlas->depth );
-    fprintf( file, " {" );
-    for( i=0; i < texture_size; i+= 32 )
-    {
-        for( j=0; j < 32 && (j+i) < texture_size ; ++ j)
-        {
-            if( (j+i) < (texture_size-1) )
-            {
-                fprintf( file, "%d,", atlas->data[i+j] );
-            }
-            else
-            {
-                fprintf( file, "%d", atlas->data[i+j] );
-            }
-        }
-        if( (j+i) < texture_size )
-        {
-            fprintf( file, "\n  " );
-        }
-    }
-    fprintf( file, "}, \n" );
-
-
-    // -------------------
-    // Texture information
-    // -------------------
-    fprintf( file, " %ff, %ff, %ff, %ff, %ff, %" PRIzu ", \n",
-             font->size, font->height,
-             font->linegap,font->ascender, font->descender,
-             glyph_count );
-
-    // --------------
-    // Texture glyphs
-    // --------------
-    fprintf( file, " {\n" );
     texture_glyph_t * glyph;
-    GLYPHS_ITERATOR1(i, glyph, font->glyphs) {
-	fprintf( file, " {\n" );
-	GLYPHS_ITERATOR2(i, glyph, font->glyphs) {
-/*
+
+    GLYPHS_ITERATOR(i, glyph, font->glyphs) {
+	fprintf( file, "texture_glyph_t %s_glyph_%08x = ", variable_name, glyph->codepoint, glyph->codepoint );
+ /*
         // Debugging information
         printf( "glyph : '%lc'\n",
                  glyph->codepoint );
@@ -525,15 +482,62 @@ int main( int argc, char **argv )
 			    }
 			fprintf( file, "}" );
 		    }
-		    fprintf( file, " },\n" );
-		} else {
-		    fprintf( file, "  { 0, },\n" );
+		    fprintf( file, " };\n" );
 		}
+    GLYPHS_ITERATOR_END
+
+    fprintf( file, "texture_font_t %s = {\n", variable_name );
+
+
+    // ------------
+    // Texture data
+    // ------------
+    fprintf( file, " %" PRIzu ", %" PRIzu ", %" PRIzu ", \n", atlas->width, atlas->height, atlas->depth );
+    fprintf( file, " {" );
+    for( i=0; i < texture_size; i+= 32 )
+    {
+        for( j=0; j < 32 && (j+i) < texture_size ; ++ j)
+        {
+            if( (j+i) < (texture_size-1) )
+            {
+                fprintf( file, "%d,", atlas->data[i+j] );
+            }
+            else
+            {
+                fprintf( file, "%d", atlas->data[i+j] );
+            }
+        }
+        if( (j+i) < texture_size )
+        {
+            fprintf( file, "\n  " );
+        }
+    }
+    fprintf( file, "}, \n" );
+
+
+    // -------------------
+    // Texture information
+    // -------------------
+    fprintf( file, " %ff, %ff, %ff, %ff, %ff, %" PRIzu ", \n",
+             font->size, font->height,
+             font->linegap,font->ascender, font->descender,
+             glyph_count );
+
+    // --------------
+    // Texture glyphs
+    // --------------
+    fprintf( file, " {\n" );
+    GLYPHS_ITERATOR1(i, glyph, font->glyphs) {
+	fprintf( file, " {\n" );
+	GLYPHS_ITERATOR2(i, glyph, font->glyphs) {
+	    fprintf( file, "  &%s_glyph_%08x,\n", variable_name, glyph->codepoint );
+	} else {
+	    fprintf( file, "  NULL,\n" );
+	}
 	GLYPHS_ITERATOR_END1;
 	fprintf( file, " },\n" );
     } GLYPHS_ITERATOR_END2;
     fprintf( file, " }\n};\n" );
-    
     fprintf( file,
         "#ifdef __cplusplus\n"
         "}\n"
