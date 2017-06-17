@@ -445,7 +445,7 @@ texture_font_load_glyph( texture_font_t * self,
     glyph_index = FT_Get_Char_Index( face, ucodepoint );
     if(!glyph_index) {
 	texture_glyph_t * glyph;
-	if ((glyph = texture_font_find_glyph(self, "\xEF\xBF\xBD"))) {
+	if ((glyph = texture_font_find_glyph(self, "\0"))) {
 	    texture_font_index_glyph( self, glyph, ucodepoint );
 	    FT_Done_Face(face);
 	    FT_Done_FreeType(library);
@@ -511,7 +511,7 @@ texture_font_load_glyph( texture_font_t * self,
         if( error )
         {
             freetype_error( error, "FT_Error (0x%02x) : %s\n",
-                    FT_Errors[error].code, FT_Errors[error].message);
+			    FT_Errors[error].code, FT_Errors[error].message);
             goto cleanup_stroker;
         }
 
@@ -526,7 +526,7 @@ texture_font_load_glyph( texture_font_t * self,
         if( error )
         {
             freetype_error( error, "FT_Error (0x%02x) : %s\n",
-                    FT_Errors[error].code, FT_Errors[error].message);
+			    FT_Errors[error].code, FT_Errors[error].message);
             goto cleanup_stroker;
         }
 
@@ -540,7 +540,7 @@ texture_font_load_glyph( texture_font_t * self,
         if( error )
         {
             freetype_error( error, "FT_Error (0x%02x) : %s\n",
-                    FT_Errors[error].code, FT_Errors[error].message);
+			    FT_Errors[error].code, FT_Errors[error].message);
             goto cleanup_stroker;
         }
 
@@ -629,7 +629,7 @@ cleanup_stroker:
     free( buffer );
 
     glyph = texture_glyph_new( );
-    glyph->codepoint = glyph_index ? utf8_to_utf32( codepoint ) : 0xFFFD;
+    glyph->codepoint = glyph_index ? utf8_to_utf32( codepoint ) : 0;
 ;
     glyph->width    = tgt_w;
     glyph->height   = tgt_h;
@@ -650,7 +650,7 @@ cleanup_stroker:
 
     texture_font_index_glyph(self, glyph, ucodepoint);
     if(!glyph_index) {
-	texture_font_index_glyph(self, glyph, 0xFFFD);
+	texture_font_index_glyph(self, glyph, 0);
     }
     
     if( self->rendermode != RENDER_NORMAL && self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )

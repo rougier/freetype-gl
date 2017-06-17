@@ -46,6 +46,18 @@ namespace ftgl {
  */
 
 /**
+ * A list of possible ways to render a glyph.
+ */
+typedef enum rendermode_t
+{
+    RENDER_NORMAL,
+    RENDER_OUTLINE_EDGE,
+    RENDER_OUTLINE_POSITIVE,
+    RENDER_OUTLINE_NEGATIVE,
+    RENDER_SIGNED_DISTANCE_FIELD
+} rendermode_t;
+
+/**
  * A structure that describe a glyph.
  */
 typedef struct texture_glyph_t
@@ -101,7 +113,7 @@ typedef struct texture_glyph_t
     /**
      * Glyph outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
      */
-    int outline_type;
+    rendermode_t rendermode;
 
     /**
      * Glyph outline thickness
@@ -168,7 +180,7 @@ typedef struct texture_font_t
     /**
      * Outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
      */
-    int outline_type;
+    rendermode_t rendermode;
 
     /**
      * Outline thickness
@@ -338,8 +350,31 @@ typedef struct texture_font_t
 texture_glyph_t *
 texture_glyph_new( void );
 
-/** @} */
+/**
+ * Delete a glyph
+ *
+ * @param  self         A valid texture glyph
+ */
+void
+texture_glyph_delete( texture_glyph_t * );
 
+/** @} */
+ 
+#define GLYPHS_ITERATOR1(index, name, glyph) \
+    for( index = 0; index < vector_size ( glyph ); index++ ) { \
+       texture_glyph_t ** __glyphs;
+#define GLYPHS_ITERATOR2(index, name, glyph) \
+       if(( __glyphs = *(texture_glyph_t *** ) vector_get ( glyph, index ) )) { \
+           int __i;                                                    \
+           for( __i = 0; __i < 0x100; __i++ ) {                        \
+               if(( name = __glyphs[__i] ))
+#define GLYPHS_ITERATOR(index, name, glyph) \
+    GLYPHS_ITERATOR1(index, name, glyph)               \
+       GLYPHS_ITERATOR2(index, name, glyph)
+
+#define GLYPHS_ITERATOR_END1 }
+#define GLYPHS_ITERATOR_END2 } }
+#define GLYPHS_ITERATOR_END } } }
 
 #ifdef __cplusplus
 }
