@@ -148,8 +148,8 @@ if(freetype-gl_BUILD_SHARED)
     SET_TARGET_PROPERTIES(
         freetype-gl
     PROPERTIES
-        VERSION 3.2.0
-        SOVERSION 3.2.0)
+        VERSION 3
+        SOVERSION 3)
 else()
     add_library(freetype-gl STATIC
         ${FREETYPE_GL_SRC}
