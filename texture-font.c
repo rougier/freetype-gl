@@ -69,16 +69,16 @@ texture_font_load_face(texture_font_t *self, float size,
     }
 
     if(error) {
-        freetype_error( error, "FT_Error (line %d, code 0x%02x) : %s\n",
-                __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+        freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+                __FILE__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
         goto cleanup_library;
     }
 
     /* Select charmap */
     error = FT_Select_Charmap(*face, FT_ENCODING_UNICODE);
     if(error) {
-        freetype_error( error, "FT_Error (line %d, code 0x%02x) : %s\n",
-                __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+        freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+                __FILE__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
         goto cleanup_face;
     }
 
@@ -86,8 +86,8 @@ texture_font_load_face(texture_font_t *self, float size,
     error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI * HRES, DPI);
 
     if(error) {
-        freetype_error( error, "FT_Error (line %d, code 0x%02x) : %s\n",
-                __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+        freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+                __FILE__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
         goto cleanup_face;
     }
 
@@ -111,7 +111,7 @@ texture_glyph_new(void)
     texture_glyph_t *self = (texture_glyph_t *) malloc( sizeof(texture_glyph_t) );
     if(self == NULL) {
         freetype_gl_error( Out_Of_Memory,
-                "line %d: No more memory for allocating data\n", __LINE__);
+                "%s:%d: No more memory for allocating data\n", __FILE__, __LINE__);
         return NULL;
     }
 
@@ -128,7 +128,7 @@ texture_glyph_new(void)
     self->t0        = 0.0;
     self->s1        = 0.0;
     self->t1        = 0.0;
-    self->kerning   = vector_new( sizeof(kerning_t) );
+    self->kerning   = vector_new( sizeof(float**) );
     return self;
 }
 
@@ -137,7 +137,10 @@ texture_glyph_new(void)
 void
 texture_glyph_delete( texture_glyph_t *self )
 {
+    int i;
     assert( self );
+    for(i=0; i < self->kerning->size; i++)
+	free( *(float **) vector_get( self->kerning, i ) );
     vector_delete( self->kerning );
     free( self );
 }
@@ -147,28 +150,54 @@ float
 texture_glyph_get_kerning( const texture_glyph_t * self,
                            const char * codepoint )
 {
-    size_t i;
     uint32_t ucodepoint = utf8_to_utf32( codepoint );
+    uint32_t i = ucodepoint >> 8;
+    uint32_t j = ucodepoint & 0xFF;
+    float *kern_index;
 
     assert( self );
-    for( i=0; i<vector_size(self->kerning); ++i )
-    {
-        kerning_t * kerning = (kerning_t *) vector_get( self->kerning, i );
-        if( kerning->codepoint == ucodepoint )
-        {
-            return kerning->kerning;
-        }
-    }
-    return 0;
+    if(ucodepoint == -1)
+	return 0;
+    if(self->kerning->size <= i)
+	return 0;
+
+    kern_index = *(float **) vector_get( self->kerning, i );
+
+    if(!kern_index)
+	return 0;
+    else
+	return kern_index[j];
 }
 
+// ---------------------------------------------- texture_font_index_kerning ---
+
+void texture_font_index_kerning( texture_glyph_t * self,
+				 uint32_t codepoint,
+				 float kerning)
+{
+    uint32_t i = codepoint >> 8;
+    uint32_t j = codepoint & 0xFF;
+    float ** kerning_index;
+
+    if(self->kerning->size <= i) {
+	vector_resize( self->kerning, i+1);
+    }
+
+    kerning_index = (float **) vector_get( self->kerning, i );
+
+    if(!*kerning_index) {
+	*kerning_index = calloc( 0x100, sizeof(float) );
+    }
+
+    (*kerning_index)[j] = kerning;
+}
 
 // ------------------------------------------ texture_font_generate_kerning ---
 void
 texture_font_generate_kerning( texture_font_t *self,
                                FT_Library *library, FT_Face *face )
 {
-    size_t i, j;
+    size_t i, j, k;
     FT_UInt glyph_index, prev_index;
     texture_glyph_t *glyph, *prev_glyph;
     FT_Vector kerning;
@@ -181,6 +210,8 @@ texture_font_generate_kerning( texture_font_t *self,
 	glyph_index = FT_Get_Char_Index( *face, glyph->codepoint );
 //	fprintf(stderr, "Retrieving glyph %p from index %i\n", __glyphs, __i);
 //	fprintf(stderr, "Glpyh %p: Indexing %d, kerning %p\n", glyph, glyph_index, glyph->kerning);
+	for(k=0; k < glyph->kerning->size; k++)
+	    free( *(float **) vector_get( glyph->kerning, k ) );
 	vector_clear( glyph->kerning );
 	
 	GLYPHS_ITERATOR(j, prev_glyph, self->glyphs ) {
@@ -190,14 +221,16 @@ texture_font_generate_kerning( texture_font_t *self,
 	    //       prev_glyph->codepoint, prev_glyph->codepoint,
 	    //       glyph_index, glyph_index, kerning.x);
 	    if( kerning.x ) {
-		kerning_t k = {prev_glyph->codepoint, kerning.x / (float)(HRESf*HRESf)};
-		vector_push_back( glyph->kerning, &k );
+		texture_font_index_kerning( glyph,
+					    prev_glyph->codepoint,
+					    kerning.x / (float)(HRESf*HRESf) );
 	    }
 	    // also insert kerning with the current added element
 	    FT_Get_Kerning( *face, glyph_index, prev_index, FT_KERNING_UNFITTED, &kerning );
 	    if( kerning.x ) {
-		kerning_t k = {glyph->codepoint, kerning.x / (float)(HRESf*HRESf)};
-		vector_push_back( prev_glyph->kerning, &k );
+		texture_font_index_kerning( prev_glyph,
+					    glyph->codepoint,
+					    kerning.x / (float)(HRESf*HRESf) );
 	    }
         }
         GLYPHS_ITERATOR_END
@@ -280,7 +313,7 @@ texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
     self = calloc(1, sizeof(*self));
     if (!self) {
         freetype_gl_error( Out_Of_Memory,
-			   "line %d: No more memory for allocating data\n", __LINE__);
+			   "%s:%d: No more memory for allocating data\n", __FILE__, __LINE__);
         return NULL;
     }
 
@@ -311,7 +344,7 @@ texture_font_new_from_memory(texture_atlas_t *atlas, float pt_size,
     self = calloc(1, sizeof(*self));
     if (!self) {
         freetype_gl_error( Out_Of_Memory,
-			   "line %d: No more memory for allocating data\n", __LINE__);
+			   "%s:%d: No more memory for allocating data\n", __FILE__, __LINE__);
         return NULL;
     }
 
@@ -365,17 +398,15 @@ texture_font_find_glyph( texture_font_t * self,
     if(ucodepoint == -1)
 	return (texture_glyph_t *)self->atlas->special;
 
-    if(self->glyphs->size <= i) {
+    if(self->glyphs->size <= i)
 	return NULL;
-    }
 
     glyph_index1 = *(texture_glyph_t ***) vector_get( self->glyphs, i );
 
-    if(!glyph_index1) {
+    if(!glyph_index1)
 	return NULL;
-    } else {
+    else
 	return glyph_index1[j];
-    }
 }
 
 void texture_font_index_glyph( texture_font_t * self,
@@ -487,8 +518,8 @@ texture_font_load_glyph( texture_font_t * self,
     error = FT_Load_Glyph( face, glyph_index, flags );
     if( error )
     {
-        freetype_error( error, "FT_Error (line %d, code 0x%02x) : %s\n",
-			__LINE__, FT_Errors[error].code, FT_Errors[error].message);
+        freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			__FILE__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
         FT_Done_Face( face );
         FT_Done_FreeType( library );
         return 0;
@@ -596,7 +627,7 @@ cleanup_stroker:
     if ( region.x < 0 )
     {
         freetype_gl_error( Texture_Atlas_Full,
-			   "Texture atlas is full (line %d)\n",  __LINE__ );
+			   "Texture atlas is full (%s:%d)\n",  __FILE__, __LINE__ );
         FT_Done_Face( face );
         FT_Done_FreeType( library );
         return 0;

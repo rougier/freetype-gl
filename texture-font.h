@@ -54,31 +54,6 @@ typedef enum rendermode_t
     RENDER_SIGNED_DISTANCE_FIELD
 } rendermode_t;
 
-
-/**
- * A structure that hold a kerning value relatively to a Unicode
- * codepoint.
- *
- * This structure cannot be used alone since the (necessary) right
- * Unicode codepoint is implicitely held by the owner of this structure.
- */
-typedef struct kerning_t
-{
-    /**
-     * Left Unicode codepoint in the kern pair in UTF-32 LE encoding.
-     */
-    uint32_t codepoint;
-
-    /**
-     * Kerning value (in fractional pixels).
-     */
-    float kerning;
-
-} kerning_t;
-
-
-
-
 /*
  * Glyph metrics:
  * --------------

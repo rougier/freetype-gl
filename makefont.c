@@ -374,17 +374,12 @@ int main( int argc, char **argv )
     // Structure declarations
     // ----------------------
     fprintf( file,
-        "#include <stddef.h>\n"
-        "#include <stdint.h>\n"
-        "#ifdef __cplusplus\n"
-        "extern \"C\" {\n"
-        "#endif\n"
-        "\n"
-        "typedef struct\n"
-        "{\n"
-        "    uint32_t codepoint;\n"
-        "    float kerning;\n"
-        "} kerning_t;\n\n" );
+	     "#include <stddef.h>\n"
+	     "#include <stdint.h>\n"
+	     "#ifdef __cplusplus\n"
+	     "extern \"C\" {\n"
+	     "#endif\n"
+	     "\n" );
 
     fprintf( file,
         "typedef struct\n"
@@ -395,7 +390,7 @@ int main( int argc, char **argv )
         "    float advance_x, advance_y;\n"
         "    float s0, t0, s1, t1;\n"
         "    size_t kerning_count;\n"
-        "    kerning_t kerning[%" PRIzu "];\n"
+        "    float kerning[%" PRIzu "][0x100];\n"
         "} texture_glyph_t;\n\n", max_kerning_count );
 
     fprintf( file,
@@ -470,17 +465,19 @@ int main( int argc, char **argv )
 		    }
 		    else {
 			fprintf( file, "{ " );
-			for( k=0; k < vector_size(glyph->kerning); ++k )
-			    {
-				kerning_t *kerning = (kerning_t *) vector_get( glyph->kerning, k);
+			for( k=0; k < vector_size(glyph->kerning); ++k ) {
+			    float *kerning = *(float **) vector_get( glyph->kerning, k);
+			    
+			    fprintf( file, "{" );
+			    for( int l=0; l<0xff; l++ )
+				fprintf( file, " %ff,", kerning[l] );
+			    fprintf( file, " %ff }", kerning[0xFF] );
+					 
+			    if( k < (vector_size(glyph->kerning)-1))
+				fprintf( file, ",\n" );
 				
-				fprintf( file, "{%u, %ff}", kerning->codepoint, kerning->kerning );
-				if( k < (vector_size(glyph->kerning)-1))
-				    {
-					fprintf( file, ", " );
-				    }
-			    }
-			fprintf( file, "}" );
+			}
+			fprintf( file, " }" );
 		    }
 		    fprintf( file, " };\n" );
 		}

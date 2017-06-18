@@ -46,15 +46,17 @@ extern char* freetype_gl_errstr(int errno);
     
 extern char* freetype_gl_errstrs[];
 
-#define freetype_gl_error(errno, ...)			     \
-  freetype_gl_errno = FTGL_ERR_CAT( FTGL_ERR_PREFIX, errno); \
-  freetype_gl_message = freetype_gl_errstrs[FTGL_ERR_CAT( FTGL_ERR_PREFIX, errno)-FTGL_ERR_BASE]; \
-  freetype_gl_errhook(freetype_gl_errno, freetype_gl_message, __VA_ARGS__);
+#define freetype_gl_error(errno, ...) {			     \
+	freetype_gl_errno = FTGL_ERR_CAT( FTGL_ERR_PREFIX, errno);	\
+	freetype_gl_message = freetype_gl_errstrs[FTGL_ERR_CAT( FTGL_ERR_PREFIX, errno)-FTGL_ERR_BASE]; \
+	freetype_gl_errhook(freetype_gl_errno, freetype_gl_message, __VA_ARGS__); \
+    }
 
-#define freetype_error(error, ...)		     \
-  freetype_gl_errno = FT_Errors[error].code; \
-  freetype_gl_message = (char*)FT_Errors[error].message;		\
-  freetype_gl_errhook(freetype_gl_errno, freetype_gl_message, __VA_ARGS__);
+#define freetype_error(error, ...) {	     \
+	freetype_gl_errno = FT_Errors[error].code;			\
+	freetype_gl_message = (char*)FT_Errors[error].message;		\
+	freetype_gl_errhook(freetype_gl_errno, freetype_gl_message, __VA_ARGS__); \
+    }
 
 #define FTGL_ERRSTR_MAX 0x100
 

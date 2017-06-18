@@ -168,6 +168,7 @@ vector_clear( vector_t *self )
 {
     assert( self );
 
+    memset( (char *)(self->items), 0, self->size * self->item_size);
     self->size = 0;
 }
 

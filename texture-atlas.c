@@ -22,9 +22,11 @@ void texture_atlas_special ( texture_atlas_t * self )
 					-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 					-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 					-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-    if ( region.x < 0 )
+    if ( region.x < 0 ) {
 	freetype_gl_error( Texture_Atlas_Full,
-			   "Texture atlas is full (line %d)\n",  __LINE__ );
+			   "Texture atlas is full, %d (%s:%d)\n", region.x, __FILE__, __LINE__ );
+    }
+    
     texture_atlas_set_region( self, region.x, region.y, 4, 4, data, 0 );
     glyph->codepoint = -1;
     glyph->s0 = (region.x+2)/(float)self->width;
@@ -51,7 +53,7 @@ texture_atlas_new( const size_t width,
     if( self == NULL)
     {
         freetype_gl_error( Out_Of_Memory,
-			   "line %d: No more memory for allocating data\n", __LINE__ );
+			   "%s:%d: No more memory for allocating data\n", __FILE__, __LINE__ );
 	return NULL;
         /* exit( EXIT_FAILURE ); */ /* Never exit from a library */
     }
@@ -69,7 +71,7 @@ texture_atlas_new( const size_t width,
     if( self->data == NULL)
     {
         freetype_gl_error( Out_Of_Memory,
-			   "line %d: No more memory for allocating data\n", __LINE__ );
+			   "%s:%d: No more memory for allocating data\n", __FILE__, __LINE__ );
 	return NULL;
     }
 
@@ -243,7 +245,7 @@ texture_atlas_get_region( texture_atlas_t * self,
     if( node == NULL)
     {
         freetype_gl_error( Out_Of_Memory,
-			   "line %d: No more memory for allocating data\n", __LINE__ );
+			   "%s:%d: No more memory for allocating data\n", __FILE__, __LINE__ );
 	return (ivec4){{-1,-1,0,0}};
         /* exit( EXIT_FAILURE ); */ /* Never exit from a library */
     }

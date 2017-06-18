@@ -31,6 +31,7 @@ option(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
 option(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (experimental)" OFF)
 option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 option(freetype-gl_BUILD_TESTS "Build the tests" ON)
+option(freetype-gl_BUILD_SHARED "Build shared library" OFF)
 
 include(RequireIncludeFile)
 include(RequireFunctionExists)
@@ -139,10 +140,17 @@ set(FREETYPE_GL_SRC
     freetype-gl-err.c
 )
 
-add_library(freetype-gl STATIC
-    ${FREETYPE_GL_SRC}
-    ${FREETYPE_GL_HDR}
-)
+if(freetype-gl_BUILD_SHARED)
+    add_library(freetype-gl SHARED
+        ${FREETYPE_GL_SRC}
+        ${FREETYPE_GL_HDR}
+    )
+else()
+    add_library(freetype-gl STATIC
+        ${FREETYPE_GL_SRC}
+        ${FREETYPE_GL_HDR}
+    )
+endif()
 
 if(freetype-gl_BUILD_MAKEFONT)
     add_executable(makefont makefont.c)
