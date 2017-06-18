@@ -426,7 +426,13 @@ void
    */
   void
   texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
-							  size_t height_new);
+			      size_t height_new);
+  void
+  texture_font_enlarge_glyphs( texture_font_t * self, float mulw, float mulh);
+  
+  void
+  texture_font_enlarge_texture( texture_font_t * self, size_t width_new,
+				size_t height_new);
 /**
  * Get the kerning between two horizontal glyphs.
  *

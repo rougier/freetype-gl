@@ -735,10 +735,10 @@ texture_font_get_glyph( texture_font_t * self,
     return NULL;
 }
 
-// ------------------------------------------------- texture_font_enlarge_atlas ---
+// ------------------------------------------  texture_font_enlarge_texture ---
 void
-texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
-			    size_t height_new)
+texture_font_enlarge_texture( texture_font_t * self, size_t width_new,
+			      size_t height_new)
 {
     assert(self);
     assert(self->atlas);
@@ -768,21 +768,32 @@ texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
     size_t old_row_size = width_old * pixel_size;
     texture_atlas_set_region(ta, 1, 1, width_old - 2, height_old - 2, data_old + old_row_size + pixel_size, old_row_size);
     free(data_old);    
-    //change uv coordinates of existing glyphs to reflect size change
+}
+// -------------------------------------------- texture_font_enlarge_atlas ---
+void
+texture_font_enlarge_glyphs( texture_font_t * self, float mulw, float mulh)
+{
+    size_t i;
+    texture_glyph_t* g;
+    GLYPHS_ITERATOR(i, g, self->glyphs) {
+	g->s0 *= mulw;
+	g->s1 *= mulw;
+	g->t0 *= mulh;
+	g->t1 *= mulh;
+    } GLYPHS_ITERATOR_END
+}
+
+// -------------------------------------------  texture_font_enlarge_atlas ---
+void
+texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
+			    size_t height_new)
+{
+    texture_atlas_t* ta = self->atlas;
+    size_t width_old = ta->width;
+    size_t height_old = ta->height;    
     float mulw = (float)width_old / width_new;
     float mulh = (float)height_old / height_new;
-    size_t i, j;
-    for (i = 0; i < vector_size(self->glyphs); i++) {
-    	texture_glyph_t** gs = *(texture_glyph_t***)vector_get(self->glyphs, i);
-	if(gs)
-	    for( j = 0; j < 0x100; j++) {
-		texture_glyph_t* g=gs[j];
-		if(g) {
-		    g->s0 *= mulw;
-		    g->s1 *= mulw;
-		    g->t0 *= mulh;
-		    g->t1 *= mulh;
-		}
-	}
-    }
+
+    texture_font_enlarge_texture( self, width_new, height_new);
+    texture_font_enlarge_glyphs( self, mulw, mulh );
 }
