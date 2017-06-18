@@ -148,8 +148,14 @@ if(freetype-gl_BUILD_SHARED)
     SET_TARGET_PROPERTIES(
         freetype-gl
     PROPERTIES
-        VERSION 3
-        SOVERSION 3)
+        VERSION 0.3.2
+        SOVERSION 0)
+    target_link_libraries (freetype-gl
+			   ${OPENGL_LIBRARY}
+			   ${FREETYPE_LIBRARIES}
+			   ${MATH_LIBRARY}
+			   ${GLEW_LIBRARY}
+			   )
 else()
     add_library(freetype-gl STATIC
         ${FREETYPE_GL_SRC}
