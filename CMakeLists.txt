@@ -145,6 +145,11 @@ if(freetype-gl_BUILD_SHARED)
         ${FREETYPE_GL_SRC}
         ${FREETYPE_GL_HDR}
     )
+    SET_TARGET_PROPERTIES(
+        freetype-gl
+    PROPERTIES
+        VERSION 3.2.0
+        SOVERSION 3.2.0)
 else()
     add_library(freetype-gl STATIC
         ${FREETYPE_GL_SRC}
@@ -186,3 +191,20 @@ if(freetype-gl_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif(freetype-gl_BUILD_TESTS)
+
+get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+
+if ("${LIB64}" STREQUAL "TRUE")
+    set(LIBSUFFIX 64)
+else()
+    set(LIBSUFFIX "")
+endif()
+
+set(INSTALL_LIB_DIR     lib${LIBSUFFIX} CACHE PATH "Installation directory for libraries")
+mark_as_advanced(INSTALL_LIB_DIR)
+
+install(TARGETS freetype-gl
+        LIBRARY DESTINATION ${INSTALL_LIB_DIR})
+install(FILES ${FREETYPE_GL_HDR} DESTINATION include)
+
+set(CMAKE_BUILD_TYPE Release)

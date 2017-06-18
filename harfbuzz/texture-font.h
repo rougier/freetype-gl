@@ -122,6 +122,10 @@ typedef struct texture_glyph_t
 
 } texture_glyph_t;
 
+typedef enum font_location_t {
+    TEXTURE_FONT_FILE = 0,
+    TEXTURE_FONT_MEMORY,
+} font_location_t;
 
 
 /**
@@ -142,10 +146,7 @@ typedef struct texture_font_t
     /**
      * font location
      */
-    enum {
-        TEXTURE_FONT_FILE = 0,
-        TEXTURE_FONT_MEMORY,
-    } location;
+    font_location_t location;
 
     union {
         /**
