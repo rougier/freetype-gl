@@ -46,6 +46,7 @@ if(freetype-gl_BUILD_SHARED)
 			   ${FREETYPE_LIBRARIES}
 			   ${MATH_LIBRARY}
 			   ${GLEW_LIBRARY}
+			   ${HARFBUZZ_LIBRARIES}
 			   )
 else()
     add_library(freetype-gl-hb STATIC
@@ -53,4 +54,21 @@ else()
         ${FREETYPE_GL_HB_HDR}
     )
 endif()
+
+get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+
+if ("${LIB64}" STREQUAL "TRUE")
+    set(LIBSUFFIX 64)
+else()
+    set(LIBSUFFIX "")
+endif()
+
+set(INSTALL_LIB_DIR     lib${LIBSUFFIX} CACHE PATH "Installation directory for libraries")
+mark_as_advanced(INSTALL_LIB_DIR)
+
+install(TARGETS freetype-gl-hb
+        LIBRARY DESTINATION ${INSTALL_LIB_DIR})
+install(FILES ${FREETYPE_GL_HB_HDR} DESTINATION include/harfbuzz)
+
+set(CMAKE_BUILD_TYPE Release)
 

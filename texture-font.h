@@ -16,6 +16,16 @@ extern "C" {
 #include "vector.h"
 #include "texture-atlas.h"
 
+#ifndef __THREAD
+#if defined(__GNUC__) || defined(__clang__)
+#define __THREAD __thread
+#elif defined(_MSC_VER)
+#define __THREAD __declspec( thread )
+#else
+#define __THREAD
+#endif
+#endif
+
 #ifdef __cplusplus
 namespace ftgl {
 #endif
@@ -173,8 +183,38 @@ typedef struct texture_glyph_t
 
 typedef enum font_location_t {
     TEXTURE_FONT_FILE = 0,
-    TEXTURE_FONT_MEMORY,
+    TEXTURE_FONT_MEMORY
 } font_location_t;
+
+typedef enum font_mode_t {
+    MODE_AUTO_CLOSE = 0,
+    MODE_GLYPHS_CLOSE,
+    MODE_FREE_CLOSE,
+    MODE_MANUAL_CLOSE,
+    MODE_ALWAYS_OPEN
+} font_mode_t;
+
+/* If there is no Freetype included, just define that as incomplete pointer */
+#if !defined(FT2BUILD_H_) && !defined(__FT2BUILD_H__) && !defined(FREETYPE_H_)
+typedef struct FT_FaceRec_* FT_Face;
+typedef struct FT_LibraryRec_* FT_Library;
+#endif
+
+/**
+ *  Texture font library structure.
+ */
+typedef struct texture_font_library_t
+{
+    /**
+     * Flag for mode
+     */
+    font_mode_t mode;
+
+    /**
+     * Freetype library pointer
+     */
+    FT_Library library;
+} texture_font_library_t;
 
 /**
  *  Texture font structure.
@@ -191,7 +231,7 @@ typedef struct texture_font_t
      * Atlas structure to store glyphs data.
      */
     texture_atlas_t * atlas;
-
+    
     /**
      * font location
      */
@@ -212,6 +252,12 @@ typedef struct texture_font_t
         } memory;
     };
 
+    /**
+     * Texture font library
+     */
+
+    texture_font_library_t * library;
+  
     /**
      * Font size
      */
@@ -297,10 +343,31 @@ typedef struct texture_font_t
      */
     float underline_thickness;
 
+    /**
+     * Flag for mode
+     */
+    font_mode_t mode;
+
+    /**
+     * Freetype face pointer
+     */
+    FT_Face face;
 } texture_font_t;
 
+/**
+ * This function creates a new font library
+ *
+ * @return a new library (no font loaded yet)
+ */
+  texture_font_library_t *
+      texture_library_new();
 
+/**
+ * This variable holds the per-thread library
+ */
 
+  extern __THREAD texture_font_library_t * freetype_gl_library;
+  
 /**
  * This function creates a new texture font from given filename and size.  The
  * texture atlas is used to store glyph on demand. Note the depth of the atlas
@@ -343,6 +410,16 @@ typedef struct texture_font_t
                                 size_t memory_size );
 
 /**
+ * Close the freetype structures from a font and the associated library
+ *
+ * @param self         a valid texture font
+ * @param face_mode    if the mode of the face is less or equal, be done with it
+ * @param library_mode if the mode of the library is less or equal, be done with it
+ */
+  void
+  texture_font_close( texture_font_t *self, font_mode_t face_mode, font_mode_t library_mode );
+
+/**
  * Delete a texture font. Note that this does not delete the glyph from the
  * texture atlas.
  *
@@ -350,6 +427,17 @@ typedef struct texture_font_t
  */
   void
   texture_font_delete( texture_font_t * self );
+
+
+/**
+ * Load a texture font.
+ *
+ * @param self a valid texture font
+ *
+ * @return 1 on success, 0 on error
+ */
+  int
+  texture_font_load_face( texture_font_t * self );
 
 
 /**

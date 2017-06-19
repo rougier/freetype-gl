@@ -6,12 +6,19 @@
 #ifndef __FREETYPE_GL_ERR_H__
 #define __FREETYPE_GL_ERR_H__
 
+#ifndef __THREAD
 #if defined(__GNUC__) || defined(__clang__)
 #define __THREAD __thread
 #elif defined(_MSC_VER)
 #define __THREAD __declspec( thread )
 #else
 #define __THREAD
+#endif
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+namespace ftgl {
 #endif
 
 /*********** public error API ***********/
@@ -81,4 +88,9 @@ extern char* freetype_gl_errstrs[];
 
 #include <freetype-gl-errdef.h>
     
+#ifdef __cplusplus
+}
+}
+#endif
+
 #endif /* FREETYPE_GL_ERR_H */

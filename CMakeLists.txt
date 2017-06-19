@@ -22,6 +22,9 @@ if((${CMAKE_SYSTEM_NAME} MATCHES "Darwin") OR
     set(freetype-gl_WITH_GLEW_DEFAULT OFF)
 endif()
 
+option(freetype-gl_DEBUG
+    "Use the DEBUG option to build for debugging"
+    OFF)
 option(freetype-gl_WITH_GLEW
     "Use the GLEW library to fetch OpenGL function pointers"
     ${freetype-gl_WITH_GLEW_DEFAULT})
@@ -213,4 +216,8 @@ install(TARGETS freetype-gl
         LIBRARY DESTINATION ${INSTALL_LIB_DIR})
 install(FILES ${FREETYPE_GL_HDR} DESTINATION include)
 
-set(CMAKE_BUILD_TYPE Release)
+if(freetype-gl_DEBUG)
+    set(CMAKE_BUILD_TYPE Debug)
+else()
+    set(CMAKE_BUILD_TYPE Release)
+endif()
