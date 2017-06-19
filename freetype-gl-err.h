@@ -16,6 +16,8 @@
 #endif
 #endif
 
+#define __FILENAME__ (__FILE__ + SOURCE_PATH_SIZE)
+
 #ifdef __cplusplus
 extern "C" {
 namespace ftgl {

@@ -23,11 +23,6 @@
 #define HRESf 64.f
 #define DPI   72
 
-#ifndef __BASE_FILE__
-#include <libgen.h>
-#define __BASE_FILE__ basename(__FILE__)
-#endif
-
 #undef __FTERRORS_H__
 #define FT_ERRORDEF( e, v, s )  { e, s },
 #define FT_ERROR_START_LIST     {
@@ -41,6 +36,7 @@ const struct {
 // per-thread library
 
 __THREAD texture_font_library_t * freetype_gl_library = NULL;
+__THREAD font_mode_t mode_default=MODE_AUTO_CLOSE;
 
 // ------------------------------------------------------ texture_glyph_new ---
 texture_glyph_t *
@@ -49,7 +45,7 @@ texture_glyph_new(void)
     texture_glyph_t *self = (texture_glyph_t *) malloc( sizeof(texture_glyph_t) );
     if(self == NULL) {
         freetype_gl_error( Out_Of_Memory,
-                "%s:%d: No more memory for allocating data\n", __BASE_FILE__, __LINE__);
+			   "%s:%d: No more memory for allocating data\n", __FILENAME__, __LINE__);
         return NULL;
     }
 
@@ -70,6 +66,12 @@ texture_glyph_new(void)
     return self;
 }
 
+// -------------------------------------------------- font_set_default_mode ---
+void
+font_set_default_mode(font_mode_t mode)
+{
+    mode_default=mode;
+}
 
 // --------------------------------------------------- texture_glyph_delete ---
 void
@@ -206,7 +208,7 @@ texture_font_init(texture_font_t *self)
     self->lcd_weights[3] = 0x40;
     self->lcd_weights[4] = 0x10;
 
-    if (!texture_font_load_face(self))
+    if (!texture_font_load_face(self, self->size))
         return -1;
 
     self->underline_position = self->face->underline_position / (float)(HRESf*HRESf) * self->size;
@@ -224,9 +226,9 @@ texture_font_init(texture_font_t *self)
     }
 
     metrics = self->face->size->metrics;
-    self->ascender = (metrics.ascender >> 6) / 100.0;
-    self->descender = (metrics.descender >> 6) / 100.0;
-    self->height = (metrics.height >> 6) / 100.0;
+    self->ascender = (metrics.ascender) / 64.0;
+    self->descender = (metrics.descender) / 64.0;
+    self->height = (metrics.height) / 64.0;
     self->linegap = self->height - self->ascender + self->descender;
 
     /* NULL is a special glyph */
@@ -241,7 +243,7 @@ texture_library_new()
 {
     texture_font_library_t *self = calloc(1, sizeof(*self));
     
-    self->mode = MODE_MANUAL_CLOSE;
+    self->mode = MODE_ALWAYS_OPEN;
     
     return self;
 }
@@ -258,7 +260,7 @@ texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
     self = calloc(1, sizeof(*self));
     if (!self) {
         freetype_gl_error( Out_Of_Memory,
-			   "%s:%d: No more memory for allocating data\n", __BASE_FILE__, __LINE__);
+			   "%s:%d: No more memory for allocating data\n", __FILENAME__, __LINE__);
         return NULL;
     }
 
@@ -267,7 +269,8 @@ texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
 
     self->location = TEXTURE_FONT_FILE;
     self->filename = strdup(filename);
-
+    self->mode = mode_default;
+    
     if (texture_font_init(self)) {
         texture_font_delete(self);
         return NULL;
@@ -299,7 +302,8 @@ texture_font_new_from_memory(texture_atlas_t *atlas, float pt_size,
     self->location = TEXTURE_FONT_MEMORY;
     self->memory.base = memory_base;
     self->memory.size = memory_size;
-
+    self->mode = mode_default;
+    
     if (texture_font_init(self)) {
         texture_font_delete(self);
         return NULL;
@@ -316,50 +320,65 @@ texture_font_close( texture_font_t *self, font_mode_t face_mode, font_mode_t lib
     if( self->face && self->mode <= face_mode ) {
 	FT_Done_Face( self->face );
 	self->face = NULL;
+    } else {
+	return; // never close the library when the face stays open
     }
 
-    if( freetype_gl_library && freetype_gl_library->library && freetype_gl_library->mode <= library_mode ) {
-	FT_Done_FreeType( freetype_gl_library->library );
-	freetype_gl_library->library = NULL;
+    if( self->library && self->library->library && self->library->mode <= library_mode ) {
+	FT_Done_FreeType( self->library->library );
+	self->library->library = NULL;
     }
 }
 
 // ------------------------------------------------- texture_font_load_face ---
 
 int
-texture_font_load_face( texture_font_t *self )
+texture_font_load_face( texture_font_t *self, float size )
 {
-    int error;
-    
-    if ( !freetype_gl_library ) {
-	freetype_gl_library = texture_library_new();
-    }
+    FT_Error error;
+    FT_Matrix matrix = {
+        (int)((1.0/HRES) * 0x10000L),
+        (int)((0.0)      * 0x10000L),
+        (int)((0.0)      * 0x10000L),
+        (int)((1.0)      * 0x10000L)};
 
-    if( !freetype_gl_library->library ) {
-	error = FT_Init_FreeType( &freetype_gl_library->library );
+    if ( !self->library ) {
+	if ( !freetype_gl_library ) {
+	    freetype_gl_library = texture_library_new();
+	}
+	self->library = freetype_gl_library;
+    }
+    
+    if( !self->library->library ) {
+	error = FT_Init_FreeType( &self->library->library );
 	if(error) {
 	    freetype_error(error, "FT_Error (0x%02x) : %s\n",
 			   FT_Errors[error].code, FT_Errors[error].message);
-	    goto cleanup;
+		goto cleanup;
 	}
     }
-    self->library = freetype_gl_library;
-
+    
     if( !self->face ) {
 	switch (self->location) {
 	case TEXTURE_FONT_FILE:
 	    error = FT_New_Face(self->library->library, self->filename, 0, &self->face);
+	    if(error) {
+		freetype_error( error, "FT_Error, file %s (%s:%d, code 0x%02x) : %s\n",
+				self->filename, __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+		goto cleanup_library;
+	    }
 	    break;
 
 	case TEXTURE_FONT_MEMORY:
 	    error = FT_New_Memory_Face(self->library->library,
 				       self->memory.base, self->memory.size, 0, &self->face);
+	    if(error) {
+		freetype_error( error, "FT_Error memory %p:%x (%s:%d, code 0x%02x) : %s\n",
+				self->memory.base, self->memory.size,
+				__FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+		goto cleanup_library;
+	    }
 	    break;
-	}
-	if(error) {
-	    freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
-			    __BASE_FILE__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-	    goto cleanup_library;
 	}
     }
 
@@ -367,18 +386,22 @@ texture_font_load_face( texture_font_t *self )
     error = FT_Select_Charmap(self->face, FT_ENCODING_UNICODE);
     if(error) {
         freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
-			__BASE_FILE__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+			__FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
         goto cleanup_face;
     }
 
     /* Set char size */
-    error = FT_Set_Char_Size(self->face, (int)(self->size * 100.f * HRES), 0, DPI * HRES, DPI);
+    error = FT_Set_Char_Size(self->face, (int)(size * HRES), 0, DPI * HRES, DPI);
     
     if(error) {
         freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
-			__BASE_FILE__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+			__FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
         goto cleanup_face;
     }
+
+    /* Set transform matrix */
+    FT_Set_Transform(self->face, &matrix, NULL);
+
     return 1;
 
   cleanup_face:
@@ -402,22 +425,19 @@ texture_font_delete( texture_font_t *self )
     if(self->location == TEXTURE_FONT_FILE && self->filename)
 	free( self->filename );
 	
-    if( self->library->mode <= MODE_FREE_CLOSE ) {
-	free( self->library );
-    }
-
     GLYPHS_ITERATOR(i, glyph, self->glyphs) {
-	if((__i | i << 8) == glyph->codepoint)
-	    if(glyph->codepoint)
-		texture_glyph_delete( glyph );
-	    else
-		glyph0 = glyph;
+	if(glyph->codepoint)
+	    texture_glyph_delete( glyph );
+	else
+	    glyph0 = glyph;
     } GLYPHS_ITERATOR_END1
 	free( __glyphs );
     GLYPHS_ITERATOR_END2;
 
-    if( glyph0 )
+    if( glyph0 ) {
+	fprintf(stderr, "free %p cp %x\n", glyph0, glyph0->codepoint);
 	texture_glyph_delete( glyph0 );
+    }
     vector_delete( self->glyphs );
     free( self );
 }
@@ -473,7 +493,6 @@ texture_font_load_glyph( texture_font_t * self,
 {
     size_t i, x, y;
 
-    FT_Library library;
     FT_Error error;
     FT_Face face;
     FT_Glyph ft_glyph;
@@ -502,20 +521,19 @@ texture_font_load_glyph( texture_font_t * self,
 	return 1;
     }
 
-    if (!texture_font_load_face(self))
+    if (!texture_font_load_face(self, self->size))
         return 0;
 
     flags = 0;
     ft_glyph_top = 0;
     ft_glyph_left = 0;
     ucodepoint = (FT_ULong)utf8_to_utf32( codepoint );
-    glyph_index = FT_Get_Char_Index( face, ucodepoint );
+    glyph_index = FT_Get_Char_Index( self->face, ucodepoint );
     if(!glyph_index) {
 	texture_glyph_t * glyph;
 	if ((glyph = texture_font_find_glyph(self, "\0"))) {
 	    texture_font_index_glyph( self, glyph, ucodepoint );
-	    FT_Done_Face(face);
-	    FT_Done_FreeType(library);
+	    texture_font_close( self, MODE_AUTO_CLOSE, MODE_AUTO_CLOSE );
 	    return 1;
 	}
     }
@@ -542,28 +560,27 @@ texture_font_load_glyph( texture_font_t * self,
 
     if( self->atlas->depth == 3 )
     {
-        FT_Library_SetLcdFilter( library, FT_LCD_FILTER_LIGHT );
+        FT_Library_SetLcdFilter( self->library->library, FT_LCD_FILTER_LIGHT );
         flags |= FT_LOAD_TARGET_LCD;
 
         if( self->filtering )
         {
-            FT_Library_SetLcdFilterWeights( library, self->lcd_weights );
+            FT_Library_SetLcdFilterWeights( self->library->library, self->lcd_weights );
         }
     }
 
-    error = FT_Load_Glyph( face, glyph_index, flags );
+    error = FT_Load_Glyph( self->face, glyph_index, flags );
     if( error )
     {
         freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
-			__BASE_FILE__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-        FT_Done_Face( face );
-        FT_Done_FreeType( library );
+			__FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+	texture_font_close( self, MODE_AUTO_CLOSE, MODE_AUTO_CLOSE );
         return 0;
     }
 
     if( self->rendermode == RENDER_NORMAL || self->rendermode == RENDER_SIGNED_DISTANCE_FIELD )
     {
-        slot            = face->glyph;
+        slot            = self->face->glyph;
         ft_bitmap       = slot->bitmap;
         ft_glyph_top    = slot->bitmap_top;
         ft_glyph_left   = slot->bitmap_left;
@@ -573,7 +590,7 @@ texture_font_load_glyph( texture_font_t * self,
         FT_Stroker stroker;
         FT_BitmapGlyph ft_bitmap_glyph;
 
-        error = FT_Stroker_New( library, &stroker );
+        error = FT_Stroker_New( self->library->library, &stroker );
 
         if( error )
         {
@@ -588,7 +605,7 @@ texture_font_load_glyph( texture_font_t * self,
                         FT_STROKER_LINEJOIN_ROUND,
                         0);
 
-        error = FT_Get_Glyph( face->glyph, &ft_glyph);
+        error = FT_Get_Glyph( self->face->glyph, &ft_glyph);
 
         if( error )
         {
@@ -633,8 +650,7 @@ cleanup_stroker:
 
         if( error )
         {
-            FT_Done_Face( face );
-            FT_Done_FreeType( library );
+	    texture_font_close( self, MODE_AUTO_CLOSE, MODE_AUTO_CLOSE );
             return 0;
         }
     }
@@ -663,9 +679,10 @@ cleanup_stroker:
     if ( region.x < 0 )
     {
         freetype_gl_error( Texture_Atlas_Full,
-			   "Texture atlas is full (%s:%d)\n",  __BASE_FILE__, __LINE__ );
-        FT_Done_Face( face );
-        FT_Done_FreeType( library );
+			   "Texture atlas is full, asked for %i*%i (%s:%d)\n",
+			   tgt_w, tgt_h,
+			   __FILENAME__, __LINE__ );
+	texture_font_close( self, MODE_AUTO_CLOSE, MODE_AUTO_CLOSE );
         return 0;
     }
 
@@ -710,8 +727,8 @@ cleanup_stroker:
     glyph->t1       = (y + glyph->height)/(float)self->atlas->height;
 
     // Discard hinting to get advance
-    FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
-    slot = face->glyph;
+    FT_Load_Glyph( self->face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
+    slot = self->face->glyph;
     glyph->advance_x = slot->advance.x / HRESf;
     glyph->advance_y = slot->advance.y / HRESf;
 
@@ -723,10 +740,9 @@ cleanup_stroker:
     if( self->rendermode != RENDER_NORMAL && self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )
         FT_Done_Glyph( ft_glyph );
 
-    texture_font_generate_kerning( self, &library, &face );
+    texture_font_generate_kerning( self, &self->library->library, &self->face );
 
-    FT_Done_Face( face );
-    FT_Done_FreeType( library );
+    texture_font_close( self, MODE_AUTO_CLOSE, MODE_AUTO_CLOSE );
 
     return 1;
 }
@@ -738,12 +754,20 @@ texture_font_load_glyphs( texture_font_t * self,
 {
     size_t i;
 
+    self->mode++;
+
     /* Load each glyph */
     for( i = 0; i < strlen(codepoints); i += utf8_surrogate_len(codepoints + i) ) {
-        if( !texture_font_load_glyph( self, codepoints + i ) )
-            return utf8_strlen( codepoints + i );
+        if( !texture_font_load_glyph( self, codepoints + i ) ) {
+	    self->mode--;
+	    texture_font_close( self, MODE_AUTO_CLOSE, MODE_AUTO_CLOSE );
 
+            return utf8_strlen( codepoints + i );
+	}
     }
+
+    self->mode--;
+    texture_font_close( self, MODE_AUTO_CLOSE, MODE_AUTO_CLOSE );
 
     return 0;
 }

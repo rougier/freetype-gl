@@ -181,11 +181,17 @@ typedef struct texture_glyph_t
 
 } texture_glyph_t;
 
+/**
+ * Enum type for texture location
+ */
 typedef enum font_location_t {
     TEXTURE_FONT_FILE = 0,
     TEXTURE_FONT_MEMORY
 } font_location_t;
 
+/**
+ * Enum type for automatic open/close
+ */
 typedef enum font_mode_t {
     MODE_AUTO_CLOSE = 0,
     MODE_GLYPHS_CLOSE,
@@ -193,6 +199,18 @@ typedef enum font_mode_t {
     MODE_MANUAL_CLOSE,
     MODE_ALWAYS_OPEN
 } font_mode_t;
+
+/**
+ * default mode for fonts
+ */
+extern __THREAD font_mode_t mode_default;
+
+/** set defualt mode for fonts
+ *
+ */
+
+void
+freetype_set_default_mode(font_mode_t mode);
 
 /* If there is no Freetype included, just define that as incomplete pointer */
 #if !defined(FT2BUILD_H_) && !defined(__FT2BUILD_H__) && !defined(FREETYPE_H_)
@@ -437,7 +455,7 @@ typedef struct texture_font_t
  * @return 1 on success, 0 on error
  */
   int
-  texture_font_load_face( texture_font_t * self );
+  texture_font_load_face( texture_font_t * self, float size );
 
 
 /**
