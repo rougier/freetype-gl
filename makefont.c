@@ -29,7 +29,35 @@ void print_help()
              "--rendermode <one of 'normal', 'outline_edge', 'outline_positive', 'outline_negative' or 'sdf'>\n" );
 }
 
+void print_glyph(FILE * file, texture_glyph_t * glyph)
+{
+    // TextureFont
+    fprintf( file, "  {%u, ", glyph->codepoint );
+    fprintf( file, "%" PRIzu ", %" PRIzu ", ", glyph->width, glyph->height );
+    fprintf( file, "%d, %d, ", glyph->offset_x, glyph->offset_y );
+    fprintf( file, "%ff, %ff, ", glyph->advance_x, glyph->advance_y );
+    fprintf( file, "%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
+    fprintf( file, "%" PRIzu ", ", vector_size(glyph->kerning) );
+    if (vector_size(glyph->kerning) == 0) {
+	fprintf( file, "0" );
+    } else {
+	int k;
+	fprintf( file, "{ " );
+	for( k=0; k < vector_size(glyph->kerning); ++k ) {
+	    float *kerning = *(float **) vector_get( glyph->kerning, k);
+	    int l;
+	    fprintf( file, "{" );
+	    for( l=0; l<0xff; l++ )
+		fprintf( file, " %ff,", kerning[l] );
+	    fprintf( file, " %ff }", kerning[0xFF] );
 
+	    if( k < (vector_size(glyph->kerning)-1))
+		fprintf( file, ",\n" );
+	}
+	fprintf( file, " }" );
+    }
+    fprintf( file, " };\n" );
+}
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
@@ -451,36 +479,8 @@ int main( int argc, char **argv )
         }
         printf( "\n\n" );
 */
-
-
-		    // TextureFont
-		    fprintf( file, "  {%u, ", glyph->codepoint );
-		    fprintf( file, "%" PRIzu ", %" PRIzu ", ", glyph->width, glyph->height );
-		    fprintf( file, "%d, %d, ", glyph->offset_x, glyph->offset_y );
-		    fprintf( file, "%ff, %ff, ", glyph->advance_x, glyph->advance_y );
-		    fprintf( file, "%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
-		    fprintf( file, "%" PRIzu ", ", vector_size(glyph->kerning) );
-		    if (vector_size(glyph->kerning) == 0) {
-			fprintf( file, "0" );
-		    }
-		    else {
-			fprintf( file, "{ " );
-			for( k=0; k < vector_size(glyph->kerning); ++k ) {
-			    float *kerning = *(float **) vector_get( glyph->kerning, k);
-			    int l;
-			    fprintf( file, "{" );
-			    for( l=0; l<0xff; l++ )
-				fprintf( file, " %ff,", kerning[l] );
-			    fprintf( file, " %ff }", kerning[0xFF] );
-					 
-			    if( k < (vector_size(glyph->kerning)-1))
-				fprintf( file, ",\n" );
-				
-			}
-			fprintf( file, " }" );
-		    }
-		    fprintf( file, " };\n" );
-		}
+	print_glyph(file, glyph);
+    }
     GLYPHS_ITERATOR_END
 
     fprintf( file, "texture_font_t %s = {\n", variable_name );
