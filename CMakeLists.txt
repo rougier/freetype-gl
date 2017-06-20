@@ -218,7 +218,8 @@ set(INSTALL_LIB_DIR     lib${LIBSUFFIX} CACHE PATH "Installation directory for l
 mark_as_advanced(INSTALL_LIB_DIR)
 
 install(TARGETS freetype-gl
-        LIBRARY DESTINATION ${INSTALL_LIB_DIR})
+	ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
+	LIBRARY DESTINATION ${INSTALL_LIB_DIR})
 install(FILES ${FREETYPE_GL_HDR} DESTINATION include)
 
 if(freetype-gl_DEBUG)

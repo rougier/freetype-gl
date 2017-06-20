@@ -67,6 +67,7 @@ set(INSTALL_LIB_DIR     lib${LIBSUFFIX} CACHE PATH "Installation directory for l
 mark_as_advanced(INSTALL_LIB_DIR)
 
 install(TARGETS freetype-gl-hb
+	ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
         LIBRARY DESTINATION ${INSTALL_LIB_DIR})
 install(FILES ${FREETYPE_GL_HB_HDR} DESTINATION include/harfbuzz)
 
