@@ -467,9 +467,9 @@ int main( int argc, char **argv )
 			fprintf( file, "{ " );
 			for( k=0; k < vector_size(glyph->kerning); ++k ) {
 			    float *kerning = *(float **) vector_get( glyph->kerning, k);
-			    
+			    int l;
 			    fprintf( file, "{" );
-			    for( int l=0; l<0xff; l++ )
+			    for( l=0; l<0xff; l++ )
 				fprintf( file, " %ff,", kerning[l] );
 			    fprintf( file, " %ff }", kerning[0xFF] );
 					 
