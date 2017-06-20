@@ -405,6 +405,8 @@ texture_font_load_face( texture_font_t *self, float size )
     return 1;
 
   cleanup_face:
+    texture_font_close( self, MODE_ALWAYS_OPEN, MODE_FREE_CLOSE );
+    return 0;
   cleanup_library:
     texture_font_close( self, MODE_ALWAYS_OPEN, MODE_ALWAYS_OPEN );
   cleanup:
