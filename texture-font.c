@@ -66,9 +66,9 @@ texture_glyph_new(void)
     return self;
 }
 
-// -------------------------------------------------- font_set_default_mode ---
+// ---------------------------------------------- texture_font_default_mode ---
 void
-font_set_default_mode(font_mode_t mode)
+texture_font_default_mode(font_mode_t mode)
 {
     mode_default=mode;
 }

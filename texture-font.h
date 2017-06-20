@@ -207,10 +207,11 @@ extern __THREAD font_mode_t mode_default;
 
 /** set defualt mode for fonts
  *
+ * @param  mode  The mode for automatic open/close new fonts get
  */
 
 void
-font_set_default_mode(font_mode_t mode);
+texture_font_default_mode(font_mode_t mode);
 
 /* If there is no Freetype included, just define that as incomplete pointer */
 #if !defined(FT2BUILD_H_) && !defined(__FT2BUILD_H__) && !defined(FREETYPE_H_)
