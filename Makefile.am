@@ -16,8 +16,8 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 AM_CPPFLAGS = $(EXAMPLE_CFLAGS) @FTINC@ -DSOURCE_PATH_SIZE=@SOURCE_PATH_SIZE@
 
 lib_LTLIBRARIES = libfreetype-gl.la
-libfreetype_gl_la_SOURCES = texture-atlas.c texture-font.c vector.c utf8-utils.c freetype-gl-err.c
-include_HEADERS = freetype-gl.h vec234.h vector.h texture-atlas.h texture-font.h opengl.h freetype-gl-err.h freetype-gl-errdef.h
+libfreetype_gl_la_SOURCES = texture-atlas.c texture-font.c vector.c utf8-utils.c distance-field.c freetype-gl-err.c
+include_HEADERS = freetype-gl.h vec234.h vector.h texture-atlas.h texture-font.h opengl.h distance-field.h freetype-gl-err.h freetype-gl-errdef.h
 libfreetype_gl_la_LIBADD = -lm -l@LIBGL@ -lfreetype -lz @LIBADD@
 
 distclean-am: clean-am distclean-compile distclean-hdr distclean-libtool distclean-tags
