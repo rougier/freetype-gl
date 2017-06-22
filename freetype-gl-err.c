@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "freetype-gl.h"
+#include "freetype-gl-err.h"
 
 __THREAD int freetype_gl_errno=0;
 __THREAD char * freetype_gl_message=NULL;
