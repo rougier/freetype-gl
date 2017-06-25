@@ -21,7 +21,11 @@
 #  include <GL/glew.h>
 #  include <GL/wglew.h>
 #elif defined(__ANDROID_API__)
-#  include <GLES2/gl2.h>
+#  if defined(FREETYPE_GL_ES_VERSION_3_0)
+#    include <GLES3/gl3.h>
+#  else
+#    include <GLES2/gl2.h>
+#  endif
 #else
 #  include <GL/glew.h>
 #  include <GL/gl.h>
