@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include "vector.h"
 #include "freetype-gl-err.h"
+#include "platform.h"
 
 
 // ------------------------------------------------------------- vector_new ---

@@ -134,8 +134,7 @@ void texture_font_index_kerning( texture_glyph_t * self,
 
 // ------------------------------------------ texture_font_generate_kerning ---
 void
-texture_font_generate_kerning( texture_font_t *self,
-                               FT_Library *library, FT_Face *face )
+texture_font_generate_kerning( texture_font_t *self )
 {
     size_t i, j, k;
     FT_UInt glyph_index, prev_index;
@@ -275,6 +274,8 @@ texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
         texture_font_delete(self);
         return NULL;
     }
+    self->face = NULL;
+    self->library = NULL;
 
     return self;
 }
@@ -308,6 +309,8 @@ texture_font_new_from_memory(texture_atlas_t *atlas, float pt_size,
         texture_font_delete(self);
         return NULL;
     }
+    self->face = NULL;
+    self->library = NULL;
 
     return self;
 }
@@ -488,15 +491,14 @@ void texture_font_index_glyph( texture_font_t * self,
     (*glyph_index1)[j] = glyph;
 }
 
-// ------------------------------------------------ texture_font_load_glyph ---
+// ---------------------------------------------- texture_font_load_a_glyph ---
 int
-texture_font_load_glyph( texture_font_t * self,
+texture_font_load_a_glyph( texture_font_t * self,
                          const char * codepoint )
 {
     size_t i, x, y;
 
     FT_Error error;
-    FT_Face face;
     FT_Glyph ft_glyph;
     FT_GlyphSlot slot;
     FT_Bitmap ft_bitmap;
@@ -749,6 +751,18 @@ cleanup_stroker:
     return 1;
 }
 
+// ------------------------------------------------ texture_font_load_glyph ---
+int
+texture_font_load_glyph( texture_font_t * self,
+                         const char * codepoint )
+{
+  int retval;
+
+  retval=!texture_font_load_a_glyph(self, codepoint );
+
+  texture_font_unload_face(self);
+  return retval;
+}
 // ----------------------------------------------- texture_font_load_glyphs ---
 size_t
 texture_font_load_glyphs( texture_font_t * self,
@@ -787,13 +801,14 @@ texture_font_get_glyph( texture_font_t * self,
     assert( self->atlas );
 
     /* Check if codepoint has been already loaded */
+
     if( (glyph = texture_font_find_glyph( self, codepoint )) )
         return glyph;
 
     /* Glyph has not been already loaded */
     if( texture_font_load_glyph( self, codepoint ) )
-        return texture_font_find_glyph( self, codepoint );
-
+	return texture_font_find_glyph( self, codepoint );
+    
     return NULL;
 }
 
