@@ -24,9 +24,12 @@ esac
 FTINC=`eval $ac_compiler -E -Wp,-v conftest.$ac_ext 2>&1 | grep '^ ' | while read i; do test -f $i/freetype2/ft2build.h && echo -I$i/freetype2; done`
 rm conftest.$ac_ext
 
+SOURCE_PATH_SIZE=$(echo $PWD | wc -c)
+
 AC_SUBST(FTINC)
 AC_SUBST(LIBADD)
 AC_SUBST(LIBGL)
+AC_SUBST(SOURCE_PATH_SIZE)
 
 PRECC=${CC%gcc*}
 PRECLANG=${PRECC%clang*}
