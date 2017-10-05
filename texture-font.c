@@ -146,7 +146,7 @@ texture_font_generate_kerning( texture_font_t *self )
     /* For each glyph couple combination, check if kerning is necessary */
     /* Starts at index 1 since 0 is for the special background glyph */
     GLYPHS_ITERATOR(i, glyph, self->glyphs ) {
-	glyph_index = FT_Get_Char_Index( *face, glyph->codepoint );
+	glyph_index = FT_Get_Char_Index( self->face, glyph->codepoint );
 //	fprintf(stderr, "Retrieving glyph %p from index %i\n", __glyphs, __i);
 //	fprintf(stderr, "Glpyh %p: Indexing %d, kerning %p\n", glyph, glyph_index, glyph->kerning);
 	for(k=0; k < glyph->kerning->size; k++)
@@ -154,8 +154,8 @@ texture_font_generate_kerning( texture_font_t *self )
 	vector_clear( glyph->kerning );
 	
 	GLYPHS_ITERATOR(j, prev_glyph, self->glyphs ) {
-	    prev_index = FT_Get_Char_Index( *face, prev_glyph->codepoint );
-	    FT_Get_Kerning( *face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
+	    prev_index = FT_Get_Char_Index( self->face, prev_glyph->codepoint );
+	    FT_Get_Kerning( self->face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
 	    // printf("%c(%d)-%c(%d): %ld\n",
 	    //       prev_glyph->codepoint, prev_glyph->codepoint,
 	    //       glyph_index, glyph_index, kerning.x);
@@ -165,7 +165,7 @@ texture_font_generate_kerning( texture_font_t *self )
 					    kerning.x / (float)(HRESf*HRESf) );
 	    }
 	    // also insert kerning with the current added element
-	    FT_Get_Kerning( *face, glyph_index, prev_index, FT_KERNING_UNFITTED, &kerning );
+	    FT_Get_Kerning( self->face, glyph_index, prev_index, FT_KERNING_UNFITTED, &kerning );
 	    if( kerning.x ) {
 		texture_font_index_kerning( prev_glyph,
 					    glyph->codepoint,
@@ -331,6 +331,18 @@ texture_font_close( texture_font_t *self, font_mode_t face_mode, font_mode_t lib
 	FT_Done_FreeType( self->library->library );
 	self->library->library = NULL;
     }
+}
+
+// ----------------------------------------------- texture_font_unload_face ---
+static int
+texture_font_unload_face(texture_font_t *self)
+{
+  if(self->face)
+    FT_Done_Face( self->face );
+  if(self->library)
+    FT_Done_FreeType( (FT_Library)(self->library) );
+  self->face=NULL;
+  self->library=NULL;
 }
 
 // ------------------------------------------------- texture_font_load_face ---
@@ -744,7 +756,7 @@ cleanup_stroker:
     if( self->rendermode != RENDER_NORMAL && self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )
         FT_Done_Glyph( ft_glyph );
 
-    texture_font_generate_kerning( self, &self->library->library, &self->face );
+    texture_font_generate_kerning( self );
 
     texture_font_close( self, MODE_AUTO_CLOSE, MODE_AUTO_CLOSE );
 
@@ -774,7 +786,7 @@ texture_font_load_glyphs( texture_font_t * self,
 
     /* Load each glyph */
     for( i = 0; i < strlen(codepoints); i += utf8_surrogate_len(codepoints + i) ) {
-        if( !texture_font_load_glyph( self, codepoints + i ) ) {
+        if( texture_font_load_a_glyph( self, codepoints + i ) ) {
 	    self->mode--;
 	    texture_font_close( self, MODE_AUTO_CLOSE, MODE_AUTO_CLOSE );
 
