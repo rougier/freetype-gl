@@ -199,6 +199,7 @@ texture_font_init(texture_font_t *self)
     self->hinting = 1;
     self->kerning = 1;
     self->filtering = 1;
+    self->scaletex = 1;
 
     // FT_LCD_FILTER_LIGHT   is (0x00, 0x55, 0x56, 0x55, 0x00)
     // FT_LCD_FILTER_DEFAULT is (0x10, 0x40, 0x70, 0x40, 0x10)
@@ -723,11 +724,21 @@ cleanup_stroker:
     glyph->outline_thickness = self->outline_thickness;
     glyph->offset_x = ft_glyph_left;
     glyph->offset_y = ft_glyph_top;
-    glyph->s0       = x/(float)self->atlas->width;
-    glyph->t0       = y/(float)self->atlas->height;
-    glyph->s1       = (x + glyph->width)/(float)self->atlas->width;
-    glyph->t1       = (y + glyph->height)/(float)self->atlas->height;
-
+    if(self->scaletex) {
+	glyph->s0       = x/(float)self->atlas->width;
+	glyph->t0       = y/(float)self->atlas->height;
+	glyph->s1       = (x + glyph->width)/(float)self->atlas->width;
+	glyph->t1       = (y + glyph->height)/(float)self->atlas->height;
+    } else {
+	// fix up unscaled coordinates by subtracting 0.5
+	// this avoids drawing pixels from neighboring characters
+	// note that you also have to paint these glyphs with an offset of
+	// half a pixel each to get crisp rendering
+	glyph->s0       = x - 0.5;
+	glyph->t0       = y - 0.5;
+	glyph->s1       = x + glyph->width - 0.5;
+	glyph->t1       = y + glyph->height - 0.5;
+    }
     // Discard hinting to get advance
     FT_Load_Glyph( self->face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
     slot = self->face->glyph;
@@ -853,9 +864,11 @@ texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
     texture_atlas_t* ta = self->atlas;
     size_t width_old = ta->width;
     size_t height_old = ta->height;    
-    float mulw = (float)width_old / width_new;
-    float mulh = (float)height_old / height_new;
 
     texture_font_enlarge_texture( self, width_new, height_new);
-    texture_font_enlarge_glyphs( self, mulw, mulh );
+    if( self->scaletex ) {
+	float mulw = (float)width_old / width_new;
+	float mulh = (float)height_old / height_new;
+	texture_font_enlarge_glyphs( self, mulw, mulh );
+    }
 }

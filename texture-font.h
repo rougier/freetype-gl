@@ -371,6 +371,11 @@ typedef struct texture_font_t
      * Freetype face pointer
      */
     FT_Face face;
+
+    /**
+     * Whether to scale texture coordinates
+     */
+    int scaletex;
 } texture_font_t;
 
 /**
