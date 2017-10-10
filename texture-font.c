@@ -179,6 +179,69 @@ texture_font_generate_kerning( texture_font_t *self,
     GLYPHS_ITERATOR_END
 }
 
+// -------------------------------------------------- texture_is_color_font ---
+
+int
+texture_is_color_font( texture_font_t *self) {
+    static const uint32_t tag = FT_MAKE_TAG('C', 'B', 'D', 'T');
+    unsigned long length = 0;
+    FT_Load_Sfnt_Table(self->face, tag, 0, NULL, &length);
+    return length != 0;
+}
+
+// -------------------------------------------------- texture_font_set_size ---
+
+int
+texture_font_set_size ( texture_font_t *self, float size )
+{
+    FT_Error error=0;
+    FT_Matrix matrix = {
+        (int)((1.0/HRES) * 0x10000L),
+        (int)((0.0)      * 0x10000L),
+        (int)((0.0)      * 0x10000L),
+        (int)((1.0)      * 0x10000L)};
+
+    if( texture_is_color_font( self ) ) {
+	/* Select best size */
+	if (self->face->num_fixed_sizes == 0) {
+	    freetype_error( error, "FT_Error (%s:%d) : no fixed size in color font\n",
+			    __FILENAME__, __LINE__);
+	    return 0;
+	}
+	
+	int best_match = 0;
+	int diff = abs((int)size - self->face->available_sizes[0].width);
+
+	for (int i = 1; i < self->face->num_fixed_sizes; ++i) {
+	    int ndiff = abs((int)size - self->face->available_sizes[i].width);
+	    if (ndiff < diff) {
+		best_match = i;
+		diff = ndiff;
+	    }
+	}
+	error = FT_Select_Size(self->face, best_match);
+	self->scale = self->size / self->face->available_sizes[best_match].width;
+	if(error) {
+	    freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			    __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+	    return 0;
+	}
+    } else {
+	/* Set char size */
+	error = FT_Set_Char_Size(self->face, (int)(size * HRES), 0, DPI * HRES, DPI);
+	
+	if(error) {
+	    freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			    __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+	    return 0;
+	}
+    }
+    /* Set transform matrix */
+    FT_Set_Transform(self->face, &matrix, NULL);
+
+    return 1;
+}
+
 // ------------------------------------------------------ texture_font_init ---
 static int
 texture_font_init(texture_font_t *self)
@@ -234,6 +297,9 @@ texture_font_init(texture_font_t *self)
     self->height = (metrics.height >> 6) / 100.f;
     self->linegap = self->height - self->ascender + self->descender;
 
+    if (!texture_font_set_size(self, self->size))
+	return -1;
+    
     /* NULL is a special glyph */
     texture_font_get_glyph( self, NULL );
 
@@ -249,16 +315,6 @@ texture_library_new()
     self->mode = MODE_ALWAYS_OPEN;
     
     return self;
-}
-
-// -------------------------------------------------- texture_is_color_font ---
-
-int
-texture_is_color_font( texture_font_t *self) {
-    static const uint32_t tag = FT_MAKE_TAG('C', 'B', 'D', 'T');
-    unsigned long length = 0;
-    FT_Load_Sfnt_Table(self->face, tag, 0, NULL, &length);
-    return length != 0;
 }
 
 // --------------------------------------------- texture_font_new_from_file ---
@@ -349,11 +405,6 @@ int
 texture_font_load_face( texture_font_t *self, float size )
 {
     FT_Error error;
-    FT_Matrix matrix = {
-        (int)((1.0/HRES) * 0x10000L),
-        (int)((0.0)      * 0x10000L),
-        (int)((0.0)      * 0x10000L),
-        (int)((1.0)      * 0x10000L)};
 
     if ( !self->library ) {
 	if ( !freetype_gl_library ) {
@@ -401,48 +452,13 @@ texture_font_load_face( texture_font_t *self, float size )
 			    __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
 	    goto cleanup_face;
 	}
+
+	if(!texture_font_set_size ( self, size ))
+	    goto cleanup_face;
     }
-
-    if( texture_is_color_font( self ) ) {
-	/* Select best size */
-	if (self->face->num_fixed_sizes == 0) {
-	    freetype_error( error, "FT_Error (%s:%d) : no fixed size in color font\n",
-			    __FILENAME__, __LINE__);
-	    goto cleanup_face;
-	}
-	
-	int best_match = 0;
-	int diff = abs((int)size - self->face->available_sizes[0].width);
-
-	for (int i = 1; i < self->face->num_fixed_sizes; ++i) {
-	    int ndiff = abs((int)size - self->face->available_sizes[i].width);
-	    if (ndiff < diff) {
-		best_match = i;
-		diff = ndiff;
-	    }
-	}
-	error = FT_Select_Size(self->face, best_match);
-	self->scale = self->size / self->face->available_sizes[best_match].width;
-	if(error) {
-	    freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
-			    __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-	    goto cleanup_face;
-	}
-    } else {
-	/* Set char size */
-	error = FT_Set_Char_Size(self->face, (int)(size * HRES), 0, DPI * HRES, DPI);
-	
-	if(error) {
-	    freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
-			    __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-	    goto cleanup_face;
-	}
-    }
-    /* Set transform matrix */
-    FT_Set_Transform(self->face, &matrix, NULL);
-
+    
     return 1;
-
+    
   cleanup_face:
     texture_font_close( self, MODE_ALWAYS_OPEN, MODE_FREE_CLOSE );
     return 0;
