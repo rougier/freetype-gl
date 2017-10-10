@@ -376,6 +376,11 @@ typedef struct texture_font_t
      * Whether to scale texture coordinates
      */
     int scaletex;
+
+    /**
+     * factor to scale font coordinates
+     */
+    float scale;
 } texture_font_t;
 
 /**
@@ -397,7 +402,7 @@ typedef struct texture_font_t
  * texture atlas is used to store glyph on demand. Note the depth of the atlas
  * will determine if the font is rendered as alpha channel only (depth = 1) or
  * RGB (depth = 3) that correspond to subpixel rendering (if available on your
- * freetype implementation).
+ * freetype implementation), or RGBA (depth = 4) for color fonts.
  *
  * @param atlas     A texture atlas
  * @param pt_size   Size of font to be created (in points)
