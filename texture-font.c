@@ -211,7 +211,7 @@ texture_font_init(texture_font_t *self)
     self->lcd_weights[3] = 0x40;
     self->lcd_weights[4] = 0x10;
 
-    if (!texture_font_load_face(self, self->size))
+    if (!texture_font_load_face(self, self->size * 100.f))
         return -1;
 
     self->underline_position = self->face->underline_position / (float)(HRESf*HRESf) * self->size;
@@ -229,9 +229,9 @@ texture_font_init(texture_font_t *self)
     }
 
     metrics = self->face->size->metrics;
-    self->ascender = (metrics.ascender) / 64.0;
-    self->descender = (metrics.descender) / 64.0;
-    self->height = (metrics.height) / 64.0;
+    self->ascender = (metrics.ascender >> 6) / 100.f;
+    self->descender = (metrics.descender >> 6) / 100.f;
+    self->height = (metrics.height >> 6) / 100.f;
     self->linegap = self->height - self->ascender + self->descender;
 
     /* NULL is a special glyph */
@@ -401,45 +401,45 @@ texture_font_load_face( texture_font_t *self, float size )
 			    __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
 	    goto cleanup_face;
 	}
+    }
 
-	if( texture_is_color_font( self ) ) {
-	    /* Select best size */
-	    if (self->face->num_fixed_sizes == 0) {
-		freetype_error( error, "FT_Error (%s:%d) : no fixed size in color font\n",
-				__FILENAME__, __LINE__);
-		goto cleanup_face;
-	    }
+    if( texture_is_color_font( self ) ) {
+	/* Select best size */
+	if (self->face->num_fixed_sizes == 0) {
+	    freetype_error( error, "FT_Error (%s:%d) : no fixed size in color font\n",
+			    __FILENAME__, __LINE__);
+	    goto cleanup_face;
+	}
 	
-	    int best_match = 0;
-	    int diff = abs((int)size - self->face->available_sizes[0].width);
+	int best_match = 0;
+	int diff = abs((int)size - self->face->available_sizes[0].width);
 
-	    for (int i = 1; i < self->face->num_fixed_sizes; ++i) {
-		int ndiff = abs((int)size - self->face->available_sizes[i].width);
-		if (ndiff < diff) {
-		    best_match = i;
-		    diff = ndiff;
-		}
-	    }
-	    error = FT_Select_Size(self->face, best_match);
-	    self->scale = self->size / self->face->available_sizes[best_match].width;
-	    if(error) {
-		freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
-				__FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-		goto cleanup_face;
-	    }
-	} else {
-	    /* Set char size */
-	    error = FT_Set_Char_Size(self->face, (int)(size * HRES), 0, DPI * HRES, DPI);
-	
-	    if(error) {
-		freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
-				__FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
-		goto cleanup_face;
+	for (int i = 1; i < self->face->num_fixed_sizes; ++i) {
+	    int ndiff = abs((int)size - self->face->available_sizes[i].width);
+	    if (ndiff < diff) {
+		best_match = i;
+		diff = ndiff;
 	    }
 	}
-	/* Set transform matrix */
-	FT_Set_Transform(self->face, &matrix, NULL);
+	error = FT_Select_Size(self->face, best_match);
+	self->scale = self->size / self->face->available_sizes[best_match].width;
+	if(error) {
+	    freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			    __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+	    goto cleanup_face;
+	}
+    } else {
+	/* Set char size */
+	error = FT_Set_Char_Size(self->face, (int)(size * HRES), 0, DPI * HRES, DPI);
+	
+	if(error) {
+	    freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			    __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+	    goto cleanup_face;
+	}
     }
+    /* Set transform matrix */
+    FT_Set_Transform(self->face, &matrix, NULL);
 
     return 1;
 
