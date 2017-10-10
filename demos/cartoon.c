@@ -87,15 +87,21 @@ void init( void )
     font->rendermode = RENDER_OUTLINE_POSITIVE;
     font->outline_thickness = 7;
     add_text( buffer, font, "Freetype GL", pen, black, black );
+    texture_font_close( font, MODE_ALWAYS_OPEN, MODE_FREE_CLOSE );
 
+    font = texture_font_new_from_file( atlas, 128, "fonts/LuckiestGuy.ttf" );
     font->rendermode = RENDER_OUTLINE_POSITIVE;
     font->outline_thickness = 5;
     add_text( buffer, font, "Freetype GL", pen, yellow, yellow );
+    texture_font_close( font, MODE_ALWAYS_OPEN, MODE_FREE_CLOSE );
 
+    font = texture_font_new_from_file( atlas, 128, "fonts/LuckiestGuy.ttf" );
     font->rendermode = RENDER_OUTLINE_EDGE;
     font->outline_thickness = 3;
     add_text( buffer, font, "Freetype GL", pen, black, black );
+    texture_font_close( font, MODE_ALWAYS_OPEN, MODE_FREE_CLOSE );
 
+    font = texture_font_new_from_file( atlas, 128, "fonts/LuckiestGuy.ttf" );
     font->rendermode = RENDER_NORMAL;
     font->outline_thickness = 0;
     add_text( buffer, font, "Freetype GL", pen, orange1, orange2 );
