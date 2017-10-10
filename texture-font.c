@@ -721,7 +721,8 @@ cleanup_stroker:
         padding.left = 1;
     }
 
-    size_t src_w = ft_bitmap.width;
+    size_t src_w = ((self->atlas->depth == 3) ? ft_bitmap.width/3 :
+		    ft_bitmap.width);
     size_t src_h = ft_bitmap.rows;
 
     size_t tgt_w = src_w + padding.left + padding.right;
@@ -750,7 +751,8 @@ cleanup_stroker:
     for( i = 0; i < src_h; i++ )
     {
         //difference between width and pitch: https://www.freetype.org/freetype2/docs/reference/ft2-basic_types.html#FT_Bitmap
-        memcpy( dst_ptr, src_ptr, ft_bitmap.width * self->atlas->depth);
+        memcpy( dst_ptr, src_ptr, (ft_bitmap.width *
+				   (self->atlas->depth == 4) ? 4 : 1));
         dst_ptr += tgt_w * self->atlas->depth;
         src_ptr += ft_bitmap.pitch;
     }
