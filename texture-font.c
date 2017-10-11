@@ -526,8 +526,8 @@ texture_font_find_glyph( texture_font_t * self,
 	glyph = glyph_index1[j];
 
     while( glyph && // if no glyph is there, we are done here
-	   glyph->rendermode != self->rendermode &&
-	   glyph->outline_thickness != self->outline_thickness ) {
+	   (glyph->rendermode != self->rendermode ||
+	    glyph->outline_thickness != self->outline_thickness) ) {
 	// fprintf(stderr, "glyph r/ot/g: %d %f %d\n",
 	//         glyph->rendermode, glyph->outline_thickness, glyph->glyphmode);
 	if( glyph->glyphmode != GLYPH_CONT)
