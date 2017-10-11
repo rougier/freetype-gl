@@ -477,7 +477,7 @@ void
 texture_font_delete( texture_font_t *self )
 {
     size_t i;
-    texture_glyph_t *glyph, *glyph0=NULL;
+    texture_glyph_t *glyph;
 
     assert( self );
 
@@ -487,18 +487,11 @@ texture_font_delete( texture_font_t *self )
 	free( self->filename );
 	
     GLYPHS_ITERATOR(i, glyph, self->glyphs) {
-	if(glyph->codepoint)
-	    texture_glyph_delete( glyph );
-	else
-	    glyph0 = glyph;
+	texture_glyph_delete( glyph );
     } GLYPHS_ITERATOR_END1
 	free( __glyphs );
     GLYPHS_ITERATOR_END2;
 
-    if( glyph0 ) {
-	// fprintf(stderr, "free %p cp %x\n", glyph0, glyph0->codepoint);
-	texture_glyph_delete( glyph0 );
-    }
     vector_delete( self->glyphs );
     free( self );
 }
@@ -528,12 +521,9 @@ texture_font_find_glyph( texture_font_t * self,
     while( glyph && // if no glyph is there, we are done here
 	   (glyph->rendermode != self->rendermode ||
 	    glyph->outline_thickness != self->outline_thickness) ) {
-	// fprintf(stderr, "glyph r/ot/g: %d %f %d\n",
-	//         glyph->rendermode, glyph->outline_thickness, glyph->glyphmode);
 	if( glyph->glyphmode != GLYPH_CONT)
 	    return NULL;
 	glyph++;
-	// fprintf(stderr, "look for another glyph %p %d\n", glyph, glyph->glyphmode);
     }
     return glyph;
 }
@@ -858,7 +848,12 @@ cleanup_stroker:
 
     int free_glyph = texture_font_index_glyph(self, glyph, ucodepoint);
     if(!glyph_index) {
-	free_glyph &= texture_font_index_glyph(self, glyph, 0);
+	if(!free_glyph) {
+	    texture_glyph_t *new_glyph = malloc(sizeof(texture_glyph_t));
+	    memcpy(new_glyph, glyph, sizeof(texture_glyph_t));
+	    glyph=new_glyph;
+	}
+	free_glyph = texture_font_index_glyph(self, glyph, 0);
     }
     if(free_glyph) {
 	// fprintf(stderr, "Free glyph\n");
