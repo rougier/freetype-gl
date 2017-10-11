@@ -658,7 +658,12 @@ texture_font_load_glyph( texture_font_t * self,
 
     if( self->atlas->depth == 4 )
     {
+#ifdef FT_LOAD_COLOR
 	flags |= FT_LOAD_COLOR;
+#else
+	freetype_error( 0, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			    __FILENAME__, __LINE__, 0, "FT_LOAD_COLOR not available");
+#endif
     }
 
     error = FT_Load_Glyph( self->face, glyph_index, flags );
