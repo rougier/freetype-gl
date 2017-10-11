@@ -64,6 +64,15 @@ typedef enum rendermode_t
     RENDER_SIGNED_DISTANCE_FIELD
 } rendermode_t;
 
+/**
+ * Glyph array end mark type
+ */
+typedef enum glyphmode_t
+{
+    GLYPH_END=0,
+    GLYPH_CONT=1
+} glyphmode_t;
+
 /*
  * Glyph metrics:
  * --------------
@@ -178,6 +187,11 @@ typedef struct texture_glyph_t
      * Glyph outline thickness
      */
     float outline_thickness;
+
+    /**
+     * Glyph scan end mark
+     */
+    glyphmode_t glyphmode;
 
 } texture_glyph_t;
 
@@ -501,11 +515,14 @@ typedef struct texture_font_t
  * 
  * @param self      A valid texture font
  * @param glyph     The glyph to index in the font
+ * @param codepoint The codepoint to insert into
+ *
+ * @return          1 if glyph was copied, 0 if it was inserted
  */
-void
- texture_font_index_glyph( texture_font_t * self,
-                           texture_glyph_t * glyph,
-			   uint32_t codepoint );
+int
+texture_font_index_glyph( texture_font_t * self,
+			  texture_glyph_t * glyph,
+			  uint32_t codepoint );
     
 /**
  * Request the loading of a given glyph.

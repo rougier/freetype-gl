@@ -53,8 +53,11 @@ texture_glyph_new(void)
     self->codepoint  = -1;
     self->width     = 0;
     self->height    = 0;
+    /* Attributes that can have different images for the same codepoint */
     self->rendermode = RENDER_NORMAL;
     self->outline_thickness = 0.0;
+    self->glyphmode = GLYPH_END;
+    /* End of attribute part */
     self->offset_x  = 0;
     self->offset_y  = 0;
     self->advance_x = 0.0;
@@ -492,7 +495,7 @@ texture_font_delete( texture_font_t *self )
     GLYPHS_ITERATOR_END2;
 
     if( glyph0 ) {
-	fprintf(stderr, "free %p cp %x\n", glyph0, glyph0->codepoint);
+	// fprintf(stderr, "free %p cp %x\n", glyph0, glyph0->codepoint);
 	texture_glyph_delete( glyph0 );
     }
     vector_delete( self->glyphs );
@@ -506,7 +509,7 @@ texture_font_find_glyph( texture_font_t * self,
     uint32_t ucodepoint = utf8_to_utf32( codepoint );
     uint32_t i = ucodepoint >> 8;
     uint32_t j = ucodepoint & 0xFF;
-    texture_glyph_t **glyph_index1;
+    texture_glyph_t **glyph_index1, *glyph;
 
     if(ucodepoint == -1)
 	return (texture_glyph_t *)self->atlas->special;
@@ -519,16 +522,29 @@ texture_font_find_glyph( texture_font_t * self,
     if(!glyph_index1)
 	return NULL;
     else
-	return glyph_index1[j];
+	glyph = glyph_index1[j];
+
+    while( glyph && // if no glyph is there, we are done here
+	   glyph->rendermode != self->rendermode &&
+	   glyph->outline_thickness != self->outline_thickness ) {
+	// fprintf(stderr, "glyph r/ot/g: %d %f %d\n",
+	//         glyph->rendermode, glyph->outline_thickness, glyph->glyphmode);
+	if( glyph->glyphmode != GLYPH_CONT)
+	    return NULL;
+	glyph++;
+	// fprintf(stderr, "look for another glyph %p %d\n", glyph, glyph->glyphmode);
+    }
+    return glyph;
 }
 
-void texture_font_index_glyph( texture_font_t * self,
-			       texture_glyph_t *glyph,
-			       uint32_t codepoint)
+int
+texture_font_index_glyph( texture_font_t * self,
+			  texture_glyph_t *glyph,
+			  uint32_t codepoint)
 {
     uint32_t i = codepoint >> 8;
     uint32_t j = codepoint & 0xFF;
-    texture_glyph_t ***glyph_index1;
+    texture_glyph_t ***glyph_index1, *glyph_insert;
 
     if(self->glyphs->size <= i) {
 	vector_resize( self->glyphs, i+1);
@@ -540,7 +556,20 @@ void texture_font_index_glyph( texture_font_t * self,
 	*glyph_index1 = calloc( 0x100, sizeof(texture_glyph_t*) );
     }
 
-    (*glyph_index1)[j] = glyph;
+    if(( glyph_insert = (*glyph_index1)[j] )) {
+	int i = 0;
+	// fprintf(stderr, "glyph already there\n");
+	while (glyph_insert[i].glyphmode != GLYPH_END)
+	    i++;
+	// fprintf(stderr, "Insert a glyph after position %d\n", i);
+	glyph_insert[i].glyphmode = GLYPH_CONT;
+	(*glyph_index1)[j] = glyph_insert = realloc( glyph_insert, sizeof(texture_glyph_t)*(i+2) );
+	memcpy( glyph_insert+(i+1), glyph, sizeof(texture_glyph_t) );
+	return 1;
+    } else {
+	(*glyph_index1)[j] = glyph;
+	return 0;
+    }
 }
 
 // ------------------------------------------------ texture_font_load_glyph ---
@@ -815,13 +844,17 @@ cleanup_stroker:
 	glyph->advance_x = slot->advance.x * self->scale;
 	glyph->advance_y = slot->advance.y * self->scale;
     } else {
-	glyph->advance_x = slot->advance.x / HRESf;
-	glyph->advance_y = slot->advance.y / HRESf;
+	glyph->advance_x = slot->advance.x * self->scale / HRESf;
+	glyph->advance_y = slot->advance.y * self->scale / HRESf;
     }
 
-    texture_font_index_glyph(self, glyph, ucodepoint);
+    int free_glyph = texture_font_index_glyph(self, glyph, ucodepoint);
     if(!glyph_index) {
-	texture_font_index_glyph(self, glyph, 0);
+	free_glyph &= texture_font_index_glyph(self, glyph, 0);
+    }
+    if(free_glyph) {
+	// fprintf(stderr, "Free glyph\n");
+	free(glyph);
     }
     
     if( self->rendermode != RENDER_NORMAL && self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )
