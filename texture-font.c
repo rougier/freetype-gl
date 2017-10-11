@@ -842,7 +842,9 @@ cleanup_stroker:
     }
     // Discard hinting to get advance
     FT_Load_Glyph( self->face, glyph_index,
+#ifdef FT_LOAD_COLOR
 		   ((self->atlas->depth == 4) ? FT_LOAD_COLOR : 0) |
+#endif
 		   FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
     slot = self->face->glyph;
     if( self->atlas->depth == 4 ) {
