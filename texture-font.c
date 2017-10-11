@@ -214,8 +214,9 @@ texture_font_set_size ( texture_font_t *self, float size )
 	
 	int best_match = 0;
 	int diff = abs((int)size - self->face->available_sizes[0].width);
+	int i;
 
-	for (int i = 1; i < self->face->num_fixed_sizes; ++i) {
+	for (i = 1; i < self->face->num_fixed_sizes; ++i) {
 	    int ndiff = abs((int)size - self->face->available_sizes[i].width);
 	    if (ndiff < diff) {
 		best_match = i;
