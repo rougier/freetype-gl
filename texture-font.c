@@ -651,13 +651,12 @@ size_t
 texture_font_load_glyphs( texture_font_t * self,
                           const char * codepoints )
 {
-    size_t i;
+    size_t i, c;
 
     /* Load each glyph */
-    for( i = 0; i < utf8_strlen(codepoints); i += utf8_surrogate_len(codepoints + i) ) {
+    for( i = 0; i < strlen(codepoints); i += utf8_surrogate_len(codepoints + i) ) {
         if( !texture_font_load_glyph( self, codepoints + i ) )
             return utf8_strlen( codepoints + i );
-
     }
 
     return 0;
