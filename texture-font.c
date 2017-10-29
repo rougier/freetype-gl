@@ -420,7 +420,7 @@ texture_font_load_glyph( texture_font_t * self,
             fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
             FT_Done_Face( face );
             FT_Done_FreeType( library );
-            return NULL;
+            return 0;
         }
         texture_atlas_set_region( self->atlas, region.x, region.y, 4, 4, data, 0 );
         glyph->codepoint = -1;
@@ -695,13 +695,13 @@ texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
     //ensure size increased
     assert(width_new >= self->atlas->width);
     assert(height_new >= self->atlas->height);
-    assert(width_new + height_new > self->atlas->width + self->atlas->height);    
+    assert(width_new + height_new > self->atlas->width + self->atlas->height);
     texture_atlas_t* ta = self->atlas;
     size_t width_old = ta->width;
-    size_t height_old = ta->height;    
+    size_t height_old = ta->height;
     //allocate new buffer
     unsigned char* data_old = ta->data;
-    ta->data = calloc(1,width_new*height_new * sizeof(char)*ta->depth);    
+    ta->data = calloc(1,width_new*height_new * sizeof(char)*ta->depth);
     //update atlas size
     ta->width = width_new;
     ta->height = height_new;
@@ -711,13 +711,13 @@ texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
         node.x = width_old - 1;
         node.y = 1;
         node.z = width_new - width_old;
-        vector_push_back(ta->nodes, &node);    
+        vector_push_back(ta->nodes, &node);
     }
     //copy over data from the old buffer, skipping first row and column because of the margin
     size_t pixel_size = sizeof(char) * ta->depth;
     size_t old_row_size = width_old * pixel_size;
     texture_atlas_set_region(ta, 1, 1, width_old - 2, height_old - 2, data_old + old_row_size + pixel_size, old_row_size);
-    free(data_old);    
+    free(data_old);
     //change uv coordinates of existing glyphs to reflect size change
     float mulw = (float)width_old / width_new;
     float mulh = (float)height_old / height_new;
