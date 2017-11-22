@@ -42,6 +42,7 @@ harfbuzz/libfreetype-gl-hb.a
 
 CMakeFiles
 CMakeCache.txt
+CTestTestfile.cmake
 cmake_install.cmake
 Makefile
 libfreetype-gl.a

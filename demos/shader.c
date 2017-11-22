@@ -27,7 +27,7 @@ shader_read( const char *filename )
 	fseek( file, 0, SEEK_END );
 	size = ftell( file );
 	fseek(file, 0, SEEK_SET );
-    buffer = (char *) malloc( (size+1) * sizeof( char *) );
+    buffer = (char *) malloc( (size+1) * sizeof( char ) );
 	fread( buffer, sizeof(char), size, file );
     buffer[size] = 0;
     fclose( file );

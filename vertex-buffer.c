@@ -195,7 +195,7 @@ vertex_buffer_print( vertex_buffer_t * self )
 
     assert(self);
 
-    fprintf( stderr, "%ld vertices, %ld indices\n",
+    fprintf( stderr, "%zd vertices, %zd indices\n",
              vector_size( self->vertices ), vector_size( self->indices ) );
     while( self->attributes[i] )
     {
