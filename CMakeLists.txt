@@ -159,6 +159,15 @@ if(freetype-gl_BUILD_MAKEFONT)
     endif()
 endif()
 
+install(TARGETS freetype-gl 
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib)
+install(FILES ${FREETYPE_GL_HDR} 
+  DESTINATION include/freetype-gl
+  PERMISSIONS WORLD_READ)
+
+  
 if(freetype-gl_BUILD_APIDOC)
     add_subdirectory(doc)
 endif()
