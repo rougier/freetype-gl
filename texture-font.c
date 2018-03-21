@@ -5,6 +5,7 @@
  */
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_SIZES_H
 #include FT_STROKER_H
 // #include FT_ADVANCES_H
 #include FT_LCD_FILTER_H
@@ -224,12 +225,12 @@ texture_font_set_size ( texture_font_t *self, float size )
 	    }
 	}
 	error = FT_Select_Size(self->face, best_match);
-	self->scale = self->size / self->face->available_sizes[best_match].width;
 	if(error) {
 	    freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
 			    __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
 	    return 0;
 	}
+	self->scale = self->size / self->face->available_sizes[best_match].width;
     } else {
 	/* Set char size */
 	error = FT_Set_Char_Size(self->face, (int)(size * HRES), 0, DPI * HRES, DPI);
@@ -398,7 +399,8 @@ texture_font_t *
 texture_font_clone( texture_font_t *old, float pt_size)
 {
     texture_font_t *self;
-
+    FT_Error error = 0;
+    
     self = calloc(1, sizeof(*self));
     if (!self) {
         freetype_gl_error( Out_Of_Memory,
@@ -408,6 +410,21 @@ texture_font_clone( texture_font_t *old, float pt_size)
 
     memcpy(self, old, sizeof(*self));
     self->glyphs = vector_new(sizeof(texture_glyph_t *));
+
+    error = FT_New_Size( self->face, &self->ft_size );
+    if(error) {
+	freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			__FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+	return NULL;
+    }
+
+    error = FT_Activate_Size( self->ft_size );
+    if(error) {
+	freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			__FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+	return NULL;
+    }
+    
     if(!texture_font_set_size ( self, pt_size * 100.f ))
 	return NULL;
 
@@ -490,6 +507,20 @@ texture_font_load_face( texture_font_t *self, float size )
 	    goto cleanup_face;
 	}
 
+	error = FT_New_Size( self->face, &self->ft_size );
+	if(error) {
+	    freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			    __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+	    goto cleanup_face;
+	}
+
+	error = FT_Activate_Size( self->ft_size );
+	if(error) {
+	    freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			    __FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+	    goto cleanup_face;
+	}
+	
 	if(!texture_font_set_size ( self, size ))
 	    goto cleanup_face;
     }
@@ -511,8 +542,15 @@ texture_font_delete( texture_font_t *self )
 {
     size_t i;
     texture_glyph_t *glyph;
+    FT_Error error=0;
 
     assert( self );
+
+    error = FT_Done_Size( self->ft_size );
+    if(error) {
+	freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			__FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+    }
 
     texture_font_close( self, MODE_ALWAYS_OPEN, MODE_FREE_CLOSE );
 
@@ -689,6 +727,13 @@ texture_font_load_glyph( texture_font_t * self,
 #endif
     }
 
+    error = FT_Activate_Size( self->ft_size );
+    if(error) {
+	freetype_error( error, "FT_Error (%s:%d, code 0x%02x) : %s\n",
+			__FILENAME__, __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+	return 0;
+    }
+
     error = FT_Load_Glyph( self->face, glyph_index, flags );
     if( error )
     {
@@ -863,12 +908,6 @@ cleanup_stroker:
 	glyph->s1       = x + tgt_w - 0.5;
 	glyph->t1       = y + tgt_h - 0.5;
     }
-    // Discard hinting to get advance
-    FT_Load_Glyph( self->face, glyph_index,
-#ifdef FT_LOAD_COLOR
-		   ((self->atlas->depth == 4) ? FT_LOAD_COLOR : 0) |
-#endif
-		   FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
     slot = self->face->glyph;
     if( self->atlas->depth == 4 ) {
 	// color fonts use actual pixels, not subpixels
