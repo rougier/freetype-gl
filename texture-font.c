@@ -246,12 +246,38 @@ texture_font_set_size ( texture_font_t *self, float size )
     return 1;
 }
 
+// --------------------------------------------------
+
+void
+texture_font_init_size( texture_font_t * self)
+{
+    FT_Size_Metrics metrics;
+    
+    self->underline_position = self->face->underline_position / (float)(HRESf*HRESf) * self->size;
+    self->underline_position = roundf( self->underline_position );
+    if( self->underline_position > -2 )
+    {
+        self->underline_position = -2.0;
+    }
+
+    self->underline_thickness = self->face->underline_thickness / (float)(HRESf*HRESf) * self->size;
+    self->underline_thickness = roundf( self->underline_thickness );
+    if( self->underline_thickness < 1 )
+    {
+        self->underline_thickness = 1.0;
+    }
+
+    metrics = self->face->size->metrics;
+    self->ascender = (metrics.ascender >> 6) / 100.f;
+    self->descender = (metrics.descender >> 6) / 100.f;
+    self->height = (metrics.height >> 6) / 100.f;
+    self->linegap = self->height - self->ascender + self->descender;
+}
+
 // ------------------------------------------------------ texture_font_init ---
 static int
 texture_font_init(texture_font_t *self)
 {
-    FT_Size_Metrics metrics;
-
     assert(self->atlas);
     assert(self->size > 0);
     assert((self->location == TEXTURE_FONT_FILE && self->filename)
@@ -281,25 +307,7 @@ texture_font_init(texture_font_t *self)
     if (!texture_font_load_face(self, self->size * 100.f))
         return -1;
 
-    self->underline_position = self->face->underline_position / (float)(HRESf*HRESf) * self->size;
-    self->underline_position = roundf( self->underline_position );
-    if( self->underline_position > -2 )
-    {
-        self->underline_position = -2.0;
-    }
-
-    self->underline_thickness = self->face->underline_thickness / (float)(HRESf*HRESf) * self->size;
-    self->underline_thickness = roundf( self->underline_thickness );
-    if( self->underline_thickness < 1 )
-    {
-        self->underline_thickness = 1.0;
-    }
-
-    metrics = self->face->size->metrics;
-    self->ascender = (metrics.ascender >> 6) / 100.f;
-    self->descender = (metrics.descender >> 6) / 100.f;
-    self->height = (metrics.height >> 6) / 100.f;
-    self->linegap = self->height - self->ascender + self->descender;
+    texture_font_init_size( self );
 
     if (!texture_font_set_size(self, self->size))
 	return -1;
@@ -385,6 +393,31 @@ texture_font_new_from_memory(texture_atlas_t *atlas, float pt_size,
     return self;
 }
 
+// ----------------------------------------------------- texture_font_clone ---
+texture_font_t *
+texture_font_clone( texture_font_t *old, float pt_size)
+{
+    texture_font_t *self;
+
+    self = calloc(1, sizeof(*self));
+    if (!self) {
+        freetype_gl_error( Out_Of_Memory,
+			   "line %d: No more memory for allocating data\n", __LINE__);
+        return NULL;
+    }
+
+    memcpy(self, old, sizeof(*self));
+    self->glyphs = vector_new(sizeof(texture_glyph_t *));
+    if(!texture_font_set_size ( self, pt_size * 100.f ))
+	return NULL;
+
+    texture_font_init_size( self );
+    
+    if(!texture_font_set_size ( self, pt_size ))
+	return NULL;
+
+    return self;
+}
 // ----------------------------------------------------- texture_font_close ---
 
 void

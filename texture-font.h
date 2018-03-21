@@ -453,6 +453,16 @@ typedef struct texture_font_t
                                 size_t memory_size );
 
 /**
+ * Clone the freetype-gl font and set a different size
+ *
+ * @param self         a valid texture font
+ * @param size         the new size of the font
+ */
+  texture_font_t *
+  texture_font_clone( texture_font_t *old,
+		      float pt_size);
+
+/**
  * Close the freetype structures from a font and the associated library
  *
  * @param self         a valid texture font
