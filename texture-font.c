@@ -571,6 +571,13 @@ cleanup_stroker:
         padding.top = 1;
         padding.left = 1;
     }
+	
+	if (self->padding != 0) {
+		padding.top += self->padding;
+		padding.left += self->padding;
+		padding.right += self->padding;
+		padding.bottom += self->padding;
+	}
 
     size_t src_w = ft_bitmap.width/self->atlas->depth;
     size_t src_h = ft_bitmap.rows;
