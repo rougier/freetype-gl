@@ -320,6 +320,12 @@ typedef struct texture_font_t
      * formats.
      */
     float underline_thickness;
+	
+	/**
+	* The padding to be add to the glyph's texture that are loaded by this font.
+	* Usefull when adding effects with shaders.
+	*/
+	int padding;
 
 } texture_font_t;
 
