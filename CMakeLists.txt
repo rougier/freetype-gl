@@ -83,6 +83,9 @@ endif()
 
 find_package(OpenGL REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(PNG REQUIRED)
+find_package(ZLIB REQUIRED)
+find_package(BZIP2 REQUIRED)
 
 if(freetype-gl_WITH_GLEW)
     find_package(GLEW REQUIRED)
@@ -150,6 +153,9 @@ if(freetype-gl_BUILD_MAKEFONT)
         ${FREETYPE_LIBRARIES}
         ${MATH_LIBRARY}
         ${GLEW_LIBRARY}
+  ${PNG_LIBRARY}
+  ${ZLIB_LIBRARY}
+  ${BZIP2_LIBRARY}
     )
 
     if(MSVC AND NOT (MSVC_VERSION LESS 1900))
