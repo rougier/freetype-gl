@@ -3,9 +3,14 @@
 # Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
 # file `LICENSE` for more details.
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.12.1)
 
 project(freetype-gl LANGUAGES C CXX)
+
+set(LIBRARY_VERSION_MAJOR 1)
+set(LIBRARY_VERSION_MINOR 0)
+set(LIBRARY_VERSION_PATCH 0)
+set(LIBRARY_VERSION_STRING ${LIBRARY_VERSION_MAJOR}.${LIBRARY_VERSION_MINOR}.${LIBRARY_VERSION_PATCH})
 
 set(CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules"
@@ -140,6 +145,9 @@ add_library(freetype-gl SHARED
     ${FREETYPE_GL_SRC}
     ${FREETYPE_GL_HDR}
 )
+
+set_target_properties(freetype-gl PROPERTIES VERSION ${LIBRARY_VERSION_STRING}
+                                          SOVERSION ${LIBRARY_VERSION_MAJOR})
 
 if(freetype-gl_BUILD_MAKEFONT)
     add_executable(makefont makefont.c)
