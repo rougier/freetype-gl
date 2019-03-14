@@ -3,7 +3,7 @@
 # Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
 # file `LICENSE` for more details.
 
-cmake_minimum_required(VERSION 3.12.1)
+cmake_minimum_required(VERSION 3.4.0)
 
 project(freetype-gl LANGUAGES C CXX)
 
