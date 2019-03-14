@@ -1,4 +1,4 @@
-# Freetype GL - A C OpenGL Freetype engine
+# FreeType GL - A C OpenGL FreeType engine
 
 [![Build Status Travis](https://travis-ci.org/rougier/freetype-gl.png?branch=master)](https://travis-ci.org/rougier/freetype-gl)
 [![Build Status Appveyor](https://ci.appveyor.com/api/projects/status/github/rougier/freetype-gl?branch=master)](https://ci.appveyor.com/project/rougier/freetype-gl)
