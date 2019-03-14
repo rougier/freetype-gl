@@ -47,6 +47,6 @@ Header files and libraries for building the FreeType GL applications
 
 %files devel
 %{_includedir}/%{name}
-%{_libdir}/lib*.so.*
+%{_libdir}/lib*.so*
 
 %changelog
