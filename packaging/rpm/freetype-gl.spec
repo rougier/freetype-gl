@@ -1,5 +1,5 @@
 Name:           freetype-gl
-Version:        1.0.0
+Version:        0.1.0
 Release:        1%{?dist}
 Summary:        FreeType GL - A C OpenGL FreeType engine
 
@@ -31,10 +31,9 @@ Header files and libraries for building the FreeType GL applications
   -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON \
   -DCMAKE_SKIP_RPATH:BOOL=YES \
   -DENABLE_PIC:BOOL=ON \
+  -DCMAKE_BUILD_TYPE=Release \
   .
 %make_build
-
-#-DCMAKE_BUILD_TYPE=Release \
 
 %install
 %make_install
