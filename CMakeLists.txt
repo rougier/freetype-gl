@@ -168,8 +168,6 @@ if(freetype-gl_BUILD_MAKEFONT)
 
     install(TARGETS makefont
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-)
-
 endif()
 
 install(TARGETS freetype-gl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
