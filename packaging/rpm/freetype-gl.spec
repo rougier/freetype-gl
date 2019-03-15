@@ -26,7 +26,8 @@ Header files, libraries and documentation for building the FreeType GL applicati
 %autosetup -p1 -n %{name}-%{version}
 
 %build
-%cmake3 \
+%cmake3 -Wno-dev \
+  -DCMAKE_INSTALL_BINDIR:PATH=%{_bindir} \
   -DCMAKE_INSTALL_LIBDIR:PATH=%{_libdir} \
   -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON \
   -DCMAKE_SKIP_RPATH:BOOL=YES \
