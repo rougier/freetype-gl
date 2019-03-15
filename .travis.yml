@@ -42,6 +42,6 @@ install:
 #
   - cd ..
 before_script:
-  - cmake -Dfreetype-gl_BUILD_HARFBUZZ=ON . && make
+  - cmake -Dfreetype-gl_BUILD_HARFBUZZ=ON -DCMAKE_INSTALL_BINDIR:PATH=%{_bindir} -DCMAKE_INSTALL_LIBDIR:PATH=%{_libdir} . && make
 script:
   - ctest --output-on-failure
