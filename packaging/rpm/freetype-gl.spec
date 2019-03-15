@@ -1,5 +1,5 @@
 Name:           freetype-gl
-Version:        0.1.2
+Version:        0.1.3
 Release:        1%{?dist}
 Summary:        FreeType GL - A C OpenGL FreeType engine
 
