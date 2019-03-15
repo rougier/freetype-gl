@@ -3,13 +3,13 @@
 # Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
 # file `LICENSE` for more details.
 
-cmake_minimum_required(VERSION 3.4.0)
+cmake_minimum_required(VERSION 3.10.0)
 
 project(freetype-gl LANGUAGES C CXX)
 
 set(LIBRARY_VERSION_MAJOR 0)
 set(LIBRARY_VERSION_MINOR 1)
-set(LIBRARY_VERSION_PATCH 1)
+set(LIBRARY_VERSION_PATCH 2)
 set(LIBRARY_VERSION_STRING ${LIBRARY_VERSION_MAJOR}.${LIBRARY_VERSION_MINOR}.${LIBRARY_VERSION_PATCH})
 
 set(CMAKE_MODULE_PATH
@@ -165,15 +165,19 @@ if(freetype-gl_BUILD_MAKEFONT)
         # see http://stackoverflow.com/a/32418900/469659
         target_link_libraries(makefont "legacy_stdio_definitions.lib")
     endif()
+
+    install(TARGETS makefont
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+)
+
 endif()
 
-install(TARGETS makefont RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(TARGETS freetype-gl LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(FILES ${FREETYPE_GL_HDR} 
-  DESTINATION include/freetype-gl
-  PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 
-  
+install(FILES ${FREETYPE_GL_HDR} 
+    DESTINATION include/freetype-gl
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+
 if(freetype-gl_BUILD_APIDOC)
     add_subdirectory(doc)
 endif()
