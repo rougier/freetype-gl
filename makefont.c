@@ -417,7 +417,7 @@ int main( int argc, char **argv )
     // ------------
     // Texture data
     // ------------
-    fprintf( file, " %" PRIzu ", %" PRIzu ", %" PRIzu ", \n", atlas->width, atlas->height, atlas->depth );
+    fprintf( file, " %" PRIzu ", %" PRIzu ", %" PRIzu ",\n", atlas->width, atlas->height, atlas->depth );
     fprintf( file, " {" );
     for( i=0; i < texture_size; i+= 32 )
     {
@@ -434,7 +434,7 @@ int main( int argc, char **argv )
         }
         if( (j+i) < texture_size )
         {
-            fprintf( file, "\n  " );
+            fprintf( file, "\n" );
         }
     }
     fprintf( file, "}, \n" );

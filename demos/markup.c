@@ -246,7 +246,7 @@ void display( GLFWwindow* window )
                             1, 0, projection.data);
         vertex_buffer_render( lines_buffer, GL_LINES );
     }
-    
+
     glfwSwapBuffers( window );
 }
 

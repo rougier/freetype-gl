@@ -152,8 +152,8 @@ build_buffer( void )
         return;
     }
 
-	if (!font)
-		return;
+    if (!font)
+        return;
 
     markup.font = font;
     font->hinting = p_hinting;

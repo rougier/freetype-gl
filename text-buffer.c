@@ -14,11 +14,11 @@
 #include "utf8-utils.h"
 
 #define SET_GLYPH_VERTEX(value,x0,y0,z0,s0,t0,r,g,b,a,sh,gm) { \
-	glyph_vertex_t *gv=&value;                                 \
-	gv->x=x0; gv->y=y0; gv->z=z0;                              \
-	gv->u=s0; gv->v=t0;                                        \
-	gv->r=r; gv->g=g; gv->b=b; gv->a=a;                        \
-	gv->shift=sh; gv->gamma=gm;}
+    glyph_vertex_t *gv=&value;                                 \
+    gv->x=x0; gv->y=y0; gv->z=z0;                              \
+    gv->u=s0; gv->v=t0;                                        \
+    gv->r=r; gv->g=g; gv->b=b; gv->a=a;                        \
+    gv->shift=sh; gv->gamma=gm;}
 
 // ----------------------------------------------------------------------------
 
@@ -116,11 +116,11 @@ text_buffer_move_last_line( text_buffer_t * self, float dy )
 
 // ----------------------------------------------------------------------------
 // text_buffer_finish_line (internal use only)
-// 
-//  Performs calculations needed at the end of each line of text 
-//  and prepares for the next line if necessary
 //
-//  advancePen: if true, advance the pen to the next line
+// Performs calculations needed at the end of each line of text
+// and prepares for the next line if necessary
+//
+// advancePen: if true, advance the pen to the next line
 //
 static void
 text_buffer_finish_line( text_buffer_t * self, vec2 * pen, bool advancePen )
@@ -523,7 +523,6 @@ text_buffer_align( text_buffer_t * self, vec2 * pen,
                 vertex->x += dx;
             }
         }
-        
     }
 }
 

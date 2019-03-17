@@ -320,12 +320,12 @@ typedef struct texture_font_t
      * formats.
      */
     float underline_thickness;
-	
-	/**
-	* The padding to be add to the glyph's texture that are loaded by this font.
-	* Usefull when adding effects with shaders.
-	*/
-	int padding;
+
+    /**
+    * The padding to be add to the glyph's texture that are loaded by this font.
+    * Usefull when adding effects with shaders.
+    */
+    int padding;
 
 } texture_font_t;
 
@@ -397,9 +397,9 @@ typedef struct texture_font_t
   texture_font_get_glyph( texture_font_t * self,
                           const char * codepoint );
 
-/** 
- * Request an already loaded glyph from the font. 
- * 
+/**
+ * Request an already loaded glyph from the font.
+ *
  * @param self      A valid texture font
  * @param codepoint Character codepoint to be found in UTF-8 encoding.
  *
@@ -408,7 +408,7 @@ typedef struct texture_font_t
  texture_glyph_t *
  texture_font_find_glyph( texture_font_t * self,
                           const char * codepoint );
-    
+
 /**
  * Request the loading of a given glyph.
  *
@@ -434,18 +434,22 @@ typedef struct texture_font_t
   size_t
   texture_font_load_glyphs( texture_font_t * self,
                             const char * codepoints );
-  /*
-   *Increases the size of a fonts texture atlas
-   *Invalidates all pointers to font->atlas->data
-   *Changes the UV Coordinates of existing glyphs in the font
-   *
-   *@param self A valid texture font
-   *@param width_new Width of the texture atlas after resizing (must be bigger or equal to current width)
-   *@param height_new Height of the texture atlas after resizing (must be bigger or equal to current height)
-   */
-  void
-  texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
-							  size_t height_new);
+
+/*
+ * Increases the size of a fonts texture atlas
+ * Invalidates all pointers to font->atlas->data
+ * Changes the UV Coordinates of existing glyphs in the font
+ *
+ * @param self A valid texture font
+ * @param width_new Width of the texture atlas after resizing (must be bigger
+ *                  or equal to current width)
+ * @param height_new Height of the texture atlas after resizing (must be bigger or
+ *                   equal to current height)
+ */
+void
+texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
+                            size_t height_new );
+
 /**
  * Get the kerning between two horizontal glyphs.
  *
