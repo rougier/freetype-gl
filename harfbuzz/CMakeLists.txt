@@ -21,6 +21,7 @@ set(FREETYPE_GL_HB_HDR
 )
 
 set(FREETYPE_GL_HB_SRC
+    platform.c
     texture-atlas.c
     texture-font.c
     vector.c
