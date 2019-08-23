@@ -25,7 +25,7 @@ void print_help()
 {
     fprintf( stderr, "Usage: makefont [--help] --font <font file> "
              "--header <header file> --size <font size> "
-             "--variable <variable name> --texture <texture size>"
+             "--variable <variable name> --texture <texture size> "
              "--rendermode <one of 'normal', 'outline_edge', 'outline_positive', 'outline_negative' or 'sdf'>\n" );
 }
 
