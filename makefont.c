@@ -399,7 +399,7 @@ int main( int argc, char **argv )
         "    size_t tex_width;\n"
         "    size_t tex_height;\n"
         "    size_t tex_depth;\n"
-        "    char tex_data[%" PRIzu "];\n"
+        "    unsigned char tex_data[%" PRIzu "];\n"
         "    float size;\n"
         "    float height;\n"
         "    float linegap;\n"
