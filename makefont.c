@@ -367,7 +367,19 @@ int main( int argc, char **argv )
         " * those of the authors and should not be interpreted as representing official\n"
         " * policies, either expressed or implied, of Nicolas P. Rougier.\n"
         " * ============================================================================\n"
-        " */\n");
+        " */\n\n");
+
+    fprintf( file, 
+        "/* ============================================================================\n"
+        " * Parameters\n"
+        " * ----------------------------------------------------------------------------\n"
+        " * Font size: %f\n"
+        " * Texture width: %d\n"
+        " * Texture height: %d\n"
+        " * Texture depth: %d\n"
+        " * ===============================================================================\n"
+        " */\n\n", 
+        font_size, atlas->width, atlas->height, atlas->depth);
 
 
     // ----------------------
