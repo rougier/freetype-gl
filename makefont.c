@@ -47,7 +47,7 @@ int main( int argc, char **argv )
     const char * header_filename = NULL;
     const char * variable_name   = "font";
     int show_help = 0;
-    size_t texture_width = 128;
+    size_t texture_width = 0;
     rendermode_t rendermode = RENDER_NORMAL;
     const char *rendermodes[5];
     rendermodes[RENDER_NORMAL] = "normal";
@@ -166,7 +166,7 @@ int main( int argc, char **argv )
         {
             ++arg;
 
-            if ( 128.0 != texture_width )
+            if ( 0 != texture_width )
             {
                 fprintf( stderr, "Multiple --texture parameters.\n" );
                 print_help();
@@ -198,16 +198,16 @@ int main( int argc, char **argv )
         {
             ++arg;
 
-            if ( 128.0 != texture_width )
-            {
-                fprintf( stderr, "Multiple --texture parameters.\n" );
-                print_help();
-                exit( 1 );
-            }
+            // if ( 128.0 != texture_width )
+            // {
+            //     fprintf( stderr, "Multiple --texture parameters.\n" );
+            //     print_help();
+            //     exit( 1 );
+            // }
 
             if ( arg >= argc )
             {
-                fprintf( stderr, "No texture size given.\n" );
+                fprintf( stderr, "No render mode given.\n" );
                 print_help();
                 exit( 1 );
             }
@@ -281,6 +281,11 @@ int main( int argc, char **argv )
         fprintf( stderr, "No header file given.\n" );
         print_help();
         exit( 1 );
+    }
+
+    if ( 0 == texture_width )
+    {
+        texture_width = 128;
     }
 
     texture_atlas_t * atlas = texture_atlas_new( texture_width, texture_width, 1 );
