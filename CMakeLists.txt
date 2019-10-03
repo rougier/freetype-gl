@@ -89,6 +89,10 @@ if(freetype-gl_WITH_GLEW)
     find_package(GLEW REQUIRED)
 endif()
 
+if(freetype-gl_WITH_GLAD)
+    add_definitions(-DGL_WITH_GLAD)
+endif()
+
 include_directories(
     ${OPENGL_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
