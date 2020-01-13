@@ -198,13 +198,6 @@ int main( int argc, char **argv )
         {
             ++arg;
 
-            // if ( 128.0 != texture_width )
-            // {
-            //     fprintf( stderr, "Multiple --texture parameters.\n" );
-            //     print_help();
-            //     exit( 1 );
-            // }
-
             if ( arg >= argc )
             {
                 fprintf( stderr, "No render mode given.\n" );
