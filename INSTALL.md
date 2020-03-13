@@ -75,6 +75,20 @@ cmake -G "MinGW Makefiles"  -Dfreetype-gl_BUILD_HARFBUZZ=ON ..
 
 **Note**: Harfbuzz examples only work with symbolic links enabled. See <https://github.com/git-for-windows/git/wiki/Symbolic-links>
 
+### VCPKG
+Alternatively, you can build and install freetype-gl using [vcpkg](https://github.com/microsoft/vcpkg/) dependency manager:
+
+```
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+./bootstrap-vcpkg.sh
+./vcpkg integrate install
+./vcpkg install freetype-gl
+```
+
+The freetype-gl port in vcpkg is kept up to date by microsoft team members and community contributors.
+If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
 ### Build demos
 
 ```
