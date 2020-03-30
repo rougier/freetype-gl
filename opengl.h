@@ -6,6 +6,9 @@
 #ifndef __OPEN_GL_H__
 #define __OPEN_GL_H__
 
+#if defined(GL_WITH_GLAD)
+#   include <glad/glad.h>
+#else
 #if defined(__APPLE__)
 #   include "TargetConditionals.h"
 #   if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
@@ -26,5 +29,6 @@
 #  include <GL/glew.h>
 #  include <GL/gl.h>
 #endif
+#endif /* GL_WITH_GLAD */
 
 #endif /* OPEN_GL_H */
