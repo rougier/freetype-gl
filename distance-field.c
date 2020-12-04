@@ -75,7 +75,7 @@ make_distance_mapb( unsigned char *img,
     unsigned char *out = (unsigned char *) malloc( width * height * sizeof(unsigned char) );
     unsigned int i;
 
-    // find minimimum and maximum values
+    // find minimum and maximum values
     double img_min = DBL_MAX;
     double img_max = DBL_MIN;
 
