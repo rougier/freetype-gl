@@ -141,7 +141,7 @@ set(FREETYPE_GL_SRC
     vertex-buffer.c
 )
 
-add_library(freetype-gl STATIC
+add_library(freetype-gl
     ${FREETYPE_GL_SRC}
     ${FREETYPE_GL_HDR}
 )
