@@ -17,6 +17,7 @@
 #include "texture-font.h"
 #include "platform.h"
 #include "utf8-utils.h"
+#include "ftgl-utils.h"
 
 #define HRES  64
 #define HRESf 64.f
@@ -36,28 +37,12 @@ static FT_F26Dot6 convert_float_to_F26Dot6(float value)
 #define FT_ERRORDEF( e, v, s )    case v: return s;
 #define FT_ERROR_END_LIST       }
 // Same signature as the function defined in fterrors.h:
-// https://www.freetype.org/freetype2/docs/reference/ft2-error_enumerations.html#ft_error_string
-const char* FT_Error_String( FT_Error error_code )
+// https://www.freetype.org/freetype2/docs/reference/ft2-error_enumerations.html#FTGL_Error_String
+const char* FTGL_Error_String( FT_Error error_code )
 {
 #include FT_ERRORS_H
     return "INVALID ERROR CODE";
 }
-
-error_callback_t log_error = error_callback_default;
-void
-error_callback_default(const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
-    va_end(args);
-}
-void
-ftgl_set_error_callback(error_callback_t error_callback)
-{
-    log_error = error_callback;
-}
-
 
 // ------------------------------------------------- texture_font_load_face ---
 static int
@@ -78,8 +63,8 @@ texture_font_load_face(texture_font_t *self, float size,
     error = FT_Init_FreeType(library);
     if( error )
     {
-        fprintf( stderr, "FT_Error (line %d, 0x%02x) : %s\n",
-                 __LINE__, error, FT_Error_String(error) );
+        log_error( "FT_Error (line %d, 0x%02x) : %s\n",
+                 __LINE__, error, FTGL_Error_String(error) );
         goto cleanup;
     }
 
@@ -97,8 +82,8 @@ texture_font_load_face(texture_font_t *self, float size,
 
     if( error )
     {
-        fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-                 __LINE__, error, FT_Error_String(error) );
+        log_error( "FT_Error (line %d, code 0x%02x) : %s\n",
+                 __LINE__, error, FTGL_Error_String(error) );
         goto cleanup_library;
     }
 
@@ -106,8 +91,8 @@ texture_font_load_face(texture_font_t *self, float size,
     error = FT_Select_Charmap(*face, FT_ENCODING_UNICODE);
     if( error )
     {
-        fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-                 __LINE__, error, FT_Error_String(error) );
+        log_error( "FT_Error (line %d, code 0x%02x) : %s\n",
+                 __LINE__, error, FTGL_Error_String(error) );
         goto cleanup_face;
     }
 
@@ -127,8 +112,8 @@ texture_font_load_face(texture_font_t *self, float size,
 
     if( error )
     {
-        fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-                 __LINE__, error, FT_Error_String(error) );
+        log_error( "FT_Error (line %d, code 0x%02x) : %s\n",
+                 __LINE__, error, FTGL_Error_String(error) );
         goto cleanup_face;
     }
 
@@ -151,7 +136,7 @@ texture_glyph_new(void)
 {
     texture_glyph_t *self = (texture_glyph_t *) malloc( sizeof(texture_glyph_t) );
     if(self == NULL) {
-        fprintf( stderr,
+        log_error(
                 "line %d: No more memory for allocating data\n", __LINE__);
         return NULL;
     }
@@ -319,7 +304,7 @@ texture_font_new_from_file(texture_atlas_t *atlas, const float pt_size,
 
     self = calloc(1, sizeof(*self));
     if (!self) {
-        fprintf(stderr,
+        log_error(
                 "line %d: No more memory for allocating data\n", __LINE__);
         return NULL;
     }
@@ -350,7 +335,7 @@ texture_font_new_from_memory(texture_atlas_t *atlas, float pt_size,
 
     self = calloc(1, sizeof(*self));
     if (!self) {
-        fprintf(stderr,
+        log_error(
                 "line %d: No more memory for allocating data\n", __LINE__);
         return NULL;
     }
@@ -463,7 +448,7 @@ texture_font_load_glyph( texture_font_t * self,
                                             -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
         if ( region.x < 0 )
         {
-            fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
+            log_error( "Texture atlas is full (line %d)\n",  __LINE__ );
             FT_Done_Face( face );
             FT_Done_FreeType( library );
             return 0;
@@ -532,8 +517,8 @@ texture_font_load_glyph( texture_font_t * self,
     error = FT_Load_Glyph( face, glyph_index, flags );
     if( error )
     {
-        fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-                 __LINE__, error, FT_Error_String(error) );
+        log_error( "FT_Error (line %d, code 0x%02x) : %s\n",
+                 __LINE__, error, FTGL_Error_String(error) );
         FT_Done_Face( face );
         FT_Done_FreeType( library );
         return 0;
@@ -555,8 +540,8 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf( stderr, "FT_Error (line %d, 0x%02x) : %s\n",
-                     __LINE__, error, FT_Error_String(error) );
+            log_error( "FT_Error (line %d, 0x%02x) : %s\n",
+                     __LINE__, error, FTGL_Error_String(error) );
             goto cleanup_stroker;
         }
 
@@ -570,8 +555,8 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf( stderr, "FT_Error (line %d, 0x%02x) : %s\n",
-                     __LINE__, error, FT_Error_String(error) );
+            log_error( "FT_Error (line %d, 0x%02x) : %s\n",
+                     __LINE__, error, FTGL_Error_String(error) );
             goto cleanup_stroker;
         }
 
@@ -584,8 +569,8 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf( stderr, "FT_Error (line %d, 0x%02x) : %s\n",
-                     __LINE__, error, FT_Error_String(error) );
+            log_error( "FT_Error (line %d, 0x%02x) : %s\n",
+                     __LINE__, error, FTGL_Error_String(error) );
             goto cleanup_stroker;
         }
 
@@ -596,8 +581,8 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf( stderr, "FT_Error (line %d, 0x%02x) : %s\n",
-                     __LINE__, error, FT_Error_String(error) );
+            log_error( "FT_Error (line %d, 0x%02x) : %s\n",
+                     __LINE__, error, FTGL_Error_String(error) );
             goto cleanup_stroker;
         }
 
@@ -648,7 +633,7 @@ cleanup_stroker:
 
     if ( region.x < 0 )
     {
-        fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
+        log_error( "Texture atlas is full (line %d)\n",  __LINE__ );
         FT_Done_Face( face );
         FT_Done_FreeType( library );
         return 0;

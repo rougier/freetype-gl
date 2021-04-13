@@ -329,21 +329,6 @@ typedef struct texture_font_t
 
 } texture_font_t;
 
-/**
- * This function sets 
- *
- * @param atlas     A texture atlas
- * @param pt_size   Size of font to be created (in points)
- * @param filename  A font filename
- *
- * @return A new empty font (no glyph inside yet)
- *
- */
- typedef void (*error_callback_t) (const char *fmt, ...);
- void error_callback_default(const char *fmt, ...);
- static error_callback_t log_error;
- void
- ftgl_set_error_callback(error_callback_t error_callback);
 
 
 /**
