@@ -43,6 +43,22 @@ const char* FT_Error_String( FT_Error error_code )
     return "INVALID ERROR CODE";
 }
 
+error_callback_t log_error = error_callback_default;
+void
+error_callback_default(const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(stderr, fmt, args);
+    va_end(args);
+}
+void
+ftgl_set_error_callback(error_callback_t error_callback)
+{
+    log_error = error_callback;
+}
+
+
 // ------------------------------------------------- texture_font_load_face ---
 static int
 texture_font_load_face(texture_font_t *self, float size,
