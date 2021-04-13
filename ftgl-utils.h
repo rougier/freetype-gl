@@ -16,22 +16,28 @@ extern "C" {
 namespace ftgl {
 #endif
 
- /**
-  * This function sets
-  *
-  * @param atlas     A texture atlas
-  * @param pt_size   Size of font to be created (in points)
-  * @param filename  A font filename
-  *
-  * @return A new empty font (no glyph inside yet)
-  *
-  */
+
 typedef void (*error_callback_t) (const char *fmt, ...);
 extern error_callback_t log_error;
-void
-error_callback_default(const char *fmt, ...);
-void
-ftgl_set_error_callback(error_callback_t error_callback);
+
+/**
+ * Prints input to stderr
+ * This is fallback function for error reporting if ftgl_set_error_callback() wans't called
+ *
+ * @param fmt       cstring to be printed matching C-style printing syntax
+ * @param ...       va_list fmt supplying arguments
+ */
+  void
+  error_callback_default(const char *fmt, ...);
+
+/**
+ * Set function to call on error handling
+ * This is fallback function for error reporting if ftgl_set_error_callback() wans't called
+ *
+ * @param error_cb  callback function to call on error, see error_callback_default for reference
+ */
+  void
+  set_error_callback(error_callback_t error_cb);
 
 #ifdef __cplusplus
 }

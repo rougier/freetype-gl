@@ -6,6 +6,8 @@
 #include "ftgl-utils.h"
 
 error_callback_t log_error = error_callback_default;
+
+// ------------------------------------------------- error_callback_default ---
 void
 error_callback_default(const char *fmt, ...)
 {
@@ -14,8 +16,10 @@ error_callback_default(const char *fmt, ...)
     vfprintf(stderr, fmt, args);
     va_end(args);
 }
+
+// ----------------------------------------------------- set_error_callback ---
 void
-ftgl_set_error_callback(error_callback_t error_callback)
+set_error_callback(error_callback_t error_cb)
 {
-    log_error = error_callback;
+    log_error = error_cb;
 }
