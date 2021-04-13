@@ -22,15 +22,26 @@
 #define HRESf 64.f
 #define DPI   72
 
-#undef __FTERRORS_H__
-#define FT_ERRORDEF( e, v, s )  { e, s },
-#define FT_ERROR_START_LIST     {
-#define FT_ERROR_END_LIST       { 0, 0 } };
-const struct {
-    int          code;
-    const char*  message;
-} FT_Errors[] =
+static float convert_F26Dot6_to_float(FT_F26Dot6 value)
+{
+  return ((float)value) / 64.0;
+}
+static FT_F26Dot6 convert_float_to_F26Dot6(float value)
+{
+  return (FT_F26Dot6) (value * 64.0);
+}
+
+#undef FTERRORS_H_
+#define FT_ERROR_START_LIST     switch ( error_code ) {
+#define FT_ERRORDEF( e, v, s )    case v: return s;
+#define FT_ERROR_END_LIST       }
+// Same signature as the function defined in fterrors.h:
+// https://www.freetype.org/freetype2/docs/reference/ft2-error_enumerations.html#ft_error_string
+const char* FT_Error_String( FT_Error error_code )
+{
 #include FT_ERRORS_H
+    return "INVALID ERROR CODE";
+}
 
 // ------------------------------------------------- texture_font_load_face ---
 static int
@@ -49,9 +60,10 @@ texture_font_load_face(texture_font_t *self, float size,
 
     /* Initialize library */
     error = FT_Init_FreeType(library);
-    if(error) {
-        fprintf(stderr, "FT_Error (0x%02x) : %s\n",
-                FT_Errors[error].code, FT_Errors[error].message);
+    if( error )
+    {
+        fprintf( stderr, "FT_Error (line %d, 0x%02x) : %s\n",
+                 __LINE__, error, FT_Error_String(error) );
         goto cleanup;
     }
 
@@ -67,26 +79,40 @@ texture_font_load_face(texture_font_t *self, float size,
         break;
     }
 
-    if(error) {
-        fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-                __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+    if( error )
+    {
+        fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+                 __LINE__, error, FT_Error_String(error) );
         goto cleanup_library;
     }
 
     /* Select charmap */
     error = FT_Select_Charmap(*face, FT_ENCODING_UNICODE);
-    if(error) {
-        fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-                __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+    if( error )
+    {
+        fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+                 __LINE__, error, FT_Error_String(error) );
         goto cleanup_face;
     }
 
     /* Set char size */
-    error = FT_Set_Char_Size(*face, (int)(size * HRES), 0, DPI * HRES, DPI);
+    /* See page 24 of “Higher Quality 2D Text Rendering”:
+     * http://jcgt.org/published/0002/01/04/
+     * “To render high-quality text, Shemarev [2007] recommends using only
+     *  vertical hinting and completely discarding the horizontal hints.
+     *  Hinting is the responsibility of the rasterization engine (FreeType in
+     *  our case) which provides no option to specifically discard horizontal
+     *  hinting. In the case of the FreeType library, we can nonetheless trick
+     *  the engine by specifying an oversized horizontal DPI (100 times the
+     *  vertical) while specifying a transformation matrix that scale down the
+     *  glyph as shown in Listing 1.”
+     * That horizontal DPI factor is HRES here. */
+    error = FT_Set_Char_Size(*face, convert_float_to_F26Dot6(size), 0, DPI * HRES, DPI);
 
-    if(error) {
-        fprintf(stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-                __LINE__, FT_Errors[error].code, FT_Errors[error].message);
+    if( error )
+    {
+        fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
+                 __LINE__, error, FT_Error_String(error) );
         goto cleanup_face;
     }
 
@@ -186,13 +212,17 @@ texture_font_generate_kerning( texture_font_t *self,
         {
             prev_glyph = *(texture_glyph_t **) vector_get( self->glyphs, j );
             prev_index = FT_Get_Char_Index( *face, prev_glyph->codepoint );
+            // FT_KERNING_UNFITTED returns FT_F26Dot6 values.
             FT_Get_Kerning( *face, prev_index, glyph_index, FT_KERNING_UNFITTED, &kerning );
             // printf("%c(%d)-%c(%d): %ld\n",
             //       prev_glyph->codepoint, prev_glyph->codepoint,
             //       glyph_index, glyph_index, kerning.x);
             if( kerning.x )
             {
-                kerning_t k = {prev_glyph->codepoint, kerning.x / (float)(HRESf*HRESf)};
+                kerning_t k = {
+                  prev_glyph->codepoint,
+                  convert_F26Dot6_to_float(kerning.x) / HRESf
+                };
                 vector_push_back( glyph->kerning, &k );
             }
         }
@@ -231,7 +261,7 @@ texture_font_init(texture_font_t *self)
     self->lcd_weights[3] = 0x40;
     self->lcd_weights[4] = 0x10;
 
-    if (!texture_font_load_face(self, self->size * 100.f, &library, &face))
+    if (!texture_font_load_face(self, self->size, &library, &face))
         return -1;
 
     self->underline_position = face->underline_position / (float)(HRESf*HRESf) * self->size;
@@ -249,9 +279,9 @@ texture_font_init(texture_font_t *self)
     }
 
     metrics = face->size->metrics;
-    self->ascender = (metrics.ascender >> 6) / 100.0;
-    self->descender = (metrics.descender >> 6) / 100.0;
-    self->height = (metrics.height >> 6) / 100.0;
+    self->ascender  = metrics.ascender  >> 6;
+    self->descender = metrics.descender >> 6;
+    self->height    = metrics.height    >> 6;
     self->linegap = self->height - self->ascender + self->descender;
     FT_Done_Face( face );
     FT_Done_FreeType( library );
@@ -470,12 +500,24 @@ texture_font_load_glyph( texture_font_t * self,
             FT_Library_SetLcdFilterWeights( library, self->lcd_weights );
         }
     }
+    else if (HRES == 1)
+    {
+        /* “FT_LOAD_TARGET_LIGHT
+         *  A lighter hinting algorithm for gray-level modes. Many generated
+         *  glyphs are fuzzier but better resemble their original shape.
+         *  This is achieved by snapping glyphs to the pixel grid
+         *  only vertically (Y-axis), as is done by FreeType's new CFF engine
+         *  or Microsoft's ClearType font renderer.”
+         * https://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#ft_load_target_xxx
+         */
+        flags |= FT_LOAD_TARGET_LIGHT;
+    }
 
     error = FT_Load_Glyph( face, glyph_index, flags );
     if( error )
     {
         fprintf( stderr, "FT_Error (line %d, code 0x%02x) : %s\n",
-                 __LINE__, FT_Errors[error].code, FT_Errors[error].message );
+                 __LINE__, error, FT_Error_String(error) );
         FT_Done_Face( face );
         FT_Done_FreeType( library );
         return 0;
@@ -497,8 +539,8 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf(stderr, "FT_Error (0x%02x) : %s\n",
-                    FT_Errors[error].code, FT_Errors[error].message);
+            fprintf( stderr, "FT_Error (line %d, 0x%02x) : %s\n",
+                     __LINE__, error, FT_Error_String(error) );
             goto cleanup_stroker;
         }
 
@@ -512,8 +554,8 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf(stderr, "FT_Error (0x%02x) : %s\n",
-                    FT_Errors[error].code, FT_Errors[error].message);
+            fprintf( stderr, "FT_Error (line %d, 0x%02x) : %s\n",
+                     __LINE__, error, FT_Error_String(error) );
             goto cleanup_stroker;
         }
 
@@ -526,8 +568,8 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf(stderr, "FT_Error (0x%02x) : %s\n",
-                    FT_Errors[error].code, FT_Errors[error].message);
+            fprintf( stderr, "FT_Error (line %d, 0x%02x) : %s\n",
+                     __LINE__, error, FT_Error_String(error) );
             goto cleanup_stroker;
         }
 
@@ -538,8 +580,8 @@ texture_font_load_glyph( texture_font_t * self,
 
         if( error )
         {
-            fprintf(stderr, "FT_Error (0x%02x) : %s\n",
-                    FT_Errors[error].code, FT_Errors[error].message);
+            fprintf( stderr, "FT_Error (line %d, 0x%02x) : %s\n",
+                     __LINE__, error, FT_Error_String(error) );
             goto cleanup_stroker;
         }
 
@@ -638,8 +680,8 @@ cleanup_stroker:
     // Discard hinting to get advance
     FT_Load_Glyph( face, glyph_index, FT_LOAD_RENDER | FT_LOAD_NO_HINTING);
     slot = face->glyph;
-    glyph->advance_x = slot->advance.x / HRESf;
-    glyph->advance_y = slot->advance.y / HRESf;
+    glyph->advance_x = convert_F26Dot6_to_float(slot->advance.x);
+    glyph->advance_y = convert_F26Dot6_to_float(slot->advance.y);
 
     vector_push_back( self->glyphs, &glyph );
 

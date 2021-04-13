@@ -141,7 +141,16 @@ set(FREETYPE_GL_SRC
     vertex-buffer.c
 )
 
-add_library(freetype-gl STATIC
+if(NOT MSVC)
+	set(PKG_CONFIG_PREFIX ${CMAKE_INSTALL_PREFIX})
+	set(PKG_CONFIG_EXEC_PREFIX "\${prefix}")
+	set(PKG_CONFIG_LIBDIR "\${exec_prefix}/lib")
+	set(PKG_CONFIG_INCLUDEDIR "\${prefix}/include")
+	configure_file(freetype-gl.pc.in ${CMAKE_CURRENT_BINARY_DIR}/freetype-gl.pc @ONLY)
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/freetype-gl.pc DESTINATION ${PKG_CONFIG_PREFIX}/share/pkgconfig)
+endif()
+
+add_library(freetype-gl
     ${FREETYPE_GL_SRC}
     ${FREETYPE_GL_HDR}
 )
