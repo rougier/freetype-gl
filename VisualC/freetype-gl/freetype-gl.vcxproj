@@ -175,6 +175,7 @@
     <ClInclude Include="..\..\edtaa3func.h" />
     <ClInclude Include="..\..\font-manager.h" />
     <ClInclude Include="..\..\freetype-gl.h" />
+    <ClInclude Include="..\..\ftgl-utils.h" />
     <ClInclude Include="..\..\markup.h" />
     <ClInclude Include="..\..\opengl.h" />
     <ClInclude Include="..\..\platform.h" />
@@ -193,6 +194,7 @@
     <ClCompile Include="..\..\distance-field.c" />
     <ClCompile Include="..\..\edtaa3func.c" />
     <ClCompile Include="..\..\font-manager.c" />
+    <ClCompile Include="..\..\ftgl-utils.c" />
     <ClCompile Include="..\..\makefont.c" />
     <ClCompile Include="..\..\platform.c" />
     <ClCompile Include="..\..\text-buffer.c" />

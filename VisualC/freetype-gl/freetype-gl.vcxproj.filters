@@ -78,6 +78,9 @@
     <ClInclude Include="..\..\vertex-buffer.h">
       <Filter>Header Files\Original</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\ftgl-utils.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\distance-field.c">
@@ -118,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="Development\stdafx.c">
       <Filter>Source Files\Development</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ftgl-utils.c">
+      <Filter>Source Files\Original</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
