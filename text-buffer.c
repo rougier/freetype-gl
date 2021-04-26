@@ -12,6 +12,7 @@
 #include "opengl.h"
 #include "text-buffer.h"
 #include "utf8-utils.h"
+#include "ftgl-utils.h"
 
 #define SET_GLYPH_VERTEX(value,x0,y0,z0,s0,t0,r,g,b,a,sh,gm) { \
     glyph_vertex_t *gv=&value;                                 \
@@ -191,7 +192,7 @@ text_buffer_add_text( text_buffer_t * self,
 
     if( !markup->font )
     {
-        fprintf( stderr, "Houston, we've got a problem !\n" );
+        log_error( "Houston, we've got a problem !\n" );
         return;
     }
 

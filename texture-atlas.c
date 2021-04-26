@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <limits.h>
 #include "texture-atlas.h"
+#include "ftgl-utils.h"
 
 
 // ------------------------------------------------------ texture_atlas_new ---
@@ -26,7 +27,7 @@ texture_atlas_new( const size_t width,
     assert( (depth == 1) || (depth == 3) || (depth == 4) );
     if( self == NULL)
     {
-        fprintf( stderr,
+        log_error(
                  "line %d: No more memory for allocating data\n", __LINE__ );
         exit( EXIT_FAILURE );
     }
@@ -43,7 +44,7 @@ texture_atlas_new( const size_t width,
 
     if( self->data == NULL)
     {
-        fprintf( stderr,
+        log_error(
                  "line %d: No more memory for allocating data\n", __LINE__ );
         exit( EXIT_FAILURE );
     }
@@ -214,7 +215,7 @@ texture_atlas_get_region( texture_atlas_t * self,
     node = (ivec3 *) malloc( sizeof(ivec3) );
     if( node == NULL)
     {
-        fprintf( stderr,
+        log_error(
                  "line %d: No more memory for allocating data\n", __LINE__ );
         exit( EXIT_FAILURE );
     }

@@ -10,6 +10,7 @@
 #include "vec234.h"
 #include "platform.h"
 #include "vertex-attribute.h"
+#include "ftgl-utils.h"
 
 
 
@@ -67,7 +68,7 @@ vertex_attribute_parse( char *format )
         name = strndup(format, p-format);
         if( *(++p) == '\0' )
         {
-            fprintf( stderr, "No size specified for '%s' attribute\n", name );
+            log_error( "No size specified for '%s' attribute\n", name );
             free( name );
             return 0;
         }
@@ -75,7 +76,7 @@ vertex_attribute_parse( char *format )
 
         if( *(++p) == '\0' )
         {
-            fprintf( stderr, "No format specified for '%s' attribute\n", name );
+            log_error( "No format specified for '%s' attribute\n", name );
             free( name );
             return 0;
         }
@@ -92,7 +93,7 @@ vertex_attribute_parse( char *format )
     }
     else
     {
-        fprintf(stderr, "Vertex attribute format not understood ('%s')\n", format );
+        log_error( "Vertex attribute format not understood ('%s')\n", format );
         return 0;
     }
 

@@ -121,6 +121,7 @@ set(FREETYPE_GL_HDR
     texture-atlas.h
     texture-font.h
     utf8-utils.h
+    ftgl-utils.h
     vec234.h
     vector.h
     vertex-attribute.h
@@ -136,6 +137,7 @@ set(FREETYPE_GL_SRC
     texture-atlas.c
     texture-font.c
     utf8-utils.c
+    ftgl-utils.c
     vector.c
     vertex-attribute.c
     vertex-buffer.c
