@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "font-manager.h"
+#include "ftgl-utils.h"
 
 
 // ------------------------------------------------------------ file_exists ---
@@ -38,7 +39,7 @@ font_manager_new( size_t width, size_t height, size_t depth )
     self = (font_manager_t *) malloc( sizeof(font_manager_t) );
     if( !self )
     {
-        fprintf( stderr,
+        log_error(
                  "line %d: No more memory for allocating data\n", __LINE__ );
         exit( EXIT_FAILURE );
     }
@@ -124,7 +125,7 @@ font_manager_get_from_filename( font_manager_t *self,
         texture_font_load_glyphs( font, self->cache );
         return font;
     }
-    fprintf( stderr, "Unable to load \"%s\" (size=%.1f)\n", filename, size );
+    log_error( "Unable to load \"%s\" (size=%.1f)\n", filename, size );
     return 0;
 }
 
@@ -149,13 +150,13 @@ font_manager_get_from_description( font_manager_t *self,
     else
     {
 #if defined(_WIN32) || defined(_WIN64)
-        fprintf( stderr, "\"font_manager_get_from_description\" not implemented yet.\n" );
+        log_error( "\"font_manager_get_from_description\" not implemented yet.\n" );
         return 0;
 #endif
         filename = font_manager_match_description( self, family, size, bold, italic );
         if( !filename )
         {
-            fprintf( stderr, "No \"%s (size=%.1f, bold=%d, italic=%d)\" font available.\n",
+            log_error( "No \"%s (size=%.1f, bold=%d, italic=%d)\" font available.\n",
                      family, size, bold, italic );
             return 0;
         }
@@ -191,7 +192,7 @@ font_manager_match_description( font_manager_t * self,
     return 0;
 #else
 #  if defined _WIN32 || defined _WIN64
-      fprintf( stderr, "\"font_manager_match_description\" not implemented for windows.\n" );
+      log_error( "\"font_manager_match_description\" not implemented for windows.\n" );
       return 0;
 #  endif
     char *filename = 0;
@@ -219,7 +220,7 @@ font_manager_match_description( font_manager_t * self,
 
     if ( !match )
     {
-        fprintf( stderr, "fontconfig error: could not match family '%s'", family );
+        log_error( "fontconfig error: could not match family '%s'", family );
         return 0;
     }
     else
@@ -228,7 +229,7 @@ font_manager_match_description( font_manager_t * self,
         FcResult result = FcPatternGet( match, FC_FILE, 0, &value );
         if ( result )
         {
-            fprintf( stderr, "fontconfig error: could not match family '%s'", family );
+            log_error( "fontconfig error: could not match family '%s'", family );
         }
         else
         {

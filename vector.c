@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "vector.h"
+#include "ftgl-utils.h"
 
 
 
@@ -20,7 +21,7 @@ vector_new( size_t item_size )
 
     if( !self )
     {
-        fprintf( stderr,
+        log_error(
                  "line %d: No more memory for allocating data\n", __LINE__ );
         exit( EXIT_FAILURE );
     }
