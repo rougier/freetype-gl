@@ -667,6 +667,7 @@ cleanup_stroker:
 
     glyph = texture_glyph_new( );
     glyph->codepoint = utf8_to_utf32( codepoint );
+    glyph->is_placeholder = glyph_index == 0;
     glyph->width    = tgt_w;
     glyph->height   = tgt_h;
     glyph->rendermode = self->rendermode;

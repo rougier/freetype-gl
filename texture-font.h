@@ -193,6 +193,11 @@ typedef struct texture_glyph_t
      * Glyph outline thickness
      */
     float outline_thickness;
+    
+    /**
+     * Whether the glyph is a placeholder for a glyph that doesn't exist in the font
+     */
+    int is_placeholder;
 
 } texture_glyph_t;
 
