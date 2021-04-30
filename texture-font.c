@@ -32,16 +32,30 @@ static FT_F26Dot6 convert_float_to_F26Dot6(float value)
   return (FT_F26Dot6) (value * 64.0);
 }
 
-#undef FTERRORS_H_
-#define FT_ERROR_START_LIST     switch ( error_code ) {
-#define FT_ERRORDEF( e, v, s )    case v: return s;
-#define FT_ERROR_END_LIST       }
-// Same signature as the function defined in fterrors.h:
+// Follows same logic as example provided by documentation:
 // https://www.freetype.org/freetype2/docs/reference/ft2-error_enumerations.html#FTGL_Error_String
 const char* FTGL_Error_String( FT_Error error_code )
 {
+    /* Depending on freetype version header guard macro may vary */
+#undef __FTERRORS_H__
+#undef FTERRORS_H_
+
+    /* Stream error string table defined in header FT_ERRORS_H to hard-code strings into this lib */
+#define FT_ERRORDEF( e, v, s )  case e: return s;
+#define FT_ERROR_START_LIST     switch (error_code) {
+#define FT_ERROR_END_LIST       }
 #include FT_ERRORS_H
-    return "INVALID ERROR CODE";
+
+    /* Fallback if error code was not present in hard coded table (version mismatch between compiled/linked freetype) */
+    return "unknown error";
+
+    /* Redefine undefs in case of clashes later on */
+#ifndef __FTERRORS_H__
+#define __FTERRORS_H__
+#endif
+#ifndef FTERRORS_H_
+#define FTERRORS_H_
+#endif
 }
 
 // ------------------------------------------------- texture_font_load_face ---
