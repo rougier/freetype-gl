@@ -533,6 +533,10 @@ texture_font_load_glyph( texture_font_t * self,
          */
         flags |= FT_LOAD_TARGET_LIGHT;
     }
+    
+    if( self->rendermode == RENDER_NORMAL ) {
+        flags |= FT_LOAD_COLOR;
+    }
 
     error = FT_Load_Glyph( face, glyph_index, flags );
     if( error )
@@ -594,10 +598,10 @@ texture_font_load_glyph( texture_font_t * self,
             goto cleanup_stroker;
         }
 
-        if( self->atlas->depth == 1 )
-            error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_NORMAL, 0, 1);
-        else
+        if( self->atlas->depth == 3 )
             error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_LCD, 0, 1);
+        else
+            error = FT_Glyph_To_Bitmap( &ft_glyph, FT_RENDER_MODE_NORMAL, 0, 1);
 
         if( error )
         {
@@ -643,8 +647,9 @@ cleanup_stroker:
         padding.bottom += self->padding;
     }
 
-    size_t src_w = ft_bitmap.width/self->atlas->depth;
+    size_t src_w = ft_bitmap.width;
     size_t src_h = ft_bitmap.rows;
+    if( ft_bitmap.pixel_mode == FT_PIXEL_MODE_LCD ) src_w /= 3;
 
     size_t tgt_w = src_w + padding.left + padding.right;
     size_t tgt_h = src_h + padding.top + padding.bottom;
@@ -662,18 +667,57 @@ cleanup_stroker:
     x = region.x;
     y = region.y;
 
+    // Copy pixel data over
     unsigned char *buffer = calloc( tgt_w * tgt_h * self->atlas->depth, sizeof(unsigned char) );
-
     unsigned char *dst_ptr = buffer + (padding.top * tgt_w + padding.left) * self->atlas->depth;
-    unsigned char *src_ptr = ft_bitmap.buffer;
-    for( i = 0; i < src_h; i++ )
+    
+    
+    if( ft_bitmap.pixel_mode == FT_PIXEL_MODE_BGRA )
     {
-        //difference between width and pitch: https://www.freetype.org/freetype2/docs/reference/ft2-basic_types.html#FT_Bitmap
-        memcpy( dst_ptr, src_ptr, ft_bitmap.width);
-        dst_ptr += tgt_w * self->atlas->depth;
-        src_ptr += ft_bitmap.pitch;
+        struct src_pixel_t { uint8_t b; uint8_t g; uint8_t r; uint8_t a; } * src = (struct src_pixel_t *)ft_bitmap.buffer;
+        if( self->atlas->depth == 4 )
+        {
+            // Reorder components into RBGA for buffer
+            struct dst_pixel_t { uint8_t r; uint8_t g; uint8_t b; uint8_t a; } * dst = (struct dst_pixel_t *)dst_ptr;
+            for( int row = 0; row < src_h; row++, dst += tgt_w ) {
+                for( int col = 0; col < src_w; col++, src++ ) {
+                    dst[col] = (struct dst_pixel_t){ src->r, src->g, src->b, src->a };
+                }
+            }
+        }
+        else if( ft_bitmap.pixel_mode == FT_PIXEL_MODE_BGRA && self->atlas->depth == 1 )
+        {
+            // RGBA in, grey out: Use weighted sum for luminosity, and multiply by alpha.
+            for( int row = 0; row < src_h; row++, dst_ptr += tgt_w * self->atlas->depth ) {
+                for( int col = 0; col < src_w; col++, src++ ) {
+                    dst_ptr[col] = (0.3*src->r + 0.59*src->g + 0.11*src->b) * (src->a/255.0);
+                }
+            }
+        }
     }
-
+    else if( ft_bitmap.pixel_mode == FT_PIXEL_MODE_GRAY && self->atlas->depth == 4 ) {
+        // Grey in, RGBA out: Use grey level for alpha channel, with white color
+        unsigned char *src_ptr = ft_bitmap.buffer;
+        struct dst_pixel_t { uint8_t r; uint8_t g; uint8_t b; uint8_t a; } * dst = (struct dst_pixel_t *)dst_ptr;
+        for( int row = 0; row < src_h; row++, dst += tgt_w ) {
+            for( int col = 0; col < src_w; col++, src_ptr++ ) {
+                dst[col] = (struct dst_pixel_t){ 255, 255, 255, *src_ptr };
+            }
+        }
+    }
+    else
+    {
+        // Straight copy, per row
+        unsigned char *src_ptr = ft_bitmap.buffer;
+        for( i = 0; i < src_h; i++ )
+        {
+            //difference between width and pitch: https://www.freetype.org/freetype2/docs/reference/ft2-basic_types.html#FT_Bitmap
+            memcpy( dst_ptr, src_ptr, ft_bitmap.width);
+            dst_ptr += tgt_w * self->atlas->depth;
+            src_ptr += ft_bitmap.pitch;
+        }
+    }
+    
     if( self->rendermode == RENDER_SIGNED_DISTANCE_FIELD )
     {
         unsigned char *sdf = make_distance_mapb( buffer, tgt_w, tgt_h );
