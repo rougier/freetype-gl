@@ -109,6 +109,26 @@ texture_font_load_face(texture_font_t *self, float size,
      *  glyph as shown in Listing 1.”
      * That horizontal DPI factor is HRES here. */
     error = FT_Set_Char_Size(*face, convert_float_to_F26Dot6(size), 0, DPI * HRES, DPI);
+    
+    if( error && FT_HAS_FIXED_SIZES( *face ) )
+    {
+        // This font has fixed sizes; find the closest one and select that
+        float charsize = convert_float_to_F26Dot6(size);
+        float closest_y_ppem = 0;
+        float closest_x_ppem = 0;
+        float min_diff = INFINITY;
+        for( int i=0; i<(*face)->num_fixed_sizes; i++ )
+        {
+            float diff = (*face)->available_sizes[i].y_ppem - charsize;
+            if ( diff < min_diff ) {
+                min_diff = diff;
+                closest_y_ppem = (*face)->available_sizes[i].y_ppem;
+                closest_x_ppem = (*face)->available_sizes[i].x_ppem;
+            }
+        }
+        
+        error = FT_Set_Char_Size(*face, closest_y_ppem, closest_x_ppem, DPI, DPI);
+    }
 
     if( error )
     {
