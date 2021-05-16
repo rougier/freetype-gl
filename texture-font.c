@@ -415,16 +415,16 @@ texture_font_find_glyph( texture_font_t * self,
     return NULL;
 }
 
-// ------------------------------------------------ texture_font_load_glyph ---
+// ------------------------------------------------ texture_font_load_glyph_single ---
 int
-texture_font_load_glyph( texture_font_t * self,
-                         const char * codepoint )
+texture_font_load_glyph_single( texture_font_t * self,
+                                const char * codepoint,
+                                FT_Library library,
+                                FT_Face face)
 {
     size_t i, x, y;
 
-    FT_Library library;
     FT_Error error;
-    FT_Face face;
     FT_Glyph ft_glyph;
     FT_GlyphSlot slot;
     FT_Bitmap ft_bitmap;
@@ -438,14 +438,8 @@ texture_font_load_glyph( texture_font_t * self,
     ivec4 region;
     size_t missed = 0;
 
-
-    if (!texture_font_load_face(self, self->size, &library, &face))
-        return 0;
-
     /* Check if codepoint has been already loaded */
     if (texture_font_find_glyph(self, codepoint)) {
-        FT_Done_Face(face);
-        FT_Done_FreeType(library);
         return 1;
     }
 
@@ -463,8 +457,6 @@ texture_font_load_glyph( texture_font_t * self,
         if ( region.x < 0 )
         {
             log_error( "Texture atlas is full (line %d)\n",  __LINE__ );
-            FT_Done_Face( face );
-            FT_Done_FreeType( library );
             return 0;
         }
         texture_atlas_set_region( self->atlas, region.x, region.y, 4, 4, data, 0 );
@@ -474,9 +466,6 @@ texture_font_load_glyph( texture_font_t * self,
         glyph->s1 = (region.x+3)/(float)self->atlas->width;
         glyph->t1 = (region.y+3)/(float)self->atlas->height;
         vector_push_back( self->glyphs, &glyph );
-
-        FT_Done_Face(face);
-        FT_Done_FreeType(library);
         return 1;
     }
 
@@ -533,8 +522,6 @@ texture_font_load_glyph( texture_font_t * self,
     {
         log_error( "FT_Error (line %d, code 0x%02x) : %s\n",
                  __LINE__, error, FTGL_Error_String(error) );
-        FT_Done_Face( face );
-        FT_Done_FreeType( library );
         return 0;
     }
 
@@ -610,8 +597,6 @@ cleanup_stroker:
 
         if( error )
         {
-            FT_Done_Face( face );
-            FT_Done_FreeType( library );
             return 0;
         }
     }
@@ -648,8 +633,6 @@ cleanup_stroker:
     if ( region.x < 0 )
     {
         log_error( "Texture atlas is full (line %d)\n",  __LINE__ );
-        FT_Done_Face( face );
-        FT_Done_FreeType( library );
         return 0;
     }
 
@@ -705,10 +688,31 @@ cleanup_stroker:
 
     texture_font_generate_kerning( self, &library, &face );
 
-    FT_Done_Face( face );
-    FT_Done_FreeType( library );
-
     return 1;
+}
+
+// ------------------------------------------------ texture_font_load_glyph ---
+int
+texture_font_load_glyph( texture_font_t * self,
+                         const char * codepoint)
+{
+    /* Check if codepoint has been already loaded */
+    if (texture_font_find_glyph(self, codepoint)) {
+        return 1;
+    }
+    
+    /* Load font */
+    FT_Library library;
+    FT_Face face;
+    if (!texture_font_load_face(self, self->size, &library, &face))
+        return 0;
+    
+    /* Load glyph */
+    int result = texture_font_load_glyph_single(self, codepoint, library, face);
+    
+    FT_Done_Face(face);
+    FT_Done_FreeType(library);
+    return result;
 }
 
 // ----------------------------------------------- texture_font_load_glyphs ---
@@ -716,14 +720,25 @@ size_t
 texture_font_load_glyphs( texture_font_t * self,
                           const char * codepoints )
 {
+    /* Load font */
+    FT_Library library;
+    FT_Face face;
+    if (!texture_font_load_face(self, self->size, &library, &face))
+        return 0;
+
     size_t i, c;
 
     /* Load each glyph */
     for( i = 0; i < strlen(codepoints); i += utf8_surrogate_len(codepoints + i) ) {
-        if( !texture_font_load_glyph( self, codepoints + i ) )
+        if( !texture_font_load_glyph_single( self, codepoints + i, library, face ) ) {
+            FT_Done_Face(face);
+            FT_Done_FreeType(library);
             return utf8_strlen( codepoints + i );
+        }
     }
-
+    
+    FT_Done_Face(face);
+    FT_Done_FreeType(library);
     return 0;
 }
 
