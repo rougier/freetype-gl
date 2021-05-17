@@ -20,19 +20,33 @@
 #include "platform.h"
 #include "utf8-utils.h"
 #include "freetype-gl-err.h"
+#include "ftgl-utils.h"
 
 #define HRES  64
 #define HRESf 64.f
 #define DPI   72
 
+static float convert_F26Dot6_to_float(FT_F26Dot6 value)
+{
+  return ((float)value) / 64.0;
+}
+static FT_F26Dot6 convert_float_to_F26Dot6(float value)
+{
+  return (FT_F26Dot6) (value * 64.0);
+}
+
+// Follows same logic as example provided by documentation:
+// https://www.freetype.org/freetype2/docs/reference/ft2-error_enumerations.html#FTGL_Error_String
+const char* FTGL_Error_String( FT_Error error_code )
+{
+    /* Depending on freetype version header guard macro may vary */
 #undef __FTERRORS_H__
-#define FT_ERRORDEF( e, v, s )  { e, s },
-#define FT_ERROR_START_LIST     {
-#define FT_ERROR_END_LIST       { 0, 0 } };
-const struct {
-    int          code;
-    const char*  message;
-} FT_Errors[] =
+#undef FTERRORS_H_
+
+    /* Stream error string table defined in header FT_ERRORS_H to hard-code strings into this lib */
+#define FT_ERRORDEF( e, v, s )  case e: return s;
+#define FT_ERROR_START_LIST     switch (error_code) {
+#define FT_ERROR_END_LIST       }
 #include FT_ERRORS_H
 
 // per-thread library
@@ -716,6 +730,18 @@ texture_font_load_glyph( texture_font_t * self,
             FT_Library_SetLcdFilterWeights( self->library->library, self->lcd_weights );
         }
     }
+    else if (HRES == 1)
+    {
+        /* “FT_LOAD_TARGET_LIGHT
+         *  A lighter hinting algorithm for gray-level modes. Many generated
+         *  glyphs are fuzzier but better resemble their original shape.
+         *  This is achieved by snapping glyphs to the pixel grid
+         *  only vertically (Y-axis), as is done by FreeType's new CFF engine
+         *  or Microsoft's ClearType font renderer.”
+         * https://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#ft_load_target_xxx
+         */
+        flags |= FT_LOAD_TARGET_LIGHT;
+    }
 
     if( self->atlas->depth == 4 )
     {
@@ -840,6 +866,14 @@ cleanup_stroker:
         padding.left = 1;
     }
 
+    if( self->padding != 0 )
+    {
+        padding.top += self->padding;
+        padding.left += self->padding;
+        padding.right += self->padding;
+        padding.bottom += self->padding;
+    }
+
     size_t src_w = self->atlas->depth == 3 ? ft_bitmap.width/3 : ft_bitmap.width;
     size_t src_h = ft_bitmap.rows;
 
@@ -947,7 +981,7 @@ size_t
 texture_font_load_glyphs( texture_font_t * self,
                           const char * codepoints )
 {
-    size_t i;
+    size_t i, c;
 
     self->mode++;
 
@@ -1000,23 +1034,24 @@ texture_font_enlarge_texture( texture_font_t * self, size_t width_new,
     //ensure size increased
     assert(width_new >= self->atlas->width);
     assert(height_new >= self->atlas->height);
-    assert(width_new + height_new > self->atlas->width + self->atlas->height);    
+    assert(width_new + height_new > self->atlas->width + self->atlas->height);
     texture_atlas_t* ta = self->atlas;
     size_t width_old = ta->width;
-    size_t height_old = ta->height;    
+    size_t height_old = ta->height;
     //allocate new buffer
     unsigned char* data_old = ta->data;
-    ta->data = calloc(1,width_new*height_new * sizeof(char)*ta->depth);    
+    ta->data = calloc(1,width_new*height_new * sizeof(char)*ta->depth);
     //update atlas size
     ta->width = width_new;
     ta->height = height_new;
     //add node reflecting the gained space on the right
-    if(width_new>width_old){
-    	ivec3 node;
+    if( width_new > width_old )
+    {
+        ivec3 node;
         node.x = width_old - 1;
         node.y = 1;
         node.z = width_new - width_old;
-        vector_push_back(ta->nodes, &node);    
+        vector_push_back(ta->nodes, &node);
     }
     //copy over data from the old buffer, skipping first row and column because of the margin
     size_t pixel_size = sizeof(char) * ta->depth;

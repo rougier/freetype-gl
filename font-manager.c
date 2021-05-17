@@ -14,6 +14,7 @@
 #include <string.h>
 #include "font-manager.h"
 #include "freetype-gl-err.h"
+#include "ftgl-utils.h"
 
 // ------------------------------------------------------------ file_exists ---
 static int

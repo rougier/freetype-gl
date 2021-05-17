@@ -33,6 +33,7 @@ option(freetype-gl_DEBUG
 option(freetype-gl_WITH_GLEW
     "Use the GLEW library to fetch OpenGL function pointers"
     ${freetype-gl_WITH_GLEW_DEFAULT})
+option(freetype-gl_WITH_GLAD "Use the GLAD gl loader" OFF)
 option(freetype-gl_USE_VAO "Use a VAO to render a vertex_buffer instance (required for forward compatible OpenGL 3.0 contexts)" OFF)
 option(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
 option(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
@@ -97,6 +98,10 @@ if(freetype-gl_WITH_GLEW)
     find_package(GLEW REQUIRED)
 endif()
 
+if(freetype-gl_WITH_GLAD)
+    add_definitions(-DGL_WITH_GLAD)
+endif()
+
 include_directories(
     ${OPENGL_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
@@ -125,6 +130,7 @@ set(FREETYPE_GL_HDR
     texture-atlas.h
     texture-font.h
     utf8-utils.h
+    ftgl-utils.h
     vec234.h
     vector.h
     vertex-attribute.h
@@ -142,11 +148,21 @@ set(FREETYPE_GL_SRC
     texture-atlas.c
     texture-font.c
     utf8-utils.c
+    ftgl-utils.c
     vector.c
     vertex-attribute.c
     vertex-buffer.c
     freetype-gl-err.c
 )
+
+if(NOT MSVC)
+	set(PKG_CONFIG_PREFIX ${CMAKE_INSTALL_PREFIX})
+	set(PKG_CONFIG_EXEC_PREFIX "\${prefix}")
+	set(PKG_CONFIG_LIBDIR "\${exec_prefix}/lib")
+	set(PKG_CONFIG_INCLUDEDIR "\${prefix}/include")
+	configure_file(freetype-gl.pc.in ${CMAKE_CURRENT_BINARY_DIR}/freetype-gl.pc @ONLY)
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/freetype-gl.pc DESTINATION ${PKG_CONFIG_PREFIX}/share/pkgconfig)
+endif()
 
 if(freetype-gl_BUILD_SHARED)
     add_library(freetype-gl SHARED
@@ -188,6 +204,14 @@ if(freetype-gl_BUILD_MAKEFONT)
         target_link_libraries(makefont "legacy_stdio_definitions.lib")
     endif()
 endif()
+
+install(TARGETS freetype-gl
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib)
+install(FILES ${FREETYPE_GL_HDR}
+  DESTINATION include/freetype-gl
+  PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 
 if(freetype-gl_BUILD_APIDOC)
     add_subdirectory(doc)

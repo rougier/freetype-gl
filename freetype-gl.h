@@ -8,6 +8,7 @@
 
 /* Mandatory */
 #include "opengl.h"
+#include "ftgl-utils.h"
 #include "vec234.h"
 #include "vector.h"
 #include "texture-atlas.h"

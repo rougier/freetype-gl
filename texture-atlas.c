@@ -11,6 +11,7 @@
 #include "texture-atlas.h"
 #include "texture-font.h"
 #include "freetype-gl-err.h"
+#include "ftgl-utils.h"
 
 // -------------------------------------------------- texture_atlas_special ---
 
@@ -118,9 +119,9 @@ texture_atlas_set_region( texture_atlas_t * self,
     assert( (x + width) <= (self->width-1));
     assert( y < (self->height-1));
     assert( (y + height) <= (self->height-1));
-	
-    //prevent copying data from undefined position 
-    //and prevent memcpy's undefined behavior when count is zero
+
+    // prevent copying data from undefined position
+    // and prevent memcpy's undefined behavior when count is zero
     assert(height == 0 || (data != NULL && width > 0));
 
     depth = self->depth;
@@ -143,36 +144,36 @@ texture_atlas_fit( texture_atlas_t * self,
 {
     ivec3 *node;
     int x, y, width_left;
-	size_t i;
+    size_t i;
 
     assert( self );
 
     node = (ivec3 *) (vector_get( self->nodes, index ));
     x = node->x;
-	y = node->y;
+    y = node->y;
     width_left = width;
-	i = index;
+    i = index;
 
-	if ( (x + width) > (self->width-1) )
+    if ( (x + width) > (self->width-1) )
     {
-		return -1;
+        return -1;
     }
-	y = node->y;
-	while( width_left > 0 )
-	{
+    y = node->y;
+    while( width_left > 0 )
+    {
         node = (ivec3 *) (vector_get( self->nodes, i ));
         if( node->y > y )
         {
             y = node->y;
         }
-		if( (y + height) > (self->height-1) )
+        if( (y + height) > (self->height-1) )
         {
-			return -1;
+            return -1;
         }
-		width_left -= node->z;
-		++i;
-	}
-	return y;
+        width_left -= node->z;
+        ++i;
+    }
+    return y;
 }
 
 

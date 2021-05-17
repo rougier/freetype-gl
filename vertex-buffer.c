@@ -11,6 +11,7 @@
 #include "platform.h"
 #include "vertex-buffer.h"
 #include "freetype-gl-err.h"
+#include "ftgl-utils.h"
 
 /**
  * Buffer status
@@ -196,7 +197,7 @@ vertex_buffer_print( vertex_buffer_t * self )
 
     assert(self);
 
-    fprintf( stderr, "%ld vertices, %ld indices\n",
+    log_error( "%ld vertices, %ld indices\n",
              vector_size( self->vertices ), vector_size( self->indices ) );
     while( self->attributes[i] )
     {
@@ -213,7 +214,7 @@ vertex_buffer_print( vertex_buffer_t * self )
         case GL_FLOAT:          j=7; break;
         default:                j=8; break;
         }
-        fprintf(stderr, "%s : %dx%s (+%p)\n",
+        log_error( "%s : %dx%s (+%p)\n",
                 self->attributes[i]->name,
                 self->attributes[i]->size,
                 gltypes[j],

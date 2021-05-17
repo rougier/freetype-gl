@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Development">
+      <UniqueIdentifier>{527eb0f4-ebf6-4910-89fd-e431d2006b0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Development">
+      <UniqueIdentifier>{71edd785-24e3-40f9-8870-4d4a31e2ba9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Original">
+      <UniqueIdentifier>{89e08f84-75a3-4822-b4c0-89e5a02bd492}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Original">
+      <UniqueIdentifier>{d78cfaf3-5b6e-49e4-b05b-2be17b9ca762}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Development\framework.h">
+      <Filter>Header Files\Development</Filter>
+    </ClInclude>
+    <ClInclude Include="Development\stdafx.h">
+      <Filter>Header Files\Development</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\distance-field.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\edtaa3func.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\font-manager.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\freetype-gl.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\markup.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\opengl.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\platform.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\text-buffer.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\texture-atlas.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\texture-font.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\utf8-utils.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vec234.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vector.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vertex-attribute.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vertex-buffer.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ftgl-utils.h">
+      <Filter>Header Files\Original</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\distance-field.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\edtaa3func.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\font-manager.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\makefont.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\platform.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\text-buffer.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\texture-atlas.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\texture-font.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\utf8-utils.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vector.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vertex-attribute.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vertex-buffer.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+    <ClCompile Include="Development\stdafx.c">
+      <Filter>Source Files\Development</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ftgl-utils.c">
+      <Filter>Source Files\Original</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

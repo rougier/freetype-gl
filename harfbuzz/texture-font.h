@@ -45,6 +45,20 @@ namespace ftgl {
  * @{
  */
 
+
+/**
+ * A list of possible ways to render a glyph.
+ */
+typedef enum rendermode_t
+{
+    RENDER_NORMAL,
+    RENDER_OUTLINE_EDGE,
+    RENDER_OUTLINE_POSITIVE,
+    RENDER_OUTLINE_NEGATIVE,
+    RENDER_SIGNED_DISTANCE_FIELD
+} rendermode_t;
+
+
 /**
  * A list of possible ways to render a glyph.
  */
@@ -111,7 +125,7 @@ typedef struct texture_glyph_t
     float t1;
 
     /**
-     * Glyph outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
+     * Mode this glyph was rendered
      */
     rendermode_t rendermode;
 
@@ -179,7 +193,7 @@ typedef struct texture_font_t
     int hinting;
 
     /**
-     * Outline type (0 = None, 1 = line, 2 = inner, 3 = outer)
+     * Mode the font is rendering its next glyph
      */
     rendermode_t rendermode;
 

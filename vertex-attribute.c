@@ -11,6 +11,7 @@
 #include "platform.h"
 #include "vertex-attribute.h"
 #include "freetype-gl-err.h"
+#include "ftgl-utils.h"
 
 
 // ----------------------------------------------------------------------------

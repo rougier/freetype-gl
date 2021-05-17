@@ -40,8 +40,8 @@ img { }
 
 /*** Separators ***/
 hr {
-	height:     0;
-	border:     none;
+    height:     0;
+    border:     none;
 }
 
 /*** Links ***/
@@ -52,7 +52,7 @@ a {
     text-decoration: none;
 }
 a:hover {
-	text-decoration: underline;
+    text-decoration: underline;
 }
 
 

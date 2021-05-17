@@ -16,19 +16,19 @@ shader_read( const char *filename )
 {
     FILE * file;
     char * buffer;
-	size_t size;
+    size_t size;
 
     file = fopen( filename, "rb" );
     if( !file )
     {
         fprintf( stderr, "Unable to open file \"%s\".\n", filename );
-		return 0;
+        return 0;
     }
-	fseek( file, 0, SEEK_END );
-	size = ftell( file );
-	fseek(file, 0, SEEK_SET );
+    fseek( file, 0, SEEK_END );
+    size = ftell( file );
+    fseek(file, 0, SEEK_SET );
     buffer = (char *) malloc( (size+1) * sizeof( char *) );
-	fread( buffer, sizeof(char), size, file );
+    fread( buffer, sizeof(char), size, file );
     buffer[size] = 0;
     fclose( file );
     return buffer;
