@@ -50,8 +50,8 @@ __THREAD font_mode_t mode_default=MODE_FREE_CLOSE;
 
 // rol8 ror8
 
-#if defined _MSC_VER && defined __EDG__ && !defined __cplusplus
-    #define inline
+#if defined(_WIN32) || defined(_WIN64)
+# define inline
 #endif
 
 static inline uint32_t rol8(uint32_t in)
