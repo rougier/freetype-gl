@@ -42,7 +42,7 @@ static FT_F26Dot6 convert_float_to_F26Dot6(float value)
 // per-thread library
 
 __THREAD texture_font_library_t * freetype_gl_library = NULL;
-__THREAD font_mode_t mode_default=MODE_AUTO_CLOSE;
+__THREAD font_mode_t mode_default=MODE_FREE_CLOSE;
 
 // rol8 ror8
 
