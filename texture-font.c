@@ -50,8 +50,12 @@ __THREAD font_mode_t mode_default=MODE_FREE_CLOSE;
 
 // rol8 ror8
 
-#if defined(_WIN32) || defined(_WIN64)
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(__GNUC__)
 # define inline
+static inline __builtin_bswap32(uint32_t in)
+{
+    return ((in >> 24) & 0xFF) | ((in >> 8) & 0xFF00) | ((in & 0xFF00) << 8) | ((in & 0xFF) << 24);
+}
 #endif
 
 static inline uint32_t rol8(uint32_t in)
