@@ -10,7 +10,6 @@
 #include <limits.h>
 #include "texture-atlas.h"
 #include "texture-font.h"
-#include "freetype-gl-err.h"
 #include "ftgl-utils.h"
 
 // -------------------------------------------------- texture_atlas_special ---
@@ -20,12 +19,11 @@ void texture_atlas_special ( texture_atlas_t * self )
     ivec4 region = texture_atlas_get_region( self, 5, 5 );
     texture_glyph_t * glyph = texture_glyph_new( );
     static unsigned char data[4*4*3] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-					-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-					-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-					-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+                                        -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                                        -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+                                        -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
     if ( region.x < 0 ) {
-	freetype_gl_error( Texture_Atlas_Full,
-			   "Texture atlas is full, %d (%s:%d)\n", region.x, __FILENAME__, __LINE__ );
+        freetype_gl_error( Texture_Atlas_Full );
     }
     
     texture_atlas_set_region( self, region.x, region.y, 4, 4, data, 0 );
@@ -53,9 +51,8 @@ texture_atlas_new( const size_t width,
     assert( (depth == 1) || (depth == 3) || (depth == 4) );
     if( self == NULL)
     {
-        freetype_gl_error( Out_Of_Memory,
-			   "%s:%d: No more memory for allocating data\n", __FILENAME__, __LINE__ );
-	return NULL;
+        freetype_gl_error( Out_Of_Memory );
+        return NULL;
         /* exit( EXIT_FAILURE ); */ /* Never exit from a library */
     }
     self->nodes = vector_new( sizeof(ivec3) );
@@ -72,9 +69,8 @@ texture_atlas_new( const size_t width,
 
     if( self->data == NULL)
     {
-        freetype_gl_error( Out_Of_Memory,
-			   "%s:%d: No more memory for allocating data\n", __FILENAME__, __LINE__ );
-	return NULL;
+        freetype_gl_error( Out_Of_Memory );
+        return NULL;
     }
 
     texture_atlas_special( self );
@@ -119,7 +115,7 @@ texture_atlas_set_region( texture_atlas_t * self,
     assert( (x + width) <= (self->width-1));
     assert( y < (self->height-1));
     assert( (y + height) <= (self->height-1));
-
+        
     // prevent copying data from undefined position
     // and prevent memcpy's undefined behavior when count is zero
     assert(height == 0 || (data != NULL && width > 0));
@@ -156,22 +152,22 @@ texture_atlas_fit( texture_atlas_t * self,
 
     if ( (x + width) > (self->width-1) )
     {
-        return -1;
+	return -1;
     }
     y = node->y;
     while( width_left > 0 )
     {
-        node = (ivec3 *) (vector_get( self->nodes, i ));
-        if( node->y > y )
-        {
-            y = node->y;
-        }
-        if( (y + height) > (self->height-1) )
-        {
-            return -1;
-        }
-        width_left -= node->z;
-        ++i;
+	node = (ivec3 *) (vector_get( self->nodes, i ));
+	if( node->y > y )
+	{
+	    y = node->y;
+	}
+	if( (y + height) > (self->height-1) )
+	{
+	    return -1;
+	}
+	width_left -= node->z;
+	++i;
     }
     return y;
 }
@@ -186,14 +182,16 @@ texture_atlas_merge( texture_atlas_t * self )
 
     assert( self );
 
-    for( i=0; i< self->nodes->size-1; ++i ) {
+    for( i=0; i< self->nodes->size-1; ++i )
+    {
         node = (ivec3 *) (vector_get( self->nodes, i ));
         next = (ivec3 *) (vector_get( self->nodes, i+1 ));
-	if( node->y == next->y ) {
-	    node->z += next->z;
-	    vector_erase( self->nodes, i+1 );
-	    --i;
-	}
+        if( node->y == next->y )
+	{
+            node->z += next->z;
+            vector_erase( self->nodes, i+1 );
+            --i;
+        }
     }
 }
 
@@ -215,22 +213,25 @@ texture_atlas_get_region( texture_atlas_t * self,
     best_height = UINT_MAX;
     best_index  = -1;
     best_width = UINT_MAX;
-    for( i=0; i<self->nodes->size; ++i ) {
+    for( i=0; i<self->nodes->size; ++i )
+    {
         y = texture_atlas_fit( self, i, width, height );
-	if( y >= 0 ) {
+        if( y >= 0 )
+	{
             node = (ivec3 *) vector_get( self->nodes, i );
-	    if( ( (y + height) < best_height ) ||
+            if( ( (y + height) < best_height ) ||
                 ( ((y + height) == best_height) && (node->z > 0 && (size_t)node->z < best_width)) ) {
-		best_height = y + height;
-		best_index = i;
-		best_width = node->z;
-		region.x = node->x;
-		region.y = y;
-	    }
+                best_height = y + height;
+                best_index = i;
+                best_width = node->z;
+                region.x = node->x;
+                region.y = y;
+            }
         }
     }
     
-    if( best_index == -1 ) {
+    if( best_index == -1 )
+    {
         region.x = -1;
         region.y = -1;
         region.width = 0;
@@ -240,9 +241,8 @@ texture_atlas_get_region( texture_atlas_t * self,
 
     node = (ivec3 *) malloc( sizeof(ivec3) );
     if( node == NULL) {
-        freetype_gl_error( Out_Of_Memory,
-			   "%s:%d: No more memory for allocating data\n", __FILENAME__, __LINE__ );
-	return (ivec4){{-1,-1,0,0}};
+        freetype_gl_error( Out_Of_Memory );
+        return (ivec4){{-1,-1,0,0}};
         /* exit( EXIT_FAILURE ); */ /* Never exit from a library */
     }
     node->x = region.x;
@@ -251,11 +251,13 @@ texture_atlas_get_region( texture_atlas_t * self,
     vector_insert( self->nodes, best_index, node );
     free( node );
 
-    for(i = best_index+1; i < self->nodes->size; ++i) {
+    for( i = best_index+1; i < self->nodes->size; ++i )
+    {
         node = (ivec3 *) vector_get( self->nodes, i );
         prev = (ivec3 *) vector_get( self->nodes, i-1 );
 
-        if (node->x < (prev->x + prev->z) ) {
+        if (node->x < (prev->x + prev->z) )
+	{
             int shrink = prev->x + prev->z - node->x;
             node->x += shrink;
             node->z -= shrink;
@@ -297,4 +299,38 @@ texture_atlas_clear( texture_atlas_t * self )
 
     vector_push_back( self->nodes, &node );
     memset( self->data, 0, self->width*self->height*self->depth );
+}
+
+// -------------------------------------------- texture_atlas_enlarge_atlas ---
+
+void texture_atlas_enlarge_texture ( texture_atlas_t* self, size_t width_new, size_t height_new)
+{
+    assert(self);
+    //ensure size increased
+    assert(width_new >= self->width);
+    assert(height_new >= self->height);
+    assert(width_new + height_new > self->width + self->height);
+
+    size_t width_old = self->width;
+    size_t height_old = self->height;    
+    //allocate new buffer
+    unsigned char* data_old = self->data;
+    self->data = calloc(1,width_new*height_new * sizeof(char)*self->depth);    
+    //update atlas size
+    self->width = width_new;
+    self->height = height_new;
+    //add node reflecting the gained space on the right
+    if( width_new>width_old )
+    {
+        ivec3 node;
+        node.x = width_old - 1;
+        node.y = 1;
+        node.z = width_new - width_old;
+        vector_push_back(self->nodes, &node);    
+    }
+    //copy over data from the old buffer, skipping first row and column because of the margin
+    size_t pixel_size = sizeof(char) * self->depth;
+    size_t old_row_size = width_old * pixel_size;
+    texture_atlas_set_region(self, 1, 1, width_old - 2, height_old - 2, data_old + old_row_size + pixel_size, old_row_size);
+    free(data_old);    
 }

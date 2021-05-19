@@ -10,7 +10,6 @@
 #include "vec234.h"
 #include "platform.h"
 #include "vertex-attribute.h"
-#include "freetype-gl-err.h"
 #include "ftgl-utils.h"
 
 
@@ -68,8 +67,7 @@ vertex_attribute_parse( char *format )
         name = strndup(format, p-format);
         if( *(++p) == '\0' )
         {
-            freetype_gl_error( No_Size_Specified,
-			       "No size specified for '%s' attribute\n", name );
+	    freetype_gl_error_str( No_Size_Specified, name );
             free( name );
             return 0;
         }
@@ -77,8 +75,7 @@ vertex_attribute_parse( char *format )
 
         if( *(++p) == '\0' )
         {
-            freetype_gl_error( No_Format_Specified,
-			       "No format specified for '%s' attribute\n", name );
+            freetype_gl_error_str( No_Format_Specified, name );
             free( name );
             return 0;
         }
@@ -95,8 +92,7 @@ vertex_attribute_parse( char *format )
     }
     else
     {
-        freetype_gl_error(Vertex_Attribute_Format_Wrong,
-			  "Vertex attribute format not understood ('%s')\n", format );
+        freetype_gl_error_str(Vertex_Attribute_Format_Wrong, name );
         return 0;
     }
 

@@ -10,7 +10,6 @@
 #include "vec234.h"
 #include "platform.h"
 #include "vertex-buffer.h"
-#include "freetype-gl-err.h"
 #include "ftgl-utils.h"
 
 /**

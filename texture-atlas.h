@@ -194,6 +194,15 @@ typedef struct texture_atlas_t
   void
   texture_atlas_clear( texture_atlas_t * self );
 
+/**
+ *  Enlarge a texture atlas
+ *
+ *  @param self       a texture atlas structure
+ *  @param width_new  new width
+ *  @param height_new new height
+ */
+  void
+  texture_atlas_enlarge_texture ( texture_atlas_t* self, size_t width_new, size_t height_new);
 
 /** @} */
 

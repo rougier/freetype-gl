@@ -213,7 +213,6 @@ typedef enum font_mode_t {
     MODE_MANUAL_CLOSE,
     MODE_ALWAYS_OPEN
 } font_mode_t;
-
 /**
  * default mode for fonts
  */
@@ -232,6 +231,11 @@ texture_font_default_mode(font_mode_t mode);
 typedef struct FT_FaceRec_* FT_Face;
 typedef struct FT_LibraryRec_* FT_Library;
 typedef struct FT_SizeRec_* FT_Size;
+#endif
+
+/* same for harfbuzz */
+#ifndef HB_BUFFER_H
+typedef struct hb_font_t hb_font_t;
 #endif
 
 /**
@@ -298,11 +302,6 @@ typedef struct texture_font_t
     float size;
 
     /**
-     * Whether to use autohint when rendering font
-     */
-    int hinting;
-
-    /**
      * Mode the font is rendering its next glyph
      */
     rendermode_t rendermode;
@@ -315,18 +314,26 @@ typedef struct texture_font_t
     /**
      * Whether to use our own lcd filter.
      */
-    int filtering;
+    unsigned char filtering;
+    /**
+     * Whether to use kerning if available
+     */
+    unsigned char kerning;
+
+    /**
+     * Whether to use autohint when rendering font
+     */
+    unsigned char hinting;
+
+    /**
+     * Whether to scale texture coordinates
+     */
+    unsigned char scaletex;
 
     /**
      * LCD filter weights
      */
     unsigned char lcd_weights[5];
-
-    /**
-     * Whether to use kerning if available
-     */
-    int kerning;
-
 
     /**
      * This field is simply used to compute a default line spacing (i.e., the
@@ -378,6 +385,12 @@ typedef struct texture_font_t
     float underline_thickness;
 
     /**
+    * The padding to be add to the glyph's texture that are loaded by this font.
+    * Usefull when adding effects with shaders.
+    */
+    int padding;
+
+    /**
      * Flag for mode
      */
     font_mode_t mode;
@@ -388,26 +401,19 @@ typedef struct texture_font_t
     FT_Face face;
 
     /**
-     * Whether to scale texture coordinates
-     */
-    int scaletex;
-
-    /**
      * Freetype size pointer
      */
     FT_Size ft_size;
 
     /**
+     * Harfbuzz font pointer
+     */
+    hb_font_t* hb_font;
+
+    /**
      * factor to scale font coordinates
      */
     float scale;
-
-    /**
-    * The padding to be add to the glyph's texture that are loaded by this font.
-    * Usefull when adding effects with shaders.
-    */
-    int padding;
-
 } texture_font_t;
 
 /**
@@ -555,9 +561,50 @@ texture_font_index_glyph( texture_font_t * self,
  *
  * @return One if the glyph could be loaded, zero if not.
  */
-  int
-  texture_font_load_glyph( texture_font_t * self,
-                           const char * codepoint );
+int
+texture_font_load_glyph( texture_font_t * self,
+			 const char * codepoint );
+
+/**
+ * Request a new glyph from the font. If it has not been created yet, it will
+ * be.
+ *
+ * @param self      A valid texture font
+ * @param codepoint Font's character codepoint to be obtained
+ *
+ * @return A pointer on the new glyph or 0 if the texture atlas is not big
+ *         enough
+ *
+ */
+texture_glyph_t *
+texture_font_get_glyph_gi( texture_font_t * self,
+			   uint32_t glyph_index );
+
+/**
+ * Request an already loaded glyph from the font. 
+ *
+ * @param self         A valid texture font
+ * @param glyph_index  Font's character codepoint to be found
+ *
+ * @return A pointer on the glyph or 0 if the glyph is not loaded
+ */
+texture_glyph_t *
+texture_font_find_glyph_gi( texture_font_t * self,
+			    uint32_t glyph_index );
+
+/**
+ * Request the loading of a given glyph.
+ *
+ * @param self         A valid texture font
+ * @param glyph_index  Character codepoint to be loaded in font's codepoint
+ * @param ucodepoint   Character codepoint for inserting into lookup table
+ *
+ * @return One if the glyph could be loaded, zero if not.
+ */
+int
+texture_font_load_glyph_gi( texture_font_t * self,
+			    uint32_t glyph_index,
+			    uint32_t ucodepoint);
 
 /**
  * Request the loading of several glyphs at once.
@@ -573,37 +620,25 @@ texture_font_index_glyph( texture_font_t * self,
   texture_font_load_glyphs( texture_font_t * self,
                             const char * codepoints );
 /**
-   *Increases the size of a fonts texture atlas
-   *Invalidates all pointers to font->atlas->data
-   *Changes the UV Coordinates of existing glyphs in the font
-   *
-   *@param self A valid texture font
-   *@param width_new Width of the texture atlas after resizing (must be bigger or equal to current width)
-   *@param height_new Height of the texture atlas after resizing (must be bigger or equal to current height)
-   */
+ * Increases the size of a fonts texture atlas
+ * Invalidates all pointers to font->atlas->data
+ * Changes the UV Coordinates of existing glyphs in the font
+ *
+ * @param self A valid texture font
+ * @param width_new Width of the texture atlas after resizing (must be bigger
+ *                  or equal to current width)
+ * @param height_new Height of the texture atlas after resizing (must be bigger or
+ *                   equal to current height)
+ */
   void
   texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
-			      size_t height_new);
-/**
-   *Changes the UV Coordinates of existing glyphs in the font
-   *
-   *@param self A valid texture font
-   *@param mulw factor for adjusting new texture width 
-   *@param mulh factor for adjusting new texture height
-   */
+			      size_t height_new );
   void
-  texture_font_enlarge_glyphs( texture_font_t * self, float mulw, float mulh);
+  texture_font_enlarge_glyphs( texture_font_t * self, float mulw, float mulh );
   
-/**
-   *Increases the size of a fonts texture atlas
-   *
-   *@param self A valid texture font
-   *@param width_new Width of the texture atlas after resizing (must be bigger or equal to current width)
-   *@param height_new Height of the texture atlas after resizing (must be bigger or equal to current height)
-   */
   void
   texture_font_enlarge_texture( texture_font_t * self, size_t width_new,
-				size_t height_new);
+				size_t height_new );
 /**
  * Get the kerning between two horizontal glyphs.
  *
