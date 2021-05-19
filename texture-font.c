@@ -621,13 +621,7 @@ cleanup_stroker:
         int top;
         int right;
         int bottom;
-    } padding = { 0, 0, 1, 1 };
-
-    if( self->rendermode == RENDER_SIGNED_DISTANCE_FIELD )
-    {
-        padding.top = 1;
-        padding.left = 1;
-    }
+    } padding = { 1, 1, 1, 1 };
 
     if( self->padding != 0 )
     {
@@ -679,10 +673,13 @@ cleanup_stroker:
 
     free( buffer );
 
+    x += padding.left;
+    y += padding.top;
+
     glyph = texture_glyph_new( );
     glyph->codepoint = utf8_to_utf32( codepoint );
-    glyph->width    = tgt_w;
-    glyph->height   = tgt_h;
+    glyph->width    = src_w;
+    glyph->height   = src_h;
     glyph->rendermode = self->rendermode;
     glyph->outline_thickness = self->outline_thickness;
     glyph->offset_x = ft_glyph_left;
