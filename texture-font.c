@@ -17,6 +17,10 @@
 #include <math.h>
 #ifdef __APPLE__
 # include <machine/endian.h>
+#elif defined(_WIN32) || defined(_WIN64)
+# define __LITTLE_ENDIAN 1234
+# define __BIG_ENDIAN 4321
+# define __BYTE_ORDER __LITTLE_ENDIAN
 #else
 # include <endian.h>
 #endif
