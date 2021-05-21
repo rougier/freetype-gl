@@ -350,7 +350,7 @@ texture_font_init(texture_font_t *self)
 
 // ---------------------------------------------------- texture_library_new ---
 texture_font_library_t *
-texture_library_new()
+texture_library_new(void)
 {
     texture_font_library_t *self = calloc(1, sizeof(*self));
     
@@ -686,7 +686,7 @@ texture_font_load_glyph_gi( texture_font_t * self,
 
     FT_Error error;
     FT_Face face;
-    FT_Glyph ft_glyph;
+    FT_Glyph ft_glyph = NULL;
     FT_GlyphSlot slot;
     FT_Bitmap ft_bitmap;
 

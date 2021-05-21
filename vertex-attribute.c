@@ -59,7 +59,7 @@ vertex_attribute_parse( char *format )
     int size;
     int normalized = 0;
     char ctype;
-    char *name;
+    char *name = NULL;
     vertex_attribute_t *attr;
     char *p = strchr(format, ':');
     if( p != NULL)

@@ -422,7 +422,7 @@ typedef struct texture_font_t
  * @return a new library (no font loaded yet)
  */
   texture_font_library_t *
-      texture_library_new();
+      texture_library_new(void);
 
 /**
  * This variable holds the per-thread library
