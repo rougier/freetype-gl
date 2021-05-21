@@ -92,7 +92,7 @@ const char* FTGL_Error_String( unsigned int error_code );
 # define FTGL_ERR_XCAT( x, y )  x ## y
 # define FTGL_ERR_CAT( x, y )   FTGL_ERR_XCAT( x, y )
 #endif
-#define FTGL_ERR_BASE  0x100 /* Freetype GL errors start at 0x100 */
+#define FTGL_ERR_BASE  0xE0 /* Freetype GL errors start at 0xE0 */
 
 #ifndef IMPLEMENT_FREETYPE_GL
 extern
@@ -123,7 +123,7 @@ const char* freetype_gl_errstrs[];
 	log_error("Freetype Error %s:%d: %s\n", __FILE__, __LINE__, freetype_gl_message); \
     }
 
-#define FTGL_ERRSTR_MAX 0x11F
+#define FTGL_ERR_MAX FTGL_ERR_BASE+0x1F
 
 #ifndef FTGL_ERRORDEF_
 # ifndef FTGL_ERRORDEF

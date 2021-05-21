@@ -45,7 +45,7 @@ __THREAD const char * freetype_gl_message=NULL;
 #undef FTERRORS_H_
 #define FT_NOERRORDEF_( e, v, s )  [v] = s,
 #define FT_ERRORDEF_( e, v, s )  [v] = s,
-#define FTGL_ERRORDEF_( e, v, s )  [v] = s,
+#define FTGL_ERRORDEF_( e, v, s )  [v+FTGL_ERR_BASE] = s,
 #define FT_ERROR_START_LIST
 #define FT_ERROR_END_LIST
 #define FTGL_ERROR_START_LIST
@@ -54,12 +54,12 @@ __THREAD const char * freetype_gl_message=NULL;
 const char* freetype_gl_errstrs[] = {
   #include <freetype/fterrdef.h>
   #include "freetype-gl-errdef.h"
-  [FTGL_ERRSTR_MAX+1] = NULL
+  [FTGL_ERR_MAX+1] = NULL
 };
 
 const char* FTGL_Error_String( unsigned int error_code )
 {
-    if( error_code > FTGL_ERRSTR_MAX) return NULL;
+    if( error_code > FTGL_ERR_MAX) return NULL;
     return freetype_gl_errstrs[error_code];
 }
 
