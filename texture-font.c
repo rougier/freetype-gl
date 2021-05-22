@@ -969,7 +969,7 @@ cleanup_stroker:
         glyph->t1       = y + tgt_h - 0.5;
     }
     slot = self->face->glyph;
-    if( self->atlas->depth == 4 ) {
+    if( FT_HAS_FIXED_SIZES( self->face ) ) {
         // color fonts use actual pixels, not subpixels
         glyph->advance_x = slot->advance.x;
         glyph->advance_y = slot->advance.y;
