@@ -61,14 +61,9 @@ static inline __builtin_bswap32(uint32_t in)
 }
 #endif
 
-static inline uint32_t rol8(uint32_t in)
+static inline uint32_t rol(uint32_t in, uint32_t x)
 {
-    return (in >> 24) | (in << 8);
-}
-
-static inline uint32_t ror8(uint32_t in)
-{
-    return (in >> 8) | (in << 24);
+    return (in >> 32-x) | (in << x);
 }
 
 // ------------------------------------------------------ texture_glyph_new ---
@@ -922,9 +917,9 @@ cleanup_stroker:
                 uint32_t bgra, rgba;
                 bgra = ((uint32_t*)src_ptr)[j];
 #if __BYTE_ORDER == __BIG_ENDIAN
-                rgba = rol8(__builtin_bswap32(bgra));
+                rgba = rol(__builtin_bswap32(bgra), 8);
 #else
-                rgba = ror8(__builtin_bswap32(bgra));
+                rgba = rol(__builtin_bswap32(bgra), 24);
 #endif
                 ((uint32_t*)dst_ptr)[j] = rgba;
             }
