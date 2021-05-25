@@ -244,22 +244,29 @@ texture_font_set_size ( texture_font_t *self, float size )
         }
         
         int best_match = 0;
-        int diff = abs((int)size - self->face->available_sizes[0].width);
+        float diff = 1e20;
         int i;
 
-        for (i = 1; i < self->face->num_fixed_sizes; ++i) {
-            int ndiff = abs((int)size - self->face->available_sizes[i].width);
+        for (i = 0; i < self->face->num_fixed_sizes; ++i) {
+	    float new_size = convert_F26Dot6_to_float(self->face->available_sizes[i].size);
+	    float ndiff = size > new_size ? size / new_size : new_size / size;
+	    if(freetype_gl_warnings)
+		log_error("candiate: size[%i]=%f %d*%d\n", i, new_size,
+			  self->face->available_sizes[i].width,
+			  self->face->available_sizes[i].height);
             if (ndiff < diff) {
                 best_match = i;
                 diff = ndiff;
             }
         }
+	if(freetype_gl_warnings)
+	    log_error("selected: size[%i] for %f\n", best_match, size);
         error = FT_Select_Size(self->face, best_match);
         if(error) {
             freetype_error( error );
             return 0;
         }
-        self->scale = self->size / self->face->available_sizes[best_match].width;
+        self->scale = self->size / convert_F26Dot6_to_float(self->face->available_sizes[best_match].size);
     } else {
         /* Set char size */
         error = FT_Set_Char_Size(self->face, convert_float_to_F26Dot6(size), 0, DPI * HRES, DPI);
