@@ -63,7 +63,7 @@ static inline __builtin_bswap32(uint32_t in)
 
 static inline uint32_t rol(uint32_t in, uint32_t x)
 {
-    return (in >> 32-x) | (in << x);
+    return (in >> (32-x)) | (in << x);
 }
 
 // ------------------------------------------------------ texture_glyph_new ---

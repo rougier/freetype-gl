@@ -478,8 +478,8 @@ typedef struct texture_font_t
  * @param size         the new size of the font
  */
   texture_font_t *
-  texture_font_clone( texture_font_t *old,
-		      float pt_size);
+  texture_font_clone( texture_font_t *self,
+		      float size);
 
 /**
  * Close the freetype structures from a font and the associated library
@@ -504,7 +504,8 @@ typedef struct texture_font_t
 /**
  * Load a texture font.
  *
- * @param self a valid texture font
+ * @param self  a valid texture font
+ * @param size  the size of the font
  *
  * @return 1 on success, 0 on error
  */
@@ -557,7 +558,7 @@ texture_font_index_glyph( texture_font_t * self,
  * Request the loading of a given glyph.
  *
  * @param self       A valid texture font
- * @param codepoints Character codepoint to be loaded in UTF-8 encoding.
+ * @param codepoint  Character codepoint to be loaded in UTF-8 encoding.
  *
  * @return One if the glyph could be loaded, zero if not.
  */
@@ -569,8 +570,8 @@ texture_font_load_glyph( texture_font_t * self,
  * Request a new glyph from the font. If it has not been created yet, it will
  * be.
  *
- * @param self      A valid texture font
- * @param codepoint Font's character codepoint to be obtained
+ * @param self        A valid texture font
+ * @param glyph_index Font's character glyph index to be obtained
  *
  * @return A pointer on the new glyph or 0 if the texture atlas is not big
  *         enough
@@ -633,9 +634,26 @@ texture_font_load_glyph_gi( texture_font_t * self,
   void
   texture_font_enlarge_atlas( texture_font_t * self, size_t width_new,
 			      size_t height_new );
+
+/**
+ * Changes the UV Coordinates of existing glyphs in the font
+ *
+ * @param self A valid texture font
+ * @param mulw scale factor for width
+ * @param mulh scale factor for height
+ */
   void
   texture_font_enlarge_glyphs( texture_font_t * self, float mulw, float mulh );
   
+/**
+ * Increases the size of a fonts texture atlas
+ *
+ * @param self A valid texture font
+ * @param width_new Width of the texture atlas after resizing (must be bigger
+ *                  or equal to current width)
+ * @param height_new Height of the texture atlas after resizing (must be bigger or
+ *                   equal to current height)
+ */
   void
   texture_font_enlarge_texture( texture_font_t * self, size_t width_new,
 				size_t height_new );
@@ -666,7 +684,7 @@ texture_glyph_new( void );
  * @param  self         A valid texture glyph
  */
 void
-texture_glyph_delete( texture_glyph_t * );
+texture_glyph_delete( texture_glyph_t * self );
 
 /** @} */
 
