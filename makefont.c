@@ -29,12 +29,40 @@ void print_help()
              "--rendermode <one of 'normal', 'outline_edge', 'outline_positive', 'outline_negative' or 'sdf'>\n" );
 }
 
+void print_glyph(FILE * file, texture_glyph_t * glyph)
+{
+    // TextureFont
+    fprintf( file, "  {%u, ", glyph->codepoint );
+    fprintf( file, "%" PRIzu ", %" PRIzu ", ", glyph->width, glyph->height );
+    fprintf( file, "%d, %d, ", glyph->offset_x, glyph->offset_y );
+    fprintf( file, "%ff, %ff, ", glyph->advance_x, glyph->advance_y );
+    fprintf( file, "%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
+    fprintf( file, "%" PRIzu ", ", vector_size(glyph->kerning) );
+    if (vector_size(glyph->kerning) == 0) {
+	fprintf( file, "0" );
+    } else {
+	int k;
+	fprintf( file, "{ " );
+	for( k=0; k < vector_size(glyph->kerning); ++k ) {
+	    float *kerning = *(float **) vector_get( glyph->kerning, k);
+	    int l;
+	    fprintf( file, "{" );
+	    for( l=0; l<0xff; l++ )
+		fprintf( file, " %ff,", kerning[l] );
+	    fprintf( file, " %ff }", kerning[0xFF] );
 
+	    if( k < (vector_size(glyph->kerning)-1))
+		fprintf( file, ",\n" );
+	}
+	fprintf( file, " }" );
+    }
+    fprintf( file, " };\n" );
+}
 // ------------------------------------------------------------------- main ---
 int main( int argc, char **argv )
 {
     FILE* test;
-    size_t i, j;
+    size_t i, j, k;
     int arg;
 
     char * font_cache =
@@ -307,17 +335,22 @@ int main( int argc, char **argv )
             variable_name,
             rendermodes[rendermode] );
 
-    size_t texture_size = atlas->width * atlas->height *atlas->depth;
+    size_t texture_size = atlas->width * atlas->height * atlas->depth;
     size_t glyph_count = font->glyphs->size;
     size_t max_kerning_count = 1;
     for( i=0; i < glyph_count; ++i )
     {
-        texture_glyph_t *glyph = *(texture_glyph_t **) vector_get( font->glyphs, i );
-
-        if( vector_size(glyph->kerning) > max_kerning_count )
-        {
-            max_kerning_count = vector_size(glyph->kerning);
-        }
+        texture_glyph_t **glyph_0x100 = *(texture_glyph_t ***) vector_get( font->glyphs, i );
+	if(glyph_0x100) {
+	    for( j=0; j < 0x100; ++j ) {
+		texture_glyph_t *glyph;
+		if(( glyph = glyph_0x100[j] )) {
+		    size_t new_max = vector_size(glyph->kerning);
+		    if( new_max > max_kerning_count )
+			max_kerning_count = new_max;
+		}
+	    }
+	}
     }
 
 
@@ -379,17 +412,12 @@ int main( int argc, char **argv )
     // Structure declarations
     // ----------------------
     fprintf( file,
-        "#include <stddef.h>\n"
-        "#include <stdint.h>\n"
-        "#ifdef __cplusplus\n"
-        "extern \"C\" {\n"
-        "#endif\n"
-        "\n"
-        "typedef struct\n"
-        "{\n"
-        "    uint32_t codepoint;\n"
-        "    float kerning;\n"
-        "} kerning_t;\n\n" );
+	     "#include <stddef.h>\n"
+	     "#include <stdint.h>\n"
+	     "#ifdef __cplusplus\n"
+	     "extern \"C\" {\n"
+	     "#endif\n"
+	     "\n" );
 
     fprintf( file,
         "typedef struct\n"
@@ -400,8 +428,14 @@ int main( int argc, char **argv )
         "    float advance_x, advance_y;\n"
         "    float s0, t0, s1, t1;\n"
         "    size_t kerning_count;\n"
-        "    kerning_t kerning[%" PRIzu "];\n"
+        "    float kerning[%" PRIzu "][0x100];\n"
         "} texture_glyph_t;\n\n", max_kerning_count );
+
+    fprintf( file,
+	     "typedef struct\n"
+	     "{\n"
+	     "   texture_glyph_t *glyphs[0x100];\n"
+	     "} texture_glyph_0x100_t;\n\n" );
 
     fprintf( file,
         "typedef struct\n"
@@ -416,10 +450,48 @@ int main( int argc, char **argv )
         "    float ascender;\n"
         "    float descender;\n"
         "    size_t glyphs_count;\n"
-        "    texture_glyph_t glyphs[%" PRIzu "];\n"
+        "    texture_glyph_0x100_t glyphs[%" PRIzu "];\n"
         "} texture_font_t;\n\n", texture_size, glyph_count );
 
+    texture_glyph_t * glyph;
 
+    GLYPHS_ITERATOR(i, glyph, font->glyphs) {
+	fprintf( file, "texture_glyph_t %s_glyph_%08x = ", variable_name, glyph->codepoint, glyph->codepoint );
+ /*
+        // Debugging information
+        printf( "glyph : '%lc'\n",
+                 glyph->codepoint );
+        printf( "  size       : %dx%d\n",
+                 glyph->width, glyph->height );
+        printf( "  offset     : %+d%+d\n",
+                 glyph->offset_x, glyph->offset_y );
+        printf( "  advance    : %ff, %ff\n",
+                 glyph->advance_x, glyph->advance_y );
+        printf( "  tex coords.: %ff, %ff, %ff, %ff\n",
+                 glyph->u0, glyph->v0, glyph->u1, glyph->v1 );
+
+        printf( "  kerning    : " );
+        if( glyph->kerning_count )
+        {
+            for( j=0; j < glyph->kerning_count; ++j )
+            {
+                printf( "('%lc', %ff)",
+                         glyph->kerning[j].codepoint, glyph->kerning[j].kerning );
+                if( j < (glyph->kerning_count-1) )
+                {
+                    printf( ", " );
+                }
+            }
+        }
+        else
+        {
+            printf( "None" );
+        }
+        printf( "\n\n" );
+*/
+	print_glyph(file, glyph);
+    }
+    GLYPHS_ITERATOR_END
 
     fprintf( file, "texture_font_t %s = {\n", variable_name );
 
@@ -462,72 +534,17 @@ int main( int argc, char **argv )
     // Texture glyphs
     // --------------
     fprintf( file, " {\n" );
-    for( i=0; i < glyph_count; ++i )
-    {
-        texture_glyph_t * glyph = *(texture_glyph_t **) vector_get( font->glyphs, i );
-
-/*
-        // Debugging information
-        printf( "glyph : '%lc'\n",
-                 glyph->codepoint );
-        printf( "  size       : %dx%d\n",
-                 glyph->width, glyph->height );
-        printf( "  offset     : %+d%+d\n",
-                 glyph->offset_x, glyph->offset_y );
-        printf( "  advance    : %ff, %ff\n",
-                 glyph->advance_x, glyph->advance_y );
-        printf( "  tex coords.: %ff, %ff, %ff, %ff\n",
-                 glyph->u0, glyph->v0, glyph->u1, glyph->v1 );
-
-        printf( "  kerning    : " );
-        if( glyph->kerning_count )
-        {
-            for( j=0; j < glyph->kerning_count; ++j )
-            {
-                printf( "('%lc', %ff)",
-                         glyph->kerning[j].codepoint, glyph->kerning[j].kerning );
-                if( j < (glyph->kerning_count-1) )
-                {
-                    printf( ", " );
-                }
-            }
-        }
-        else
-        {
-            printf( "None" );
-        }
-        printf( "\n\n" );
-*/
-
-
-        // TextureFont
-        fprintf( file, "  {%u, ", glyph->codepoint );
-        fprintf( file, "%" PRIzu ", %" PRIzu ", ", glyph->width, glyph->height );
-        fprintf( file, "%d, %d, ", glyph->offset_x, glyph->offset_y );
-        fprintf( file, "%ff, %ff, ", glyph->advance_x, glyph->advance_y );
-        fprintf( file, "%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
-        fprintf( file, "%" PRIzu ", ", vector_size(glyph->kerning) );
-        if (vector_size(glyph->kerning) == 0) {
-            fprintf( file, "0" );
-        }
-        else {
-            fprintf( file, "{ " );
-            for( j=0; j < vector_size(glyph->kerning); ++j )
-            {
-                kerning_t *kerning = (kerning_t *) vector_get( glyph->kerning, j);
-
-                fprintf( file, "{%u, %ff}", kerning->codepoint, kerning->kerning );
-                if( j < (vector_size(glyph->kerning)-1))
-                {
-                    fprintf( file, ", " );
-                }
-            }
-            fprintf( file, "}" );
-        }
-        fprintf( file, " },\n" );
-    }
+    GLYPHS_ITERATOR1(i, glyph, font->glyphs) {
+	fprintf( file, " {\n" );
+	GLYPHS_ITERATOR2(i, glyph, font->glyphs) {
+	    fprintf( file, "  &%s_glyph_%08x,\n", variable_name, glyph->codepoint );
+	} else {
+	    fprintf( file, "  NULL,\n" );
+	}
+	GLYPHS_ITERATOR_END1;
+	fprintf( file, " },\n" );
+    } GLYPHS_ITERATOR_END2;
     fprintf( file, " }\n};\n" );
-
     fprintf( file,
         "#ifdef __cplusplus\n"
         "}\n"

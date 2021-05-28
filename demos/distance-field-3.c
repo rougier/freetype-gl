@@ -266,7 +266,7 @@ void init( void )
     // back to 32 points
     // Just load another glyph if you want to see difference (draw render a '@')
     glyph = load_glyph( "fonts/Vera.ttf", "@", 512, 64, 0.1);
-    vector_push_back( font->glyphs, &glyph );
+    texture_font_index_glyph( font, glyph, '@' );
 
     glyph = texture_font_get_glyph( font, "@");
 

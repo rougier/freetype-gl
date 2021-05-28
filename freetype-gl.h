@@ -7,12 +7,24 @@
 #define __FREETYPE_GL_H__
 
 /* Mandatory */
+#include "platform.h"
 #include "opengl.h"
-#include "ftgl-utils.h"
 #include "vec234.h"
 #include "vector.h"
 #include "texture-atlas.h"
 #include "texture-font.h"
+#include "ftgl-utils.h"
+
+#ifdef IMPLEMENT_FREETYPE_GL
+#include "platform.c"
+#include "texture-atlas.c"
+#include "texture-font.c"
+#include "vector.c"
+#include "utf8-utils.c"
+#include "distance-field.c"
+#include "edtaa3func.c"
+#include "ftgl-utils.c"
+#endif
 
 #ifdef __cplusplus
 #ifndef NOT_USING_FT_GL_NAMESPACE

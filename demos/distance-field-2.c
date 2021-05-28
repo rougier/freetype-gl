@@ -54,9 +54,9 @@ add_text( vertex_buffer_t * buffer, texture_font_t * font,
     float r = color->red, g = color->green, b = color->blue, a = color->alpha;
     for( i = 0; i < strlen(text); ++i )
     {
-        glfwSetTime(total_time);
+        double start_time = glfwGetTime();
         texture_glyph_t *glyph = texture_font_get_glyph( font, text + i );
-        total_time += glfwGetTime();
+        total_time += glfwGetTime()-start_time;
         if( glyph != NULL )
         {
             float kerning = 0.0f;

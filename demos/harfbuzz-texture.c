@@ -214,7 +214,7 @@ void init( void )
             ivec4 region = texture_atlas_get_region( atlas, w+1, h+1 );
             if ( region.x < 0 )
             {
-                fprintf( stderr, "Texture atlas is full (line %d)\n",  __LINE__ );
+		fprintf( stderr, "Texture atlas is full (%s:%d)\n", __FILE__, __LINE__ );
                 continue;
             }
             int x = region.x, y = region.y;

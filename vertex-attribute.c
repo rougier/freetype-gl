@@ -13,7 +13,6 @@
 #include "ftgl-utils.h"
 
 
-
 // ----------------------------------------------------------------------------
 vertex_attribute_t *
 vertex_attribute_new( GLchar * name,
@@ -60,7 +59,7 @@ vertex_attribute_parse( char *format )
     int size;
     int normalized = 0;
     char ctype;
-    char *name;
+    char *name = NULL;
     vertex_attribute_t *attr;
     char *p = strchr(format, ':');
     if( p != NULL)
@@ -68,7 +67,7 @@ vertex_attribute_parse( char *format )
         name = strndup(format, p-format);
         if( *(++p) == '\0' )
         {
-            log_error( "No size specified for '%s' attribute\n", name );
+	    freetype_gl_error_str( No_Size_Specified, name );
             free( name );
             return 0;
         }
@@ -76,7 +75,7 @@ vertex_attribute_parse( char *format )
 
         if( *(++p) == '\0' )
         {
-            log_error( "No format specified for '%s' attribute\n", name );
+            freetype_gl_error_str( No_Format_Specified, name );
             free( name );
             return 0;
         }
@@ -93,7 +92,7 @@ vertex_attribute_parse( char *format )
     }
     else
     {
-        log_error( "Vertex attribute format not understood ('%s')\n", format );
+        freetype_gl_error_str(Vertex_Attribute_Format_Wrong, name );
         return 0;
     }
 
