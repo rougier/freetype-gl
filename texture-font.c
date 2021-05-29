@@ -905,14 +905,16 @@ cleanup_stroker:
     x = region.x;
     y = region.y;
 
+    // Copy pixel data over
     unsigned char *buffer = calloc( tgt_w * tgt_h * self->atlas->depth, sizeof(unsigned char) );
 
     unsigned char *dst_ptr = buffer + (padding.top * tgt_w + padding.left) * self->atlas->depth;
     unsigned char *src_ptr = ft_bitmap.buffer;
-    if( self->atlas->depth == 4 ) {
+    if( ft_bitmap.pixel_mode == FT_PIXEL_MODE_BGRA && self->atlas->depth == 4 )
+    {
+        // BGRA in, RGBA out
         for( i = 0; i < src_h; i++ ) {
             int j;
-            // flip bgra to rgba, because that's better for OpenGL
             for( j = 0; j < ft_bitmap.width; j++ ) {
                 uint32_t bgra, rgba;
                 bgra = ((uint32_t*)src_ptr)[j];
@@ -926,7 +928,29 @@ cleanup_stroker:
             dst_ptr += tgt_w * self->atlas->depth;
             src_ptr += ft_bitmap.pitch;
         }
-    } else {
+    }
+    else if( ft_bitmap.pixel_mode == FT_PIXEL_MODE_BGRA && self->atlas->depth == 1 )
+    {
+        // BGRA in, grey out: Use weighted sum for luminosity, and multiply by alpha
+        struct src_pixel_t { uint8_t b; uint8_t g; uint8_t r; uint8_t a; } * src = (struct src_pixel_t *)ft_bitmap.buffer;
+        for( int row = 0; row < src_h; row++, dst_ptr += tgt_w * self->atlas->depth ) {
+            for( int col = 0; col < src_w; col++, src++ ) {
+                dst_ptr[col] = (0.3*src->r + 0.59*src->g + 0.11*src->b) * (src->a/255.0);
+            }
+        }
+    }
+    else if( ft_bitmap.pixel_mode == FT_PIXEL_MODE_GRAY && self->atlas->depth == 4 ) {
+        // Grey in, RGBA out: Use grey level for alpha channel, with white color
+        struct dst_pixel_t { uint8_t r; uint8_t g; uint8_t b; uint8_t a; } * dst = (struct dst_pixel_t *)dst_ptr;
+        for( int row = 0; row < src_h; row++, dst += tgt_w ) {
+            for( int col = 0; col < src_w; col++, src_ptr++ ) {
+                dst[col] = (struct dst_pixel_t){ 255, 255, 255, *src_ptr };
+            }
+        }
+    }
+    else
+    {
+        // Straight copy, per row
         for( i = 0; i < src_h; i++ ) {
             //difference between width and pitch: https://www.freetype.org/freetype2/docs/reference/ft2-basic_types.html#FT_Bitmap
             memcpy( dst_ptr, src_ptr, ft_bitmap.width);
