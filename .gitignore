@@ -47,3 +47,6 @@ Makefile
 libfreetype-gl.a
 makefont
 /build
+/.vs
+/out
+/glfw-3.2.1*
