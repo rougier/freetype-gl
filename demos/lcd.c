@@ -124,7 +124,6 @@ void display( GLFWwindow* window )
 
     glColor4f( 0, 0, 0, 1 );
     glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-    glBlendColor( 1, 1, 1, 1 );
     glEnable( GL_BLEND );
 
 
