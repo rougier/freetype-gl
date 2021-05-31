@@ -20,9 +20,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifdef __cplusplus
 namespace ftgl {
 #endif
 
@@ -139,7 +136,7 @@ extern
 #endif
 "C" {
 #  endif
-    
+
 # endif /* !FTGL_ERRORDEF */
 
     /* this macro is used to define an error */
@@ -155,6 +152,7 @@ extern
 #undef FTGL_ERROR_END_LIST
 
 #ifdef __cplusplus
+}
 }
 }
 #endif
