@@ -157,6 +157,7 @@ extern
 #ifdef __cplusplus
 }
 }
+}
 #endif
 
 #endif
