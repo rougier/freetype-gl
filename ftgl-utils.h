@@ -134,10 +134,6 @@ const char* freetype_gl_errstrs[];
 
 #  ifdef __cplusplus
 #   define FTGL_NEED_EXTERN_C
-#ifndef IMPLEMENT_FREETYPE_GL
-extern
-#endif
-"C" {
 #  endif
     
 # endif /* !FTGL_ERRORDEF */
