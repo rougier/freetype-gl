@@ -21,7 +21,7 @@ a single vertex buffer.
 * **texture-atlas**: This structure is responsible for the packing of small
                      regions into a bigger texture. It is based on the skyline
                      bottom left algorithm which appear to be [well suited for
-                     storing glyphs](./doc/RectangleBinPack.pdf).
+                     storing glyphs](https://raw.githubusercontent.com/rougier/freetype-gl/master/doc/RectangleBinPack.pdf).
 
 * **vector**:        This structure loosely mimics the std::vector class from
                      c++. It is used by texture-atlas (for storing nodes),
