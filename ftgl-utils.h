@@ -20,9 +20,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifdef __cplusplus
 namespace ftgl {
 #endif
 
@@ -132,14 +129,6 @@ const char* freetype_gl_errstrs[];
 #  define FTGL_ERROR_START_LIST     enum {
 #  define FTGL_ERROR_END_LIST       FTGL_ERR_CAT( FTGL_ERR_PREFIX, Max ) };
 
-#  ifdef __cplusplus
-#   define FTGL_NEED_EXTERN_C
-#ifndef IMPLEMENT_FREETYPE_GL
-extern
-#endif
-"C" {
-#  endif
-    
 # endif /* !FTGL_ERRORDEF */
 
     /* this macro is used to define an error */
