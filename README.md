@@ -8,7 +8,8 @@ a single vertex buffer.
 
 ![Screenshot](http://raw.github.com/rougier/freetype-gl/master/doc/images/markup.png)
 
-[Installation instructions](INSTALL.md).
+
+[Installation instructions](INSTALL.md)
 
 ## Code organization
 
@@ -19,9 +20,8 @@ a single vertex buffer.
 
 * **texture-atlas**: This structure is responsible for the packing of small
                      regions into a bigger texture. It is based on the skyline
-                     bottom left algorithm which appear to be well suited for
-                     storing glyphs. More information at:
-                     http://clb.demon.fi/files/RectangleBinPack.pdf
+                     bottom left algorithm which appear to be [well suited for
+                     storing glyphs](./doc/RectangleBinPack.pdf).
 
 * **vector**:        This structure loosely mimics the std::vector class from
                      c++. It is used by texture-atlas (for storing nodes),
