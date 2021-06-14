@@ -146,6 +146,7 @@ const char* freetype_gl_errstrs[];
 #ifdef __cplusplus
 }
 }
+}
 #endif
 
 #endif
