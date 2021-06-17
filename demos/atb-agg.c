@@ -155,6 +155,13 @@ build_buffer( void )
     if (!font)
         return;
 
+    int pixHeight;
+    {
+        int viewport[4];
+        glGetIntegerv( GL_VIEWPORT, viewport );
+        pixHeight = viewport[3];
+    }
+
     markup.font = font;
     font->hinting = p_hinting;
     font->kerning = p_kerning;
@@ -166,7 +173,7 @@ build_buffer( void )
     font->lcd_weights[3] = (unsigned char)(p_secondary*norm*255);
     font->lcd_weights[4] = (unsigned char)(p_tertiary*norm*255);
     pen.x = 10;
-    pen.y = 600 - font->height - 10;
+    pen.y = pixHeight - font->height - 10;
     text_buffer_printf( text_buffer, &pen, &markup, text, NULL );
 
     // Post-processing for width and orientation
@@ -288,19 +295,40 @@ void TW_CALL get_lcd_filtering( void *value, void *data )
 // ------------------------------------------------------------------- init ---
 void init( GLFWwindow* window )
 {
+    int scale_factor;
+    {
+        int pixWidth, pixHeight, winWidth, winHeight;
+        glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
+        glfwGetWindowSize( window, &winWidth, &winHeight );
+        scale_factor = (pixWidth / (double) winWidth) + 0.5;
+    }
+    {
+        char buf[256];
+        sprintf(buf, "GLOBAL fontscaling=%d", scale_factor);
+        TwDefine(buf);
+    }
+
+    TwInit( TW_OPENGL, NULL );
+
     // Create a new tweak bar
     bar = TwNewBar("TweakBar");
     TwDefine("GLOBAL "
              "help = 'This example shows how to tune all font parameters.' ");
     TwDefine("TweakBar                      "
-             "size          = '280 400'     "
-             "position      = '500 20'      "
              "color         = '127 127 127' "
              "alpha         = 240           "
              "label         = 'Parameters'  "
              "resizable     = True          "
              "fontresizable = True          "
              "iconifiable   = True          ");
+    {
+        char buf[256];
+        sprintf(
+            buf, "TweakBar size = '%d %d' position = '%d %d'",
+            280*scale_factor, 400*scale_factor,
+            500*scale_factor, 20*scale_factor);
+        TwDefine(buf);
+    }
 
     {
         TwEnumVal familyEV[NUM_FONTS] = {
@@ -321,8 +349,8 @@ void init( GLFWwindow* window )
                "label = 'Size' "
                "group = 'Font' "
                "min   = 6.0    "
-               "max   = 24.0   "
-               "step  = 0.05   "
+               "max   = 60.0   "
+               "step  = 0.2   "
                "help  = ' '    ");
     TwAddVarCB(bar, "LCD filtering", TW_TYPE_BOOL32, set_lcd_filtering, get_lcd_filtering, NULL,
                "label = 'LCD filtering' "
@@ -501,7 +529,10 @@ void reshape( GLFWwindow* window, int width, int height )
 // ------------------------------------------------------------- cursor_pos ---
 void cursor_pos( GLFWwindow* window, double x, double y )
 {
-    TwMouseMotion( x, y );
+    int pixWidth, pixHeight, winWidth, winHeight;
+    glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
+    glfwGetWindowSize( window, &winWidth, &winHeight );
+    TwMouseMotion( (x * pixWidth) / winWidth, (y * pixHeight) / winHeight );
 }
 
 
@@ -666,8 +697,6 @@ int main( int argc, char **argv )
     glfwMakeContextCurrent( window );
     glfwSwapInterval( 1 );
 
-    TwInit( TW_OPENGL, NULL );
-
     glfwSetFramebufferSizeCallback( window, reshape );
     glfwSetWindowRefreshCallback( window, display );
     glfwSetCursorPosCallback( window, cursor_pos );
@@ -688,7 +717,11 @@ int main( int argc, char **argv )
     init( window );
 
     glfwShowWindow( window );
-    reshape( window, 800, 600 );
+    {
+        int pixWidth, pixHeight;
+        glfwGetFramebufferSize( window, &pixWidth, &pixHeight );
+        reshape( window, pixWidth, pixHeight );
+    }
 
     while(!glfwWindowShouldClose( window ))
     {
