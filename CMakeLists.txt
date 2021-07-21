@@ -7,6 +7,9 @@ cmake_minimum_required(VERSION 2.8.12)
 
 project(freetype-gl LANGUAGES C CXX)
 
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED TRUE)
+
 set(CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules"
     "${CMAKE_MODULE_PATH}"
