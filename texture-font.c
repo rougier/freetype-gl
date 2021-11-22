@@ -66,6 +66,33 @@ static inline uint32_t rol(uint32_t in, uint32_t x)
     return (in >> (32-x)) | (in << x);
 }
 
+// ------------------------------------------------------ texture_glyph_clone ---
+texture_glyph_t*
+texture_glyph_clone(texture_glyph_t* self)
+{
+    int i;
+    texture_glyph_t* new_glyph;
+    float* source;
+    float** target;
+    assert(self);
+
+    new_glyph = (texture_glyph_t *) malloc( sizeof(texture_glyph_t) );
+    if(new_glyph == NULL) {
+        freetype_gl_error( Out_Of_Memory );
+        return NULL;
+    }
+    memcpy(new_glyph, self, sizeof(texture_glyph_t));
+    new_glyph->kerning = vector_new(sizeof(float**));
+    vector_resize(new_glyph->kerning, self->kerning->size);
+    for (i = 0; i < self->kerning->size; i++) {
+        source = *(float**)vector_get(self->kerning, i);
+        target = (float**)vector_get(new_glyph->kerning, i);
+        *target = calloc(0x100, sizeof(float));
+        memcpy(*target, source, 0x100);
+    }
+    return new_glyph;
+}
+
 // ------------------------------------------------------ texture_glyph_new ---
 texture_glyph_t *
 texture_glyph_new(void)
@@ -1007,9 +1034,7 @@ cleanup_stroker:
     int free_glyph = texture_font_index_glyph(self, glyph, ucodepoint);
     if(!glyph_index) {
         if(!free_glyph) {
-            texture_glyph_t *new_glyph = malloc(sizeof(texture_glyph_t));
-            memcpy(new_glyph, glyph, sizeof(texture_glyph_t));
-            glyph=new_glyph;
+            glyph = texture_glyph_clone(glyph);
         }
         free_glyph = texture_font_index_glyph(self, glyph, 0);
     }
