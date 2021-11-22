@@ -106,6 +106,7 @@ endif()
 find_package(Freetype REQUIRED)
 
 if(freetype-gl_WITH_GLEW)
+    add_definitions(-DWITH_GLEW=1)
     find_package(GLEW REQUIRED)
 endif()
 
