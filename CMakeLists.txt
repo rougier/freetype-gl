@@ -41,6 +41,7 @@ option(freetype-gl_BUILD_HARFBUZZ "Build the freetype-gl harfbuzz support (exper
 option(freetype-gl_BUILD_MAKEFONT "Build the makefont tool" ON)
 option(freetype-gl_BUILD_TESTS "Build the tests" ON)
 option(freetype-gl_BUILD_SHARED "Build shared library" OFF)
+option(freetype-gl_OFF_SCREEN "Build for off-screen render (build libfreetype-gl.so only without GLX, demos must disable because of missing glfw)" OFF)
 
 include(RequireIncludeFile)
 include(RequireFunctionExists)
@@ -91,10 +92,21 @@ if(NOT MINGW AND (WIN32 OR WIN64))
         ${CMAKE_CURRENT_SOURCE_DIR}/windows/freetype)
 endif()
 
-find_package(OpenGL REQUIRED)
+if(freetype-gl_OFF_SCREEN)
+    set(freetype-gl_BUILD_DEMOS OFF)
+
+    # Build OFF screen must use FindOpenGL with GLVND
+    # The only one module OpenGL are needed for libOpenGL.so
+    set(OpenGL_GL_PREFERENCE GLVND)
+    find_package(OpenGL REQUIRED OpenGL EGL)
+    set(OPENGL_LIBRARY ${OPENGL_opengl_LIBRARY})
+else()
+    find_package(OpenGL REQUIRED)
+endif()
 find_package(Freetype REQUIRED)
 
 if(freetype-gl_WITH_GLEW)
+    add_definitions(-DWITH_GLEW=1)
     find_package(GLEW REQUIRED)
 endif()
 

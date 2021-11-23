@@ -30,7 +30,9 @@
 #    include <GLES2/gl2.h>
 #  endif
 #else
+#if defined(WITH_GLEW)
 #  include <GL/glew.h>
+#endif
 #  include <GL/gl.h>
 #endif
 #endif /* GL_WITH_GLAD */
