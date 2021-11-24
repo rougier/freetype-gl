@@ -106,12 +106,12 @@ endif()
 find_package(Freetype REQUIRED)
 
 if(freetype-gl_WITH_GLEW)
-    add_definitions(-DWITH_GLEW=1)
+    set(FREETYPE_GL_USE_GLEW 1)
     find_package(GLEW REQUIRED)
 endif()
 
 if(freetype-gl_WITH_GLAD)
-    add_definitions(-DGL_WITH_GLAD)
+    set(GL_WITH_GLAD 1)
 endif()
 
 include_directories(
@@ -119,6 +119,7 @@ include_directories(
     ${FREETYPE_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${GLEW_INCLUDE_PATH}
+    ${PROJECT_BINARY_DIR}
 )
 
 if(MSVC)
@@ -127,8 +128,13 @@ if(MSVC)
 endif(MSVC)
 
 if(freetype-gl_USE_VAO)
-    add_definitions(-DFREETYPE_GL_USE_VAO)
+    set(FREETYPE_GL_USE_VAO 1)
 endif(freetype-gl_USE_VAO)
+
+configure_file (
+        "${PROJECT_SOURCE_DIR}/cmake/config.h.in"
+        "${PROJECT_BINARY_DIR}/config.h"
+)
 
 set(FREETYPE_GL_HDR
     distance-field.h
@@ -148,6 +154,7 @@ set(FREETYPE_GL_HDR
     vertex-attribute.h
     vertex-buffer.h
     freetype-gl-errdef.h
+    ${PROJECT_BINARY_DIR}/config.h
 )
 
 set(FREETYPE_GL_SRC
