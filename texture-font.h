@@ -686,6 +686,14 @@ texture_glyph_new( void );
 void
 texture_glyph_delete( texture_glyph_t * self );
 
+/**
+ * Clone a glyph
+ *
+ * @param self         A valid texture glyph
+ */
+texture_glyph_t*
+texture_glyph_clone( texture_glyph_t* self );
+
 /** @} */
 
 #define GLYPHS_ITERATOR1(index, name, glyph) \
