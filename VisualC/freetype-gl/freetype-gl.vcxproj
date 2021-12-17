@@ -74,29 +74,29 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)_$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)$(PlatformTarget)\$(Configuration)\MSVCFiles\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)\..\windows\freetype;$(SolutionDir)\..\windows\glew\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\windows\freetype;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Development;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)_$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)$(PlatformTarget)\$(Configuration)\MSVCFiles\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)\..\windows\freetype;$(SolutionDir)\..\windows\glew\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\windows\freetype;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Development;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)_$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)$(PlatformTarget)\$(Configuration)\MSVCFiles\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)\..\windows\freetype;$(SolutionDir)\..\windows\glew\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\windows\freetype;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Development;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)_$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)$(PlatformTarget)\$(Configuration)\MSVCFiles\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)\..\windows\freetype;$(SolutionDir)\..\windows\glew\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\windows\freetype;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Development;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -189,6 +189,7 @@
     <ClInclude Include="..\..\vertex-buffer.h" />
     <ClInclude Include="Development\framework.h" />
     <ClInclude Include="Development\stdafx.h" />
+    <ClInclude Include="Development\config.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\distance-field.c" />
