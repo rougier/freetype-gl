@@ -74,28 +74,28 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)_$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)$(PlatformTarget)\$(Configuration)\MSVCFiles\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)\Development;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\freetype-gl\Development;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)_$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)$(PlatformTarget)\$(Configuration)\MSVCFiles\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)\Development;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\freetype-gl\Development;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)_$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)$(PlatformTarget)\$(Configuration)\MSVCFiles\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)\Development;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\freetype-gl\Development;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)_$(PlatformTarget)\</OutDir>
     <IntDir>$(SolutionDir)$(PlatformTarget)\$(Configuration)\MSVCFiles\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)\Development;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\freetype-gl\Development;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
