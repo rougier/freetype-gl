@@ -3,7 +3,8 @@
 # Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
 # file `LICENSE` for more details.
 version: ci-{build}
-
+cache: 
+  - c:/tools/vcpkg/installed/
 environment:
   matrix:
 
@@ -43,33 +44,45 @@ init:
   - git config --global core.autocrlf true
 
 for:
-
-  -
-    matrix:
+  - matrix:
       only:
         - job_name: Cmake
     install:
-    - '"C:\Program Files (X86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"'
-    # Remove the VS Xamarin targets to reduce AppVeyor specific noise in build
-    # logs.  See also http://help.appveyor.com/discussions/problems/4569
-    - del "C:\Program Files (x86)\MSBuild\12.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
-    - ps: Start-FileDownload https://github.com/glfw/glfw/archive/3.2.1.zip -FileName glfw-3.2.1.zip
-    - unzip glfw-3.2.1.zip
-    - cd glfw-3.2.1
-    - cmake -G "Visual Studio 12" -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
-    - cmake --build . --config Release --target install -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
-    - cd ..
+      - '"C:\Program Files (X86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"'
+      # Remove the VS Xamarin targets to reduce AppVeyor specific noise in build
+      # logs.  See also http://help.appveyor.com/discussions/problems/4569
+      - del "C:\Program Files (x86)\MSBuild\12.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
+      - cd C:\Tools\vcpkg
+      - git pull --quiet
+      - .\bootstrap-vcpkg.bat
+      - vcpkg install glfw3:x86-windows
+      - vcpkg install glfw3:x64-windows
+      - vcpkg install glew:x86-windows
+      - vcpkg install glew:x64-windows
+      - vcpkg install freetype:x86-windows
+      - vcpkg install freetype:x64-windows
+      - cd %APPVEYOR_BUILD_FOLDER%
     build_script:
-    - cmake -G "Visual Studio 12" -Dfreetype-gl_BUILD_APIDOC=OFF -Dfreetype-gl_BUILD_TESTS=OFF "-Dglfw3_DIR=C:/Program Files (x86)/GLFW/lib/cmake/glfw3" ..
-    - cmake --build . --config RelWithDebInfo -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
+      - cmake -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -G "Visual Studio 12" -Dfreetype-gl_BUILD_APIDOC=OFF -Dfreetype-gl_BUILD_TESTS=OFF ..
+      - cmake --build . --config RelWithDebInfo -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /verbosity:minimal
     before_build:
-    - if not exist build\NUL mkdir build
-    - cd build
+      - if not exist build\NUL mkdir build
+      - cd build
  
-  -
-    matrix:
+  - matrix:
       only:
         - job_group: MSVS
-    
+    install:
+      - cd C:\Tools\vcpkg
+      - git pull --quiet
+      - .\bootstrap-vcpkg.bat
+      - vcpkg integrate install
+      - vcpkg install glfw3:x86-windows
+      - vcpkg install glfw3:x64-windows
+      - vcpkg install glew:x86-windows
+      - vcpkg install glew:x64-windows
+      - vcpkg install freetype:x86-windows
+      - vcpkg install freetype:x64-windows
+      - cd %APPVEYOR_BUILD_FOLDER%
     build_script:
     - msbuild VisualC\freetype-gl.sln

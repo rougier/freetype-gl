@@ -33,6 +33,9 @@
     <ClInclude Include="Development\stdafx.h">
       <Filter>Header Files\Development</Filter>
     </ClInclude>
+    <ClInclude Include="Development\config.h">
+      <Filter>Header Files\Development</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\distance-field.h">
       <Filter>Header Files\Original</Filter>
     </ClInclude>
