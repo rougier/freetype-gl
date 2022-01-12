@@ -26,7 +26,7 @@ void print_at( int pen_x, int pen_y, char *text )
     for( i=0; i < strlen(text); ++i) {
 	texture_glyph_t *glyph = 0;
 	codepoint = utf8_to_utf32( text + i );
-	glyph = font.glyphs[codepoint>>8].glyphs[codepoint&0xff];
+	glyph = font.glyphs[codepoint>>8][codepoint&0xff];
         if( !glyph )
         {
             continue;
