@@ -39,7 +39,7 @@ void print_glyph(FILE * file, texture_glyph_t * glyph)
     fprintf( file, "%ff, %ff, %ff, %ff, ", glyph->s0, glyph->t0, glyph->s1, glyph->t1 );
     fprintf( file, "%" PRIzu ", ", vector_size(glyph->kerning) );
     if (vector_size(glyph->kerning) == 0) {
-	fprintf( file, "0" );
+	fprintf( file, "{{0}}" );
     } else {
 	int k;
 	fprintf( file, "{ " );
@@ -432,12 +432,6 @@ int main( int argc, char **argv )
         "} texture_glyph_t;\n\n", max_kerning_count );
 
     fprintf( file,
-	     "typedef struct\n"
-	     "{\n"
-	     "   texture_glyph_t *glyphs[0x100];\n"
-	     "} texture_glyph_0x100_t;\n\n" );
-
-    fprintf( file,
         "typedef struct\n"
         "{\n"
         "    size_t tex_width;\n"
@@ -450,7 +444,7 @@ int main( int argc, char **argv )
         "    float ascender;\n"
         "    float descender;\n"
         "    size_t glyphs_count;\n"
-        "    texture_glyph_0x100_t glyphs[%" PRIzu "];\n"
+        "    texture_glyph_t *glyphs[%" PRIzu "][0x100];\n"
         "} texture_font_t;\n\n", texture_size, glyph_count );
 
     texture_glyph_t * glyph;
