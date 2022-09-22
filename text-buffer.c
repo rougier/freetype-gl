@@ -24,7 +24,7 @@
 // ----------------------------------------------------------------------------
 
 text_buffer_t *
-text_buffer_new( )
+text_buffer_new( void )
 {
     text_buffer_t *self = (text_buffer_t *) malloc (sizeof(text_buffer_t));
     self->buffer = vertex_buffer_new(
