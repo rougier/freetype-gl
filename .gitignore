@@ -50,3 +50,8 @@ makefont
 /.vs
 /out
 /glfw-3.2.1*
+
+/subprojects/*
+!/subprojects/*.wrap
+/builddir
+/prefix
