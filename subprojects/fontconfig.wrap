@@ -1,0 +1,9 @@
+[wrap-file]
+source_url = https://gitlab.freedesktop.org/fontconfig/fontconfig/-/archive/2.14.1/fontconfig-2.14.1.tar.bz2
+source_filename = fontconfig-2.14.1.tar.bz2
+source_hash = 78c7ffcfb7f950ad4e0b5ad38040e032517140d23e6520314d3b591527a0f9fe
+directory = fontconfig-2.14.1
+diff_files = fontconfig/meson.build.patch
+
+[provide]
+fontconfig = fontconfig_dep

@@ -34,3 +34,5 @@ freetype_gl_dep = declare_dependency(include_directories: inc, dependencies: dep
 
 makefont_sources = files('makefont.c')
 executable('makefont', makefont_sources, dependencies: freetype_gl_dep, install: true)
+
+subdir('demos')

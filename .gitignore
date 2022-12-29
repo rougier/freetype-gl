@@ -53,5 +53,6 @@ makefont
 
 /subprojects/*
 !/subprojects/*.wrap
+!/subprojects/packagefiles
 /builddir
 /prefix
