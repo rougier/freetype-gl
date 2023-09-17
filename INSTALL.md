@@ -40,6 +40,8 @@ You can then run some demos under:
 
 ## Windows MSYS2 MINGW64 with gcc 64-bit toolchain
 
+A video by OGLDEV on building FreetypeGL using Visual Studio 2022: <https://youtu.be/W_lyfaKpUsE>
+
 <http://msys2.github.io/>
 
 Be sure to check the MSYS2 wiki for install instructions / general information about the different shells etc. <https://sourceforge.net/p/msys2/wiki>
