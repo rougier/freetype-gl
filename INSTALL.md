@@ -1,5 +1,9 @@
 # Install
 
+## Arch Linux
+
+freetype-gl is available on the [Arch User Repository](https://aur.archlinux.org/packages/freetype-gl).
+
 ## Ubuntu
 
 The procedure is detailed in the [.travis.yml](.travis.yml).
