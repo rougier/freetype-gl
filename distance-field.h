@@ -12,7 +12,7 @@ namespace ftgl {
 #endif
 
 /**
- * @file   shader.h
+ * @file   distance-field.h
  * @author Nicolas Rougier (Nicolas.Rougier@inria.fr)
  *
  * @defgroup distance-field Distance Field
@@ -54,7 +54,7 @@ make_distance_mapd( double *img,
                     unsigned int width, unsigned int height );
 
 unsigned char *
-make_distance_mapb( unsigned char *img,
+make_distance_mapb( const unsigned char *img,
                     unsigned int width, unsigned int height );
 
 /** @} */
