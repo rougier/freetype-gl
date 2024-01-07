@@ -49,16 +49,16 @@ viewport_t viewport = {0,0,1};
 
 
 // ------------------------------------------------------------------- init ---
-void init( void )
+void init( const char* fontpath, int fontsize, int texsize, const char* shaderpath )
 {
     texture_font_t * font;
-    const char *filename = "fonts/Vera.ttf";
+    const char *filename = fontpath;
     const char * cache = " !\"#$%&'()*+,-./0123456789:;<=>?"
                          "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
                          "`abcdefghijklmnopqrstuvwxyz{|}~";
 
-    atlas = texture_atlas_new( 512, 512, 1 );
-    font = texture_font_new_from_file( atlas, 72, filename );
+    atlas = texture_atlas_new( texsize, texsize, 1 );
+    font = texture_font_new_from_file( atlas, fontsize, filename );
     font->rendermode = RENDER_SIGNED_DISTANCE_FIELD;
 
     glfwSetTime(total_time);
@@ -84,8 +84,8 @@ void init( void )
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
     vertex_buffer_push_back( buffer, vertices, 4, indices, 6 );
 
-    shader = shader_load( "shaders/distance-field.vert",
-                           "shaders/distance-field.frag" );
+    shader = shader_load( "shaders/distance-field.vert", shaderpath );
+
     mat4_set_identity( &projection );
     mat4_set_identity( &model );
     mat4_set_identity( &view );
@@ -199,14 +199,40 @@ int main( int argc, char **argv )
 {
     GLFWwindow* window;
     char* screenshot_path = NULL;
+    char* font_path = "fonts/Vera.ttf";
+    char* shader_path = "shaders/distance-field.frag";
+    int font_size = 72;
+    int tex_size = 512;
 
-    if (argc > 1)
+    for (int i = 1; i < argc; i++)
     {
-        if (argc == 3 && 0 == strcmp( "--screenshot", argv[1] ))
-            screenshot_path = argv[2];
+        if (i+1 < argc && 0 == strcmp( "--screenshot", argv[i] ))
+            screenshot_path = argv[++i];
+        else if (i+1 < argc && 0 == strcmp( "--font", argv[i] ))
+            font_path = argv[++i];
+        else if (i+1 < argc && 0 == strcmp( "--fontsize", argv[i] ))
+            font_size = atoi (argv[++i]);
+        else if (i+1 < argc && 0 == strcmp( "--texsize", argv[i] ))
+            tex_size = atoi (argv[++i]);
+        else if (i+1 < argc && 0 == strcmp( "--shader", argv[i] ))
+            shader_path = argv[++i];
+        else if (0 == strcmp( "--help", argv[i] ))
+        {
+            fprintf( stderr, "Usage: distance-field [OPTION]...\n" );
+            fprintf( stderr, "Options:\n" );
+            fprintf( stderr, "  --screenshot FILE   save tga image file and exit\n" );
+            fprintf( stderr, "  --font FILE         use font file (%s)\n", font_path );
+            fprintf( stderr, "  --fontsize INTEGER  set font size (%d)\n", font_size );
+            fprintf( stderr, "  --texsize INTEGER   set texture size (%d)\n", tex_size );
+            fprintf( stderr, "  --shader FILE       use fragment shader file (%s)\n", shader_path );
+            fprintf( stderr, "  --help              display this help and exit\n" );
+            exit( EXIT_SUCCESS );
+        }
         else
         {
             fprintf( stderr, "Unknown or incomplete parameters given\n" );
+            fprintf( stderr, "Usage: distance-field [OPTION]...\n" );
+            fprintf( stderr, "Try 'distance-field --help' for more information.\n" );
             exit( EXIT_FAILURE );
         }
     }
@@ -249,7 +275,7 @@ int main( int argc, char **argv )
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
 
-    init();
+    init( font_path, font_size, tex_size, shader_path );
 
     fprintf(stderr, "Total time to generate distance map: %fs\n", total_time);
 
