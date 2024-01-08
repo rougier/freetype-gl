@@ -515,6 +515,33 @@ typedef struct texture_font_t
 
 
 /**
+ * Get font weights (varialble fonts only)
+ *
+ * @param self  a valid texture font
+ * @param def   default weight
+ * @param min   minimum weight
+ * @param max   maximum weight
+ *
+ * @return 1 on success, 0 on error
+ */
+  int
+  texture_font_get_weight( texture_font_t * self, FT_Fixed * def,
+                           FT_Fixed * min, FT_Fixed * max );
+
+
+/**
+ * Set font weight (varialble fonts only)
+ *
+ * @param self  a valid texture font
+ * @param wght  new font weight
+ *
+ * @return 1 on success, 0 on error
+ */
+  int
+  texture_font_set_weight( texture_font_t * self, FT_Fixed wght );
+
+
+/**
  * Request a new glyph from the font. If it has not been created yet, it will
  * be.
  *
