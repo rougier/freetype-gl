@@ -10,6 +10,7 @@
 // #include FT_ADVANCES_H
 #include FT_LCD_FILTER_H
 #include FT_TRUETYPE_TABLES_H
+#include FT_MULTIPLE_MASTERS_H
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -580,6 +581,85 @@ texture_font_load_face( texture_font_t *self, float size )
     texture_font_close( self, MODE_ALWAYS_OPEN, MODE_ALWAYS_OPEN );
   cleanup:
     return 0;
+}
+
+// ------------------------------------------------ texture_font_get_weight ---
+int
+texture_font_get_weight( texture_font_t *self, FT_Fixed *def, FT_Fixed *min, FT_Fixed *max )
+{
+    int result = 0;
+
+    if( def && min && max ) {
+        *def = 0; *min = 0; *max = 0;
+
+        if( self && self->library->library && self->face ) {
+            FT_MM_Var *master;
+
+            if( FT_Get_MM_Var( self->face, &master ) == 0 ) {
+                const FT_Tag tag = FT_MAKE_TAG ('w', 'g', 'h', 't');
+                const char* name = "Weight";
+
+                for( unsigned int i = 0; i < 16 && i < master->num_axis; i++ ) {
+
+                    if( tag == master->axis[i].tag
+                        || strcmp( name, master->axis[i].name ) == 0 )
+                    {
+                        *def = master->axis[i].def;
+                        *min = master->axis[i].minimum;
+                        *max = master->axis[i].maximum;
+                        result = 1;
+                        break;
+                    }
+                }
+                FT_Done_MM_Var (self->library->library, master);
+            }
+        }
+    }
+
+    return result;
+}
+
+// ------------------------------------------------ texture_font_set_weight ---
+int
+texture_font_set_weight( texture_font_t *self, FT_Fixed wght )
+{
+    int result = 0;
+
+    if( self && self->library->library && self->face ) {
+        FT_MM_Var *master;
+
+        if( FT_Get_MM_Var( self->face, &master ) == 0 ) {
+            const FT_Tag tag = FT_MAKE_TAG ('w', 'g', 'h', 't');
+            const char* name = "Weight";
+            unsigned int index = UINT_MAX;
+
+            for( unsigned int i = 0; i < 16 && i < master->num_axis; i++ ) {
+
+                if( tag == master->axis[i].tag
+                    || strcmp( name, master->axis[i].name ) == 0 )
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            if( index < 16 ) {
+                FT_Fixed coords[16];
+
+                if( FT_Get_Var_Design_Coordinates( self->face, 16, coords ) == 0 )
+                {
+                    coords[index] = wght;
+                    if( FT_Set_Var_Design_Coordinates( self->face, 16, coords ) != 0 )
+                        result = 1;
+                }
+            }
+            FT_Done_MM_Var (self->library->library, master);
+        }
+    }
+
+    if( !result ) freetype_gl_warning( Variable_Font_Weight_Not_Available );
+
+    return result;
 }
 
 // ---------------------------------------------------- texture_font_delete ---
