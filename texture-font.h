@@ -231,6 +231,7 @@ texture_font_default_mode(font_mode_t mode);
 typedef struct FT_FaceRec_* FT_Face;
 typedef struct FT_LibraryRec_* FT_Library;
 typedef struct FT_SizeRec_* FT_Size;
+typedef unsigned long FT_Fixed;
 #endif
 
 /* same for harfbuzz */
