@@ -159,7 +159,7 @@ void edtaa3 (const double* img, double* gx, double* gy, int w, int h, short* dis
         if (x == 0 && y == 0) { \
             d = edgedf (gx[c], gy[c], img[c]); \
         } else if (x == 0 || y == 0) { \
-            d = sqrt (x*x + y*y) + 0.5f - img[c]; \
+            d = sqrt (x*x + y*y) + 0.5 - img[c]; \
         } else { \
             d = sqrt (x*x + y*y) + edgedf (x, y, img[c]); \
         } \
