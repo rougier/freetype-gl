@@ -515,7 +515,7 @@ typedef struct texture_font_t
 
 
 /**
- * Get font weights (varialble fonts only)
+ * Get font weights (variable fonts only)
  *
  * @param self  a valid texture font
  * @param def   default weight
@@ -530,7 +530,7 @@ typedef struct texture_font_t
 
 
 /**
- * Set font weight (varialble fonts only)
+ * Set font weight (variable fonts only)
  *
  * @param self  a valid texture font
  * @param wght  new font weight
