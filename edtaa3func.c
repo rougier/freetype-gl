@@ -60,7 +60,7 @@
 #include "edtaa3func.h"
 
 #define DISTMAX DBL_MAX
-#define EPSILON DBL_EPSILON
+#define EPSILON 1.0e-03
 
 #ifndef M_SQRT2
     #define SQRT2 1.41421356237309504880
