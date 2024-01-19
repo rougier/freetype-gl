@@ -631,35 +631,44 @@ texture_font_set_weight( texture_font_t *self, FT_Fixed wght )
         if( FT_Get_MM_Var( self->face, &master ) == 0 ) {
             const FT_Tag tag = FT_MAKE_TAG ('w', 'g', 'h', 't');
             const char* name = "Weight";
-            unsigned int index = UINT_MAX;
 
             for( unsigned int i = 0; i < 16 && i < master->num_axis; i++ ) {
 
                 if( tag == master->axis[i].tag
                     || strcmp( name, master->axis[i].name ) == 0 )
                 {
-                    index = i;
+                    const FT_Fixed min = master->axis[i].minimum;
+                    const FT_Fixed max = master->axis[i].maximum;
+
+                    if( wght >= min && wght <= max )
+                    {
+                        const int n = i + 1;
+                        FT_Fixed coords[16];
+
+                        if( FT_Get_Var_Design_Coordinates( self->face, n, coords ) == 0 )
+                        {
+                            coords[i] = wght;
+
+                            if( FT_Set_Var_Design_Coordinates( self->face, n, coords ) == 0 )
+                                result = 1;
+                        }
+                    }
+                    else result = -1;
+
                     break;
-                }
-            }
-
-            if( index < 16 ) {
-                FT_Fixed coords[16];
-
-                if( FT_Get_Var_Design_Coordinates( self->face, 16, coords ) == 0 )
-                {
-                    coords[index] = wght;
-                    if( FT_Set_Var_Design_Coordinates( self->face, 16, coords ) != 0 )
-                        result = 1;
                 }
             }
             FT_Done_MM_Var (self->library->library, master);
         }
     }
 
-    if( !result ) freetype_gl_warning( Variable_Font_Weight_Not_Available );
+    if( result < 0 ) {
+        freetype_gl_warning( Variable_Font_Weight_Out_Of_Range );
+    } else if ( result == 0 ) {
+        freetype_gl_warning( Variable_Font_Weight_Not_Available );
+    }
 
-    return result;
+    return result == 1;
 }
 
 // ---------------------------------------------------- texture_font_delete ---
