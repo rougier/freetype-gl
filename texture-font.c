@@ -583,6 +583,18 @@ texture_font_load_face( texture_font_t *self, float size )
     return 0;
 }
 
+// ----------------------------------------------- texture_font_is_variable ---
+int
+texture_font_is_variable( texture_font_t *self )
+{
+    int result = 0;
+
+    if( self && self->face )
+        result = self->face->face_flags & FT_FACE_FLAG_MULTIPLE_MASTERS;
+
+    return result == FT_FACE_FLAG_MULTIPLE_MASTERS;
+}
+
 // ------------------------------------------------ texture_font_get_weight ---
 int
 texture_font_get_weight( texture_font_t *self, FT_Fixed *def, FT_Fixed *min, FT_Fixed *max )

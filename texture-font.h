@@ -513,6 +513,18 @@ typedef struct texture_font_t
   int
   texture_font_load_face( texture_font_t * self, float size );
 
+/**
+ * Texture font contains multiple masters and is capable of interpolating between them.
+ *
+ * @param self  a valid texture font
+ *
+ * @return 1 if true, 0 if false
+ *
+ * @see texture_font_get_weight, texture_font_set_weight
+ */
+  int
+  texture_font_is_variable( texture_font_t * self );
+
 
 /**
  * Get font weights (variable fonts only)
