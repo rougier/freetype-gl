@@ -231,6 +231,7 @@ texture_font_default_mode(font_mode_t mode);
 typedef struct FT_FaceRec_* FT_Face;
 typedef struct FT_LibraryRec_* FT_Library;
 typedef struct FT_SizeRec_* FT_Size;
+typedef signed long FT_Fixed;
 #endif
 
 /* same for harfbuzz */
@@ -511,6 +512,45 @@ typedef struct texture_font_t
  */
   int
   texture_font_load_face( texture_font_t * self, float size );
+
+/**
+ * Texture font contains multiple masters and is capable of interpolating between them.
+ *
+ * @param self  a valid texture font
+ *
+ * @return 1 if true, 0 if false
+ *
+ * @see texture_font_get_weight, texture_font_set_weight
+ */
+  int
+  texture_font_is_variable( texture_font_t * self );
+
+
+/**
+ * Get font weights (variable fonts only)
+ *
+ * @param self  a valid texture font
+ * @param def   default weight
+ * @param min   minimum weight
+ * @param max   maximum weight
+ *
+ * @return 1 on success, 0 on error
+ */
+  int
+  texture_font_get_weight( texture_font_t * self, FT_Fixed * def,
+                           FT_Fixed * min, FT_Fixed * max );
+
+
+/**
+ * Set font weight (variable fonts only)
+ *
+ * @param self  a valid texture font
+ * @param wght  new font weight
+ *
+ * @return 1 on success, 0 on error
+ */
+  int
+  texture_font_set_weight( texture_font_t * self, FT_Fixed wght );
 
 
 /**

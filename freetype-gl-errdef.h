@@ -35,6 +35,10 @@ FTGL_ERRORDEF_( Load_Color_Not_Available,		0x0B,
 		"FT_LOAD_COLOR not available" )
 FTGL_ERRORDEF_( No_Fixed_Size_In_Color_Font,		0x0C,
 		"No fixed size in color font" )
+FTGL_ERRORDEF_( Variable_Font_Weight_Not_Available,	0x0D,
+		"Variable font weight not available" )
+FTGL_ERRORDEF_( Variable_Font_Weight_Out_Of_Range, 	0x0E,
+		"Variable font weight out of range" )
 
 FTGL_ERROR_END_LIST
 

@@ -49,7 +49,7 @@ viewport_t viewport = {0,0,1};
 
 
 // ------------------------------------------------------------------- init ---
-void init( const char* fontpath, int fontsize, int texsize, const char* shaderpath )
+void init( const char* fontpath, int fontsize, FT_Fixed fontweight, int texsize, const char* shaderpath )
 {
     texture_font_t * font;
     const char *filename = fontpath;
@@ -60,6 +60,9 @@ void init( const char* fontpath, int fontsize, int texsize, const char* shaderpa
     atlas = texture_atlas_new( texsize, texsize, 1 );
     font = texture_font_new_from_file( atlas, fontsize, filename );
     font->rendermode = RENDER_SIGNED_DISTANCE_FIELD;
+
+    if( texture_font_is_variable( font ))
+        texture_font_set_weight( font, fontweight << 16 );
 
     glfwSetTime(total_time);
     texture_font_load_glyphs( font, cache );
@@ -202,6 +205,7 @@ int main( int argc, char **argv )
     char* font_path = "fonts/Vera.ttf";
     char* shader_path = "shaders/distance-field.frag";
     int font_size = 72;
+    FT_Fixed font_weight = 400;
     int tex_size = 512;
 
     for (int i = 1; i < argc; i++)
@@ -212,6 +216,8 @@ int main( int argc, char **argv )
             font_path = argv[++i];
         else if (i+1 < argc && 0 == strcmp( "--fontsize", argv[i] ))
             font_size = atoi (argv[++i]);
+        else if (i+1 < argc && 0 == strcmp( "--fontweight", argv[i] ))
+            font_weight = atoi (argv[++i]);
         else if (i+1 < argc && 0 == strcmp( "--texsize", argv[i] ))
             tex_size = atoi (argv[++i]);
         else if (i+1 < argc && 0 == strcmp( "--shader", argv[i] ))
@@ -220,12 +226,13 @@ int main( int argc, char **argv )
         {
             fprintf( stderr, "Usage: distance-field [OPTION]...\n" );
             fprintf( stderr, "Options:\n" );
-            fprintf( stderr, "  --screenshot FILE   save tga image file and exit\n" );
-            fprintf( stderr, "  --font FILE         use font file (%s)\n", font_path );
-            fprintf( stderr, "  --fontsize INTEGER  set font size (%d)\n", font_size );
-            fprintf( stderr, "  --texsize INTEGER   set texture size (%d)\n", tex_size );
-            fprintf( stderr, "  --shader FILE       use fragment shader file (%s)\n", shader_path );
-            fprintf( stderr, "  --help              display this help and exit\n" );
+            fprintf( stderr, "  --screenshot FILE    save tga image file and exit\n" );
+            fprintf( stderr, "  --font FILE          use font file (%s)\n", font_path );
+            fprintf( stderr, "  --fontsize INTEGER   set font size (%d)\n", font_size );
+            fprintf( stderr, "  --fontweight INTEGER set font weight (%d)\n", font_weight );
+            fprintf( stderr, "  --texsize INTEGER    set texture size (%d)\n", tex_size );
+            fprintf( stderr, "  --shader FILE        use fragment shader file (%s)\n", shader_path );
+            fprintf( stderr, "  --help               display this help and exit\n" );
             exit( EXIT_SUCCESS );
         }
         else
@@ -275,7 +282,7 @@ int main( int argc, char **argv )
     fprintf( stderr, "Using GLEW %s\n", glewGetString(GLEW_VERSION) );
 #endif
 
-    init( font_path, font_size, tex_size, shader_path );
+    init( font_path, font_size, font_weight, tex_size, shader_path );
 
     fprintf(stderr, "Total time to generate distance map: %fs\n", total_time);
 
