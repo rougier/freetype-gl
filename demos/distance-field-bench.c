@@ -183,7 +183,7 @@ static void difference (
             const int diff = img1[k] - img2[k];
 
             if (diff == 0) {
-                printf ("%s", (img[k] == 0 ? "  . " : "  * "));
+                printf ("%s", (img1[k] == 0 ? "  . " : "  * "));
             } else {
                 printf ("  # ");
             }
