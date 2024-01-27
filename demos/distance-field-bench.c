@@ -7,13 +7,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <math.h>
 #include <float.h>
-#include <limits.h>
 
-// Glyph images
-#include "image.h"
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+// query performance counter scale
+double qpcscale;
+#else
+#include <time.h>
+#endif
 
 // Utility
 static double* get_background (const unsigned char* image, int size);
@@ -21,9 +24,10 @@ static double* get_foreground (double* data, int size);
 static unsigned char* get_distmap (double* outside, double* inside, int size);
 
 static void dump (const char* s, const unsigned char* data, int w, int h);
-static long dumptime (const char* s, struct timespec* begin, struct timespec* end);
-static void get_process_time (struct timespec* t);
-static double show_time (const char* s, long t1, long t2, int w, int h);
+
+static void get_process_time (double* t);
+static double dumptime (const char* s, double begin, double end);
+static double show_time (const char* s, double t1, double t2, int w, int h);
 
 static void difference (
     int i, int verbose,
@@ -117,23 +121,32 @@ typedef struct {
     int height;
 } benchmark_args_t;
 
-static long benchmark (
+static double benchmark (
     const char* s, unsigned char** distmap,
     unsigned char* (*func)(const unsigned char*, int, int), benchmark_args_t* args)
 {
-    struct timespec begin, end;
+    double begin, end;
 
     get_process_time (&begin);
     *distmap = func (args->image, args->width, args->height);
     get_process_time (&end);
 
-    return dumptime (s, &begin, &end);
+    return dumptime (s, begin, end);
 }
 
 int main (int argc, char** argv)
 {
     unsigned char *orig, *optim;
     double optimRatio = 0.0;
+
+#if defined(_WIN32) || defined(_WIN64)
+    LARGE_INTEGER frequency;
+    QueryPerformanceFrequency (&frequency);
+    qpcscale = 1.0e+9 / frequency.QuadPart; 
+#endif
+
+// Glyph images
+#include "image.h"
 
     for (int i = 0; i < imageDataSize; ++i)
     {
@@ -145,8 +158,8 @@ int main (int argc, char** argv)
 
         benchmark_args_t args = { image, width, height };
 
-        const long origTime = benchmark ("Original\t", &orig, benchoriginal, &args);
-        const long optimTime = benchmark ("Optimized\t", &optim, benchoptimized, &args);
+        const double origTime = benchmark ("Original\t", &orig, benchoriginal, &args);
+        const double optimTime = benchmark ("Optimized\t", &optim, benchoptimized, &args);
 
         optimRatio += show_time ("Optmized", origTime, optimTime, width, height);
 
@@ -214,27 +227,34 @@ static void dump (const char* s, const unsigned char* data, int w, int h)
     printf ("\n");
 }
 
-static void get_process_time (struct timespec* t)
+static void get_process_time (double* nanoseconds)
 {
-    clock_gettime (CLOCK_PROCESS_CPUTIME_ID, t);
+#if defined(_WIN32) || defined(_WIN64)
+    LARGE_INTEGER t;
+    QueryPerformanceCounter (&t);
+    const double ns = t.QuadPart * qpcscale;
+#else
+    struct timespec t;
+    clock_gettime (CLOCK_PROCESS_CPUTIME_ID, &t);
+    const double ns = t.tv_sec * 1.0e+9 + t.tv_nsec;
+#endif
+    *nanoseconds = ns;
 }
 
-static long dumptime (const char* s, struct timespec* begin, struct timespec* end)
+static double dumptime (const char* s, double begin, double end)
 {
-    long sec = end->tv_sec - begin->tv_sec;
-    long nanosec = end->tv_nsec - begin->tv_nsec;
-
     if (s) printf ("%s", s);
 
-    printf ("Time measured: %ld s and %ld ns.\n", sec, nanosec);
+    const double ns = end - begin;
+    printf ("Time measured: %.0f ns.\n", ns);
 
-    return nanosec;
+    return ns;
 }
 
-static double show_time (const char* s, long t1, long t2, int w, int h)
+static double show_time (const char* s, double t1, double t2, int w, int h)
 {
-    const double timeRatio = (double) t2 / (double) t1;
-    printf ("%12s: Time ratio: %5.2f (%dx%d %d pixels)\n", s, timeRatio, w, h, w * h);
+    const double timeRatio = t2 / t1;
+    printf ("%12s: Time ratio: %.2f (%dx%d %d pixels)\n", s, timeRatio, w, h, w * h);
 
     return timeRatio;
 }
@@ -286,7 +306,7 @@ static unsigned char* get_distmap (double* outside, double* inside, int size)
         if (distmap[i] <= -min)
             map[i] = 255;
         else if (distmap[i] >= min)
-            map[i] = 0.0;
+            map[i] = 0;
         else {
             const double value = (distmap[i] + min) / (2.0 * min);
             map[i] = (unsigned char) (255.0 * (1.0 - value));
