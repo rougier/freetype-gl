@@ -209,7 +209,7 @@ static void difference (
 
             if (diff != 0) {
                 count++;
-                if (abs (diff) > absmax) absmax = diff;
+                if (abs (diff) > absmax) absmax = abs (diff);
             }
         }
         printf ("\ncount = %d, max abs(diff) = %d\n", count, absmax);
