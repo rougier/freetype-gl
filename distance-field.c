@@ -6,100 +6,92 @@
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
-#include <string.h>
+
+#include "distance-field.h"
 #include "edtaa3func.h"
 
-
 double *
-make_distance_mapd( double *data, unsigned int width, unsigned int height )
+make_distance_mapd (double *data, unsigned int width, unsigned int height)
 {
-    short * xdist = (short *)  malloc( width * height * sizeof(short) );
-    short * ydist = (short *)  malloc( width * height * sizeof(short) );
-    double * gx   = (double *) calloc( width * height, sizeof(double) );
-    double * gy      = (double *) calloc( width * height, sizeof(double) );
-    double * outside = (double *) calloc( width * height, sizeof(double) );
-    double * inside  = (double *) calloc( width * height, sizeof(double) );
+    const unsigned int size = width * height;
+    short * xdist = (short *) malloc (size * sizeof (short));
+    short * ydist = (short *) malloc (size * sizeof (short));
+    double * gx      = (double *) malloc (size * sizeof (double));
+    double * gy      = (double *) malloc (size * sizeof (double));
+    double * outside = (double *) calloc (size, sizeof (double));
+    double * inside  = (double *) calloc (size, sizeof (double));
     double vmin = DBL_MAX;
     unsigned int i;
 
-    // Compute outside = edtaa3(bitmap); % Transform background (0's)
-    computegradient( data, width, height, gx, gy);
-    edtaa3(data, gx, gy, width, height, xdist, ydist, outside);
-    for( i=0; i<width*height; ++i)
-        if( outside[i] < 0.0 )
-            outside[i] = 0.0;
+    // Compute outside = edtaa3 (bitmap); % Transform background (0's)
+    edtaa3 (data, gx, gy, width, height, xdist, ydist, outside);
 
-    // Compute inside = edtaa3(1-bitmap); % Transform foreground (1's)
-    memset( gx, 0, sizeof(double)*width*height );
-    memset( gy, 0, sizeof(double)*width*height );
-    for( i=0; i<width*height; ++i)
-        data[i] = 1 - data[i];
-    computegradient( data, width, height, gx, gy );
-    edtaa3( data, gx, gy, width, height, xdist, ydist, inside );
-    for( i=0; i<width*height; ++i )
-        if( inside[i] < 0 )
-            inside[i] = 0.0;
+    // Compute inside = edtaa3 (1-bitmap); % Transform foreground (1's)
+    for (i=0; i<size; ++i)
+        data[i] = 1.0 - data[i];
+
+    edtaa3 (data, gx, gy, width, height, xdist, ydist, inside);
 
     // distmap = outside - inside; % Bipolar distance field
-    for( i=0; i<width*height; ++i)
+    for (i=0; i<size; ++i)
     {
+        if (inside[i] < 0.0) inside[i] = 0.0;
+        if (outside[i] < 0.0) outside[i] = 0.0;
+
         outside[i] -= inside[i];
-        if( outside[i] < vmin )
-            vmin = outside[i];
+
+        if (outside[i] < vmin) vmin = outside[i];
     }
 
-    vmin = fabs(vmin);
+    vmin = fabs (vmin);
 
-    for( i=0; i<width*height; ++i)
+    for (i=0; i<size; ++i)
     {
-        double v = outside[i];
-        if     ( v < -vmin) outside[i] = -vmin;
-        else if( v > +vmin) outside[i] = +vmin;
-        data[i] = (outside[i]+vmin)/(2*vmin);
+        if (outside[i] < -vmin)
+            data[i] = 0.0;
+        else if (outside[i] > +vmin)
+            data[i] = 1.0;
+        else
+            data[i] = (outside[i] + vmin) / (2.0 * vmin);
     }
 
-    free( xdist );
-    free( ydist );
-    free( gx );
-    free( gy );
-    free( outside );
-    free( inside );
+    free (xdist);
+    free (ydist);
+    free (gx);
+    free (gy);
+    free (outside);
+    free (inside);
+
     return data;
 }
 
 unsigned char *
-make_distance_mapb( unsigned char *img,
-                    unsigned int width, unsigned int height )
+make_distance_mapb (const unsigned char *img,
+                    unsigned int width, unsigned int height)
 {
-    double * data    = (double *) calloc( width * height, sizeof(double) );
-    unsigned char *out = (unsigned char *) malloc( width * height * sizeof(unsigned char) );
+    const unsigned int size = width * height;
+    double * data = (double *) malloc (size * sizeof (double));
+    unsigned char *out = (unsigned char *) malloc (size * sizeof (unsigned char));
     unsigned int i;
 
-    // find minimum and maximum values
-    double img_min = DBL_MAX;
-    double img_max = DBL_MIN;
-
-    for( i=0; i<width*height; ++i)
+    // Map values from 0 - 255 to 0.0 - 1.0
+    for (i=0; i<size; ++i)
     {
-        double v = img[i];
-        data[i] = v;
-        if (v > img_max)
-            img_max = v;
-        if (v < img_min)
-            img_min = v;
+        if (img[i] == 0)
+            data[i] = 0.0;
+        else if (img[i] == 255)
+            data[i] = 1.0;
+        else
+            data[i] = (double) img[i] * (1.0 / 255.0);
     }
 
-    // Map values from 0 - 255 to 0.0 - 1.0
-    for( i=0; i<width*height; ++i)
-        data[i] = (img[i]-img_min)/img_max;
-
-    data = make_distance_mapd(data, width, height);
+    data = make_distance_mapd (data, width, height);
 
     // map values from 0.0 - 1.0 to 0 - 255
-    for( i=0; i<width*height; ++i)
-        out[i] = (unsigned char)(255*(1-data[i]));
+    for (i=0; i<size; ++i)
+        out[i] = (unsigned char) (255.0 * (1.0 - data[i]));
 
-    free( data );
+    free (data);
 
     return out;
 }

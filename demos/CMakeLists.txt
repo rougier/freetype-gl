@@ -92,6 +92,17 @@ create_demo(distance-field distance-field.c)
 create_demo(distance-field-2 distance-field-2.c)
 create_demo(distance-field-3 distance-field-3.c)
 
+if(WIN32 OR WIN64)
+    create_demo(distance-field-bench distance-field-bench.c)
+else()
+    INCLUDE(CheckFunctionExists)
+    CHECK_FUNCTION_EXISTS(clock_gettime HAVE_CLOCK_GETTIME)
+
+    if(HAVE_CLOCK_GETTIME)
+        create_demo(distance-field-bench distance-field-bench.c)
+    endif()
+endif()
+
 if(FONTCONFIG_FOUND)
     include_directories(${FONTCONFIG_INCLUDE_DIR})
     create_demo(markup markup.c)
