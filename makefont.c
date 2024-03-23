@@ -400,9 +400,9 @@ int main( int argc, char **argv )
         " * Parameters\n"
         " * ----------------------------------------------------------------------------\n"
         " * Font size: %f\n"
-        " * Texture width: %d\n"
-        " * Texture height: %d\n"
-        " * Texture depth: %d\n"
+        " * Texture width: %zu\n"
+        " * Texture height: %zu\n"
+        " * Texture depth: %zu\n"
         " * ===============================================================================\n"
         " */\n\n", 
         font_size, atlas->width, atlas->height, atlas->depth);
