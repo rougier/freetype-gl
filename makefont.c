@@ -450,7 +450,7 @@ int main( int argc, char **argv )
     texture_glyph_t * glyph;
 
     GLYPHS_ITERATOR(i, glyph, font->glyphs) {
-	fprintf( file, "texture_glyph_t %s_glyph_%08x = ", variable_name, glyph->codepoint, glyph->codepoint );
+	fprintf( file, "texture_glyph_t %s_glyph_%08x = ", variable_name, glyph->codepoint );
  /*
         // Debugging information
         printf( "glyph : '%lc'\n",
