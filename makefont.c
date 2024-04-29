@@ -400,9 +400,9 @@ int main( int argc, char **argv )
         " * Parameters\n"
         " * ----------------------------------------------------------------------------\n"
         " * Font size: %f\n"
-        " * Texture width: %d\n"
-        " * Texture height: %d\n"
-        " * Texture depth: %d\n"
+        " * Texture width: %zu\n"
+        " * Texture height: %zu\n"
+        " * Texture depth: %zu\n"
         " * ===============================================================================\n"
         " */\n\n", 
         font_size, atlas->width, atlas->height, atlas->depth);
@@ -450,7 +450,7 @@ int main( int argc, char **argv )
     texture_glyph_t * glyph;
 
     GLYPHS_ITERATOR(i, glyph, font->glyphs) {
-	fprintf( file, "texture_glyph_t %s_glyph_%08x = ", variable_name, glyph->codepoint, glyph->codepoint );
+	fprintf( file, "texture_glyph_t %s_glyph_%08x = ", variable_name, glyph->codepoint );
  /*
         // Debugging information
         printf( "glyph : '%lc'\n",
