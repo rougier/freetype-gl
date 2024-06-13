@@ -34,6 +34,7 @@
 #if defined(FREETYPE_GL_USE_GLEW)
 #  include <GL/glew.h>
 #endif
+#  define GL_GLEXT_PROTOTYPES
 #  include <GL/gl.h>
 #endif
 #endif /* GL_WITH_GLAD */
