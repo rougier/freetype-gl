@@ -20,7 +20,10 @@ macro(CREATE_DEMO _target _sources)
         ${OPENGL_LIBRARY}
         ${FREETYPE_LIBRARIES}
         ${MATH_LIBRARY}
-        ${GLEW_LIBRARY}
+        ${GLEW_LIBRARY}  
+ ${PNG_LIBRARY}
+  ${ZLIB_LIBRARY}
+  ${BZIP2_LIBRARY}
     )
 
     if(MSVC AND NOT (MSVC_VERSION LESS 1900))
