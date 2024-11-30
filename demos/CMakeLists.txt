@@ -54,27 +54,29 @@ target_include_directories(demo-utils
     PUBLIC $<TARGET_PROPERTY:glfw,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
-add_custom_command(
-    DEPENDS
-        makefont
-        ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
-    COMMAND
-        ../$<$<BOOL:MSVC>:$(Configuration)/>makefont
-    ARGS
-        --font fonts/Vera.ttf
-        --header ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
-        --size 16
-        --variable font
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
-)
+if(freetype-gl_BUILD_MAKEFONT)
+    add_custom_command(
+        DEPENDS
+            makefont
+            ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
+        COMMAND
+            ../$<$<BOOL:MSVC>:$(Configuration)/>makefont
+        ARGS
+            --font fonts/Vera.ttf
+            --header ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
+            --size 16
+            --variable font
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
+    )
 
-add_custom_target(generate-embedded-font
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
-)
+    add_custom_target(generate-embedded-font
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
+    )
 
-create_demo(embedded-font embedded-font.c)
-add_dependencies(embedded-font generate-embedded-font)
+    create_demo(embedded-font embedded-font.c)
+    add_dependencies(embedded-font generate-embedded-font)
+endif()
 
 create_demo(texture texture.c)
 create_demo(font font.c)
