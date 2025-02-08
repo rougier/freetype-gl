@@ -55,15 +55,14 @@ target_include_directories(demo-utils
 )
 
 add_custom_command(
-    DEPENDS
-        makefont
-        ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
-    COMMAND
-        ${CMAKE_BINARY_DIR}/makefont 
-    ARGS
-        --font fonts/Vera.ttf
-        --header ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
-        --size 16
+    DEPENDS 
+    	${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
+    COMMAND 
+        ${CMAKE_BINARY_DIR}/makefont
+    ARGS 
+        --font fonts/Vera.ttf 
+        --header ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h 
+        --size 16 
         --variable font
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
