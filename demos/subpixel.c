@@ -50,10 +50,10 @@ void init()
 
     font_manager = font_manager_new( 512, 512, LCD_FILTERING_ON );
     text_buffer = text_buffer_new( );
-    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
+    ftgl_vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
     text_buffer->base_color = black;
 
-    vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+    ftgl_vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
     markup_t markup;
     markup.family  = "fonts/Vera.ttf";
     markup.size    = 9.0;
@@ -74,7 +74,7 @@ void init()
     markup.font = font_manager_get_from_markup( font_manager, &markup );
 
     size_t i;
-    vec2 pen = {{20, 320}};
+    ftgl_vec2 pen = {{20, 320}};
     char *text = "| A Quick Brown Fox Jumps Over The Lazy Dog\n";
     for( i=0; i < 30; ++i)
     {

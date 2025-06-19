@@ -36,7 +36,7 @@ mat4   model, view, projection;
 
 // --------------------------------------------------------------- add_text ---
 void add_text( vertex_buffer_t * buffer, texture_font_t * font,
-               char *text, vec4 * color, vec2 * pen )
+               char *text, ftgl_vec4 * color, ftgl_vec2 * pen )
 {
     size_t i;
     float r = color->red, g = color->green, b = color->blue, a = color->alpha;
@@ -78,8 +78,8 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
 void init( void )
 {
     size_t i;
-    vec2 pen = {{0,0}};
-    vec4 color = {{0,0,0,1}};
+    ftgl_vec2 pen = {{0,0}};
+    ftgl_vec4 color = {{0,0,0,1}};
 
     atlas  = texture_atlas_new( 512, 512, 1 );
     font = texture_font_new_from_file( atlas, 12, "fonts/VeraMono.ttf" );
@@ -155,8 +155,8 @@ void display( GLFWwindow* window )
     if( count < 5 )
     {
         size_t i;
-        vec4 color = {{0,0,0,1}};
-        vec2 pen = {{0,0}};
+        ftgl_vec4 color = {{0,0,0,1}};
+        ftgl_vec2 pen = {{0,0}};
         vertex_buffer_clear( buffer );
 
         pen.y = -font->descender;

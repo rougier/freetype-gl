@@ -33,7 +33,7 @@ mat4 model, view, projection;
 
 // --------------------------------------------------------------- add_text ---
 void add_text( vertex_buffer_t * buffer, texture_font_t * font,
-               char * text, vec4 * color, vec2 * pen )
+               char * text, ftgl_vec4 * color, ftgl_vec2 * pen )
 {
     size_t i;
     float r = color->red, g = color->green, b = color->blue, a = color->alpha;
@@ -80,8 +80,8 @@ void init( void )
     const char * filename = "fonts/Vera.ttf";
     char * text = "A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f,ashift:1f,agamma:1f" );
-    vec2 pen = {{0,0}};
-    vec4 color = {{0,0,0,1}};
+    ftgl_vec2 pen = {{0,0}};
+    ftgl_vec4 color = {{0,0,0,1}};
 
     for( i=7; i < 27; ++i)
     {

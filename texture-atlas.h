@@ -57,7 +57,7 @@ namespace ftgl {
  * texture_atlas_t * atlas = texture_atlas_new( 512, 512, 1 );
  *
  * // Allocates a region of 20x20
- * ivec4 region = texture_atlas_get_region( atlas, 20, 20 );
+ * ftgl_ivec4 region = texture_atlas_get_region( atlas, 20, 20 );
  *
  * // Fill region with some data
  * texture_atlas_set_region( atlas, region.x, region.y, region.width, region.height, data, stride )
@@ -159,7 +159,7 @@ typedef struct texture_atlas_t
  *  @return       Coordinates of the allocated region
  *
  */
-  ivec4
+  ftgl_ivec4
   texture_atlas_get_region( texture_atlas_t * self,
                             const size_t width,
                             const size_t height );

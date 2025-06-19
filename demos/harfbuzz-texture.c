@@ -211,7 +211,7 @@ void init( void )
             int w = ft_bitmap_width/3; // 3 because of LCD/RGB encoding
             int h = ft_bitmap_rows;
 
-            ivec4 region = texture_atlas_get_region( atlas, w+1, h+1 );
+            ftgl_ivec4 region = texture_atlas_get_region( atlas, w+1, h+1 );
             if ( region.x < 0 )
             {
 		fprintf( stderr, "Texture atlas is full (%s:%d)\n", __FILE__, __LINE__ );

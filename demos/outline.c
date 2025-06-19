@@ -33,7 +33,7 @@ mat4 model, view, projection;
 
 
 // --------------------------------------------------------------- add_text ---
-void add_text( vertex_buffer_t * buffer, vec2 * pen, ... )
+void add_text( vertex_buffer_t * buffer, ftgl_vec2 * pen, ... )
 {
     markup_t *markup;
     char *text;
@@ -104,8 +104,8 @@ void init( void )
     atlas = texture_atlas_new( 512, 512, 1 );
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
 
-    vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
-    vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+    ftgl_vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
+    ftgl_vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
 
     markup_t markup;
     markup.family  = "fonts/Vera.ttf";
@@ -128,7 +128,7 @@ void init( void )
 
     markup.font->rendermode = RENDER_OUTLINE_EDGE;
 
-    vec2 pen;
+    ftgl_vec2 pen;
     pen.x = 40;
     pen.y = 190;
     for( i=0; i< 10; ++i)
