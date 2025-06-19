@@ -325,7 +325,7 @@ texture_font_load_glyphs( texture_font_t * self,
     hb_buffer_t *buffer;
     hb_glyph_info_t *glyph_info;
 
-    ivec4 region;
+    ftgl_ivec4 region;
     size_t missed = 0;
 
     assert( self );

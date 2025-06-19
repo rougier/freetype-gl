@@ -41,10 +41,10 @@ vertex buffer and a single texture where necessary glyphs are tighly packed.
    vertex_buffer_t *buffer= vertex_buffer_new( "v3i:t2f:c4f" );
 
    // Where to start printing on screen
-   vec2 pen = {0,0};
+   ftgl_vec2 pen = {0,0};
 
    // Text color
-   vec4 black = {0,0,0,1};
+   ftgl_vec4 black = {0,0,0,1};
 
    // Add text to the buffer
    add_text( buffer, font, "Hello World !", text, &black, &pen );

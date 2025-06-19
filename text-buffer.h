@@ -59,13 +59,13 @@ typedef struct  text_buffer_t {
     /**
      * Base color for text
      */
-    vec4 base_color;
+    ftgl_vec4 base_color;
 
 
     /**
      * Pen origin
      */
-    vec2 origin;
+    ftgl_vec2 origin;
 
     /**
      * Last pen y location
@@ -75,7 +75,7 @@ typedef struct  text_buffer_t {
     /**
      * Total bounds
      */
-    vec4 bounds;
+    ftgl_vec4 bounds;
 
     /**
      * Index (in the vertex buffer) of the current line start
@@ -179,7 +179,7 @@ typedef struct line_info_t {
     /**
      * bounds of this line
      */
-    vec4 bounds;
+    ftgl_vec4 bounds;
 
 } line_info_t;
 
@@ -233,7 +233,7 @@ typedef enum Align
   *
   */
   void
-  text_buffer_printf( text_buffer_t * self, vec2 * pen, ... );
+  text_buffer_printf( text_buffer_t * self, ftgl_vec2 * pen, ... );
 
 
  /**
@@ -247,7 +247,7 @@ typedef enum Align
   */
   void
   text_buffer_add_text( text_buffer_t * self,
-                        vec2 * pen, markup_t * markup,
+                        ftgl_vec2 * pen, markup_t * markup,
                         const char * text, size_t length );
 
  /**
@@ -261,7 +261,7 @@ typedef enum Align
   */
   void
   text_buffer_add_char( text_buffer_t * self,
-                        vec2 * pen, markup_t * markup,
+                        ftgl_vec2 * pen, markup_t * markup,
                         const char * current, const char * previous );
 
  /**
@@ -274,7 +274,7 @@ typedef enum Align
   * @param alignment desired alignment of text
   */
   void
-  text_buffer_align( text_buffer_t * self, vec2 * pen,
+  text_buffer_align( text_buffer_t * self, ftgl_vec2 * pen,
                      enum Align alignment );
 
  /**
@@ -283,8 +283,8 @@ typedef enum Align
   * @param self      a text buffer
   * @param pen       pen used in last call (must be unmodified)
   */
-  vec4
-  text_buffer_get_bounds( text_buffer_t * self, vec2 * pen );
+  ftgl_vec4
+  text_buffer_get_bounds( text_buffer_t * self, ftgl_vec2 * pen );
 
 /**
   * Clear text buffer

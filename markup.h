@@ -31,9 +31,9 @@ namespace ftgl {
  *
  * ...
  *
- * vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
- * vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
- * vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+ * ftgl_vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
+ * ftgl_vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
+ * ftgl_vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
  *
  * markup_t normal = {
  *     .family  = "Droid Serif",
@@ -95,12 +95,12 @@ typedef struct markup_t
     /**
      * Text color.
      */
-    vec4 foreground_color;
+    ftgl_vec4 foreground_color;
 
     /**
      * Background color.
      */
-    vec4 background_color;
+    ftgl_vec4 background_color;
 
     /**
      * Whether outline is active.
@@ -110,7 +110,7 @@ typedef struct markup_t
     /**
      * Outline color.
      */
-    vec4 outline_color;
+    ftgl_vec4 outline_color;
 
     /**
      * Whether underline is active.
@@ -120,7 +120,7 @@ typedef struct markup_t
     /**
      * Underline color.
      */
-    vec4 underline_color;
+    ftgl_vec4 underline_color;
 
     /**
      * Whether overline is active.
@@ -130,7 +130,7 @@ typedef struct markup_t
     /**
      * Overline color.
      */
-    vec4 overline_color;
+    ftgl_vec4 overline_color;
 
     /**
      * Whether strikethrough is active.
@@ -140,7 +140,7 @@ typedef struct markup_t
     /**
      * Strikethrough color.
      */
-    vec4 strikethrough_color;
+    ftgl_vec4 strikethrough_color;
 
     /**
      * Pointer on the corresponding font (family/size/bold/italic)

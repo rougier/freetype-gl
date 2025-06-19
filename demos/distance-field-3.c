@@ -225,7 +225,7 @@ load_glyph( const char *  filename,     const char* codepoint,
     printf( "Glyph offset x: %d\n", glyph->offset_x );
     printf( "Glyph offset y: %d\n", glyph->offset_y );
     */
-    ivec4 region = texture_atlas_get_region( atlas, glyph->width, glyph->height );
+    ftgl_ivec4 region = texture_atlas_get_region( atlas, glyph->width, glyph->height );
     /*
     printf( "Region x : %d\n", region.x );
     printf( "Region y : %d\n", region.y );
@@ -317,7 +317,7 @@ void display( GLFWwindow* window )
 
     float s = .025+.975*(1+cos(angle/100.0))/2.;
 
-    vec4 color = {{1.0, 1.0, 1.0, 1.0 }};
+    ftgl_vec4 color = {{1.0, 1.0, 1.0, 1.0 }};
 
     mat4_set_identity( &model );
     mat4_scale( &model, width * s, width * s, 1 );
