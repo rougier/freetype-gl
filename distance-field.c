@@ -13,12 +13,12 @@
 double *
 make_distance_mapd( double *data, unsigned int width, unsigned int height )
 {
-    short * xdist = (short *)  malloc( width * height * sizeof(short) );
-    short * ydist = (short *)  malloc( width * height * sizeof(short) );
-    double * gx   = (double *) calloc( width * height, sizeof(double) );
-    double * gy      = (double *) calloc( width * height, sizeof(double) );
-    double * outside = (double *) calloc( width * height, sizeof(double) );
-    double * inside  = (double *) calloc( width * height, sizeof(double) );
+    short * xdist = (short *)  malloc( (size_t)width * height * sizeof(short) );
+    short * ydist = (short *)  malloc( (size_t)width * height * sizeof(short) );
+    double * gx   = (double *) calloc( (size_t)width * height, sizeof(double) );
+    double * gy      = (double *) calloc( (size_t)width * height, sizeof(double) );
+    double * outside = (double *) calloc( (size_t)width * height, sizeof(double) );
+    double * inside  = (double *) calloc( (size_t)width * height, sizeof(double) );
     double vmin = DBL_MAX;
     unsigned int i;
 
@@ -71,8 +71,8 @@ unsigned char *
 make_distance_mapb( unsigned char *img,
                     unsigned int width, unsigned int height )
 {
-    double * data    = (double *) calloc( width * height, sizeof(double) );
-    unsigned char *out = (unsigned char *) malloc( width * height * sizeof(unsigned char) );
+    double * data    = (double *) calloc( (size_t)width * height, sizeof(double) );
+    unsigned char *out = (unsigned char *) malloc( (size_t)width * height * sizeof(unsigned char) );
     unsigned int i;
 
     // find minimum and maximum values
