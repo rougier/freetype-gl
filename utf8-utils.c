@@ -11,7 +11,7 @@ size_t
 utf8_surrogate_len( const char* character )
 {
     size_t result = 0;
-    char test_char;
+    unsigned char test_char;
 
     if (!character)
         return 0;
