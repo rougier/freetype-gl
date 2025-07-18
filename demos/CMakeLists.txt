@@ -55,15 +55,14 @@ target_include_directories(demo-utils
 )
 
 add_custom_command(
-    DEPENDS
-        makefont
-        ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
-    COMMAND
-        ../$<$<BOOL:MSVC>:$(Configuration)/>makefont
-    ARGS
-        --font fonts/Vera.ttf
-        --header ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
-        --size 16
+    DEPENDS 
+    	${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
+    COMMAND 
+        ${CMAKE_BINARY_DIR}/makefont
+    ARGS 
+        --font fonts/Vera.ttf 
+        --header ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h 
+        --size 16 
         --variable font
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
@@ -95,7 +94,7 @@ create_demo(distance-field-3 distance-field-3.c)
 if(FONTCONFIG_FOUND)
     include_directories(${FONTCONFIG_INCLUDE_DIR})
     create_demo(markup markup.c)
-    target_link_libraries(markup ${Fontconfig_LIBRARY})
+    target_link_libraries(markup ${FONTCONFIG_LIBRARY})
 endif()
 
 if(ANT_TWEAK_BAR_FOUND)
