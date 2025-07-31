@@ -825,7 +825,7 @@ texture_font_load_glyph_gi( texture_font_t * self,
     int ft_glyph_top = 0;
     int ft_glyph_left = 0;
 
-    ivec4 region;
+    ftgl_ivec4 region;
     size_t missed = 0;
 
     /* Check if codepoint has been already loaded */

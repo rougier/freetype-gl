@@ -85,12 +85,12 @@ static char text[] =
 void
 build_buffer( void )
 {
-    vec2 pen;
+    ftgl_vec2 pen;
     texture_font_t *font;
-    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
-    vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
-    vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
-    vec4 color = white;
+    ftgl_vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
+    ftgl_vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
+    ftgl_vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+    ftgl_vec4 color = white;
     if( p_invert )
     {
         color = black;
@@ -174,7 +174,7 @@ build_buffer( void )
     size_t i;
     for( i=0; i < vector_size( vbuffer->items ); ++i )
     {
-        ivec4 *item = (ivec4 *) vector_get( vbuffer->items, i);
+        ftgl_ivec4 *item = (ftgl_ivec4 *) vector_get( vbuffer->items, i);
         glyph_vertex_t * v0 = /* x0,y0 */
             (glyph_vertex_t *) vector_get( vbuffer->vertices, item->vstart+0 );
         //glyph_vertex_t * v1 = /* x0,y1 */

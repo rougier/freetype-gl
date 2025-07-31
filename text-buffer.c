@@ -72,7 +72,7 @@ text_buffer_clear( text_buffer_t * self )
 
 // ----------------------------------------------------------------------------
 void
-text_buffer_printf( text_buffer_t * self, vec2 *pen, ... )
+text_buffer_printf( text_buffer_t * self, ftgl_vec2 *pen, ... )
 {
     markup_t *markup;
     char *text;
@@ -104,7 +104,7 @@ text_buffer_move_last_line( text_buffer_t * self, float dy )
     int j;
     for( i=self->line_start; i < vector_size( self->buffer->items ); ++i )
     {
-        ivec4 *item = (ivec4 *) vector_get( self->buffer->items, i);
+        ftgl_ivec4 *item = (ftgl_ivec4 *) vector_get( self->buffer->items, i);
         for( j=item->vstart; j<item->vstart+item->vcount; ++j)
         {
             glyph_vertex_t * vertex =
@@ -124,7 +124,7 @@ text_buffer_move_last_line( text_buffer_t * self, float dy )
 // advancePen: if true, advance the pen to the next line
 //
 static void
-text_buffer_finish_line( text_buffer_t * self, vec2 * pen, bool advancePen )
+text_buffer_finish_line( text_buffer_t * self, ftgl_vec2 * pen, bool advancePen )
 {
     float line_left = self->line_left;
     float line_right = pen->x;
@@ -179,7 +179,7 @@ text_buffer_finish_line( text_buffer_t * self, vec2 * pen, bool advancePen )
 // ----------------------------------------------------------------------------
 void
 text_buffer_add_text( text_buffer_t * self,
-                      vec2 * pen, markup_t * markup,
+                      ftgl_vec2 * pen, markup_t * markup,
                       const char * text, size_t length )
 {
     size_t i;
@@ -232,7 +232,7 @@ text_buffer_add_text( text_buffer_t * self,
 // ----------------------------------------------------------------------------
 void
 text_buffer_add_char( text_buffer_t * self,
-                      vec2 * pen, markup_t * markup,
+                      ftgl_vec2 * pen, markup_t * markup,
                       const char * current, const char * previous )
 {
     size_t vcount = 0;
@@ -457,7 +457,7 @@ text_buffer_add_char( text_buffer_t * self,
 
 // ----------------------------------------------------------------------------
 void
-text_buffer_align( text_buffer_t * self, vec2 * pen,
+text_buffer_align( text_buffer_t * self, ftgl_vec2 * pen,
                    enum Align alignment )
 {
     if (ALIGN_LEFT == alignment)
@@ -516,7 +516,7 @@ text_buffer_align( text_buffer_t * self, vec2 * pen,
 
         for( j=line_info->line_start; j < line_end; ++j )
         {
-            ivec4 *item = (ivec4 *) vector_get( self->buffer->items, j);
+            ftgl_ivec4 *item = (ftgl_ivec4 *) vector_get( self->buffer->items, j);
             for( k=item->vstart; k<item->vstart+item->vcount; ++k)
             {
                 glyph_vertex_t * vertex =
@@ -527,8 +527,8 @@ text_buffer_align( text_buffer_t * self, vec2 * pen,
     }
 }
 
-vec4
-text_buffer_get_bounds( text_buffer_t * self, vec2 * pen )
+ftgl_vec4
+text_buffer_get_bounds( text_buffer_t * self, ftgl_vec2 * pen )
 {
     size_t total_items = vector_size( self->buffer->items );
     if ( self->line_start != total_items )

@@ -45,11 +45,11 @@ mat4  model, view, projection;
 
 
 // --------------------------------------------------------------- add_text ---
-vec4
+ftgl_vec4
 add_text( vertex_buffer_t * buffer, texture_font_t * font,
-          char *text, vec4 * color, vec2 * pen )
+          char *text, ftgl_vec4 * color, ftgl_vec2 * pen )
 {
-    vec4 bbox = {{0,0,0,0}};
+    ftgl_vec4 bbox = {{0,0,0,0}};
     size_t i;
     float r = color->red, g = color->green, b = color->blue, a = color->alpha;
     for( i = 0; i < strlen(text); ++i )
@@ -99,11 +99,11 @@ void init( void )
     const char * filename = "fonts/Vera.ttf";
     char *text = "A Quick Brown Fox Jumps Over The Lazy Dog 0123456789";
     buffer = vertex_buffer_new( "vertex:3f,tex_coord:2f,color:4f" );
-    vec2 pen = {{0,0}};
-    vec4 black = {{1,1,1,1}};
+    ftgl_vec2 pen = {{0,0}};
+    ftgl_vec4 black = {{1,1,1,1}};
     font = texture_font_new_from_file( atlas, 48, filename );
     font->rendermode = RENDER_SIGNED_DISTANCE_FIELD;
-    vec4 bbox = add_text( buffer, font, text, &black, &pen );
+    ftgl_vec4 bbox = add_text( buffer, font, text, &black, &pen );
     size_t i;
     vector_t * vertices = buffer->vertices;
     for( i=0; i< vector_size(vertices); ++i )
@@ -145,7 +145,7 @@ void display( GLFWwindow* window )
     GLint height = viewport[3];
 
     srand(4);
-    vec4 color = {{0.067,0.333, 0.486, 1.0}};
+    ftgl_vec4 color = {{0.067,0.333, 0.486, 1.0}};
     size_t i;
     for( i=0; i<40; ++i)
     {

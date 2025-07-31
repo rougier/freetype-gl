@@ -97,7 +97,7 @@ vertex_buffer_new( const char *format )
     self->indices_id  = 0;
     self->GPU_isize = 0;
 
-    self->items = vector_new( sizeof(ivec4) );
+    self->items = vector_new( sizeof(ftgl_ivec4) );
     self->state = DIRTY;
     self->mode = GL_TRIANGLES;
     return self;
@@ -409,7 +409,7 @@ void
 vertex_buffer_render_item ( vertex_buffer_t *self,
                             size_t index )
 {
-    ivec4 * item = (ivec4 *) vector_get( self->items, index );
+    ftgl_ivec4 * item = (ftgl_ivec4 *) vector_get( self->items, index );
     assert( self );
     assert( index < vector_size( self->items ) );
 
@@ -582,7 +582,7 @@ vertex_buffer_insert( vertex_buffer_t * self, const size_t index,
                       const GLuint * indices, const size_t icount )
 {
     size_t vstart, istart, i;
-    ivec4 item;
+    ftgl_ivec4 item;
     assert( self );
     assert( vertices );
     assert( indices );
@@ -619,14 +619,14 @@ void
 vertex_buffer_erase( vertex_buffer_t * self,
                      const size_t index )
 {
-    ivec4 * item;
+    ftgl_ivec4 * item;
     int vstart;
     size_t vcount, istart, icount, i;
 
     assert( self );
     assert( index < vector_size( self->items ) );
 
-    item = (ivec4 *) vector_get( self->items, index );
+    item = (ftgl_ivec4 *) vector_get( self->items, index );
     vstart = item->vstart;
     vcount = item->vcount;
     istart = item->istart;
@@ -635,7 +635,7 @@ vertex_buffer_erase( vertex_buffer_t * self,
     // Update items
     for( i=0; i<vector_size(self->items); ++i )
     {
-        ivec4 * item = (ivec4 *) vector_get( self->items, i );
+        ftgl_ivec4 * item = (ftgl_ivec4 *) vector_get( self->items, i );
         if( item->vstart > vstart)
         {
             item->vstart -= vcount;
