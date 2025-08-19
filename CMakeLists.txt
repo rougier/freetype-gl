@@ -43,6 +43,13 @@ option(freetype-gl_BUILD_TESTS "Build the tests" ON)
 option(freetype-gl_BUILD_SHARED "Build shared library" OFF)
 option(freetype-gl_OFF_SCREEN "Build for off-screen render (build libfreetype-gl.so only without GLX, demos must disable because of missing glfw)" OFF)
 
+if(${freetype-gl_BUILD_TESTS})
+    find_package(ImageMagick QUIET COMPONENTS compare)
+    if(NOT ${ImageMagick_EXECUTABLE_DIR})
+        message(FATAL_ERROR "ImageMagick was not found. Either provide path to ImageMagick, or disable freetype-gl_BUILD_TESTS option.")
+    endif()
+endif()
+
 include(RequireIncludeFile)
 include(RequireFunctionExists)
 include(CheckLibraryExists)
@@ -74,11 +81,10 @@ check_symbol_exists(M_PI math.h HAVE_M_PI)
 
 if(NOT HAVE_M_PI)
     list(APPEND CMAKE_REQUIRED_DEFINITIONS -D_USE_MATH_DEFINES)
-    unset(HAVE_M_PI CACHE)
 
-    check_symbol_exists(M_PI math.h HAVE_M_PI)
+    check_symbol_exists(M_PI math.h HAVE_M_PI2)
 
-    if(NOT HAVE_M_PI)
+    if(NOT HAVE_M_PI2)
         message(FATAL_ERROR "`M_PI` not defined in `math.h`.")
     else()
         add_definitions(-D_USE_MATH_DEFINES)
