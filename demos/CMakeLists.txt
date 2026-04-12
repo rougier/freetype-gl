@@ -7,6 +7,7 @@ macro(CREATE_DEMO _target _sources)
     add_executable(${_target} ${_sources} $<TARGET_OBJECTS:demo-utils>)
     if(${_target} MATCHES "^harfbuzz")
         target_link_libraries(${_target}
+            freetype-gl
             freetype-gl-hb
             ${HARFBUZZ_LIBRARIES}
         )
@@ -101,7 +102,7 @@ endif()
 if(ANT_TWEAK_BAR_FOUND)
     include_directories(${ANT_TWEAK_BAR_INCLUDE_PATH})
     create_demo(atb-agg atb-agg.c)
-    target_link_libraries(atb-agg ${ANT_TWEAK_BAR_LIBRARY})
+    target_link_libraries(atb-agg ${ANT_TWEAK_BAR_LIBRARY} -lX11)
     set_target_properties(atb-agg PROPERTIES LINKER_LANGUAGE CXX)
 endif()
 
