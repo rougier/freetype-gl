@@ -3,7 +3,7 @@
 # Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
 # file `LICENSE` for more details.
 
-find_package(HarfBuzz REQUIRED)
+find_package(harfbuzz REQUIRED)
 
 include_directories(
     ${HARFBUZZ_INCLUDE_DIRS}
