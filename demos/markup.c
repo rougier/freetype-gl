@@ -46,13 +46,6 @@ GLuint text_shader;
 char *
 match_description( char * description )
 {
-
-#if (defined(_WIN32) || defined(_WIN64)) && !defined(__MINGW32__)
-    fprintf( stderr, "\"font_manager_match_description\" "
-                     "not implemented for windows.\n" );
-    return 0;
-#endif
-
     char *filename = 0;
     FcInit();
     FcPattern *pattern = FcNameParse(description);

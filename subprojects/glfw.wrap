@@ -1,0 +1,12 @@
+[wrap-file]
+directory = glfw-3.3.8
+source_url = https://github.com/glfw/glfw/archive/refs/tags/3.3.8.tar.gz
+source_filename = glfw-3.3.8.tar.gz
+source_hash = f30f42e05f11e5fc62483e513b0488d5bceeab7d9c5da0ffe2252ad81816c713
+patch_filename = glfw_3.3.8-2_patch.zip
+patch_url = https://wrapdb.mesonbuild.com/v2/glfw_3.3.8-2/get_patch
+patch_hash = eca865a15ff49d29d1a710fda3cfb9ca82057dda7f15ed617a1677cc5992c503
+wrapdb_version = 3.3.8-2
+
+[provide]
+glfw3 = glfw_dep
