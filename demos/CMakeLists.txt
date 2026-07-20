@@ -59,7 +59,7 @@ add_custom_command(
         makefont
         ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
     COMMAND
-        ../$<$<BOOL:MSVC>:$(Configuration)/>makefont
+        ../$<$<BOOL:MSVC>:${Configuration}/>makefont
     ARGS
         --font fonts/Vera.ttf
         --header ${CMAKE_CURRENT_SOURCE_DIR}/vera-16.h
