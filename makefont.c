@@ -527,22 +527,42 @@ int main( int argc, char **argv )
     // --------------
     // Texture glyphs
     // --------------
-    fprintf( file, " {\n" );
-    GLYPHS_ITERATOR1(i, glyph, font->glyphs) {
-	fprintf( file, " {\n" );
-	GLYPHS_ITERATOR2(i, glyph, font->glyphs) {
-	    fprintf( file, "  &%s_glyph_%08x,\n", variable_name, glyph->codepoint );
-	} else {
-	    fprintf( file, "  NULL,\n" );
-	}
-	GLYPHS_ITERATOR_END1;
-	fprintf( file, " },\n" );
-    } GLYPHS_ITERATOR_END2;
-    fprintf( file, " }\n};\n" );
-    fprintf( file,
+
+    fprintf(file, " {\n");
+    for (int index = 0; index < vector_size(font->glyphs); index++)
+    {
+        {
+            texture_glyph_t** __glyphs;
+            if ((__glyphs = *(texture_glyph_t***)vector_get(font->glyphs, index)))
+            {
+                int __i;
+                fprintf(file, " {\n");
+                for (__i = 0; __i < 0x100; __i++)
+                {
+                    if ((glyph = __glyphs[__i]))
+                    {
+                        fprintf(file, "  &%s_glyph_%08x,\n", variable_name, glyph->codepoint);
+                    }
+                    else
+                    {
+                        fprintf(file, "  NULL,\n");
+                    }
+                };
+                fprintf(file, " },\n");
+            }
+            else
+            {
+                fprintf(file, "{NULL},\n");
+            }
+        }
+    };
+
+    fprintf(file, " }\n};\n");
+
+    fprintf(file,
         "#ifdef __cplusplus\n"
         "}\n"
-        "#endif\n" );
+        "#endif\n");
 
     return 0;
 }
