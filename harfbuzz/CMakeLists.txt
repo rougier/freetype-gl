@@ -3,7 +3,7 @@
 # Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
 # file `LICENSE` for more details.
 
-find_package(HarfBuzz REQUIRED)
+find_package(harfbuzz REQUIRED)
 
 include_directories(
     ${HARFBUZZ_INCLUDE_DIRS}
@@ -18,7 +18,6 @@ set(FREETYPE_GL_HB_HDR
     vector.h
     vertex-attribute.h
     vertex-buffer.h
-    freetype-gl-err.h
     freetype-gl-errdef.h
 )
 
@@ -29,7 +28,6 @@ set(FREETYPE_GL_HB_SRC
     vector.c
     vertex-attribute.c
     vertex-buffer.c
-    freetype-gl-err.c
 )
 
 if(freetype-gl_BUILD_SHARED)
