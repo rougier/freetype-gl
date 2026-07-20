@@ -20,7 +20,7 @@
 typedef struct {
     float x, y, z;
     float u, v;
-    vec4 color;
+    ftgl_vec4 color;
 } vertex_t;
 
 
@@ -33,7 +33,7 @@ mat4   model, view, projection;
 
 // --------------------------------------------------------------- add_text ---
 void add_text( vertex_buffer_t * buffer, texture_font_t * font,
-               char *text, vec2 pen, vec4 fg_color_1, vec4 fg_color_2 )
+               char *text, ftgl_vec2 pen, ftgl_vec4 fg_color_1, ftgl_vec4 fg_color_2 )
 {
     size_t i;
     for( i = 0; i < strlen(text); ++i )
@@ -78,11 +78,11 @@ void init( void )
     texture_font_t *font =
     texture_font_new_from_file( atlas, 128, "fonts/LuckiestGuy.ttf" );
 
-    vec2 pen    = {{50, 50}};
-    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
-    vec4 yellow = {{1.0, 1.0, 0.0, 1.0}};
-    vec4 orange1 = {{1.0, 0.9, 0.0, 1.0}};
-    vec4 orange2 = {{1.0, 0.6, 0.0, 1.0}};
+    ftgl_vec2 pen    = {{50, 50}};
+    ftgl_vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
+    ftgl_vec4 yellow = {{1.0, 1.0, 0.0, 1.0}};
+    ftgl_vec4 orange1 = {{1.0, 0.9, 0.0, 1.0}};
+    ftgl_vec4 orange2 = {{1.0, 0.6, 0.0, 1.0}};
 
     font->rendermode = RENDER_OUTLINE_POSITIVE;
     font->outline_thickness = 7;

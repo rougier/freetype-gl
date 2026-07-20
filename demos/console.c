@@ -52,7 +52,7 @@ struct _console_t {
     markup_t       markup[MARKUP_COUNT];
     vertex_buffer_t * buffer;
     texture_atlas_t *atlas;
-    vec2           pen;
+    ftgl_vec2           pen;
     void (*handlers[4])( struct _console_t *, char * );
 };
 typedef struct _console_t console_t;
@@ -89,9 +89,9 @@ console_new( float font_size )
     self->atlas = texture_atlas_new( 512, 512, 1 );
     glGenTextures( 1, &self->atlas->id );
 
-    vec4 white = {{1,1,1,1}};
-    vec4 black = {{0,0,0,1}};
-    vec4 none = {{0,0,1,0}};
+    ftgl_vec4 white = {{1,1,1,1}};
+    ftgl_vec4 black = {{0,0,0,1}};
+    ftgl_vec4 none = {{0,0,1,0}};
 
     markup_t normal;
     normal.family  = "fonts/VeraMono.ttf";

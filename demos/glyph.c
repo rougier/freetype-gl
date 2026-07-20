@@ -26,7 +26,7 @@ typedef struct {
 
 typedef struct {
     float x, y, z;
-    vec4 color;
+    ftgl_vec4 color;
 } point_t;
 
 
@@ -43,7 +43,7 @@ const int height = 600;
 
 // --------------------------------------------------------------- add_text ---
 void add_text( vertex_buffer_t * buffer, texture_font_t * font,
-               char *text, vec4 * color, vec2 * pen )
+               char *text, ftgl_vec4 * color, ftgl_vec2 * pen )
 {
     size_t i;
     float r = color->red, g = color->green, b = color->blue, a = color->alpha;
@@ -81,8 +81,8 @@ void add_text( vertex_buffer_t * buffer, texture_font_t * font,
 // ------------------------------------------------------------------- init ---
 void init( void )
 {
-    vec4 blue  = {{0,0,1,1}};
-    vec4 black = {{0,0,0,1}};
+    ftgl_vec4 blue  = {{0,0,1,1}};
+    ftgl_vec4 black = {{0,0,0,1}};
 
     atlas = texture_atlas_new( 512, 512, 1 );
     texture_font_t * big = texture_font_new_from_file( atlas, 400, "fonts/Vera.ttf");
@@ -93,7 +93,7 @@ void init( void )
     line_buffer  = vertex_buffer_new( "vertex:3f,color:4f" );
     point_buffer = vertex_buffer_new( "vertex:3f,color:4f" );
 
-    vec2 pen, origin;
+    ftgl_vec2 pen, origin;
 
     texture_glyph_t *glyph  = texture_font_get_glyph( big, "g" );
     origin.x = width/2  - glyph->offset_x - glyph->width/2;

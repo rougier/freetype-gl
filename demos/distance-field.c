@@ -112,7 +112,7 @@ void display( GLFWwindow* window )
     GLint width  = v[2];
     GLint height = v[3];
 
-    vec4 color = {{1.0, 1.0, 1.0, 1.0 }};
+    ftgl_vec4 color = {{1.0, 1.0, 1.0, 1.0 }};
 
     mat4_set_identity( &model );
     mat4_scale( &model, width * viewport.zoom, height * viewport.zoom, 0 );

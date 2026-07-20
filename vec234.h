@@ -55,7 +55,7 @@ typedef union
         int istart; /**< Alias for third component  */
         int icount; /**< Alias for fourth component */
     };
-} ivec4;
+} ftgl_ivec4;
 
 
 /**
@@ -85,7 +85,7 @@ typedef union
         int green;  /**< Alias for second component */
         int blue;   /**< Alias for third component  */
     };
-} ivec3;
+} ftgl_ivec3;
 
 
 /**
@@ -111,7 +111,7 @@ typedef union
         int start;  /**< Alias for first component  */
         int end;    /**< Alias for second component */
     };
-} ivec2;
+} ftgl_ivec2;
 
 
 /**
@@ -150,7 +150,7 @@ typedef union
         float blue;   /**< Alias for third component  */
         float alpha;  /**< Alias for fourth component */
     };
-} vec4;
+} ftgl_vec4;
 
 
 /**
@@ -179,7 +179,7 @@ typedef union
         float green; /**< Alias fo second component */
         float blue;  /**< Alias fo third component  */
     };
-} vec3;
+} ftgl_vec3;
 
 
 /**
@@ -200,7 +200,7 @@ typedef union
         float s;   /**< Alias for first component  */
         float t;   /**< Alias for second component */
     };
-} vec2;
+} ftgl_vec2;
 
 
 #ifdef __cplusplus

@@ -92,11 +92,11 @@ void init()
     font_manager = font_manager_new( 512, 512, LCD_FILTERING_ON );
     buffer = text_buffer_new( );
 
-    vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
-    vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
-    vec4 yellow = {{1.0, 1.0, 0.0, 1.0}};
-    vec4 grey   = {{0.5, 0.5, 0.5, 1.0}};
-    vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
+    ftgl_vec4 black  = {{0.0, 0.0, 0.0, 1.0}};
+    ftgl_vec4 white  = {{1.0, 1.0, 1.0, 1.0}};
+    ftgl_vec4 yellow = {{1.0, 1.0, 0.0, 1.0}};
+    ftgl_vec4 grey   = {{0.5, 0.5, 0.5, 1.0}};
+    ftgl_vec4 none   = {{1.0, 1.0, 1.0, 0.0}};
 
     char *f_normal   = match_description("Droid Serif:size=24");
     char *f_bold     = match_description("Droid Serif:size=24:weight=bold");
@@ -142,7 +142,7 @@ void init()
     japanese.font = font_manager_get_from_markup( font_manager, &japanese );
     math.font = font_manager_get_from_markup( font_manager, &math );
 
-    vec2 pen = {{20, 200}};
+    ftgl_vec2 pen = {{20, 200}};
     text_buffer_printf( buffer, &pen,
                         &underline, "The",
                         &normal,    " Quick",
@@ -170,7 +170,7 @@ void init()
 
     text_buffer_align( buffer, &pen, ALIGN_CENTER );
 
-    vec4 bounds = text_buffer_get_bounds( buffer, &pen );
+    ftgl_vec4 bounds = text_buffer_get_bounds( buffer, &pen );
     float left = bounds.left;
     float right = bounds.left + bounds.width;
     float top = bounds.top;

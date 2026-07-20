@@ -28,9 +28,9 @@ GLuint text_shader;
 
 // ------------------------------------------------------------ init_colors ---
 void
-init_colors( vec4 *colors )
+init_colors( ftgl_vec4 *colors )
 {
-    vec4 defaults[16] =
+    ftgl_vec4 defaults[16] =
         {
             {{ 46/256.0f,  52/256.0f,  54/256.0f, 1.0f}},
             {{204/256.0f,   0/256.0f,   0/256.0f, 1.0f}},
@@ -58,13 +58,13 @@ init_colors( vec4 *colors )
     /* Color cube */
     for( i=0; i<6*6*6; i++ )
     {
-        vec4 color = {{ (i/6/6)/5.0f, ((i/6)%6)/5.0f, (i%6)/5.0f, 1.0f}};
+        ftgl_vec4 color = {{ (i/6/6)/5.0f, ((i/6)%6)/5.0f, (i%6)/5.0f, 1.0f}};
         colors[i+16] = color;
     }
     /* Grascale ramp (24 tones) */
     for( i=0; i<24; i++ )
     {
-        vec4 color ={{i/24.0f, i/24.0f, i/24.0f, 1.0f}};
+        ftgl_vec4 color ={{i/24.0f, i/24.0f, i/24.0f, 1.0f}};
         colors[232+i] = color;
     }
 }
@@ -78,12 +78,12 @@ ansi_to_markup( char *sequence, size_t length, markup_t *markup )
     int code = 0;
     int set_bg = -1;
     int set_fg = -1;
-    vec4 none = {{0,0,0,0}};
-    static vec4 * colors = 0;
+    ftgl_vec4 none = {{0,0,0,0}};
+    static ftgl_vec4 * colors = 0;
 
     if( colors == 0 )
     {
-        colors = (vec4 *) malloc( sizeof(vec4) * 256 );
+        colors = (ftgl_vec4 *) malloc( sizeof(ftgl_vec4) * 256 );
         init_colors( colors );
     }
 
@@ -205,7 +205,7 @@ ansi_to_markup( char *sequence, size_t length, markup_t *markup )
 
 // ------------------------------------------------------------------ print ---
 void
-print( text_buffer_t * buffer, vec2 * pen,
+print( text_buffer_t * buffer, ftgl_vec2 * pen,
        char *text, markup_t *markup )
 {
     char *seq_start = text, *seq_end = text;
@@ -257,8 +257,8 @@ void init( void )
     font_manager = font_manager_new( 512, 512, LCD_FILTERING_OFF );
     buffer = text_buffer_new( );
 
-    vec4 black = {{0.0, 0.0, 0.0, 1.0}};
-    vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
+    ftgl_vec4 black = {{0.0, 0.0, 0.0, 1.0}};
+    ftgl_vec4 none  = {{1.0, 1.0, 1.0, 0.0}};
 
     markup_t markup;
     markup.family  = "fonts/VeraMono.ttf";
@@ -277,7 +277,7 @@ void init( void )
     markup.strikethrough_color = black;
     markup.font = 0;
 
-    vec2 pen = {{10.0, 480.0}};
+    ftgl_vec2 pen = {{10.0, 480.0}};
     FILE *file = fopen ( "data/256colors.txt", "r" );
     if ( file != NULL )
     {
