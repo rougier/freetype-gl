@@ -64,8 +64,8 @@
  */
 void computegradient(double *img, int w, int h, double *gx, double *gy)
 {
-    int i,j,k,p,q;
-    double glength, phi, phiscaled, ascaled, errsign, pfrac, qfrac, err0, err1, err;
+    int i,j,k;
+    double glength;
 #define SQRT2 1.4142136
     for(i = 1; i < h-1; i++) { // Avoid edges where the kernels would spill over
         for(j = 1; j < w-1; j++) {

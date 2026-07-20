@@ -815,7 +815,6 @@ texture_font_load_glyph_gi( texture_font_t * self,
     size_t i, x, y;
 
     FT_Error error;
-    FT_Face face;
     FT_Glyph ft_glyph = NULL;
     FT_GlyphSlot slot;
     FT_Bitmap ft_bitmap;
@@ -826,7 +825,6 @@ texture_font_load_glyph_gi( texture_font_t * self,
     int ft_glyph_left = 0;
 
     ivec4 region;
-    size_t missed = 0;
 
     /* Check if codepoint has been already loaded */
     if (texture_font_find_glyph_gi(self, ucodepoint)) {

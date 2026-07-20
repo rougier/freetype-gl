@@ -30,6 +30,8 @@
 #  else
 #    include <GLES2/gl2.h>
 #  endif
+#elif defined(FREETYPE_GL_ES2_HEADER_ONLY)
+#  include <GLES2/gl2.h>
 #else
 #if defined(FREETYPE_GL_USE_GLEW)
 #  include <GL/glew.h>
