@@ -1147,7 +1147,8 @@ cleanup_stroker:
     if( self->rendermode != RENDER_NORMAL && self->rendermode != RENDER_SIGNED_DISTANCE_FIELD )
         FT_Done_Glyph( ft_glyph );
 
-    texture_font_generate_kerning( self, &self->library->library, &self->face );
+    if( FT_HAS_KERNING( self->face ) )
+        texture_font_generate_kerning( self, &self->library->library, &self->face );
 
     texture_font_close( self, MODE_AUTO_CLOSE, MODE_AUTO_CLOSE );
 
